@@ -3430,13 +3430,23 @@ const App = (() => {
     clone.style.left = `${Math.round(wrapperRect.left)}px`;
     clone.style.width = `${Math.round(wrapperRect.width)}px`;
     clone.style.height = `${Math.round(thead.getBoundingClientRect().height || 32)}px`;
+    const wrapperWidth = Math.round(wrapperRect.width);
+    const managerRect = sourceThs[1]?.getBoundingClientRect();
+    const stickyColumnsLeft = managerRect
+      ? Math.round(managerRect.left - wrapperRect.left)
+      : wrapperWidth;
     sourceThs.forEach((th, index) => {
       const cell = clone.children[index];
       if (!cell) return;
       const thRect = th.getBoundingClientRect();
       const rawLeft = Math.round(thRect.left - wrapperRect.left);
       const width = Math.round(thRect.width);
-      const isOutsideWrapper = rawLeft + width <= 0 || rawLeft >= Math.round(wrapperRect.width);
+      const visibleLeft = index < 2 ? rawLeft : Math.max(rawLeft, 0);
+      const visibleRight = index < 2 ? rawLeft + width : Math.min(rawLeft + width, stickyColumnsLeft, wrapperWidth);
+      const visibleWidth = Math.max(0, visibleRight - visibleLeft);
+      const leftClip = index < 2 ? 0 : Math.max(0, -rawLeft);
+      const rightClip = index < 2 ? 0 : Math.max(0, rawLeft + width - visibleRight);
+      const isOutsideWrapper = index >= 2 && visibleWidth <= 0;
       cell.style.setProperty('left', `${rawLeft}px`, 'important');
       cell.style.setProperty('right', 'auto', 'important');
       cell.style.setProperty('width', `${width}px`, 'important');
@@ -3444,6 +3454,7 @@ const App = (() => {
       cell.style.setProperty('max-width', `${width}px`, 'important');
       cell.style.setProperty('overflow', 'hidden', 'important');
       cell.style.setProperty('text-overflow', 'clip', 'important');
+      cell.style.setProperty('clip-path', index < 2 ? 'none' : `inset(0 ${rightClip}px 0 ${leftClip}px)`, 'important');
       cell.style.setProperty('font-size', '12px', 'important');
       cell.style.setProperty('line-height', '1.05', 'important');
       cell.style.setProperty('visibility', index < 2 || !isOutsideWrapper ? 'visible' : 'hidden', 'important');
