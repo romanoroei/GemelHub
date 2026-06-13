@@ -3285,7 +3285,7 @@ const App = (() => {
   let mobileStickyCompactBlock = null;
   let mobileStickyScrollWrapper = null;
   let mobileStickyTheadRaf = 0;
-  const MOBILE_TABLE_ZOOM = 0.87;
+  const MOBILE_TABLE_ZOOM = 0.93;
 
   function ensureMobileStickyThead() {
     if (mobileStickyThead) return mobileStickyThead;
