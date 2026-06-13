@@ -39,7 +39,7 @@
 
 @media (max-width: 760px) {
   html body {
-    zoom: .96;
+    zoom: .95;
   }
 
   html body table.track-table th.col-sorted-head {
@@ -15453,6 +15453,10 @@ body.h2h-active,
   display: none !important;
 }
 
+.sandbox-bar[hidden] {
+  display: none !important;
+}
+
 @media (max-width: 760px) {
   html body #tracks-container .track-block.is-mobile-sticky-compact .track-header,
   html body #tracks-container:not(.tracks-two-col-blocked) .track-block.is-mobile-sticky-compact .track-header {
@@ -15468,24 +15472,29 @@ body.h2h-active,
     min-width: 0 !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 2px !important;
+    gap: 0 !important;
+    position: relative !important;
   }
 
-  html body #tracks-container .track-table-wrapper table.track-table .yield-top-rank {
+  html body #tracks-container .track-table-wrapper table.track-table .yield-value-wrap .yield-number-shell .yield-top-rank {
     display: inline-flex !important;
-    position: static !important;
+    position: absolute !important;
+    inset-inline-start: 1px !important;
+    inset-inline-end: auto !important;
+    top: -5px !important;
     transform: none !important;
-    width: 12px !important;
-    height: 12px !important;
-    min-width: 12px !important;
-    flex: 0 0 12px !important;
+    width: 8px !important;
+    height: 8px !important;
+    min-width: 8px !important;
+    flex: 0 0 8px !important;
     margin: 0 !important;
     align-items: center !important;
     justify-content: center !important;
     border-radius: 999px !important;
-    font-size: 7px !important;
+    font-size: 5.5px !important;
     line-height: 1 !important;
     font-weight: 900 !important;
+    z-index: 2 !important;
   }
 
   html body .mobile-app-nav {
@@ -15515,5 +15524,51 @@ body.h2h-active,
   html body .sandbox-bar {
     bottom: calc(var(--mobile-app-nav-clearance) + 112px) !important;
     z-index: 8300 !important;
+  }
+
+  html body .sandbox-bar:not(.is-visible) {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  html body .sandbox-bar.is-visible {
+    display: grid !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  html body .sandbox-bar-chip-remove {
+    position: relative !important;
+    z-index: 2 !important;
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: auto !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr,
+  html body #tracks-container .track-table-wrapper table.track-table tbody td {
+    height: auto !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table .provider-cell {
+    height: auto !important;
+    min-height: 28px !important;
+    align-items: flex-start !important;
+    padding-top: 3px !important;
+    padding-bottom: 3px !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table .prov-name,
+  html body #tracks-container .track-table-wrapper table.track-table .prov-name-text {
+    max-height: none !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
   }
 }

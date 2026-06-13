@@ -595,6 +595,7 @@ const App = (() => {
     updateMobileStickyHeader();
     loadSandboxPortfolio();
     setupSandboxCheckboxes();
+    setupSandboxBarActions();
     window.addEventListener('resize', syncTracksDensityClasses);
     window.addEventListener('resize', updateStickyGapMask);
     window.addEventListener('resize', updateMobileStickyHeader);
@@ -4902,8 +4903,11 @@ const App = (() => {
     const sels = state.sandbox.selections;
     if (sels.length === 0) {
       bar.classList.remove('is-visible');
+      bar.hidden = true;
+      bar.innerHTML = '';
       return;
     }
+    bar.hidden = false;
     bar.classList.add('is-visible');
     const chipsHtml = sels.map(s => `
       <span class="sandbox-bar-chip">
@@ -4926,18 +4930,24 @@ const App = (() => {
       </div>`;
     bar.querySelector('#sandbox-go-btn').addEventListener('click', goToSandbox);
     bar.querySelector('#sandbox-h2h-btn')?.addEventListener('click', goSelectionsToH2H);
-    bar.querySelectorAll('.sandbox-bar-chip-remove').forEach(btn => {
-      btn.addEventListener('click', e => {
-        e.stopPropagation();
-        const { removeFundid: fid, removeTrackid: tid, removeCatid: cid } = btn.dataset;
-        state.sandbox.selections = state.sandbox.selections.filter(s =>
-          !(s.fundId === fid && s.trackId === tid && s.categoryId === cid));
-        const cb = document.querySelector(`.sandbox-check[data-fundid="${fid}"][data-trackid="${tid}"][data-categoryid="${cid}"]`);
-        if (cb) cb.checked = false;
-        updateSandboxBar();
-        _sbUpdateTabBadge();
-        syncFundMembershipIndicators();
-      });
+  }
+
+  function setupSandboxBarActions() {
+    const bar = document.getElementById('sandbox-bar');
+    if (!bar) return;
+    bar.addEventListener('click', e => {
+      const btn = e.target.closest('.sandbox-bar-chip-remove');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const { removeFundid: fid, removeTrackid: tid, removeCatid: cid } = btn.dataset;
+      state.sandbox.selections = state.sandbox.selections.filter(s =>
+        !(s.fundId === fid && s.trackId === tid && s.categoryId === cid));
+      const cb = document.querySelector(`.sandbox-check[data-fundid="${fid}"][data-trackid="${tid}"][data-categoryid="${cid}"]`);
+      if (cb) cb.checked = false;
+      updateSandboxBar();
+      _sbUpdateTabBadge();
+      syncFundMembershipIndicators();
     });
   }
 
