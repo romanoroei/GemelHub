@@ -1,0 +1,421 @@
+﻿<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    (function () {
+      try {
+        var consentKey = 'gemelhub_cookie_notice_closed_v2';
+        var forceShow = new URLSearchParams(window.location.search).get('showCookieBanner') === '1';
+        if (forceShow || localStorage.getItem(consentKey) !== '1') {
+          document.documentElement.classList.add('show-cookie-banner');
+        }
+      } catch (e) {
+        document.documentElement.classList.add('show-cookie-banner');
+      }
+    })();
+  </script>
+  <title>GemelHub — השוואת קופות גמל, פנסיה וקרנות השתלמות</title>
+  <meta name="description" content="השוואת קופות גמל, קרנות השתלמות ומוצרים פנסיוניים על בסיס נתונים פומביים. המידע באתר נועד לצרכי מידע והשוואה בלבד." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-table-polish-20260612an" />
+</head>
+<body>
+<a href="#content-area" class="skip-link">דלג לתוכן הראשי</a>
+<div id="a11y-live" aria-live="polite" aria-atomic="true" role="status"></div>
+
+<!-- ════════ HERO BANNER (תמיד מוצג בכל העמודים) ════════ -->
+<section class="hero-banner" id="hero-banner" aria-label="כותרת ראשית">
+  <div class="hero-content">
+    <h1 class="hero-title" id="hero-main-title">ברוכים הבאים ל-GemelHub</h1>
+    <p class="hero-sub" id="hero-sub-title">המערכת המקצועית והידידותית ביותר להשוואת קופות גמל, קרנות השתלמות, פוליסות חיסכון ופנסיה על בסיס נתוני משרד האוצר.</p>
+</div>
+</section>
+
+<!-- ════════ STICKY HEADER ════════ -->
+<div class="sticky-header" role="navigation" aria-label="ניווט ראשי">
+
+  <!-- שורה 1: טאבים -->
+  <div class="category-tabs-bar">
+    <div class="category-tabs-inner" id="category-tabs" role="tablist" aria-label="קטגוריות מוצרים">
+      <!-- filled by JS -->
+    </div>
+  </div>
+
+  <!-- שורה 2: [סינון] [כותרת קטגוריה] .... [חיפוש] -->
+  <div class="title-search-bar">
+    <div class="tsb-inner">
+      <button class="sidebar-toggle-btn" id="sidebar-toggle-btn"
+              title="הצג/הסתר פילטרים" aria-expanded="false" aria-controls="sidebar" aria-label="הצג/הסתר פילטרים" style="display:none;">
+        <i class="fas fa-sliders-h"></i>
+        <span class="stb-label">סינון</span>
+      </button>
+      <button type="button" class="compact-view-toggle" id="compact-view-toggle" aria-pressed="false" style="display:none;">
+        <i class="fas fa-compress-alt" aria-hidden="true"></i>
+        <span>תצוגה צפופה</span>
+      </button>
+      <span class="tsb-page-title" id="page-main-title">GemelHub 💰</span>
+      <button type="button" class="advanced-search-open-btn" id="advanced-search-open-btn" hidden>
+        <i class="fas fa-sliders" aria-hidden="true"></i>
+        <span>חיפוש מתקדם</span>
+      </button>
+      <button type="button" class="display-options-toggle" id="display-options-toggle" aria-expanded="false" aria-controls="display-options-panel" style="display:none;">
+        <i class="fas fa-eye" aria-hidden="true"></i>
+        <span>אפשרויות תצוגה</span>
+      </button>
+      <div class="hero-search" role="search">
+        <i class="fas fa-search" aria-hidden="true"></i>
+        <label for="global-search" class="sr-only">חיפוש קופות</label>
+        <input type="text" id="global-search"
+               placeholder="חפש לפי מנהל, מספר קופה או מסלול..."
+               autocomplete="off"
+               aria-label="חיפוש קופות לפי מנהל, מספר קופה או מסלול"
+               aria-haspopup="listbox"
+               aria-autocomplete="list" />
+        <div id="search-dropdown" class="search-dropdown" style="display:none;"></div>
+      </div>
+      <div class="custom-range-entry" id="custom-range-entry">
+        <button type="button" class="custom-range-toggle" id="custom-range-toggle" aria-expanded="false" aria-controls="custom-range-panel">
+          <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+          <span id="custom-range-toggle-label">בחר טווח השקעה מותאם</span>
+        </button>
+      </div>
+    </div>
+    <div class="custom-range-panel" id="custom-range-panel" hidden>
+      <div class="custom-range-panel-inner">
+        <div class="custom-range-panel-main">
+          <div class="custom-range-fields-actions">
+            <div class="custom-range-fields">
+              <label class="custom-range-field" data-range-fields="months">
+                <span>מחודש</span>
+                <select id="custom-range-start" aria-label="מחודש"></select>
+              </label>
+              <label class="custom-range-field" data-range-fields="months">
+                <span>עד חודש</span>
+                <select id="custom-range-end" aria-label="עד חודש"></select>
+              </label>
+              <label class="custom-range-field" data-range-fields="year" hidden>
+                <span>שנה</span>
+                <select id="custom-range-year" aria-label="שנה"></select>
+              </label>
+            </div>
+            <div class="custom-range-actions">
+              <button type="button" class="custom-range-apply" id="custom-range-apply">הצג בטבלה</button>
+              <button type="button" class="custom-range-clear" id="custom-range-clear">חזור לטבלה רגילה</button>
+            </div>
+            <p class="custom-range-meta" id="custom-range-meta"></p>
+          </div>
+          <div class="custom-range-mode" id="custom-range-mode">
+            <button type="button" class="custom-range-mode-btn is-active" data-range-mode="months">טווח חודשים</button>
+            <button type="button" class="custom-range-mode-btn" data-range-mode="year">שנה ספציפית</button>
+          </div>
+        </div>
+        <p class="custom-range-status" id="custom-range-status" aria-live="polite"></p>
+      </div>
+    </div>
+    <div class="display-options-panel" id="display-options-panel" hidden>
+      <div class="display-options-panel-inner">
+        <button type="button" class="display-option-btn display-option-compact" data-display-option="compact">
+          <i class="fas fa-compress-alt" aria-hidden="true"></i>
+          <span></span>
+        </button>
+        <label class="display-option-select">
+          <i class="fas fa-medal" aria-hidden="true"></i>
+          <span>סימון מקום ראשון</span>
+          <select id="display-medal-icon" data-display-select="medalIcon">
+            <option value="gold">🥇 מדליה</option>
+            <option value="trophy">🏆 גביע</option>
+            <option value="star">⭐ כוכב</option>
+            <option value="crown">👑 כתר</option>
+            <option value="rocket">🚀 טיל</option>
+            <option value="none">ללא סימון</option>
+          </select>
+        </label>
+        <label class="display-option-select">
+          <i class="fas fa-arrow-trend-down" aria-hidden="true"></i>
+          <span>סימון תחתית</span>
+          <select id="display-loser-icon" data-display-select="loserIcon">
+            <option value="tomato">🍅 עגבניה</option>
+            <option value="thumbsDown">👎 אגודל למטה</option>
+            <option value="warning">⚠️ אזהרה</option>
+            <option value="down">⬇️ חץ מטה</option>
+            <option value="snow">🧊 קרח</option>
+            <option value="none">ללא סימון</option>
+          </select>
+        </label>
+        <label class="display-option-select">
+          <i class="fas fa-highlighter" aria-hidden="true"></i>
+          <span>צביעת מוביל</span>
+          <select id="display-winner-highlight" data-display-select="winnerHighlightStyle">
+            <option value="yellow">צהוב</option>
+            <option value="green">ירוק</option>
+            <option value="blue">כחול</option>
+            <option value="purple">סגול</option>
+            <option value="none">ללא צביעה</option>
+          </select>
+        </label>
+        <button type="button" class="display-option-btn" data-display-option="heatmap">
+          <i class="fas fa-circle-half-stroke" aria-hidden="true"></i>
+          <span></span>
+        </button>
+        <button type="button" class="display-option-btn" data-display-option="topThree">
+          <i class="fas fa-ranking-star" aria-hidden="true"></i>
+          <span></span>
+        </button>
+        <button type="button" class="display-option-btn display-option-reset" data-display-option="reset">
+          <i class="fas fa-rotate-right" aria-hidden="true"></i>
+          <span>איפוס הגדרות תצוגה למצב רגיל</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.sticky-header -->
+
+<!-- ════════ PAGE BODY ════════ -->
+<div class="page-body">
+
+  <!-- ── MAIN CONTENT ── -->
+  <main class="content-area" id="content-area">
+
+    <!-- HOME section -->
+    <section id="home-section">
+      <!-- filled by JS -->
+    </section>
+
+    
+
+    <!-- COMPARE section --><!-- COMPARE section -->
+    <section id="compare-section" style="display:none;">
+
+      <div class="compare-mode-toggle" id="compare-mode-toggle" hidden role="tablist" aria-label="מצב תצוגת השוואה">
+        <button type="button" class="compare-mode-btn is-active" data-compare-mode="tracks" role="tab" aria-selected="true">השוואת מסלולים</button>
+        <button type="button" class="compare-mode-btn" data-compare-mode="actuarial" role="tab" aria-selected="false">איזון אקטוארי</button>
+      </div>
+
+      <!-- Loading -->
+      <div class="loading-state" id="loading-state" style="display:none;" role="status" aria-live="polite" aria-label="טוען נתונים">
+        <div class="spinner"></div>
+        <p class="loading-title">מרכיבים עבורך השוואה חכמה...</p>
+        <p class="loading-subtitle">עוד רגע תראה מי מוביל בתשואות, בדמי הניהול ובמסלול שמתאים לך.</p>
+      </div>
+
+      <!-- Compare layout: tracks area + collapsible sidebar RIGHT -->
+      <div class="compare-layout">
+
+        <!-- TRACKS AREA -->
+        <div class="tracks-area" id="tracks-area">
+
+          <!-- שורת ספירת קופות — מצד ימין מעל הטבלה -->
+          <div class="tracks-count-bar" id="tracks-count-bar" style="display:none;">
+            <span class="results-count" id="results-count"></span>
+          </div>
+
+          <div id="actuarial-container" hidden></div>
+
+          <!-- Track blocks -->
+          <div id="tracks-container"></div>
+        </div>
+
+        <!-- RIGHT SIDEBAR — hidden by default -->
+        <aside class="sidebar-right sidebar-collapsed" id="sidebar" aria-label="פילטרים לסינון">
+          <div class="sidebar-sticky">
+
+            <!-- Filters only (ללא badge) -->
+            <div id="sidebar-filters" style="display:none;">
+
+              <!-- Tracks -->
+              <div class="sidebar-section">
+                <div class="sidebar-section-title">
+                  <i class="fas fa-road"></i> מסלולי השקעה
+                  <button class="btn-clear-filter" id="clear-tracks" aria-label="נקה סינון מסלולים">נקה</button>
+                </div>
+                <div class="filter-checkboxes" id="filter-tracks"></div>
+              </div>
+
+              <!-- Providers -->
+              <div class="sidebar-section">
+                <div class="sidebar-section-title">
+                  <i class="fas fa-building"></i> מנהלי השקעות
+                  <button class="btn-clear-filter" id="clear-providers" aria-label="נקה סינון מנהלים">נקה</button>
+                </div>
+                <div class="filter-checkboxes" id="filter-providers"></div>
+              </div>
+
+            </div><!-- /#sidebar-filters -->
+          </div><!-- /.sidebar-sticky -->
+        </aside>
+
+      </div><!-- /.compare-layout -->
+
+    </section>
+
+    <!-- H2H section -->
+    <section id="h2h-section" style="display:none;">
+      <div id="h2h-workspace" class="h2h-workspace"></div>
+    </section>
+
+    <!-- Sandbox section -->
+    <section id="sandbox-section" style="display:none;" aria-label="ארגז החול שלי"></section>
+
+    <!-- Customer Portfolio section -->
+
+  </main>
+
+</div><!-- /.page-body -->
+
+<div class="advanced-search-overlay" id="advanced-search-overlay" hidden aria-hidden="true">
+  <div class="advanced-search-modal" role="dialog" aria-modal="true" aria-labelledby="advanced-search-title">
+    <div class="advanced-search-head">
+      <div>
+        <h3 id="advanced-search-title">חיפוש מתקדם בקטגוריית: <span id="advanced-search-head-category"></span></h3>
+      </div>
+      <button type="button" class="advanced-search-close" id="advanced-search-close" aria-label="סגור חיפוש מתקדם">
+        <i class="fas fa-times" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="advanced-search-meta">
+      <span class="advanced-search-chip" id="advanced-search-category-chip">קטגוריה פעילה</span>
+    </div>
+
+    <div class="advanced-search-builder">
+      <div class="advanced-search-rows" id="advanced-search-rows"></div>
+      <div class="advanced-search-actions">
+        <button type="button" class="advanced-search-add" id="advanced-search-add-row">
+          <i class="fas fa-plus" aria-hidden="true"></i>
+          <span>הוסף פרמטר</span>
+        </button>
+        <button type="button" class="advanced-search-run" id="advanced-search-run">
+          <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+          <span>מצא 5 תוצאות</span>
+        </button>
+        <button type="button" class="advanced-search-reset" id="advanced-search-reset">
+          <i class="fas fa-rotate-right" aria-hidden="true"></i>
+          <span>חיפוש מחדש</span>
+        </button>
+      </div>
+      <p class="advanced-search-status" id="advanced-search-status" aria-live="polite"></p>
+    </div>
+
+    <div class="advanced-search-results" id="advanced-search-results"></div>
+  </div>
+</div>
+
+<!-- ════════ FOOTER ════════ -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-logo">GemelHub 💰</div>
+        <p class="footer-disclaimer">
+          המידע באתר נועד לספק תמונת מצב כללית והשוואתית בלבד ואינו מהווה ייעוץ השקעות, שיווק פנסיוני או תחליף לייעוץ אישי המותאם לצרכי הלקוח. הנתונים מבוססים על מקורות פומביים ועשויים להכיל טעויות או אי-דיוקים. אין לראות בתשואות העבר התחייבות לתשואות עתידיות. לפני קבלת החלטה פיננסית מומלץ להתייעץ עם בעל רישיון.
+        </p>
+
+    <p class="footer-license">רועי רומנו, מתכנן פיננסי וסוכן פנסיוני מורשה | רישיון 00117164</p>
+    <p class="footer-contact"><a href="mailto:roeir@ar-fo.co.il">roeir@ar-fo.co.il</a> | <a href="tel:0528089808">052-8089808</a></p>
+    <div class="footer-legal">
+      <a href="disclosure.html">גילוי נאות</a>
+      <a href="privacy.html">מדיניות פרטיות</a>
+      <a href="terms.html">תנאי שימוש</a>
+      <a href="accessibility.html">הצהרת נגישות</a>
+    </div>
+
+  </div>
+</footer>
+
+<!-- CONSULT MODAL -->
+<div class="modal-overlay" id="modal-overlay" style="display:none;"
+     role="dialog" aria-modal="true" aria-labelledby="consult-modal-title">
+  <div class="modal-box">
+    <button class="modal-close" id="modal-close" aria-label="סגור חלונית"><i class="fas fa-times" aria-hidden="true"></i></button>
+    <h3 id="consult-modal-title">בדיקה אישית ע"י רועי רומנו</h3>
+    <p>מלאו פרטים ותועברו לוואטסאפ שלי עם הודעה מוכנה.</p>
+    <form id="consult-form" novalidate autocomplete="on">
+      <label for="consult-name" class="sr-only">שם מלא</label>
+      <input type="text" id="consult-name" name="name" placeholder="שם מלא" required aria-required="true" autocomplete="name" />
+      <label for="consult-phone" class="sr-only">טלפון</label>
+      <input type="tel" id="consult-phone" name="phone" placeholder="טלפון" required aria-required="true" autocomplete="tel" />
+      <label for="consult-email" class="sr-only">כתובת מייל</label>
+      <input type="email" id="consult-email" name="email" placeholder="מייל" autocomplete="email" />
+      <label class="consent-check" for="consult-consent">
+        <input type="checkbox" id="consult-consent" required aria-required="true" />
+        <span>אני מאשר/ת יצירת קשר בהתאם ל<a href="privacy.html" target="_blank" rel="noopener noreferrer">מדיניות הפרטיות</a> ויודע/ת שהמידע באתר אינו מהווה ייעוץ פנסיוני אישי.</span>
+      </label>
+      <button type="submit" class="btn-submit"><i class="fab fa-whatsapp" aria-hidden="true"></i> שלח ב-WhatsApp</button>
+    </form>
+  </div>
+</div>
+
+
+<div class="cookie-banner" id="cookie-banner" aria-label="הודעת עוגיות">
+  <div class="cookie-banner-inner cookie-banner-inner-minimal">
+    <p>האתר עושה שימוש בעוגיות לצורך שיפור חוויית המשתמש וניתוח נתונים.</p>
+    <div class="cookie-banner-actions">
+      <button type="button" class="cookie-btn cookie-btn-primary" id="cookie-accept">הבנתי</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sandbox floating selection bar -->
+<div id="sandbox-bar" class="sandbox-bar" role="status" aria-live="polite"></div>
+
+<!-- Sandbox portfolio value bar (visible only in sandbox page) -->
+<div id="sandbox-value-bar" class="sandbox-value-bar" aria-live="polite"></div>
+
+<button type="button" class="whatsapp-float" data-open-leads="float-btn" aria-label="בדיקה אישית — פתח טופס פרטים">
+  <i class="fas fa-comment-dots" aria-hidden="true"></i>
+  <span>בדיקה אישית</span>
+</button>
+
+<nav class="mobile-app-nav" aria-label="ניווט תחתון במובייל">
+  <button type="button" class="mobile-app-nav-item" data-mobile-app-action="categories" data-mobile-app-target="categories" aria-label="קטגוריות">
+    <i class="fas fa-layer-group" aria-hidden="true"></i>
+    <span>קטגוריות</span>
+  </button>
+  <button type="button" class="mobile-app-nav-item" data-mobile-app-action="filter" data-mobile-app-target="filter" aria-label="אפשרויות מתקדמות">
+    <i class="fas fa-sliders-h" aria-hidden="true"></i>
+    <span>אפשרויות</span>
+  </button>
+  <button type="button" class="mobile-app-nav-item" data-mobile-app-action="h2h" data-mobile-app-target="h2h" aria-label="ראש בראש">
+    <i class="fas fa-balance-scale" aria-hidden="true"></i>
+    <span>ראש בראש</span>
+  </button>
+  <button type="button" class="mobile-app-nav-item" data-mobile-app-action="sandbox" data-mobile-app-target="sandbox" aria-label="ארגז החול שלי">
+    <i class="fas fa-flask" aria-hidden="true"></i>
+    <span>ארגז החול</span>
+  </button>
+  <button type="button" class="mobile-app-nav-item mobile-app-nav-lock" data-mobile-app-action="login" data-mobile-app-target="login" aria-label="התחברות">
+    <i class="fas fa-user-lock" aria-hidden="true"></i>
+    <span>התחברות</span>
+  </button>
+</nav>
+
+<div class="feature-lock-message" id="feature-lock-message" role="status" aria-live="polite" hidden>
+  <i class="fas fa-lock" aria-hidden="true"></i>
+  <span>הפיצ'ר הזה זמין למשתמשים רשומים בלבד</span>
+</div>
+
+<button class="mobile-filter-btn" id="mobile-filter-btn" aria-label="פתח/סגור סינון" style="display:none;">
+  <i class="fas fa-sliders-h"></i> סינון
+</button>
+
+<button class="scroll-top-btn" id="scroll-top-btn" title="חזרה לראש העמוד" aria-label="חזרה לראש העמוד">
+  <i class="fas fa-chevron-up"></i>
+</button>
+<script>
+(function(){
+  const btn = document.getElementById('scroll-top-btn');
+  window.addEventListener('scroll', () => btn.classList.toggle('visible', window.scrollY > 300), {passive:true});
+  btn.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="js/config.js?v=provider-subfilters-20260603"></script>
+<script src="js/api.js?v=provider-subfilters-20260603"></script>
+<script src="js/legal.js"></script>
+<script src="js/leads.js"></script>
+<script src="js/app.js?v=mobile-table-polish-20260612an"></script>
+</body>
+</html>

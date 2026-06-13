@@ -1,0 +1,2844 @@
+﻿<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    (function () {
+      try {
+        var consentKey = 'gemelhub_cookie_notice_closed_v2';
+        var forceShow = new URLSearchParams(window.location.search).get('showCookieBanner') === '1';
+        if (forceShow || localStorage.getItem(consentKey) !== '1') {
+          document.documentElement.classList.add('show-cookie-banner');
+        }
+      } catch (e) {
+        document.documentElement.classList.add('show-cookie-banner');
+      }
+    })();
+  </script>
+  <title>פרטי קופה — GemelHub</title>
+  <meta name="description" content="עמוד פרטי קופה עם נתוני השוואה, תשואות, נכסים וחשיפות על בסיס נתונים פומביים. המידע אינו מהווה ייעוץ פנסיוני אישי." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-table-polish-20260612an" />
+  <link rel="stylesheet" href="css/fund.css?v=mobile-table-polish-20260613c" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="fund-page">
+<a href="#fund-content" class="skip-link">דלג לתוכן הראשי</a>
+<div id="a11y-live" aria-live="polite" aria-atomic="true" role="status"></div>
+
+<!-- ════════ STICKY HEADER — TABS + SEARCH (task 10) ════════ -->
+<div class="sticky-header" role="navigation" aria-label="ניווט ראשי">
+  <div class="category-tabs-bar">
+    <div class="category-tabs-inner" id="fund-category-tabs">
+      <!-- populated by JS -->
+    </div>
+  </div>
+  <div class="title-search-bar">
+    <div class="tsb-inner">
+      <span class="tsb-page-title" id="fund-cat-label"></span>
+      <div class="hero-search">
+        <i class="fas fa-search" aria-hidden="true"></i>
+        <label for="fund-global-search" class="sr-only">חיפוש קופות</label>
+        <input type="text" id="fund-global-search"
+               placeholder="חפש קופה לפי שם, מנהל או מספר..."
+               autocomplete="off"
+               aria-label="חיפוש קופה לפי שם, מנהל או מספר"
+               aria-haspopup="listbox"
+               aria-autocomplete="list" />
+        <div id="fund-search-dropdown" class="search-dropdown" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ MAIN CONTENT ════════ -->
+<main class="fund-page-main">
+
+  <!-- Loading state -->
+  <div id="fund-loading" class="loading-state" style="padding:80px 20px;" role="status" aria-live="polite" aria-label="טוען נתוני קופה">
+    <div class="spinner"></div>
+    <p>טוען נתוני הקופה...</p>
+  </div>
+
+  <!-- Error state -->
+  <div id="fund-error" class="error-state" style="display:none;">
+    <i class="fas fa-exclamation-triangle"></i>
+    <p id="fund-error-msg">שגיאה בטעינת הנתונים</p>
+    <a href="index.html" class="btn-back-link">חזרה לדף הבית</a>
+  </div>
+
+  <!-- Fund content -->
+  <div id="fund-content" style="display:none;">
+
+    <!-- Hero card -->
+    <div class="fund-hero" id="fund-hero">
+      <div class="fund-hero-inner">
+        <!-- right: badge + info -->
+        <div class="fund-hero-left-col">
+          <div class="fund-hero-info">
+            <div class="fund-hero-cat" id="fh-cat"></div>  <!-- task 11: larger font in CSS -->
+            <h1 class="fund-hero-name" id="fh-name"></h1>
+            <div class="fund-hero-track" id="fh-track-large"></div>
+            <div class="fund-hero-meta">
+              <span class="fh-meta-chip" id="fh-id"></span>
+              <span class="fh-meta-chip fh-meta-period" id="fh-period"></span>
+              <span class="fund-allocation-tag" id="fh-allocation-tag" hidden></span>
+              <span class="fund-stock-outlier-tag" id="fh-stock-outlier-tag" hidden></span>
+            </div>
+          </div>
+        </div>
+        <!-- left: pie charts — task 14: גדולות יותר, task 15: leader lines -->
+        <div class="fund-hero-pies" id="fund-hero-pies">
+          <div class="fh-pie-item">
+            <div class="fh-pie-title">חשיפה מנייתית</div>
+            <canvas id="pie-stocks" width="240" height="240" role="img" aria-label="תרשים חשיפה למניות"></canvas>
+          </div>
+          <div class="fh-pie-item">
+            <div class="fh-pie-title">חשיפה מטבעית</div>
+            <canvas id="pie-fx" width="240" height="240" role="img" aria-label="תרשים חשיפה מטבעית"></canvas>
+          </div>
+          <div class="fh-pie-item">
+            <div class="fh-pie-title">חשיפה גיאוגרפית</div>
+            <canvas id="pie-foreign" width="240" height="240" role="img" aria-label="תרשים חשיפה לחו״ל"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sticky fund name bar (appears when hero scrolls away) -->
+    <div id="fund-sticky-bar" class="fund-sticky-bar" aria-hidden="true">
+      <div class="fsb-inner">
+        <span class="fsb-cat"   id="fsb-cat"></span>
+        <span class="fsb-sep">·</span>
+        <span class="fsb-name"  id="fsb-name"></span>
+        <span class="fsb-sep">·</span>
+        <span class="fsb-track" id="fsb-track"></span>
+        <span class="fsb-sep">·</span>
+        <span class="fsb-id"    id="fsb-id"></span>
+      </div>
+    </div>
+
+    
+
+    <!-- Stats row: חודשי | 1Y | 3Y | 5Y | נכסים -->
+    <div class="fund-stats-row" id="fund-stats-row"></div>
+
+<!-- Two-column layout -->
+    <div class="fund-two-col">
+
+      <!-- נתונים (charts) — task 13 -->
+      <div class="fund-card fund-peers-card">
+        <div class="fund-card-title">
+          <i class="fas fa-chart-area"></i> נתונים
+        </div>
+        <div class="fund-chart-tabs" role="tablist" aria-label="סוג גרף">
+          <button class="fct-btn active" data-field="MONTHLY_YIELD" role="tab" aria-selected="true">תשואה ביחס למתחרים</button>
+          <button class="fct-btn" data-field="TOTAL_ASSETS" role="tab" aria-selected="false">שינוי היקף נכסים</button>        <!-- task 16 -->
+          <button class="fct-btn" data-field="STOCK_EXPOSURE_CHANGE" role="tab" aria-selected="false">שינוי היקף מניות</button> <!-- task 17 -->
+        </div>
+        <!-- גרף תשואה ביחס למתחרים (גלילה) -->
+        <div id="yield-chart-scroll-wrap" class="yield-scroll-wrap">
+          <div id="yield-chart-inner" class="yield-chart-inner">
+            <canvas id="history-chart" role="img" aria-label="גרף תשואה היסטורית"></canvas>
+          </div>
+        </div>
+        <!-- גרפים סטטיים (נכסים / מניות) -->
+        <div id="static-chart-wrap" style="display:none; height:280px; position:relative;">
+          <canvas id="history-chart-static"></canvas>
+        </div>
+
+        <!-- אגדה + סיכום -->
+        <div id="yield-chart-legend" style="display:none; flex-direction:column; align-items:center; gap:6px; margin-top:10px;">
+          <div style="display:flex; justify-content:center; gap:18px; flex-wrap:wrap;">
+            <span style="display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--gray-700);">
+              <span style="width:14px;height:14px;border-radius:3px;background:#c9b772;display:inline-block;"></span>הקופה
+            </span>
+            <span style="display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--gray-700);">
+              <span style="width:14px;height:14px;border-radius:3px;background:#cbd5e1;display:inline-block;"></span>ממוצע מתחרים
+            </span>
+          </div>
+          <div id="yield-chart-summary" class="yield-summary-bar"></div>
+        </div>
+        <!-- אגדה לגרף היקף נכסים -->
+        <div id="assets-chart-legend" style="display:none; justify-content:center; gap:20px; margin-top:6px; font-size:.78rem; color:var(--gray-600);">
+          <span><span style="display:inline-block;width:12px;height:12px;background:#c9b772;border-radius:2px;margin-left:4px;vertical-align:middle;"></span>שינוי חודשי (%)</span>
+          <span><span style="display:inline-block;width:22px;height:3px;background:#f97316;border-radius:2px;margin-left:4px;vertical-align:middle;"></span>שינוי מצטבר (%)</span>
+        </div>
+      </div>
+
+      <!-- השוואה למתחרים -->
+      <div class="fund-card">
+        <div class="fund-inline-cta">
+          <div class="fund-inline-cta-text">
+            <strong>רוצה לדעת האם הקופה הזו באמת מתאימה לך?</strong>
+            <span>אפשר לבדוק עבורך התאמה אישית על ידי בעל רישיון, לפי מצבך הפיננסי, המטרות שלך ונתונים נוספים.</span>
+          </div>
+          <button type="button" class="fund-inline-cta-btn" id="fund-inline-cta-btn" data-open-leads="fund-inline-cta">
+            מעוניין לבדוק
+          </button>
+        </div>
+
+        <div id="peer-filter-banner-wrap"></div>
+        <div class="fund-card-title">
+          <i class="fas fa-balance-scale"></i> השוואה למתחרים — <span id="peers-section-title">אותו מסלול</span>
+        </div>
+<div id="peers-table-wrap"></div>
+      </div>
+
+    </div>
+
+<!-- מדדים נוספים — hidden (moved to stats row) -->
+    <div class="fund-card fund-metrics-card" style="display:none;">
+      <div class="fund-card-title">
+        <i class="fas fa-chart-mixed"></i> מדדים נוספים
+      </div>
+      <div class="fund-metrics-grid" id="fund-metrics-grid"></div>
+    </div>
+
+  </div><!-- /#fund-content -->
+
+</main>
+
+<!-- ════════ FOOTER ════════ -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-logo">GemelHub 💰</div>
+      <p class="footer-disclaimer">
+        המידע באתר נועד לספק תמונת מצב כללית והשוואתית בלבד ואינו מהווה ייעוץ השקעות, שיווק פנסיוני או תחליף לייעוץ אישי המותאם לצרכי הלקוח. הנתונים מבוססים על מקורות פומביים ועשויים להכיל טעויות או אי-דיוקים. אין לראות בתשואות העבר התחייבות לתשואות עתידיות. לפני קבלת החלטה פיננסית מומלץ להתייעץ עם בעל רישיון.
+      </p>
+
+    <p class="footer-license">רועי רומנו, מתכנן פיננסי וסוכן פנסיוני מורשה | רישיון 00117164</p>
+    <p class="footer-contact"><a href="mailto:roeir@ar-fo.co.il">roeir@ar-fo.co.il</a> | <a href="tel:0528089808">052-8089808</a></p>
+    <div class="footer-legal">
+      <a href="disclosure.html">גילוי נאות</a>
+      <a href="privacy.html">מדיניות פרטיות</a>
+      <a href="terms.html">תנאי שימוש</a>
+      <a href="accessibility.html">הצהרת נגישות</a>
+    </div>
+
+  </div>
+</footer>
+
+<!-- CONSULT MODAL -->
+<div class="modal-overlay" id="modal-overlay" style="display:none;"
+     role="dialog" aria-modal="true" aria-labelledby="consult-modal-title">
+  <div class="modal-box">
+    <button class="modal-close" id="modal-close" aria-label="סגור חלונית"><i class="fas fa-times" aria-hidden="true"></i></button>
+    <h3 id="consult-modal-title">בדיקה אישית ע"י רועי רומנו</h3>
+    <p>מלאו פרטים ותועברו לוואטסאפ שלי עם הודעה מוכנה.</p>
+    <form id="consult-form" novalidate autocomplete="on">
+      <label for="consult-name" class="sr-only">שם מלא</label>
+      <input type="text" id="consult-name" name="name" placeholder="שם מלא" required aria-required="true" autocomplete="name" />
+      <label for="consult-phone" class="sr-only">טלפון</label>
+      <input type="tel" id="consult-phone" name="phone" placeholder="טלפון" required aria-required="true" autocomplete="tel" />
+      <label for="consult-email" class="sr-only">כתובת מייל</label>
+      <input type="email" id="consult-email" name="email" placeholder="מייל" autocomplete="email" />
+      <label class="consent-check" for="consult-consent">
+        <input type="checkbox" id="consult-consent" required aria-required="true" />
+        <span>אני מאשר/ת יצירת קשר בהתאם ל<a href="privacy.html" target="_blank" rel="noopener noreferrer">מדיניות הפרטיות</a> ויודע/ת שהמידע באתר אינו מהווה ייעוץ פנסיוני אישי.</span>
+      </label>
+      <button type="submit" class="btn-submit"><i class="fab fa-whatsapp" aria-hidden="true"></i> שלח ב-WhatsApp</button>
+    </form>
+  </div>
+</div>
+
+<nav class="mobile-app-nav" aria-label="ניווט תחתון במובייל">
+  <button type="button" class="mobile-app-nav-item" data-fund-mobile-action="categories" aria-label="קטגוריות">
+    <i class="fas fa-layer-group" aria-hidden="true"></i>
+    <span>קטגוריות</span>
+  </button>
+  <button type="button" class="mobile-app-nav-item" data-fund-mobile-action="search" aria-label="אפשרויות">
+    <i class="fas fa-sliders-h" aria-hidden="true"></i>
+    <span>אפשרויות</span>
+  </button>
+  <a class="mobile-app-nav-item" href="index.html?app=h2h" aria-label="ראש בראש">
+    <i class="fas fa-balance-scale" aria-hidden="true"></i>
+    <span>ראש בראש</span>
+  </a>
+  <a class="mobile-app-nav-item" href="index.html?app=sandbox" aria-label="ארגז החול שלי">
+    <i class="fas fa-flask" aria-hidden="true"></i>
+    <span>ארגז החול</span>
+  </a>
+  <button type="button" class="mobile-app-nav-item mobile-app-nav-lock" data-fund-mobile-action="login" aria-label="התחברות">
+    <i class="fas fa-user-lock" aria-hidden="true"></i>
+    <span>התחברות</span>
+  </button>
+</nav>
+
+<div class="feature-lock-message" id="feature-lock-message" role="status" aria-live="polite" hidden>
+  <i class="fas fa-lock" aria-hidden="true"></i>
+  <span>הפיצ'ר הזה זמין למשתמשים רשומים בלבד</span>
+</div>
+
+<button type="button" class="whatsapp-float" data-open-leads="float-btn-fund" aria-label="בדיקה אישית — פתח טופס פרטים">
+  <i class="fas fa-comment-dots" aria-hidden="true"></i>
+  <span>בדיקה אישית</span>
+</button>
+
+<div class="cookie-banner" id="cookie-banner" aria-label="הודעת עוגיות">
+  <div class="cookie-banner-inner cookie-banner-inner-minimal">
+    <p>האתר עושה שימוש בעוגיות לצורך שיפור חוויית המשתמש וניתוח נתונים.</p>
+    <div class="cookie-banner-actions">
+      <button type="button" class="cookie-btn cookie-btn-primary" id="cookie-accept">הבנתי</button>
+    </div>
+  </div>
+</div>
+
+  <script src="js/config.js?v=provider-subfilters-20260603"></script>
+  <script src="js/api.js?v=provider-subfilters-20260603"></script>
+<script src="js/legal.js"></script>
+<script src="js/leads.js"></script>
+<script>
+// ──────────────────────────────────────────────────────────────
+// Fund Page Logic — GemelHub
+// ──────────────────────────────────────────────────────────────
+
+const COLORS = ['#3b82f6','#22c55e','#f97316','#a855f7','#ef4444',
+                '#14b8a6','#eab308','#ec4899','#6366f1','#64748b',
+                '#f59e0b','#06b6d4','#84cc16','#d946ef'];
+const colorMap = new Map(); let colorIdx = 0;
+function providerColor(name) {
+  if (!colorMap.has(name)) colorMap.set(name, COLORS[colorIdx++ % COLORS.length]);
+  return colorMap.get(name);
+}
+function yieldClass(v) {
+  const n = parseFloat(v);
+  if (isNaN(n)) return '';
+  return n > 0 ? 'yield-pos' : n < 0 ? 'yield-neg' : '';
+}
+// issue 4: חלץ מזהה ייחודי מ-FUND_NAME עבור שמות מנהל כפולים
+// מחזיר null אם אין מזהה ידוע
+function extractFundSuffix(fundName) {
+  const subs = ['State Street','BlackRock','fidelity','Fidelity','Apollo','ילין לפידות','אלטשולר שחם','אנליסט','מור','מיטב'];
+  for (const s of subs) {
+    if ((fundName||'').toLowerCase().includes(s.toLowerCase())) return s;
+  }
+  return null;
+}
+
+let historyChart       = null;   // canvas ראשי (תשואה חודשית — גלילה)
+let historyChartStatic = null;   // canvas משני (נכסים / מניות — סטטי)
+let currentField       = 'MONTHLY_YIELD';
+let _yields12M         = null;
+let _sharpeMap         = null;
+let _6MMap             = null;
+let _consistencyMap    = null;
+let _peersMonthlyAvg   = null;   // Map<REPORT_PERIOD, avgMonthly> של המתחרים
+let _fundCatId         = null;
+let _myFundId          = null;
+let _fundTrackFullLabel = '';
+let _fundTrackId       = '';
+
+// ── task 15: Leader Lines plugin לעוגות ──────────────────────
+const PieLeaderLines = {
+  id: 'pieLeaderLines',
+  afterDraw(chart) {
+    const { ctx, data } = chart;
+    const meta = chart.getDatasetMeta(0);
+    if (!meta || !meta.data.length) return;
+    const ca = chart.chartArea;
+    const cx = (ca.left + ca.right) / 2;
+    const cy = (ca.top  + ca.bottom) / 2;
+
+    meta.data.forEach((arc, i) => {
+      const val = data.datasets[0].data[i];
+      if (!val || val < 1) return; // לא מתייג פרוסות קטנות מאוד
+      const midAngle = (arc.startAngle + arc.endAngle) / 2;
+      const outerR   = arc.outerRadius;
+      const color    = data.datasets[0].backgroundColor[i];
+      const label    = data.labels[i];
+
+      // נקודות הקו
+      const x1 = cx + Math.cos(midAngle) * (outerR + 3);
+      const y1 = cy + Math.sin(midAngle) * (outerR + 3);
+      const x2 = cx + Math.cos(midAngle) * (outerR + 16);
+      const y2 = cy + Math.sin(midAngle) * (outerR + 16);
+      const isRight = Math.cos(midAngle) >= 0;
+      const xL = x2 + (isRight ? 4 : -4);
+
+      ctx.save();
+      // קו
+      ctx.beginPath();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      // שם
+      ctx.fillStyle = '#0f172a';
+      ctx.font = '800 12px Heebo, Arial, sans-serif';
+      ctx.textAlign = isRight ? 'left' : 'right';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(label, xL, y2 - 1);
+      // אחוז
+      ctx.fillStyle = '#0f172a';
+      ctx.font = '900 12px Heebo, Arial, sans-serif';
+      ctx.textBaseline = 'top';
+      ctx.fillText(`${val.toFixed(1)}%`, xL, y2 + 1);
+      ctx.restore();
+    });
+  }
+};
+Chart.register(PieLeaderLines);
+
+async function loadFundPage() {
+  APIModule.loadCachesFromLocalStorage();
+  const params = new URLSearchParams(location.search);
+  const fundId = params.get('id');
+  _myFundId  = fundId;
+  _fundCatId = params.get('cat') || '';
+  if (!fundId) { showError('לא סופק מספר קופה'); return; }
+
+  try {
+    const _fundCat  = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === _fundCatId);
+    const isPension = !!(_fundCat?.pensionAPI);
+    const isPolisa  = !!(_fundCat?.polisaAPI);
+
+    // ── מתחיל Phase 2 מיד (במקביל ל-Phase 1) כדי לחסוך זמן טעינה ──
+    // אם יש cache ב-localStorage — Phase 2 יסתיים לפני Phase 1
+    const _phase2Promise = Promise.all([
+      APIModule.getFundHistory(fundId, _fundCatId),
+      APIModule.getTrackPeersMonthlyAvg(fundId, _fundCatId)
+    ]);
+
+    // ── שלב 1: תצוגה מהירה — נתונים נוכחיים בלבד (ללא היסטוריה) ──
+    const [latest, peers, yields12M, sharpeMap, map6M, consistencyMap] = await Promise.all([
+      APIModule.getFundLatestRecord(fundId, _fundCatId),
+      APIModule.getTrackPeers(fundId, _fundCatId),
+      isPension ? APIModule.get12MYieldsPension()      : isPolisa ? APIModule.get12MYieldsPolisa() : APIModule.get12MYields(),
+      isPension ? APIModule.getAllSharpeRatiosPension() : isPolisa ? Promise.resolve(null) : APIModule.getAllSharpeRatios(),
+      isPension ? APIModule.get6MAvgYieldsPension()    : isPolisa ? Promise.resolve(null) : APIModule.get6MAvgYields(),
+      isPension ? APIModule.getConsistencyMapPension() : isPolisa ? Promise.resolve(null) : APIModule.getConsistencyMap(),
+    ]);
+    _yields12M      = yields12M;
+    _sharpeMap      = sharpeMap;
+    _6MMap          = map6M;
+    _consistencyMap = consistencyMap;
+
+    if (!latest) { showError(`לא נמצאו נתונים לקופה #${fundId}`); return; }
+
+    const provName = getProviderDisplayName(latest.CONTROLLING_CORPORATION, latest.MANAGING_CORPORATION);
+    const cls = (latest.FUND_CLASSIFICATION || '').trim();
+    const cat = CONFIG.PRODUCT_CATEGORIES.find(c =>
+      c.apiClassifications.some(ac => cls === ac.trim())
+    );
+
+    _fundCatId = cat?.id || _fundCatId;
+    const matchedTrack = findFundTrack(latest, cat);
+    _fundTrackId = matchedTrack?.id || '';
+    const matchedTrackLabel = matchedTrack?.label || latest.SUB_SPECIALIZATION || 'מסלול';
+    const trackDisplayLabel = latest.FUND_NAME || latest.SUB_SPECIALIZATION || matchedTrackLabel;
+    const trackCompareUrl = buildTrackCompareUrl(_fundCatId, _fundTrackId);
+
+    // ── Hero ──
+    document.title = `${provName} — ${latest.FUND_NAME || latest.SUB_SPECIALIZATION || ''} | GemelHub`;
+    document.getElementById('fh-cat').textContent     = cat ? cat.label : (latest.FUND_CLASSIFICATION || '');
+    document.getElementById('fh-name').textContent    = provName;
+    setTrackLink(document.getElementById('fh-track-large'), trackDisplayLabel, trackCompareUrl);
+    document.getElementById('fh-id').textContent      = `קופה #${fundId}`;
+    const stockExposureOutlier = calcStockExposureOutlier(latest, peers);
+    const periodChip = document.getElementById('fh-period');
+    if (periodChip) {
+      periodChip.className = 'fund-stock-outlier-tag fund-stock-outlier-tag-inline';
+      renderStockOutlierTag(periodChip, stockExposureOutlier);
+    }
+    renderAllocationProfileTag(
+      document.getElementById('fh-allocation-tag'),
+      calcAllocationDiagnostics(latest, peers).profile,
+      `${trackDisplayLabel || ''} ${matchedTrackLabel || ''} ${latest.FUND_NAME || ''} ${latest.SUB_SPECIALIZATION || ''}`
+    );
+    renderStockOutlierTag(document.getElementById('fh-stock-outlier-tag'), null);
+
+    // ── Sticky mini-bar ──
+    document.getElementById('fsb-cat').textContent   = cat ? cat.label : (latest.FUND_CLASSIFICATION || '');
+    document.getElementById('fsb-name').textContent  = provName;
+    setTrackLink(document.getElementById('fsb-track'), trackDisplayLabel, trackCompareUrl);
+    document.getElementById('fsb-id').textContent    = `#${fundId}`;
+    const _stickyBar = document.getElementById('fund-sticky-bar');
+    const _heroObs = new IntersectionObserver(([entry]) => {
+      _stickyBar.classList.toggle('fsb-visible', !entry.isIntersecting);
+    }, { threshold: 0, rootMargin: '-96px 0px 0px 0px' });
+    _heroObs.observe(document.getElementById('fund-hero'));
+
+    const color = providerColor(provName);
+
+    // ── Sticky tabs + search ──
+    buildFundPageHeader();
+
+    // ── Pie charts ──
+    buildPieCharts(latest);
+
+    // ── Peers ──
+    buildPeersTable(peers, fundId, provName);
+
+    // ── כותרת "השוואה למתחרים" ──
+    (() => {
+      const catLabel = _fundCat?.label || cat?.label || '';
+      _fundTrackFullLabel = catLabel ? `${catLabel} מסלול ${matchedTrackLabel}` : matchedTrackLabel;
+      setTrackLink(document.getElementById('peers-section-title'), _fundTrackFullLabel, trackCompareUrl);
+    })();
+
+    // ── Stats + Metrics ──
+    buildStatsAndMetrics(latest, [], peers, fundId);
+
+    // הסתר ספינר — הצג תוכן
+    document.getElementById('fund-loading').style.display = 'none';
+    document.getElementById('fund-content').style.display = 'block';
+
+    // ── שלב 2: טעינת גרף ברקע (היסטוריה מלאה — לא חוסם) ──
+    // אינדיקטור טעינה — אלמנט נפרד מהאגדה, שלא יחריב את תוכן ה-HTML שלה
+    const chartLoadingEl = document.createElement('div');
+    chartLoadingEl.id = 'chart-loading-indicator';
+    chartLoadingEl.style.cssText = 'text-align:center;padding:16px 0;color:#94a3b8;font-size:.82rem;font-style:italic;';
+    chartLoadingEl.textContent = 'טוען גרף...';
+    document.getElementById('yield-chart-scroll-wrap')?.after(chartLoadingEl);
+
+    _phase2Promise.then(([history, peersMonthlyAvg]) => {
+      chartLoadingEl.remove();
+      _peersMonthlyAvg = peersMonthlyAvg;
+      buildHistoryChart(history, currentField);
+      setupChartTabs(history);
+      // עדכן עקביות עם היסטוריה אמיתית (שלב 1 הציג "טוען...")
+      buildStatsAndMetrics(latest, history, peers, fundId);
+    }).catch((err) => {
+      console.error('Phase 2 error:', err);
+      chartLoadingEl.remove();
+    });
+
+  } catch(e) {
+    console.error(e);
+    showError('שגיאה בטעינת הנתונים: ' + e.message);
+  }
+}
+
+function showError(msg) {
+  document.getElementById('fund-loading').style.display = 'none';
+  document.getElementById('fund-error').style.display   = 'flex';
+  document.getElementById('fund-error-msg').textContent = msg;
+}
+
+function matchesTrackToken(name, token) {
+  const haystack = String(name || '').toLowerCase();
+  const needle = String(token || '').trim().toLowerCase();
+  if (!needle) return false;
+  if (needle === '25%') return /(?:עד\s*25|25\s*%|25\s*אחוז)/i.test(haystack);
+  return haystack.includes(needle);
+}
+
+function findFundTrack(record, category) {
+  const catTrackIds = category?.trackList ? new Set(category.trackList) : null;
+  const tracksToSearch = catTrackIds
+    ? CONFIG.INVESTMENT_TRACKS.filter(track => catTrackIds.has(track.id))
+    : CONFIG.INVESTMENT_TRACKS;
+  const fundName = (record?.FUND_NAME || '').toLowerCase();
+  const sub = (record?.SUB_SPECIALIZATION || '').toLowerCase();
+  for (const track of tracksToSearch) {
+    if (track.subSpecializationKeys?.length) {
+      if (!track.subSpecializationKeys.some(key => sub === key.trim().toLowerCase())) continue;
+    } else if (!track.fundNameIncludes?.length) {
+      continue;
+    }
+    if (track.fundNameIncludes?.length && !track.fundNameIncludes.some(key => matchesTrackToken(fundName, key))) continue;
+    if (track.fundNameExcludes?.length && track.fundNameExcludes.some(key => matchesTrackToken(fundName, key))) continue;
+    return track;
+  }
+  return null;
+}
+
+function buildTrackCompareUrl(catId, trackId) {
+  const url = new URL('index.html', window.location.href);
+  if (catId) url.searchParams.set('cat', catId);
+  if (trackId) url.searchParams.set('track', trackId);
+  url.hash = 'compare';
+  return url.pathname.split('/').pop() + url.search + url.hash;
+}
+
+function setTrackLink(el, label, href) {
+  if (!el) return;
+  el.textContent = '';
+  if (!href) {
+    el.textContent = label || '';
+    return;
+  }
+  const link = document.createElement('a');
+  link.className = 'fund-track-link';
+  link.href = href;
+  link.title = 'מעבר לטבלת המסלול';
+  link.innerHTML = `<span>${label || ''}</span><i class="fas fa-arrow-left" aria-hidden="true"></i>`;
+  el.appendChild(link);
+}
+
+function isSp500Track(label) {
+  return /(?:s\s*&\s*p|sp)\s*500|500\s*(?:s\s*&\s*p|sp)/i.test(String(label || ''));
+}
+
+function getAllocationProfileIcons(profile, trackLabel = '') {
+  const text = String(profile || '');
+  const icons = [];
+  if (!text) return icons;
+  const flagIl = '<span class="fund-allocation-flag-svg" aria-label="ישראל" title="ישראל"><svg viewBox="0 0 30 20" role="img" focusable="false"><rect width="30" height="20" rx="2" fill="#fff"/><rect y="3" width="30" height="2.6" fill="#2563eb"/><rect y="14.4" width="30" height="2.6" fill="#2563eb"/><path d="M15 6.6l3.4 5.8H11.6L15 6.6z" fill="none" stroke="#2563eb" stroke-width="1.2" stroke-linejoin="round"/><path d="M15 13.4L11.6 7.6h6.8L15 13.4z" fill="none" stroke="#2563eb" stroke-width="1.2" stroke-linejoin="round"/></svg></span>';
+  const flagUs = '<span class="fund-allocation-img fund-allocation-img-flag-us" aria-label="ארצות הברית" title="ארצות הברית"><img src="assets/allocation-us.png" alt="" loading="lazy" /></span>';
+  const abroadIcon = '<span class="fund-allocation-img fund-allocation-img-abroad" aria-label="חו״ל" title="חו״ל"><img src="assets/allocation-abroad.png?v=20260530-2" alt="" loading="lazy" /></span>';
+  const fxIcon = '<span class="fund-allocation-img fund-allocation-img-fx" aria-label="צמוד מט״ח" title="צמוד מט״ח"><img src="assets/allocation-fx.png" alt="" loading="lazy" /></span>';
+  const shekelIcon = '<span class="fund-allocation-img fund-allocation-img-shekel" aria-label="מנוטרל מטבע" title="מנוטרל מטבע"><img src="assets/allocation-shekel.png?v=20260605-2" alt="" loading="lazy" /></span>';
+  const warningIcon = '<span class="fund-allocation-warning" aria-label="אלוקציה שונה מהקבוצה" title="אלוקציה שונה מהקבוצה">⚠️</span>';
+  if (text.includes('אלוקציה שונה')) {
+    icons.push(warningIcon);
+  }
+  if (text.includes('ישראלי') || text.includes('מוטה ישראל')) {
+    icons.push(flagIl);
+  } else if (text.includes('חו״ל')) {
+    if (isSp500Track(trackLabel)) {
+      icons.push(flagUs);
+    } else {
+      icons.push(abroadIcon);
+    }
+  }
+  if (text.includes('צמוד מט״ח')) {
+    icons.push(fxIcon);
+  }
+  if (text.includes('מנוטרל מטבע')) {
+    icons.push(shekelIcon);
+  }
+  return icons;
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[ch]));
+}
+
+function renderAllocationProfileTag(el, profile, trackLabel = '') {
+  if (!el) return;
+  const cleanProfile = String(profile || '').trim();
+  if (!cleanProfile) {
+    el.hidden = true;
+    el.textContent = '';
+    return;
+  }
+  const icons = getAllocationProfileIcons(cleanProfile, trackLabel);
+  el.hidden = false;
+  el.innerHTML = `<span class="fund-allocation-tag-text">${cleanProfile}</span>${icons.length ? `<span class="fund-allocation-tag-icons">${icons.join('')}</span>` : ''}`;
+}
+
+function allocationProfileIconBadge(profile, trackLabel = '', { textFallback = true } = {}) {
+  const cleanProfile = String(profile || '').trim();
+  if (!cleanProfile) return '';
+  const icons = getAllocationProfileIcons(cleanProfile, trackLabel);
+  if (!icons.length) {
+    return textFallback
+      ? `<span class="fund-allocation-mini-badge fund-allocation-mini-badge-text" title="${escapeHtml(cleanProfile)}">${escapeHtml(cleanProfile)}</span>`
+      : '';
+  }
+  return `<span class="fund-allocation-mini-badge" title="${escapeHtml(cleanProfile)}" aria-label="${escapeHtml(cleanProfile)}">${icons.join('')}</span>`;
+}
+
+function calcStockExposureOutlier(record, peers, threshold = 0.50) {
+  const myPct = calcExposurePct(record, 'STOCK_MARKET_EXPOSURE');
+  const peerValues = peers
+    .map(peer => calcExposurePct(peer, 'STOCK_MARKET_EXPOSURE'))
+    .filter(value => Number.isFinite(value));
+  const avgPct = peerValues.length
+    ? peerValues.reduce((sum, value) => sum + value, 0) / peerValues.length
+    : null;
+
+  if (!Number.isFinite(myPct) || !Number.isFinite(avgPct) || avgPct === 0) return null;
+
+  const gap = myPct - avgPct;
+  const relativeGap = Math.abs(gap) / Math.abs(avgPct);
+  if (relativeGap <= threshold) return null;
+
+  const direction = gap > 0 ? 'גבוהה' : 'נמוכה';
+  return {
+    myPct,
+    avgPct,
+    gap,
+    relativeGap,
+    direction,
+    text: `חשיפה ${direction} למניות ביחס לקבוצה`
+  };
+}
+
+function stockOutlierBadge(outlier, { full = false } = {}) {
+  if (!outlier) return '';
+  const title = `${outlier.text} · הקופה: ${outlier.myPct.toFixed(1)}%, ממוצע הקבוצה: ${outlier.avgPct.toFixed(1)}%`;
+  const isHigh = outlier.direction === 'גבוהה';
+  const iconClass = isHigh ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
+  const toneClass = isHigh ? 'is-high' : 'is-low';
+  return `<span class="fund-stock-outlier-badge ${toneClass}${full ? ' fund-stock-outlier-badge-full' : ''}" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}">
+    <span class="fund-stock-outlier-icon" aria-hidden="true"><i class="fas ${iconClass}"></i></span>
+    ${full ? `<span class="fund-stock-outlier-text">${escapeHtml(outlier.text)}</span>` : ''}
+  </span>`;
+}
+
+function renderStockOutlierTag(el, outlier) {
+  if (!el) return;
+  if (!outlier) {
+    el.hidden = true;
+    el.textContent = '';
+    return;
+  }
+  el.hidden = false;
+  el.innerHTML = stockOutlierBadge(outlier, { full: true });
+}
+
+function getMonthCountBetween(startPeriod, endPeriod) {
+  const startNum = Number(startPeriod);
+  const endNum = Number(endPeriod);
+  if (!startNum || !endNum || endNum < startNum) return 0;
+  const startYear = Math.floor(startNum / 100);
+  const startMonth = startNum % 100;
+  const endYear = Math.floor(endNum / 100);
+  const endMonth = endNum % 100;
+  return ((endYear - startYear) * 12) + (endMonth - startMonth) + 1;
+}
+
+function shiftPeriodByMonths(period, deltaMonths) {
+  let year = Math.floor(Number(period) / 100);
+  let month = Number(period) % 100;
+  let absolute = (year * 12) + (month - 1) + deltaMonths;
+  year = Math.floor(absolute / 12);
+  month = (absolute % 12) + 1;
+  return (year * 100) + month;
+}
+
+function formatPercentNoPlus(val) {
+  if (val === null || val === undefined || val === '') return '-';
+  const n = parseFloat(val);
+  if (isNaN(n)) return '-';
+  return `${n.toFixed(2)}%`;
+}
+
+// ── Pie Charts (task 20) ───────────────────────────────────────
+function buildPieCharts(r) {
+  const ta = parseFloat(r.TOTAL_ASSETS) || 1;
+  const stockPct   = Math.min(100, Math.max(0, (parseFloat(r.STOCK_MARKET_EXPOSURE)       || 0) / ta * 100));
+  const fxPct      = Math.min(100, Math.max(0, (parseFloat(r.FOREIGN_CURRENCY_EXPOSURE)   || 0) / ta * 100));
+  const foreignPct = Math.min(100, Math.max(0, (parseFloat(r.FOREIGN_EXPOSURE)             || 0) / ta * 100));
+
+  // task 15: padding פנימי לאפשר מקום לקווי leader lines
+  const pieOpts = (label1, pct1, color1, label2, color2) => ({
+    type: 'pie',
+    data: {
+      labels: [label1, label2],
+      datasets: [{ data: [pct1, 100 - pct1], backgroundColor: [color1, color2],
+        borderWidth: 2, borderColor: '#fff' }]
+    },
+    options: {
+      responsive: false,
+      layout: { padding: 56 },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => `${c.label}: ${c.raw.toFixed(1)}%` } },
+        pieLeaderLines: {}   // activate plugin
+      }
+    }
+  });
+
+  new Chart(document.getElementById('pie-stocks').getContext('2d'),
+    pieOpts('מניות', stockPct, '#0c2134', 'אג"ח', '#c9b772'));
+  new Chart(document.getElementById('pie-fx').getContext('2d'),
+    pieOpts('מט"ח', fxPct, '#a88618', 'שקל', '#64748b'));
+  new Chart(document.getElementById('pie-foreign').getContext('2d'),
+    pieOpts('חו"ל', foreignPct, '#0c2134', 'ישראל', '#c9b772'));
+}
+
+// ── Stats row (task 8 — now a no-op; buildStatsAndMetrics handles everything) ──
+function buildStats(r, fundId) {
+  // Only total assets shown here; metrics are shown separately via buildStatsAndMetrics
+  // This function is now a no-op since buildStatsAndMetrics handles everything
+}
+
+function buildStatsAndMetrics(latest, history, peers, myFundId) {
+  const fundCategory = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === _fundCatId);
+  const isPolisaCategory = !!fundCategory?.polisaAPI;
+
+  // ── מומנטום ──
+  const allMomentum   = calcAllPeersMomentum(peers, myFundId, history);
+  const myMomentumObj = allMomentum.find(p => p.fundId === String(myFundId));
+  const momentumScore = myMomentumObj ? myMomentumObj.score : 0;
+  const momentumLabel = momentumScore >= 75 ? 'מומנטום איכותי גבוה' :
+                        momentumScore >= 55 ? 'ביצועים טובים' :
+                        momentumScore >= 40 ? 'ביצועים ממוצעים' : 'ביצועים מתחת לממוצע ⬇';
+
+  // ── 36 חודשים אחרונים (מסודרים חדש→ישן) ──
+  const hist36 = history.length
+    ? [...history].sort((a,b) => Number(b.REPORT_PERIOD) - Number(a.REPORT_PERIOD)).slice(0, 36)
+    : [];
+
+  // ── חודשים חיוביים ──
+  const posMonths      = hist36.filter(r => parseFloat(r.MONTHLY_YIELD) > 0).length;
+  const consistencyPct = hist36.length ? Math.round(posMonths / hist36.length * 100) : null;
+  const consistencyDisplay = consistencyPct !== null ? `${consistencyPct}%` : '—';
+  const consistencyDesc    = hist36.length ? `${posMonths} מתוך ${hist36.length} חודשים` : 'טוען...';
+
+  // ── ביצועים מול ממוצע מתחרים (36 חודשים) — חישוב בריבית דריבית ──
+  let vsAvgAbove = 0, vsAvgValid = 0;
+  let vsMyCompound = 1, vsPeerCompound = 1;
+  if (hist36.length && _peersMonthlyAvg) {
+    for (const r of hist36) {
+      const myY   = parseFloat(r.MONTHLY_YIELD);
+      const peerY = _peersMonthlyAvg.get(String(r.REPORT_PERIOD));
+      if (!isNaN(myY) && peerY != null) {
+        vsAvgValid++;
+        vsMyCompound   *= (1 + myY   / 100);
+        vsPeerCompound *= (1 + peerY / 100);
+        if (myY > peerY) vsAvgAbove++;
+      }
+    }
+  }
+  // פער מצטבר = הפרש בין התשואה המצטברת (ריבית דריבית) של הקופה לממוצע המתחרים
+  const vsAvgCumGap  = vsAvgValid > 0 ? (vsMyCompound - vsPeerCompound) * 100 : 0;
+  const vsAvgPct     = vsAvgValid > 0 ? Math.round(vsAvgAbove / vsAvgValid * 100) : null;
+  const vsAvgColor   = vsAvgCumGap >= 0 ? '#16a34a' : '#ef4444';
+  const vsAvgArrow   = vsAvgCumGap >= 0 ? '▲' : '▼';
+  const vsAvgSign    = vsAvgCumGap >= 0 ? '+' : '';
+  const vsAvgDisplay = vsAvgPct !== null ? `${vsAvgPct}%` : '—';
+  const vsAvgDesc    = vsAvgValid > 0
+    ? `${vsAvgAbove} מתוך ${vsAvgValid} חודשים`
+    : 'טוען...';
+  const vsAvgGapHtml = vsAvgValid > 0
+    ? `<span style="color:${vsAvgColor};font-weight:700;">${vsAvgArrow} ${vsAvgSign}${vsAvgCumGap.toFixed(1)}%</span><span style="color:#94a3b8;"> מצטבר</span>`
+    : '';
+
+  // ── סך נכסים + דירוג ──
+  const myPeer  = peers.find(p => String(p.FUND_ID) === String(myFundId));
+  let assetsVal = parseFloat(myPeer?.TOTAL_ASSETS);
+  if (!(assetsVal > 0)) {
+    const rec = [...history].reverse().find(r => parseFloat(r.TOTAL_ASSETS) > 0);
+    assetsVal = rec ? parseFloat(rec.TOTAL_ASSETS) : NaN;
+  }
+  let assetsDisplay = '-';
+  if (assetsVal > 0) {
+    assetsDisplay = assetsVal >= 1000
+      ? `${(assetsVal / 1000).toFixed(1)} מיליארד ₪`
+      : `${Math.round(assetsVal).toLocaleString('he-IL')} מיליון ₪`;
+  }
+  // דירוג לפי גודל נכסים בין המתחרים
+  const rankedByAssets = peers
+    .map(p => ({ id: String(p.FUND_ID), val: parseFloat(p.TOTAL_ASSETS) || 0 }))
+    .filter(p => p.val > 0)
+    .sort((a, b) => b.val - a.val);
+  const assetsRank  = assetsVal > 0 ? rankedByAssets.findIndex(p => p.id === String(myFundId)) + 1 : 0;
+  const assetsTotal = rankedByAssets.length;
+  const assetsRankHtml = assetsRank > 0
+    ? `<span style="font-size:.7rem;color:#94a3b8;margin-top:2px;display:block;">דירוג #${assetsRank} מתוך ${assetsTotal} קופות</span>`
+    : '';
+  const netRows = (history.length ? history : [])
+    .filter(r => r.REPORT_PERIOD)
+    .sort((a, b) => Number(b.REPORT_PERIOD) - Number(a.REPORT_PERIOD))
+    .slice(0, 12);
+  const netVals = netRows
+    .map(r => parseFloat(r.NET_MONTHLY_DEPOSITS))
+    .filter(v => !isNaN(v));
+  const netDeposits12 = netVals.length ? netVals.reduce((sum, v) => sum + v, 0) : null;
+  const netDepositsStart = netRows.length ? Number(netRows[netRows.length - 1].REPORT_PERIOD) : null;
+  const netDepositsEnd = netRows.length ? Number(netRows[0].REPORT_PERIOD) : null;
+  const netDepositsDisplay = netDeposits12 !== null ? formatMoneyMillions(netDeposits12) : 'טוען...';
+  const netDepositsClass = netDeposits12 > 0 ? 'yield-pos' : netDeposits12 < 0 ? 'yield-neg' : '';
+  const netDepositsDesc = netDeposits12 !== null && netDepositsStart && netDepositsEnd
+    ? `${netVals.length} חו' · ${formatReportPeriod(netDepositsStart)} עד ${formatReportPeriod(netDepositsEnd)}`
+    : 'צבירה נטו שנה אחורה';
+
+  // תג "לחץ לפרטים" משותף לכל הקלפים
+  const detailBadge = `<div class="stat-card-detail-badge">לפרטים <i class="fas fa-chevron-left"></i></div>`;
+  const netDepositsCardHtml = isPolisaCategory ? '' : `
+    <div class="fund-stat-card stat-card-clickable net-deposits-stat-card" id="stat-net-deposits-card">
+      ${detailBadge}
+      <div class="fsc-icon"><i class="fas fa-money-bill-transfer" style="color:#a88618;"></i></div>
+      <div class="fsc-label">צבירה נטו</div>
+      <div class="fsc-value ${netDepositsClass}" style="font-size:1.18rem;">${netDepositsDisplay}</div>
+      <div style="font-size:.7rem;color:#94a3b8;margin-top:2px;">${netDepositsDesc}</div>
+    </div>`;
+
+  const actuarialHistory = history.length ? history : [latest];
+  const actuarialRows = actuarialHistory
+    .map(r => ({ period: Number(r.REPORT_PERIOD), value: parseFloat(r.ACTUARIAL_ADJUSTMENT) }))
+    .filter(r => !isNaN(r.value))
+    .sort((a, b) => a.period - b.period);
+  const latestYieldPeriod = Number(latest.REPORT_PERIOD) || null;
+  const trailingActuarialEndPeriod = latestYieldPeriod || (actuarialRows.length ? actuarialRows[actuarialRows.length - 1].period : null);
+  const trailingActuarialStartPeriod = trailingActuarialEndPeriod ? shiftPeriodByMonths(trailingActuarialEndPeriod, -11) : null;
+  const trailingActuarialRows = trailingActuarialEndPeriod
+    ? actuarialRows.filter(r => r.period >= trailingActuarialStartPeriod && r.period <= trailingActuarialEndPeriod)
+    : [];
+  const trailingActuarialSum = trailingActuarialRows.length
+    ? trailingActuarialRows.reduce((sum, row) => sum + row.value, 0)
+    : null;
+  const mySharpe = _sharpeMap ? _sharpeMap.get(String(myFundId)) : null;
+  const sharpePeers = peers
+    .map(p => ({
+      fundId: String(p.FUND_ID),
+      name: getProviderDisplayName(p.CONTROLLING_CORPORATION, p.MANAGING_CORPORATION),
+      sharpe: _sharpeMap ? _sharpeMap.get(String(p.FUND_ID)) : null
+    }))
+    .filter(item => item.sharpe !== undefined);
+  const rankedSharpePeers = sharpePeers
+    .filter(item => item.sharpe !== null && !isNaN(item.sharpe))
+    .sort((a, b) => b.sharpe - a.sharpe);
+  const mySharpeRank = mySharpe !== null ? rankedSharpePeers.findIndex(item => item.fundId === String(myFundId)) + 1 : 0;
+  const sharpeCardHtml = _sharpeMap
+    ? `
+    <div class="fund-stat-card stat-card-clickable sharpe-stat-card" id="stat-sharpe-card">
+      ${detailBadge}
+      <div class="fsc-icon"><i class="fas fa-bullseye" style="color:#0f766e;"></i></div>
+      <div class="fsc-label">מדד שארפ</div>
+      <div class="fsc-value ${mySharpe !== null ? yieldClass(mySharpe) : ''}">
+        ${mySharpe !== null ? mySharpe.toFixed(2) : '—'}
+      </div>
+      <div style="font-size:.7rem;color:#94a3b8;margin-top:2px;">
+        ${mySharpeRank > 0 ? `דירוג ${mySharpeRank} מתוך ${rankedSharpePeers.length}` : 'יחס תשואה מול תנודתיות'}
+      </div>
+      <div style="font-size:.7rem;margin-top:3px;color:#475569;">
+        השוואת שארפ בין החברות באותו מסלול
+      </div>
+    </div>`
+    : '';
+  const actuarialCardHtml = (_fundCatId === 'pension_mekafit' || _fundCatId === 'pension_mashlima')
+    ? `
+    <div class="fund-stat-card stat-card-clickable actuarial-stat-card" id="stat-actuarial-card">
+      ${detailBadge}
+      <div class="fsc-icon"><i class="fas fa-scale-balanced" style="color:#0f766e;"></i></div>
+      <div class="fsc-label">איזון אקטוארי שנה אחורה</div>
+      <div class="fsc-value ${trailingActuarialSum !== null ? yieldClass(trailingActuarialSum) : ''}" style="${trailingActuarialSum > 0 ? 'color:#16a34a;' : trailingActuarialSum < 0 ? 'color:#ef4444;' : ''}">
+        ${trailingActuarialSum !== null ? formatPercentNoPlus(trailingActuarialSum) : '—'}
+      </div>
+      <div style="font-size:.7rem;color:#94a3b8;margin-top:2px;">
+        ${trailingActuarialEndPeriod ? `שנה אחורה · ${formatReportPeriod(trailingActuarialStartPeriod)} עד ${formatReportPeriod(trailingActuarialEndPeriod)}` : 'שנה אחורה'}
+      </div>
+      <div style="font-size:.7rem;margin-top:3px;color:#475569;">
+        ${trailingActuarialSum !== null ? 'מחושב ברמת הקרן ולא ברמת המסלול' : 'ברמת הקרן ולא ברמת המסלול'}
+      </div>
+    </div>`
+    : '';
+
+  // ── HTML — סדר RTL: ימין→שמאל → [חיוביים | מול ממוצע | נכסים | מומנטום] ──
+  document.getElementById('fund-stats-row').innerHTML = `
+    <div class="fund-stat-card stat-card-clickable" id="stat-consistency-card">
+      ${detailBadge}
+      <div class="fsc-icon"><i class="fas fa-check-circle" style="color:#22c55e;"></i></div>
+      <div class="fsc-label">חודשים חיוביים</div>
+      <div class="fsc-value">${consistencyDisplay}</div>
+      <div style="font-size:.7rem;color:#94a3b8;margin-top:2px;">${consistencyDesc}</div>
+    </div>
+    <div class="fund-stat-card stat-card-clickable" id="stat-vsavg-card">
+      ${detailBadge}
+      <div class="fsc-icon"><i class="fas fa-chart-line" style="color:#8b5cf6;"></i></div>
+      <div class="fsc-label">מעל ממוצע המתחרים</div>
+      <div class="fsc-value" style="${vsAvgPct!==null&&vsAvgPct>=50?'color:#16a34a':vsAvgPct!==null&&vsAvgPct<50?'color:#ef4444':''}">
+        ${vsAvgDisplay}
+      </div>
+      <div style="font-size:.7rem;margin-top:2px;">${vsAvgDesc}</div>
+      <div style="font-size:.7rem;margin-top:3px;">${vsAvgGapHtml}</div>
+    </div>
+    <div class="fund-stat-card stat-card-clickable" id="stat-assets-card">
+      ${detailBadge}
+      <div class="fsc-icon"><i class="fas fa-piggy-bank" style="color:#1d4ed8;"></i></div>
+      <div class="fsc-label">סך נכסים</div>
+      <div class="fsc-value" style="font-size:1.18rem;">${assetsDisplay}</div>
+      ${assetsRankHtml}
+    </div>
+    ${netDepositsCardHtml}
+    <div class="fund-stat-card stat-card-clickable fmi-clickable" id="stat-momentum-card">
+      ${detailBadge}
+      <div class="fsc-icon"><i class="fas fa-rocket" style="color:#3b82f6;"></i></div>
+      <div class="fsc-label">מומנטום איכותי</div>
+      <div class="fsc-value ${momentumScore>=70?'yield-pos':momentumScore<=30?'yield-neg':''}">${momentumScore} / 100</div>
+      <div style="font-size:.7rem;color:#94a3b8;margin-top:2px;">${momentumLabel}</div>
+    </div>
+    ${sharpeCardHtml}
+    ${actuarialCardHtml}
+  `;
+  const statsRow = document.getElementById('fund-stats-row');
+  const statsCount = statsRow.children.length;
+  statsRow.classList.toggle('has-six-cards', statsCount === 6);
+  statsRow.classList.toggle('has-many-cards', statsCount > 6);
+
+  const myName = getProviderDisplayName(latest.CONTROLLING_CORPORATION, latest.MANAGING_CORPORATION);
+
+  document.getElementById('stat-actuarial-card')?.addEventListener('click', () => {
+    window.location.href = `index.html?cat=${encodeURIComponent(_fundCatId || '')}&view=actuarial&fund=${encodeURIComponent(_myFundId || myFundId || '')}&provider=${encodeURIComponent(myName || '')}`;
+  });
+
+  document.getElementById('stat-sharpe-card')?.addEventListener('click', () => {
+    showStatModal('stat-detail-modal',
+      `<div>
+         <div style="font-weight:900;font-size:1.14rem;color:#0c2134;line-height:1.25;">מדד שארפ — ${_fundTrackFullLabel||'המסלול'}</div>
+         <div style="font-size:.86rem;color:#475569;margin-top:5px;font-weight:700;">השוואת חברות באותו מסלול לפי יחס תשואה מול תנודתיות</div>
+       </div>`,
+      buildSharpeDetail(sharpePeers, myFundId),
+      'max-width:640px;'
+    );
+  });
+
+  document.getElementById('stat-consistency-card')?.addEventListener('click', () => {
+    if (!hist36.length) return;
+    showStatModal('stat-detail-modal',
+      `<div>
+         <div style="font-weight:800;font-size:1rem;color:#1e293b;">חודשים חיוביים — ${_fundTrackFullLabel||'המסלול'}</div>
+         <div style="font-size:.75rem;color:#64748b;margin-top:3px;">${myName} · 36 חודשים אחרונים</div>
+       </div>`,
+      buildConsistencyDetail(hist36)
+    );
+  });
+
+  document.getElementById('stat-vsavg-card')?.addEventListener('click', async () => {
+    const titleHtml = `<div>
+      <div style="font-weight:900;font-size:1.14rem;color:#0c2134;line-height:1.25;">ביצועים מול ממוצע המתחרים</div>
+      <div style="font-size:.86rem;color:#475569;margin-top:5px;font-weight:700;">${_fundTrackFullLabel||'המסלול'} · 36 חודשים אחרונים</div>
+    </div>`;
+
+    const loadingHtml = `<div style="text-align:center;padding:32px 16px;color:#94a3b8;font-size:.88rem;">
+      <i class="fas fa-spinner fa-spin" style="font-size:1.4rem;margin-bottom:10px;display:block;"></i>טוען נתוני קבוצה...
+    </div>`;
+
+    showStatModal('stat-detail-modal', titleHtml, loadingHtml, 'max-width:640px;');
+
+    try {
+      const peersCumGaps = await APIModule.getTrackPeersCumGaps(myFundId, _fundCatId);
+      const bodyEl = document.querySelector('#stat-detail-modal [data-modal-body]');
+      if (bodyEl && document.getElementById('stat-detail-modal')) {
+        bodyEl.innerHTML = buildPeersCumGapsTable(peersCumGaps, myFundId);
+      }
+    } catch(err) {
+      console.error('getTrackPeersCumGaps error:', err);
+      const bodyEl = document.querySelector('#stat-detail-modal [data-modal-body]');
+      if (bodyEl) bodyEl.innerHTML = `<div style="padding:24px;text-align:center;color:#ef4444;font-size:.85rem;">שגיאה בטעינת הנתונים</div>`;
+    }
+  });
+
+  document.getElementById('stat-assets-card')?.addEventListener('click', () => {
+    showStatModal('stat-detail-modal',
+      `<div>
+         <div style="font-weight:900;font-size:1.14rem;color:#0c2134;line-height:1.25;">דירוג סך נכסים — ${_fundTrackFullLabel||'המסלול'}</div>
+         <div style="font-size:.86rem;color:#475569;margin-top:5px;font-weight:700;">${peers.filter(p=>parseFloat(p.TOTAL_ASSETS)>0).length} קופות מדורגות לפי גודל</div>
+       </div>`,
+      buildAssetsDetail(peers, myFundId),
+      'max-width:640px;'
+    );
+  });
+
+  document.getElementById('stat-net-deposits-card')?.addEventListener('click', async () => {
+    const titleHtml = `<div>
+      <div style="font-weight:900;font-size:1.14rem;color:#0c2134;line-height:1.25;">צבירה נטו שנה אחורה</div>
+      <div style="font-size:.86rem;color:#475569;margin-top:5px;font-weight:700;">${_fundTrackFullLabel||'המסלול'} · השוואה בין החברות במסלול</div>
+    </div>`;
+    const loadingHtml = `<div style="text-align:center;padding:32px 16px;color:#94a3b8;font-size:.88rem;">
+      <i class="fas fa-spinner fa-spin" style="font-size:1.4rem;margin-bottom:10px;display:block;"></i>טוען נתוני צבירה...
+    </div>`;
+
+    showStatModal('stat-detail-modal', titleHtml, loadingHtml, 'max-width:640px;');
+
+    try {
+      const rows = await APIModule.getTrackPeersNetDeposits(myFundId, _fundCatId);
+      const bodyEl = document.querySelector('#stat-detail-modal [data-modal-body]');
+      if (bodyEl && document.getElementById('stat-detail-modal')) {
+        bodyEl.innerHTML = buildNetDepositsDetail(rows, myFundId);
+      }
+    } catch(err) {
+      console.error('getTrackPeersNetDeposits error:', err);
+      const bodyEl = document.querySelector('#stat-detail-modal [data-modal-body]');
+      if (bodyEl) bodyEl.innerHTML = `<div style="padding:24px;text-align:center;color:#ef4444;font-size:.85rem;">שגיאה בטעינת נתוני הצבירה</div>`;
+    }
+  });
+
+  document.getElementById('stat-momentum-card')?.addEventListener('click', () => {
+    showMomentumModal(peers, myFundId, myName);
+  });
+}
+
+function formatAssets(val) {
+  const n = parseFloat(val);
+  if (isNaN(n) || !n) return '-';
+  if (n >= 1e9) return `${(n/1e9).toFixed(1)}B`;
+  if (n >= 1e6) return `${(n/1e6).toFixed(0)}M`;
+  return n.toLocaleString('he-IL');
+}
+
+function formatMoneyMillions(value) {
+  const n = Number(value);
+  if (isNaN(n)) return '—';
+  const abs = Math.abs(n);
+  const sign = n < 0 ? '-' : '';
+  if (abs >= 1000) return `<span class="money-value-ltr" dir="ltr">${sign}${(abs / 1000).toFixed(2)}</span> מיליארד ₪`;
+  if (abs >= 10) return `<span class="money-value-ltr" dir="ltr">${sign}${Math.round(abs).toLocaleString('he-IL')}</span> מיליון ₪`;
+  return `<span class="money-value-ltr" dir="ltr">${sign}${abs.toFixed(1)}</span> מיליון ₪`;
+}
+
+function formatMoneyPlain(value) {
+  const n = Number(value);
+  if (isNaN(n)) return '—';
+  const abs = Math.abs(n);
+  const sign = n < 0 ? '-' : '';
+  if (abs >= 1000) return `${sign}${(abs / 1000).toFixed(2)} מיליארד ₪`;
+  if (abs >= 10) return `${sign}${Math.round(abs).toLocaleString('he-IL')} מיליון ₪`;
+  return `${sign}${abs.toFixed(1)} מיליון ₪`;
+}
+
+function updateAssetsChartLegend(mode = 'percent') {
+  const legend = document.getElementById('assets-chart-legend');
+  if (!legend) return;
+  const isNetDeposits = mode === 'netDeposits';
+  legend.innerHTML = isNetDeposits
+    ? `<span><span style="display:inline-block;width:12px;height:12px;background:#c9b772;border-radius:2px;margin-left:4px;vertical-align:middle;"></span>צבירה נטו חודשית</span>
+       <span><span style="display:inline-block;width:22px;height:3px;background:#f97316;border-radius:2px;margin-left:4px;vertical-align:middle;"></span>ממוצע נע 12 חודשים</span>`
+    : `<span><span style="display:inline-block;width:12px;height:12px;background:#c9b772;border-radius:2px;margin-left:4px;vertical-align:middle;"></span>שינוי חודשי (%)</span>
+       <span><span style="display:inline-block;width:22px;height:3px;background:#f97316;border-radius:2px;margin-left:4px;vertical-align:middle;"></span>שינוי מצטבר (%)</span>`;
+}
+
+// ── helpers: הצג/הסתר wrapper נכון לפי field ─────────────────
+function showYieldWrap(show) {
+  const sw = document.getElementById('yield-chart-scroll-wrap');
+  const st = document.getElementById('static-chart-wrap');
+  if (sw) sw.style.display = show ? 'block' : 'none';
+  if (st) st.style.display = show ? 'none'  : 'block';
+}
+
+// ── History Chart ─────────────────────────────────────────────
+function buildHistoryChart(history, field) {
+  const legend      = document.getElementById('assets-chart-legend');
+  const yieldLegend = document.getElementById('yield-chart-legend');
+  if (legend)      legend.style.display      = 'none';
+  if (yieldLegend) yieldLegend.style.display = 'none';
+
+  if (field === 'TOTAL_ASSETS') {
+    showYieldWrap(false);
+    const cat = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === _fundCatId);
+    const isPolisa = !!cat?.polisaAPI;
+
+    if (!isPolisa) {
+      const sorted = [...history]
+        .filter(r => r.REPORT_PERIOD)
+        .sort((a, b) => Number(a.REPORT_PERIOD) - Number(b.REPORT_PERIOD));
+      const last24 = sorted.slice(-24);
+      const labels = last24.map(r => formatReportPeriod(r.REPORT_PERIOD));
+      const monthly = last24.map(r => {
+        const v = parseFloat(r.NET_MONTHLY_DEPOSITS);
+        return isNaN(v) ? null : v;
+      });
+      const rolling12Avg = last24.map(row => {
+        const idx = sorted.findIndex(r => String(r.REPORT_PERIOD) === String(row.REPORT_PERIOD));
+        if (idx < 11) return null;
+        const windowRows = sorted.slice(idx - 11, idx + 1);
+        const vals = windowRows.map(r => parseFloat(r.NET_MONTHLY_DEPOSITS));
+        if (vals.some(v => isNaN(v))) return null;
+        return parseFloat((vals.reduce((sum, v) => sum + v, 0) / vals.length).toFixed(2));
+      });
+      const barColors = monthly.map(v => v === null ? '#94a3b8' : v >= 0 ? '#c9b772' : '#ef4444');
+      updateAssetsChartLegend('netDeposits');
+      if (legend) legend.style.display = 'flex';
+      renderAssetsChart(labels, monthly, rolling12Avg, barColors, {
+        barLabel: 'צבירה נטו חודשית',
+        lineLabel: 'ממוצע נע 12 חודשים',
+        monthlyAxisTitle: 'צבירה חודשית',
+        cumulativeAxisTitle: 'ממוצע 12 חו׳',
+        valueFormatter: formatMoneyPlain,
+        tickFormatter: v => formatMoneyPlain(v).replace(' מיליון ₪', ' מ׳').replace(' מיליארד ₪', ' מיליארד')
+      });
+    } else {
+      const last25   = history.slice(-25);
+      const last24   = last25.slice(-24);
+      const labels   = last24.map(r => formatReportPeriod(r.REPORT_PERIOD));
+      const monthly  = last24.map((r, i) => {
+        const prev = i === 0 ? last25[0] : last24[i - 1];
+        const cur  = parseFloat(r.TOTAL_ASSETS)    || 0;
+        const prv  = parseFloat(prev.TOTAL_ASSETS) || 0;
+        return prv ? parseFloat(((cur - prv) / prv * 100).toFixed(2)) : null;
+      });
+      const baseVal    = parseFloat(last25[0]?.TOTAL_ASSETS) || 0;
+      const cumulative = last24.map(r => {
+        const cur = parseFloat(r.TOTAL_ASSETS) || 0;
+        return baseVal ? parseFloat(((cur - baseVal) / baseVal * 100).toFixed(2)) : null;
+      });
+      const barColors = monthly.map(v => v === null ? '#94a3b8' : v >= 0 ? '#c9b772' : '#ef4444');
+      updateAssetsChartLegend('percent');
+      if (legend) legend.style.display = 'flex';
+      renderAssetsChart(labels, monthly, cumulative, barColors);
+    }
+
+  } else if (field === 'STOCK_EXPOSURE_CHANGE') {
+    showYieldWrap(false);
+    const last13   = history.slice(-13);
+    const last12   = last13.slice(-12);
+    const labels   = last12.map(r => formatReportPeriod(r.REPORT_PERIOD));
+    const ta       = r => parseFloat(r.TOTAL_ASSETS) || 1;
+    const stockPct = r => (parseFloat(r.STOCK_MARKET_EXPOSURE) || 0) / ta(r) * 100;
+    const data     = last12.map((r, i) => {
+      const prev = i === 0 ? last13[0] : last12[i - 1];
+      return parseFloat((stockPct(r) - stockPct(prev)).toFixed(2));
+    });
+    renderBarChart(labels, data, 'שינוי בהיקף המניות (נ"א)',
+                   data.map(v => v >= 0 ? '#22c55e' : '#ef4444'));
+
+  } else {
+    // MONTHLY_YIELD — גרף ברים מקובצים עם גלילה
+    showYieldWrap(true);
+    const last24  = history.slice(-24);
+    const labels  = last24.map(r => formatReportPeriod(r.REPORT_PERIOD));
+    const fund    = last24.map(r => { const v = parseFloat(r.MONTHLY_YIELD); return isNaN(v) ? null : v; });
+    const peers   = last24.map(r => _peersMonthlyAvg?.get(String(r.REPORT_PERIOD)) ?? null);
+    const hasPeer = peers.some(v => v !== null);
+    if (yieldLegend) yieldLegend.style.display = 'flex';
+    renderYieldGroupedBars(labels, fund, hasPeer ? peers : null);
+  }
+}
+
+// ── גרף ברים מקובץ: הקופה vs ממוצע מתחרים ───────────────────
+function renderYieldGroupedBars(labels, fundData, peerAvg) {
+  if (historyChart) { historyChart.destroy(); historyChart = null; }
+
+  // רוחב דינמי: 36px לכל חודש (אם יש רק קופה) / 52px אם יש גם מתחרים
+  const inner  = document.getElementById('yield-chart-inner');
+  const wrap   = document.getElementById('yield-chart-scroll-wrap');
+  const canvas = document.getElementById('history-chart');
+  const BAR_W  = peerAvg ? 52 : 36;
+  const needW  = labels.length * BAR_W + 60; // +60 לציר Y
+  // רוחב הכרטיס הנוכחי (min-width:0 מונע הרחבה)
+  const card  = wrap ? wrap.closest('.fund-card') : null;
+  const avail = card ? card.clientWidth : (wrap ? wrap.clientWidth : 400);
+  const isMobileChart = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+  const chartW = isMobileChart ? Math.max(280, avail - 36) : Math.max(needW, avail - 36); // -36 לפצות על negative margins
+  const chartH = 280;
+  if (inner)  inner.style.minWidth  = chartW + 'px';
+  if (canvas) { canvas.width = chartW; canvas.height = chartH; }
+
+  // סיכום מעל/מתחת — הועבר לקובייה "מעל ממוצע המתחרים" בשורת הסטטיסטיקות
+  const sumEl = document.getElementById('yield-chart-summary');
+  if (sumEl) sumEl.innerHTML = '';
+
+  const datasets = [
+    {
+      label: 'הקופה',
+      data: fundData,
+      backgroundColor: '#c9b772',
+      borderRadius: 4,
+      borderSkipped: false
+    }
+  ];
+  if (peerAvg) {
+    datasets.push({
+      label: 'ממוצע מתחרים',
+      data: peerAvg,
+      backgroundColor: '#cbd5e1',
+      borderRadius: 4,
+      borderSkipped: false
+    });
+  }
+
+  const ctx = document.getElementById('history-chart').getContext('2d');
+  historyChart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      responsive: false,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          rtl: true,
+          backgroundColor: 'rgba(15,23,42,0.9)',
+          titleFont: { family: 'Heebo', size: 11 },
+          bodyFont:  { family: 'Heebo', size: 12 },
+          padding: 10,
+          callbacks: {
+            label: c => {
+              const v = c.raw;
+              if (v === null || v === undefined) return null;
+              const sign = v > 0 ? '+' : '';
+              return ` ${c.dataset.label}: ${sign}${v.toFixed(2)}%`;
+            },
+            afterBody: items => {
+              const f = items.find(i => i.datasetIndex === 0);
+              const p = items.find(i => i.datasetIndex === 1);
+              if (f?.raw != null && p?.raw != null) {
+                const diff = f.raw - p.raw;
+                const arrow = diff >= 0 ? '▲' : '▼';
+                const col   = diff >= 0 ? '#4ade80' : '#f87171';
+                return [``, ` ${arrow} פער: ${diff >= 0 ? '+' : ''}${diff.toFixed(2)}%`];
+              }
+              return [];
+            }
+          }
+        }
+      },
+      scales: {
+        x: { ticks: { font: { family: 'Heebo', size: 9 }, maxRotation: 45, color: '#64748b' },
+             grid: { display: false } },
+        y: { ticks: { font: { family: 'Heebo', size: 10 }, color: '#64748b',
+                      callback: v => v.toFixed(1) + '%' },
+             grid: { color: '#e2e8f0' } }
+      }
+    }
+  });
+
+  // גלילה בגרירת עכבר
+  setupScrollDrag(wrap);
+}
+
+// ── גרף שינוי היקף נכסים: עמודות חודשיות + קו מצטבר ──────────
+function renderAssetsChart(labels, monthly, cumulative, barColors, opts = {}) {
+  if (historyChartStatic) { historyChartStatic.destroy(); historyChartStatic = null; }
+  const barLabel = opts.barLabel || 'שינוי חודשי (%)';
+  const lineLabel = opts.lineLabel || 'שינוי מצטבר (%)';
+  const monthlyAxisTitle = opts.monthlyAxisTitle || 'חודשי (%)';
+  const cumulativeAxisTitle = opts.cumulativeAxisTitle || 'מצטבר (%)';
+  const valueFormatter = opts.valueFormatter || (v => {
+    const sign = v > 0 ? '+' : '';
+    return `${sign}${v.toFixed(2)}%`;
+  });
+  const tickFormatter = opts.tickFormatter || (v => `${v}%`);
+  const ctx = document.getElementById('history-chart-static').getContext('2d');
+  historyChartStatic = new Chart(ctx, {
+    data: {
+      labels,
+      datasets: [
+        {
+          type: 'bar',
+          label: barLabel,
+          data: monthly,
+          backgroundColor: barColors,
+          borderRadius: 4,
+          borderSkipped: false,
+          yAxisID: 'yMonthly',
+          order: 2
+        },
+        {
+          type: 'line',
+          label: lineLabel,
+          data: cumulative,
+          borderColor: '#f97316',
+          backgroundColor: 'rgba(249,115,22,0.08)',
+          borderWidth: 2.5,
+          pointRadius: 3,
+          pointBackgroundColor: '#f97316',
+          tension: 0.35,
+          fill: true,
+          yAxisID: 'yCumulative',
+          order: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          rtl: true,
+          callbacks: {
+            label: c => {
+              const v = c.raw;
+              return `${c.dataset.label}: ${v !== null ? valueFormatter(v) : '—'}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { font: { family: 'Heebo', size: 9 }, maxRotation: 45 }
+        },
+        yMonthly: {
+          type: 'linear',
+          position: 'right',
+          title: { display: true, text: monthlyAxisTitle, font: { family: 'Heebo', size: 10 }, color: '#a88618' },
+          ticks: { font: { family: 'Heebo', size: 9 }, color: '#a88618',
+            callback: v => tickFormatter(v) },
+          grid: { color: '#e2e8f0' }
+        },
+        yCumulative: {
+          type: 'linear',
+          position: 'left',
+          title: { display: true, text: cumulativeAxisTitle, font: { family: 'Heebo', size: 10 }, color: '#f97316' },
+          ticks: { font: { family: 'Heebo', size: 9 }, color: '#f97316',
+            callback: v => tickFormatter(v) },
+          grid: { drawOnChartArea: false }
+        }
+      }
+    }
+  });
+}
+
+function renderBarChart(labels, data, label, colors) {
+  if (historyChartStatic) { historyChartStatic.destroy(); historyChartStatic = null; }
+  const ctx = document.getElementById('history-chart-static').getContext('2d');
+  historyChartStatic = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label, data, backgroundColor: colors,
+      borderRadius: 4, borderSkipped: false }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: {
+          label: c => `${c.dataset.label}: ${c.raw !== null ? c.raw.toFixed(2) : '-'}`
+        }}
+      },
+      scales: {
+        x: { ticks: { font:{family:'Heebo',size:10}, maxRotation: 45 } },
+        y: { ticks: { font:{family:'Heebo',size:10} }, grid:{color:'#e2e8f0'} }
+      }
+    }
+  });
+}
+
+// ── גלילה בגרירת עכבר / מגע ──────────────────────────────────
+function setupScrollDrag(el) {
+  if (!el || el._dragBound) return;
+  el._dragBound = true;
+  let isDown = false, startX = 0, scrollLeft = 0;
+
+  el.addEventListener('mousedown',  e => { isDown = true; el.style.cursor = 'grabbing'; startX = e.pageX - el.offsetLeft; scrollLeft = el.scrollLeft; });
+  el.addEventListener('mouseleave', ()  => { isDown = false; el.style.cursor = 'grab'; });
+  el.addEventListener('mouseup',    ()  => { isDown = false; el.style.cursor = 'grab'; });
+  el.addEventListener('mousemove',  e => {
+    if (!isDown) return;
+    e.preventDefault();
+    el.scrollLeft = scrollLeft - (e.pageX - el.offsetLeft - startX);
+  });
+}
+
+function setupChartTabs(history) {
+  document.querySelectorAll('.fct-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.fct-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentField = btn.dataset.field;
+      buildHistoryChart(history, currentField);
+    });
+  });
+}
+
+// ── Peers Table (tasks 16, 17, 18) ────────────────────────────
+let peersData  = [];
+let peerSort   = { field: '1yr', dir: 'desc' };
+let peerReturnMode = 'cumulative';
+let peerYearlyState = { loading: false, years: [], yieldMap: null, requestId: 0 };
+const FUND_FILTER_STATE_STORAGE_KEY = 'gemelhub_filter_state_v1';
+let peerSavedFilterState = null;
+let peerSavedFilterMode = 'prompt';
+
+function readFundSavedFilterState(catId) {
+  try {
+    const raw = localStorage.getItem(FUND_FILTER_STATE_STORAGE_KEY);
+    if (!raw) return null;
+    const all = JSON.parse(raw);
+    const saved = all && all[String(catId || '')];
+    if (!saved) return null;
+    return {
+      selectedTracks: Array.isArray(saved.selectedTracks) ? saved.selectedTracks.map(String) : [],
+      selectedProviders: Array.isArray(saved.selectedProviders) ? saved.selectedProviders.map(String) : [],
+      excludedProviders: Array.isArray(saved.excludedProviders) ? saved.excludedProviders.map(String) : [],
+      targetPopulation: saved.targetPopulation || 'כלל האוכלוסיה'
+    };
+  } catch (error) {
+    console.warn('Could not read saved comparison filters', error);
+    return null;
+  }
+}
+
+function getFundSavedFilterCount(saved = peerSavedFilterState) {
+  if (!saved) return 0;
+  let count = saved.selectedTracks.length + saved.selectedProviders.length + saved.excludedProviders.length;
+  if (_fundCatId === 'gemel' && saved.targetPopulation && saved.targetPopulation !== 'כלל האוכלוסיה') count += 1;
+  return count;
+}
+
+function parseFundProviderFilterKey(key) {
+  const raw = String(key || '');
+  if (raw.startsWith('provider:')) return { type: 'provider', provider: raw.slice('provider:'.length) };
+  if (raw.startsWith('sub:')) {
+    const rest = raw.slice('sub:'.length);
+    const sep = rest.indexOf(':');
+    return {
+      type: 'sub',
+      provider: sep >= 0 ? rest.slice(0, sep) : '',
+      token: sep >= 0 ? rest.slice(sep + 1) : ''
+    };
+  }
+  return { type: 'provider', provider: raw };
+}
+
+function fundPeerMatchesProviderFilter(record, key) {
+  const providerName = getProviderDisplayName(record.CONTROLLING_CORPORATION, record.MANAGING_CORPORATION);
+  const parsed = parseFundProviderFilterKey(key);
+  if (parsed.type === 'provider') return providerName === parsed.provider;
+  if (parsed.type === 'sub') {
+    return providerName === parsed.provider &&
+      String(record.FUND_NAME || '').toLowerCase().includes(String(parsed.token || '').toLowerCase());
+  }
+  return false;
+}
+
+function fundPeerPassesSavedProviderFilters(record, myFundId) {
+  if (!peerSavedFilterState || peerSavedFilterMode !== 'applied') return true;
+  if (String(record.FUND_ID) === String(myFundId)) return true;
+  for (const key of peerSavedFilterState.excludedProviders) {
+    if (fundPeerMatchesProviderFilter(record, key)) return false;
+  }
+  if (!peerSavedFilterState.selectedProviders.length) return true;
+  return peerSavedFilterState.selectedProviders.some(key => fundPeerMatchesProviderFilter(record, key));
+}
+
+function getFundFilteredPeers(myFundId) {
+  const filtered = peersData.filter(record => fundPeerPassesSavedProviderFilters(record, myFundId));
+  if (filtered.some(record => String(record.FUND_ID) === String(myFundId))) return filtered;
+  const current = peersData.find(record => String(record.FUND_ID) === String(myFundId));
+  return current ? [current, ...filtered] : filtered;
+}
+
+function buildPeerSavedFilterBanner(originalCount, visibleCount) {
+  const count = getFundSavedFilterCount();
+  if (!count) return '';
+  if (peerSavedFilterMode === 'applied') {
+    return `
+      <div class="peer-saved-filter-bar is-applied">
+        <span><i class="fas fa-filter" aria-hidden="true"></i> עמיתים מסוננים לפי ${count} סינונים מההשוואה הראשית</span>
+        <strong>${visibleCount} מתוך ${originalCount}</strong>
+        <button type="button" class="peer-saved-filter-btn" data-peer-filter-action="clear">הצג הכל</button>
+      </div>`;
+  }
+  if (peerSavedFilterMode === 'ignored') return '';
+  return `
+    <div class="peer-saved-filter-bar">
+      <span><i class="fas fa-filter" aria-hidden="true"></i> יש לך ${count} סינונים פעילים מההשוואה הראשית</span>
+      <div class="peer-saved-filter-actions">
+        <button type="button" class="peer-saved-filter-btn is-primary" data-peer-filter-action="apply">החל כאן</button>
+        <button type="button" class="peer-saved-filter-btn" data-peer-filter-action="ignore">התעלם בדף קופה</button>
+      </div>
+    </div>`;
+}
+
+function bindPeerSavedFilterBanner(myFundId, myName) {
+  const bannerWrap = document.getElementById('peer-filter-banner-wrap');
+  if (!bannerWrap) return;
+  bannerWrap.querySelectorAll('[data-peer-filter-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.peerFilterAction;
+      if (action === 'apply') peerSavedFilterMode = 'applied';
+      if (action === 'ignore') peerSavedFilterMode = 'ignored';
+      if (action === 'clear') peerSavedFilterMode = 'prompt';
+      renderPeersTable(myFundId, myName);
+    });
+  });
+}
+
+async function loadPeerYearlyReturns(myFundId, myName) {
+  if (peerYearlyState.loading || peerYearlyState.yieldMap) return;
+  const requestId = ++peerYearlyState.requestId;
+  peerYearlyState = { loading: true, years: [], yieldMap: null, requestId };
+  renderPeersTable(myFundId, myName);
+  try {
+    const result = await APIModule.getYearlyYieldsForFunds(peersData, _fundCatId, 'כלל האוכלוסיה', 5);
+    if (peerYearlyState.requestId !== requestId) return;
+    peerYearlyState = {
+      loading: false,
+      years: (result.years || []).slice(0, 4),
+      yieldMap: result.yieldMap || new Map(),
+      requestId
+    };
+  } catch (error) {
+    console.error(error);
+    if (peerYearlyState.requestId !== requestId) return;
+    peerYearlyState = { loading: false, years: [], yieldMap: new Map(), requestId };
+  }
+  renderPeersTable(myFundId, myName);
+}
+
+function buildPeersTable(peers, myFundId, myName) {
+  peersData = peers;
+  peerSavedFilterState = readFundSavedFilterState(_fundCatId);
+  peerSavedFilterMode = getFundSavedFilterCount(peerSavedFilterState) ? 'prompt' : 'ignored';
+  peerReturnMode = 'cumulative';
+  peerSort = { field: '1yr', dir: 'desc' };
+  peerYearlyState = { loading: false, years: [], yieldMap: null, requestId: peerYearlyState.requestId + 1 };
+  renderPeersTable(myFundId, myName);
+}
+
+function renderPeersTable(myFundId, myName) {
+  const wrap = document.getElementById('peers-table-wrap');
+  const bannerWrap = document.getElementById('peer-filter-banner-wrap');
+  if (!peersData.length) {
+    if (bannerWrap) bannerWrap.innerHTML = '';
+    wrap.innerHTML = '<div class="no-data" style="padding:30px 0;"><p>אין נתוני השוואה זמינים</p></div>';
+    return;
+  }
+
+  const displayPeers = getFundFilteredPeers(myFundId);
+
+  // מיון
+  const sorted = [...displayPeers].sort((a, b) => {
+    let av, bv;
+    if (peerSort.field === 'yearly_ytd') {
+      av = parseFloat(a.YEAR_TO_DATE_YIELD) || 0;
+      bv = parseFloat(b.YEAR_TO_DATE_YIELD) || 0;
+    } else if (/^year_\d{4}$/.test(peerSort.field)) {
+      const year = Number(peerSort.field.slice(5));
+      av = peerYearlyState.yieldMap?.get(String(a.FUND_ID))?.get(year);
+      bv = peerYearlyState.yieldMap?.get(String(b.FUND_ID))?.get(year);
+      av = av == null || isNaN(av) ? -9999 : av;
+      bv = bv == null || isNaN(bv) ? -9999 : bv;
+    } else if (peerSort.field === '1yr') {
+      av = (_yields12M ? _yields12M.get(String(a.FUND_ID)) : null) ?? -9999;
+      bv = (_yields12M ? _yields12M.get(String(b.FUND_ID)) : null) ?? -9999;
+    } else {
+      const fmap = {
+        '5yr':'YIELD_TRAILING_5_YRS', '3yr':'YIELD_TRAILING_3_YRS',
+        'monthly':'MONTHLY_YIELD', 'ytd':'YEAR_TO_DATE_YIELD'
+      };
+      const f = fmap[peerSort.field] || 'YIELD_TRAILING_3_YRS';
+      av = parseFloat(a[f]) || 0;
+      bv = parseFloat(b[f]) || 0;
+    }
+    const diff = av - bv;
+    return peerSort.dir === 'asc' ? diff : -diff;
+  });
+
+  const myRank = sorted.findIndex(r => String(r.FUND_ID) === String(myFundId)) + 1;
+  const sortLabels = { monthly:'חודשי', ytd:'YTD', yearly_ytd:'YTD', '1yr':'12 חוד׳', '3yr':'3 שנים', '5yr':'5 שנים' };
+  const activeSortLabel = /^year_\d{4}$/.test(peerSort.field) ? peerSort.field.slice(5) : (sortLabels[peerSort.field] || peerSort.field);
+  // כותרת עמודת חודשי — לפי תקופת הדיווח האחרונה (כמו בטבלה הראשית)
+  const latestPeriod = displayPeers.reduce((mx, r) => Math.max(mx, Number(r.REPORT_PERIOD||0)), 0) || null;
+  const monthCol = latestPeriod ? formatReportPeriod(latestPeriod) : 'חודשי';
+
+  const arrow = (f) => {
+    if (window.matchMedia && window.matchMedia('(max-width: 760px)').matches) return '';
+    if (peerSort.field !== f) return '<span style="color:#1a1a1a;font-size:.7rem;">⇅</span>';
+    return peerSort.dir === 'desc'
+      ? '<span style="color:var(--blue);font-size:.7rem;">↓</span>'
+      : '<span style="color:var(--blue);font-size:.7rem;">↑</span>';
+  };
+
+  // ממוצע קבוצה
+  const avgFields = ['MONTHLY_YIELD','YEAR_TO_DATE_YIELD','YIELD_TRAILING_3_YRS','YIELD_TRAILING_5_YRS'];
+  const avgs = {};
+  for (const f of avgFields) {
+    const vals = sorted.map(r => parseFloat(r[f])).filter(v => !isNaN(v));
+    avgs[f] = vals.length ? vals.reduce((a,b) => a+b, 0) / vals.length : null;
+  }
+  const y12mAvgVals = sorted.map(r => _yields12M?.get(String(r.FUND_ID))).filter(v => v != null && !isNaN(v));
+  const avg12m = y12mAvgVals.length ? y12mAvgVals.reduce((a,b) => a+b, 0) / y12mAvgVals.length : null;
+
+  const sc = (f) => peerSort.field === f ? ' col-sorted' : '';
+  const sch = (f) => peerSort.field === f ? ' col-sorted-head' : '';
+
+  // מדליית זהב / עגבנייה — מקסימום ומינימום לכל עמודת תשואה
+  const _pSafeMax = (arr) => { const v = arr.filter(x => x != null && isFinite(x)); return v.length ? Math.max(...v) : null; };
+  const _pSafeMin = (arr) => { const v = arr.filter(x => x != null && isFinite(x)); return v.length > 1 ? Math.min(...v) : null; };
+  const _pMaxVals = {
+    monthly: _pSafeMax(sorted.map(r => parseFloat(r.MONTHLY_YIELD))),
+    ytd:     _pSafeMax(sorted.map(r => parseFloat(r.YEAR_TO_DATE_YIELD))),
+    yr1:     _pSafeMax(sorted.map(r => _yields12M?.get(String(r.FUND_ID)))),
+    yr3:     _pSafeMax(sorted.map(r => parseFloat(r.YIELD_TRAILING_3_YRS))),
+    yr5:     _pSafeMax(sorted.map(r => parseFloat(r.YIELD_TRAILING_5_YRS))),
+  };
+  const _pMinVals = {
+    monthly: _pSafeMin(sorted.map(r => parseFloat(r.MONTHLY_YIELD))),
+    ytd:     _pSafeMin(sorted.map(r => parseFloat(r.YEAR_TO_DATE_YIELD))),
+    yr1:     _pSafeMin(sorted.map(r => _yields12M?.get(String(r.FUND_ID)))),
+    yr3:     _pSafeMin(sorted.map(r => parseFloat(r.YIELD_TRAILING_3_YRS))),
+    yr5:     _pSafeMin(sorted.map(r => parseFloat(r.YIELD_TRAILING_5_YRS))),
+  };
+  const _pGold   = (val, key) => { const n = parseFloat(val); return (!isNaN(n) && _pMaxVals[key] !== null && n === _pMaxVals[key]) ? '<span class="peer-yield-badge peer-yield-badge-best" aria-hidden="true">&#129351;</span>' : ''; };
+  const _pTomato = (val, key) => { const n = parseFloat(val); return (!isNaN(n) && _pMinVals[key] !== null && n === _pMinVals[key]) ? '<span class="peer-yield-badge peer-yield-badge-worst" aria-hidden="true">&#127813;</span>' : ''; };
+  const _peerYield = (val, key, cls = '') => {
+    const pct = formatPercent(val);
+    if (pct === '-' || pct === '—') return pct;
+    const classes = ['peer-yield-value', cls].filter(Boolean).join(' ');
+    return `<span class="${classes}">${_pGold(val, key)}${_pTomato(val, key)}<span class="peer-yield-number">${pct}</span></span>`;
+  };
+  // פונקציית עזר: צובעת תשואה רק כשהעמודה ממויינת
+  const peerCell = (val, key, sortKey) => _peerYield(val, key, peerSort.field === sortKey ? yieldClass(val) : '');
+  const yearlyYears = peerReturnMode === 'yearly' ? (peerYearlyState.years || []) : [];
+
+  // issue 4: זיהוי שמות מנהל כפולים — הוסף סיומת מ-FUND_NAME
+  const _peerNameCount = new Map();
+  sorted.forEach(r => {
+    const n = getProviderDisplayName(r.CONTROLLING_CORPORATION, r.MANAGING_CORPORATION);
+    _peerNameCount.set(n, (_peerNameCount.get(n) || 0) + 1);
+  });
+
+  const rows = sorted.map((r, di) => {
+    const baseName = getProviderDisplayName(r.CONTROLLING_CORPORATION, r.MANAGING_CORPORATION);
+    const _suffix = (_peerNameCount.get(baseName) > 1) ? extractFundSuffix(r.FUND_NAME || '') : null;
+    const name = _suffix ? baseName + ' — ' + _suffix : baseName;
+    const color = providerColor(baseName);
+    const isMe  = String(r.FUND_ID) === String(myFundId);
+    const rank  = di + 1;
+    const allocationIcon = allocationProfileIconBadge(
+      calcAllocationDiagnostics(r, sorted).profile,
+      `${r.FUND_NAME || ''} ${r.SUB_SPECIALIZATION || ''}`,
+      { textFallback: false }
+    );
+    const stockOutlier = stockOutlierBadge(calcStockExposureOutlier(r, sorted));
+
+    const y12m   = _yields12M ? _yields12M.get(String(r.FUND_ID)) : undefined;
+    const yr1Cell = y12m === null
+      ? '<span title="אין נתוני 12 חודשים" style="color:var(--gray-300)">—</span>'
+      : y12m !== undefined ? _peerYield(y12m, 'yr1', peerSort.field==='1yr' ? yieldClass(y12m) : '') : '-';
+
+    const nameCell = isMe
+      ? `<span style="font-weight:800;color:${color}">${name} ★</span>${allocationIcon}${stockOutlier}`
+      : `<span class="peer-name-link" data-fundid="${r.FUND_ID}" style="cursor:pointer;font-weight:600;color:${color};text-decoration:underline dotted;">${name}</span>${allocationIcon}${stockOutlier}`;
+
+    const yearlyCells = yearlyYears.map(year => {
+      const value = peerYearlyState.yieldMap?.get(String(r.FUND_ID))?.get(year);
+      const sortKey = `year_${year}`;
+      const content = value == null || isNaN(value) ? '<span style="color:var(--gray-300)">—</span>' : peerCell(value, sortKey, sortKey);
+      return `<td class="${sc(sortKey)}">${content}</td>`;
+    }).join('');
+
+    return `
+      <tr class="${isMe ? 'peer-me' : ''}">
+        <td class="rank-cell"><span class="peer-rank${isMe?' peer-rank-me':''}">${rank}</span></td>
+        <td>${nameCell}</td>
+        ${peerReturnMode === 'yearly' ? `
+        <td class="${sc('yearly_ytd')}">${peerCell(r.YEAR_TO_DATE_YIELD, 'yearly_ytd', 'yearly_ytd')}</td>
+        ${peerYearlyState.loading ? '<td colspan="4" style="color:var(--gray-400);font-style:italic;">טוען שנים...</td>' : yearlyCells || '<td colspan="4" style="color:var(--gray-400);">לא נמצאו שנים מלאות</td>'}` : `
+        <td class="${sc('monthly')}">${peerCell(r.MONTHLY_YIELD, 'monthly', 'monthly')}</td>
+        <td class="${sc('ytd')}">${peerCell(r.YEAR_TO_DATE_YIELD, 'ytd', 'ytd')}</td>
+        <td class="${sc('1yr')}">${yr1Cell}</td>
+        <td class="${sc('3yr')}">${peerCell(r.YIELD_TRAILING_3_YRS, 'yr3', '3yr')}</td>
+        <td class="${sc('5yr')}">${peerCell(r.YIELD_TRAILING_5_YRS, 'yr5', '5yr')}</td>`}
+      </tr>`;
+  }).join('');
+
+  // שורת ממוצע קבוצה
+  const yearlyAvgCells = yearlyYears.map(year => {
+    const vals = sorted
+      .map(r => peerYearlyState.yieldMap?.get(String(r.FUND_ID))?.get(year))
+      .filter(v => v != null && !isNaN(v));
+    const avgYear = vals.length ? vals.reduce((a,b) => a+b, 0) / vals.length : null;
+    const sortKey = `year_${year}`;
+    return `<td class="${sc(sortKey)}">${avgYear!==null?formatPercent(avgYear):'-'}</td>`;
+  }).join('');
+  const avgRow = `
+    <tr class="average-row">
+      <td></td>
+      <td>ממוצע קבוצה</td>
+      ${peerReturnMode === 'yearly' ? `
+      <td class="${peerSort.field==='yearly_ytd'?yieldClass(avgs.YEAR_TO_DATE_YIELD):''}${sc('yearly_ytd')}">${avgs.YEAR_TO_DATE_YIELD!==null?formatPercent(avgs.YEAR_TO_DATE_YIELD):'-'}</td>
+      ${peerYearlyState.loading ? '<td colspan="4">-</td>' : yearlyAvgCells || '<td colspan="4">-</td>'}` : `
+      <td class="${peerSort.field==='monthly'?yieldClass(avgs.MONTHLY_YIELD):''}${sc('monthly')}">${avgs.MONTHLY_YIELD!==null?formatPercent(avgs.MONTHLY_YIELD):'-'}</td>
+      <td class="${peerSort.field==='ytd'?yieldClass(avgs.YEAR_TO_DATE_YIELD):''}${sc('ytd')}">${avgs.YEAR_TO_DATE_YIELD!==null?formatPercent(avgs.YEAR_TO_DATE_YIELD):'-'}</td>
+      <td class="${peerSort.field==='1yr'?yieldClass(avg12m):''}${sc('1yr')}">${avg12m!==null?formatPercent(avg12m):'-'}</td>
+      <td class="${peerSort.field==='3yr'?yieldClass(avgs.YIELD_TRAILING_3_YRS):''}${sc('3yr')}">${avgs.YIELD_TRAILING_3_YRS!==null?formatPercent(avgs.YIELD_TRAILING_3_YRS):'-'}</td>
+      <td class="${peerSort.field==='5yr'?yieldClass(avgs.YIELD_TRAILING_5_YRS):''}${sc('5yr')}">${avgs.YIELD_TRAILING_5_YRS!==null?formatPercent(avgs.YIELD_TRAILING_5_YRS):'-'}</td>`}
+    </tr>`;
+  const yearlyHeaderCells = peerYearlyState.loading
+    ? '<th colspan="4">טוען שנים...</th>'
+    : yearlyYears.length
+      ? yearlyYears.map(year => `<th data-pf="year_${year}" class="${sch(`year_${year}`)}" style="cursor:pointer;">${year} ${arrow(`year_${year}`)}<span class="th-yield-sub">תשואה שנתית</span></th>`).join('')
+      : '<th colspan="4">לא נמצאו שנים מלאות</th>';
+
+  if (bannerWrap) {
+    bannerWrap.innerHTML = buildPeerSavedFilterBanner(peersData.length, sorted.length);
+    bindPeerSavedFilterBanner(myFundId, myName);
+  }
+
+  wrap.innerHTML = `
+    <div class="peer-rank-badge peer-rank-toolbar">
+      <div class="peer-rank-text">
+        <i class="fas fa-medal" style="color:#f59e0b;"></i>
+        דירוג לפי ${activeSortLabel}: <strong style="color:var(--blue)">${myRank} מתוך ${sorted.length}</strong>
+      </div>
+      <div class="peer-return-toggle" role="group" aria-label="סוג תשואה">
+        <button type="button" class="peer-return-btn${peerReturnMode === 'cumulative' ? ' is-active' : ''}" data-peer-mode="cumulative">תשואה מצטברת</button>
+        <button type="button" class="peer-return-btn${peerReturnMode === 'yearly' ? ' is-active' : ''}" data-peer-mode="yearly">תשואה לפי שנים</button>
+      </div>
+    </div>
+    <div class="peers-table-scroll">
+      <table class="track-table${peerReturnMode === 'yearly' ? ' fund-peer-yearly-table' : ''}" style="font-size:.75rem;table-layout:auto;">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>מנהל</th>
+            ${peerReturnMode === 'yearly' ? `
+            <th data-pf="yearly_ytd" class="${sch('yearly_ytd')}" style="cursor:pointer;" title="תשואה מתחילת השנה">YTD ${arrow('yearly_ytd')}<span class="th-yield-sub">מתחילת השנה</span></th>
+            ${yearlyHeaderCells}` : `
+            <th data-pf="monthly" class="${sch('monthly')}" style="cursor:pointer;">${monthCol} ${arrow('monthly')}</th>
+            <th data-pf="ytd"     class="${sch('ytd')}"     style="cursor:pointer;" title="תשואה מתחילת השנה">YTD ${arrow('ytd')}</th>
+            <th data-pf="1yr"     class="${sch('1yr')}"     style="cursor:pointer;">12 חוד׳ ${arrow('1yr')}</th>
+            <th data-pf="3yr"     class="${sch('3yr')}"     style="cursor:pointer;">3 שנים ${arrow('3yr')}<span class="th-yield-sub">תשואה מצטברת</span></th>
+            <th data-pf="5yr"     class="${sch('5yr')}"     style="cursor:pointer;">5 שנים ${arrow('5yr')}<span class="th-yield-sub">תשואה מצטברת</span></th>`}
+          </tr>
+        </thead>
+        <tbody>${rows}${avgRow}</tbody>
+      </table>
+    </div>`;
+
+  wrap.querySelectorAll('table.track-table').forEach(table => {
+    if (window.matchMedia && window.matchMedia('(max-width: 760px)').matches) {
+      table.querySelector(':scope > colgroup')?.remove();
+      const columnCount = table.querySelector('tr')?.children.length || 0;
+      if (columnCount > 2) {
+        // Read widths from CSS variables defined on body.fund-page in the mobile media query
+        const rankWidth = parseInt(getComputedStyle(document.body).getPropertyValue('--fund-mobile-rank-w')) || 30;
+        const managerWidth = parseInt(getComputedStyle(document.body).getPropertyValue('--fund-mobile-manager-w')) || 128;
+        const scroll = table.closest('.peers-table-scroll');
+        // window.innerWidth - 30 = screen minus fund-card(8×2) + fund-page-main(6×2) + border(1×2) padding
+        const wrapperWidth = window.innerWidth - 30;
+        // After layout, expand wrap+scroll container to screen edges
+        requestAnimationFrame(() => {
+          const r = wrap.getBoundingClientRect();
+          const rGap = Math.max(0, Math.round(window.innerWidth - r.right));
+          const lGap = Math.max(0, Math.round(r.left));
+          if (rGap > 0) wrap.style.setProperty('margin-right', `-${rGap}px`, 'important');
+          if (lGap > 0) wrap.style.setProperty('margin-left', `-${lGap}px`, 'important');
+          wrap.style.setProperty('width', `${window.innerWidth}px`, 'important');
+          if (scroll) scroll.style.setProperty('width', `${window.innerWidth}px`, 'important');
+        });
+        const returnCount = columnCount - 2;
+        const restWidth = Math.floor((wrapperWidth - rankWidth - managerWidth) / returnCount);
+        const totalWidth = rankWidth + managerWidth + (restWidth * returnCount);
+        table.style.setProperty('width', `${totalWidth}px`, 'important');
+        table.style.setProperty('min-width', '0', 'important');
+        table.style.setProperty('max-width', 'none', 'important');
+        table.style.setProperty('table-layout', 'fixed', 'important');
+        const colgroup = document.createElement('colgroup');
+        Array.from({ length: columnCount }).forEach((_, index) => {
+          const col = document.createElement('col');
+          col.style.width = index === 0 ? `${rankWidth}px` : index === 1 ? `${managerWidth}px` : `${restWidth}px`;
+          colgroup.appendChild(col);
+        });
+        table.insertBefore(colgroup, table.firstChild);
+      }
+    }
+    const headers = [...table.querySelectorAll('thead th')].map(th =>
+      (th.textContent || '').replace(/\s+/g, ' ').trim()
+    );
+    table.querySelectorAll('tbody tr').forEach(row => {
+      row.querySelectorAll('td').forEach((cell, index) => {
+        if (headers[index]) cell.dataset.mobileLabel = headers[index];
+      });
+    });
+    if (window.matchMedia && window.matchMedia('(max-width: 760px)').matches) {
+      table.querySelectorAll('th').forEach(cell => {
+        cell.style.setProperty('font-size', '0.72rem', 'important');
+        cell.style.setProperty('padding', '6px 2px', 'important');
+        cell.style.setProperty('line-height', '1.2', 'important');
+        cell.style.setProperty('overflow', 'hidden', 'important');
+        cell.style.setProperty('white-space', 'nowrap', 'important');
+      });
+      table.querySelectorAll('td').forEach(cell => {
+        cell.style.setProperty('font-size', '0.68rem', 'important');
+        cell.style.setProperty('padding', '5px 1px', 'important');
+        cell.style.setProperty('line-height', '1.2', 'important');
+        cell.style.setProperty('overflow', 'hidden', 'important');
+        cell.style.setProperty('white-space', 'nowrap', 'important');
+      });
+      // Manager column: add ellipsis for truncated names
+      table.querySelectorAll('th:nth-child(2), td:nth-child(2)').forEach(cell => {
+        cell.style.setProperty('text-overflow', 'ellipsis', 'important');
+      });
+    }
+  });
+
+  setupFundMobileTableScrollbar(wrap.querySelector('.peers-table-scroll'));
+
+  // bind sort
+  wrap.querySelectorAll('th[data-pf]').forEach(th => {
+    th.addEventListener('click', () => {
+      const f = th.dataset.pf;
+      peerSort.field = f;
+      peerSort.dir = 'desc';
+      renderPeersTable(myFundId, myName);
+    });
+  });
+  wrap.querySelectorAll('.peer-return-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.peerMode;
+      if (!mode || mode === peerReturnMode) return;
+      peerReturnMode = mode;
+      peerSort.field = mode === 'yearly' ? 'yearly_ytd' : '1yr';
+      peerSort.dir = 'desc';
+      renderPeersTable(myFundId, myName);
+      if (mode === 'yearly') loadPeerYearlyReturns(myFundId, myName);
+    });
+  });
+
+  // peer name click
+  wrap.querySelectorAll('.peer-name-link').forEach(el => {
+    el.addEventListener('click', () => {
+      const fid = el.dataset.fundid;
+      if (fid) window.location.href = `fund.html?id=${fid}&cat=${_fundCatId || ''}`;
+    });
+  });
+}
+
+function setupFundMobileTableScrollbar(wrapper) {
+  if (!wrapper) return;
+  const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+  let rail = wrapper.nextElementSibling;
+  if (!isMobile) {
+    if (rail && rail.classList.contains('mobile-table-scrollbar')) rail.remove();
+    return;
+  }
+  if (!rail || !rail.classList.contains('mobile-table-scrollbar')) {
+    rail = document.createElement('div');
+    rail.className = 'mobile-table-scrollbar';
+    rail.setAttribute('aria-hidden', 'true');
+    rail.innerHTML = '<div class="mobile-table-scrollbar-track"><div class="mobile-table-scrollbar-thumb"></div></div>';
+    wrapper.insertAdjacentElement('afterend', rail);
+  }
+  const track = rail.querySelector('.mobile-table-scrollbar-track');
+  const thumb = rail.querySelector('.mobile-table-scrollbar-thumb');
+  if (!track || !thumb) return;
+  const maxScroll = () => Math.max(0, wrapper.scrollWidth - wrapper.clientWidth);
+  const isRtl = () => {
+    const declaredDir = document.dir || document.documentElement.dir;
+    if (declaredDir) return declaredDir.toLowerCase() === 'rtl';
+    return getComputedStyle(document.documentElement).direction === 'rtl' || getComputedStyle(document.body).direction === 'rtl';
+  };
+  const update = () => {
+    const max = maxScroll();
+    rail.hidden = max <= 2;
+    if (rail.hidden) return;
+    const trackWidth = track.clientWidth || rail.clientWidth;
+    const thumbWidth = Math.max(36, Math.round((wrapper.clientWidth / wrapper.scrollWidth) * trackWidth));
+    const travel = Math.max(0, trackWidth - thumbWidth);
+    const progress = max ? Math.max(0, Math.min(1, Math.abs(wrapper.scrollLeft) / max)) : 0;
+    const visualProgress = isRtl() ? 1 - progress : progress;
+    thumb.style.width = `${thumbWidth}px`;
+    thumb.style.transform = `translateX(${Math.round(travel * visualProgress)}px)`;
+  };
+  if (rail.dataset.bound !== '1') {
+    rail.dataset.bound = '1';
+    wrapper.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update, { passive: true });
+    const setFromClientX = clientX => {
+      const max = maxScroll();
+      if (!max) return;
+      const trackRect = track.getBoundingClientRect();
+      const thumbRect = thumb.getBoundingClientRect();
+      const travel = Math.max(1, trackRect.width - thumbRect.width);
+      const visualProgress = Math.max(0, Math.min(1, (clientX - trackRect.left - thumbRect.width / 2) / travel));
+      const progress = isRtl() ? 1 - visualProgress : visualProgress;
+      wrapper.scrollLeft = isRtl() ? -progress * max : progress * max;
+      update();
+    };
+    rail.addEventListener('pointerdown', event => {
+      event.preventDefault();
+      rail.setPointerCapture?.(event.pointerId);
+      setFromClientX(event.clientX);
+      const move = moveEvent => setFromClientX(moveEvent.clientX);
+      const up = () => {
+        rail.removeEventListener('pointermove', move);
+        rail.removeEventListener('pointerup', up);
+        rail.removeEventListener('pointercancel', up);
+      };
+      rail.addEventListener('pointermove', move);
+      rail.addEventListener('pointerup', up);
+      rail.addEventListener('pointercancel', up);
+    });
+  }
+  requestAnimationFrame(update);
+}
+
+// ── Metrics — מדד מומנטום 0-100 (task 19) ────────────────────
+function buildMetrics(latest, history, peers, myName, myFundId) {
+  const ta       = parseFloat(latest.TOTAL_ASSETS) || 1;
+  const stockPct = ((parseFloat(latest.STOCK_MARKET_EXPOSURE)||0)/ta*100).toFixed(1);
+  const abroadPct= ((parseFloat(latest.FOREIGN_EXPOSURE)    ||0)/ta*100).toFixed(1);
+  const fxPct    = ((parseFloat(latest.FOREIGN_CURRENCY_EXPOSURE)||0)/ta*100).toFixed(1);
+
+  // ── מחשב ציון מומנטום 0-100 ──
+  const momentum = calcMomentumScore(latest, history, peers, myFundId);
+
+  // task 22: רק מומנטום + עקביות (הוסרו: מניות, חו"ל, מט"ח, שארפ)
+  const posMonths = history.filter(r => parseFloat(r.MONTHLY_YIELD) > 0).length;
+  const metrics = [
+    {
+      id: 'consistency',
+      icon: 'fa-check-circle', label: 'עקביות (חודשים חיוביים)', color: '#22c55e',
+      value: history.length ? `${Math.round(posMonths/history.length*100)}%` : '-',
+      cls: '',
+      desc: `${posMonths} מתוך ${history.length} חודשים`,
+      clickable: false
+    },
+    {
+      id: 'momentum',
+      icon: 'fa-rocket', label: 'מומנטום איכותי', color: '#3b82f6',
+      value: `${momentum.score} / 100`,
+      cls: momentum.score >= 70 ? 'yield-pos' : momentum.score <= 30 ? 'yield-neg' : '',
+      desc: momentum.desc,
+      clickable: true
+    }
+  ];
+
+  const grid = document.getElementById('fund-metrics-grid');
+  grid.innerHTML = metrics.map(m => `
+    <div class="fund-metric-item${m.clickable ? ' fmi-clickable' : ''}" data-metric="${m.id}"
+         style="${m.clickable ? 'cursor:pointer;' : ''}">
+      <div class="fmi-icon" style="background:${m.color}22;color:${m.color}">
+        <i class="fas ${m.icon}"></i>
+        ${m.clickable ? '<i class="fas fa-info-circle" style="font-size:.65rem;position:absolute;margin-top:-8px;margin-right:-6px;color:#94a3b8;" title="לחץ לרשימת המסלול"></i>' : ''}
+      </div>
+      <div class="fmi-body">
+        <div class="fmi-label">${m.label}${m.clickable ? ' <i class="fas fa-chevron-left" style="font-size:.65rem;color:#94a3b8;"></i>' : ''}</div>
+        <div class="fmi-value ${m.cls}">${m.value}</div>
+        <div class="fmi-desc">${m.desc}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // task 21: לחיצה על מומנטום → מודל עם רשימת כל הקופות במסלול ומתודולוגיה
+  grid.querySelector('[data-metric="momentum"]')?.addEventListener('click', () => {
+    showMomentumModal(peers, myFundId, myName);
+  });
+}
+
+// ── מדד מומנטום איכותי 0-100 ───────────────────────
+// מתודולוגיה: percentile-rank מול מתחרים + דגלי אלוקציה ללא בנצ'מרק חיצוני
+// 6M compound return (20%) + 1Y (20%) + 3Y (15%) + 5Y (10%) + עקביות (15%) + שארפ (15%) + ניקיון אלוקציה (5%)
+function calcMomentumScore(latest, history, peers, myFundId) {
+  if (!peers.length) return { score: 0, desc: 'אין נתוני מתחרים לחישוב' };
+
+  function pctRank(myVal, arr) {
+    if (myVal === null || myVal === undefined || isNaN(myVal)) return 50;
+    const valid = arr.filter(v => v !== null && v !== undefined && !isNaN(v));
+    if (!valid.length) return 50;
+    return Math.round(valid.filter(v => v < myVal).length / valid.length * 100);
+  }
+
+  // 1. תשואה צבורה 6 חודשים — ריבית דריבית (25%)
+  const my6m    = _6MMap    ? _6MMap.get(String(myFundId))    : null;
+  const peers6m = peers.map(p => _6MMap ? _6MMap.get(String(p.FUND_ID)) : null);
+  const score6m = pctRank(my6m, peers6m);
+
+  // 2. תשואה 1Y vs מתחרים (25%)
+  const my1y    = _yields12M ? _yields12M.get(String(myFundId)) : null;
+  const peers1y = peers.map(p => _yields12M ? _yields12M.get(String(p.FUND_ID)) : null);
+  const score1y = pctRank(my1y, peers1y);
+
+  // 3. תשואה 3Y vs מתחרים (20%)
+  const my3y    = parseFloat(latest.YIELD_TRAILING_3_YRS) || null;
+  const peers3y = peers.map(p => parseFloat(p.YIELD_TRAILING_3_YRS) || null);
+  const score3y = pctRank(my3y, peers3y);
+
+  // 4. תשואה 5Y vs מתחרים (15%)
+  const my5y    = parseFloat(latest.YIELD_TRAILING_5_YRS) || null;
+  const peers5y = peers.map(p => parseFloat(p.YIELD_TRAILING_5_YRS) || null);
+  const score5y = pctRank(my5y, peers5y);
+
+  // 5. עקביות — % חודשים חיוביים (10%) — מהמפה המחושבת מראש לכולם
+  const my5consistency   = _consistencyMap ? (_consistencyMap.get(String(myFundId)) ?? null) : null;
+  const peers5consistency= peers.map(p => _consistencyMap ? (_consistencyMap.get(String(p.FUND_ID)) ?? null) : null);
+  const scoreConsistency = pctRank(my5consistency, peers5consistency);
+
+  // 6. Sharpe (15%)
+  const mySharpe    = _sharpeMap ? _sharpeMap.get(String(myFundId)) : null;
+  const peersSharpe = peers.map(p => _sharpeMap ? _sharpeMap.get(String(p.FUND_ID)) : null);
+  const scoreSharpe = pctRank(mySharpe, peersSharpe);
+  const allocation = calcAllocationDiagnostics(latest, peers);
+
+  const total = Math.round(
+    score6m          * 0.20 +
+    score1y          * 0.20 +
+    score3y          * 0.15 +
+    score5y          * 0.10 +
+    scoreConsistency * 0.15 +
+    scoreSharpe      * 0.15 +
+    allocation.score * 0.05
+  );
+
+  const label = total >= 75 ? 'ביצועים מצוינים ⬆' :
+                total >= 55 ? 'ביצועים טובים' :
+                total >= 40 ? 'ביצועים ממוצעים' :
+                              'ביצועים מתחת לממוצע ⬇';
+
+  const flagText = allocation.flags.length ? ` · ${allocation.flags.length} דגלי אלוקציה` : '';
+  const desc = `${label}${flagText} — 6M: אחוזון ${score6m}, 1Y: ${score1y}, 3Y: ${score3y}, 5Y: ${score5y}, עקביות: ${scoreConsistency}, שארפ: ${scoreSharpe}`;
+
+  return { score: Math.min(100, Math.max(0, total)), desc, components: { score6m, score1y, score3y, score5y, scoreConsistency, scoreSharpe, allocation } };
+}
+
+function calcExposurePct(record, field) {
+  const assets = parseFloat(record?.TOTAL_ASSETS);
+  const value = parseFloat(record?.[field]);
+  return assets > 0 && Number.isFinite(value) ? value / assets * 100 : null;
+}
+
+function median(values) {
+  const valid = values.filter(value => Number.isFinite(value)).sort((a, b) => a - b);
+  if (!valid.length) return null;
+  const mid = Math.floor(valid.length / 2);
+  return valid.length % 2 ? valid[mid] : (valid[mid - 1] + valid[mid]) / 2;
+}
+
+function calcAllocationDiagnostics(record, peers) {
+  const defs = [
+    { key: 'stock', label: 'מניות', field: 'STOCK_MARKET_EXPOSURE' },
+    { key: 'foreign', label: 'חו״ל', field: 'FOREIGN_EXPOSURE' },
+    { key: 'fx', label: 'מט״ח', field: 'FOREIGN_CURRENCY_EXPOSURE' }
+  ];
+  const outlierChecks = [];
+  let maxAbsGap = 0;
+
+  defs.forEach(def => {
+    const myPct = calcExposurePct(record, def.field);
+    const peerValues = peers.map(peer => calcExposurePct(peer, def.field)).filter(value => Number.isFinite(value));
+    const med = median(peerValues);
+    if (!Number.isFinite(myPct) || !Number.isFinite(med)) return;
+    const gap = myPct - med;
+    const relativeGap = Math.abs(med) > 0
+      ? Math.abs(gap) / Math.abs(med)
+      : (Math.abs(myPct) > 0 ? Infinity : 0);
+    maxAbsGap = Math.max(maxAbsGap, Math.abs(gap));
+    outlierChecks.push({
+      label: def.label,
+      myPct,
+      medianPct: med,
+      gap,
+      relativeGap,
+      isOutlier: relativeGap >= 0.40,
+      text: `${def.label}: ${gap > 0 ? 'גבוהה' : 'נמוכה'} ב-${(relativeGap * 100).toFixed(0)}% מחציון המסלול (${Math.abs(gap).toFixed(1)} נק׳ אחוז)`
+    });
+  });
+  const flags = outlierChecks.length === defs.length && outlierChecks.every(item => item.isOutlier)
+    ? outlierChecks.map(({ isOutlier, ...flag }) => flag)
+    : [];
+
+  const foreignPct = calcExposurePct(record, 'FOREIGN_EXPOSURE');
+  const fxPct = calcExposurePct(record, 'FOREIGN_CURRENCY_EXPOSURE');
+  const stockPct = calcExposurePct(record, 'STOCK_MARKET_EXPOSURE');
+  let profile = '';
+  const hasStock = Number.isFinite(stockPct);
+  const hasForeign = Number.isFinite(foreignPct);
+  const hasFx = Number.isFinite(fxPct);
+  const isGeneralTrack = hasStock && stockPct >= 40 && stockPct <= 60;
+
+  if (hasStock && hasForeign && hasFx && stockPct > 99 && foreignPct > 99 && fxPct > 99) {
+    profile = 'מניות חו״ל צמוד מט״ח';
+  } else if (hasStock && hasForeign && hasFx && stockPct > 75 && foreignPct < 5 && fxPct < 5) {
+    profile = 'מסלול מניות ישראלי';
+  } else if (isGeneralTrack && hasForeign && hasFx && foreignPct > 75 && fxPct > 75) {
+    profile = 'כללי מוטה חו״ל צמוד מט״ח';
+  } else if (isGeneralTrack && hasForeign && hasFx && foreignPct < 25 && fxPct < 25) {
+    profile = 'כללי מוטה ישראל';
+  } else if (hasStock && hasForeign && hasFx && stockPct > 75 && foreignPct > 75 && fxPct > 75) {
+    profile = 'מניות מוטה חו״ל צמוד מט״ח';
+  } else if (hasStock && hasForeign && hasFx && stockPct > 75 && foreignPct > 75 && fxPct < 25) {
+    profile = 'מניות מוטה חו״ל מנוטרל מטבע';
+  } else if (hasStock && hasForeign && hasFx && stockPct > 75 && foreignPct < 25 && fxPct < 25) {
+    profile = 'מניות מוטה ישראל';
+  } else if (hasStock && hasForeign && hasFx && stockPct === 0 && foreignPct > 75 && fxPct > 75) {
+    profile = 'אג״ח מוטה חו״ל צמוד מט״ח';
+  } else if (hasStock && hasForeign && hasFx && stockPct >= 10 && stockPct <= 25 && foreignPct < 25 && fxPct < 25) {
+    profile = 'אג״ח ומניות עד 25% מוטה ישראל';
+  } else if (hasForeign && hasFx && foreignPct < 25 && fxPct < 25) {
+    profile = 'מוטה ישראל';
+  } else if (isGeneralTrack) {
+    profile = 'כללי';
+  } else if (flags.length) {
+    profile = 'אלוקציה שונה מהקבוצה';
+  }
+
+  const score = Math.max(0, Math.round(100 - Math.min(100, maxAbsGap * 3)));
+  const note = flags.length
+    ? 'לקופה יש אלוקציה שונה מהותית מהקבוצה; ייתכן שחלק מהפער היחסי קשור לאופי החשיפה ולא רק לבחירת ניירות או איכות ניהול.'
+    : 'לא זוהתה חריגת אלוקציה מהותית מול חציון המסלול לפי החשיפות הזמינות.';
+  return { score, flags, note, maxAbsGap, profile };
+}
+
+// ── חישוב ציוני מומנטום לכל העמיתים — אותה נוסחה כמו calcMomentumScore ─
+// 6M compound (20%) + 1Y(20%) + 3Y(15%) + 5Y(10%) + עקביות(15%) + שארפ(15%) + ניקיון אלוקציה(5%)
+// myFundId + myHistory מועברים כדי שהקופה הנוכחית תקבל ציון זהה לכרטיס הסטטיסטיקות
+function calcAllPeersMomentum(peers, myFundId) {
+  if (!peers.length) return [];
+
+  function pctRank(myVal, arr) {
+    if (myVal === null || myVal === undefined || isNaN(myVal)) return 50;
+    const valid = arr.filter(v => v !== null && v !== undefined && !isNaN(v));
+    if (!valid.length) return 50;
+    return Math.round(valid.filter(v => v < myVal).length / valid.length * 100);
+  }
+
+  const all6m         = peers.map(p => _6MMap          ? (_6MMap.get(String(p.FUND_ID))          ?? null) : null);
+  const all1y         = peers.map(p => _yields12M      ? (_yields12M.get(String(p.FUND_ID))      ?? null) : null);
+  const all3y         = peers.map(p => parseFloat(p.YIELD_TRAILING_3_YRS) || null);
+  const all5y         = peers.map(p => parseFloat(p.YIELD_TRAILING_5_YRS) || null);
+  const allSharpe     = peers.map(p => _sharpeMap      ? (_sharpeMap.get(String(p.FUND_ID))      ?? null) : null);
+  // עקביות מהמפה המחושבת מראש — עקבית לכולם ללא תלות בהיסטוריה הנוכחית
+  const allConsistency= peers.map(p => _consistencyMap ? (_consistencyMap.get(String(p.FUND_ID)) ?? null) : null);
+
+  return peers.map((p, i) => {
+    const allocation = calcAllocationDiagnostics(p, peers);
+    const stockOutlier = calcStockExposureOutlier(p, peers);
+    const s = Math.round(
+      pctRank(all6m[i],         all6m)          * 0.20 +
+      pctRank(all1y[i],         all1y)          * 0.20 +
+      pctRank(all3y[i],         all3y)          * 0.15 +
+      pctRank(all5y[i],         all5y)          * 0.10 +
+      pctRank(allConsistency[i],allConsistency) * 0.15 +
+      pctRank(allSharpe[i],     allSharpe)      * 0.15 +
+      allocation.score                          * 0.05
+    );
+    return {
+      fundId: String(p.FUND_ID),
+      name: getProviderDisplayName(p.CONTROLLING_CORPORATION, p.MANAGING_CORPORATION),
+      trackLabel: `${p.FUND_NAME || ''} ${p.SUB_SPECIALIZATION || ''}`,
+      score: Math.min(100, Math.max(0, s)),
+      allocation,
+      stockOutlier
+    };
+  }).sort((a, b) => b.score - a.score);
+}
+
+// ── מודל פרטים גנרי לקלפי הסטטיסטיקות ────────────────────────
+// מחזיר את ה-element של אזור התוכן (לעדכון אסינכרוני)
+function showStatModal(modalId, titleHtml, contentHtml, dialogStyle = '') {
+  document.getElementById(modalId)?.remove();
+  const modal = document.createElement('div');
+  modal.id = modalId;
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:16px;max-width:580px;width:100%;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.22);${dialogStyle}">
+      <div style="padding:18px 20px 14px;border-bottom:1px solid #f1f5f9;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-shrink:0;">
+        ${titleHtml}
+        <button data-close style="border:none;background:none;font-size:1.25rem;cursor:pointer;color:#94a3b8;padding:4px 6px;flex-shrink:0;line-height:1;">✕</button>
+      </div>
+      <div data-modal-body style="overflow-y:auto;flex:1;">${contentHtml}</div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.querySelector('[data-close]').addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+// ── תוכן: חודשים חיוביים — גריד צבעוני ─────────────────────
+function buildConsistencyDetail(hist36) {
+  const sorted = [...hist36].sort((a,b) => Number(a.REPORT_PERIOD) - Number(b.REPORT_PERIOD));
+  const pos = sorted.filter(r => parseFloat(r.MONTHLY_YIELD) > 0).length;
+  const neg = sorted.filter(r => parseFloat(r.MONTHLY_YIELD) < 0).length;
+  const total = sorted.length;
+  const pct = total ? Math.round(pos / total * 100) : 0;
+
+  const chips = sorted.map(r => {
+    const v = parseFloat(r.MONTHLY_YIELD);
+    const isPos = v > 0, isNeg = v < 0;
+    const bg   = isPos ? '#dcfce7' : isNeg ? '#fee2e2' : '#f1f5f9';
+    const col  = isPos ? '#16a34a' : isNeg ? '#ef4444' : '#94a3b8';
+    const sign = isPos ? '+' : '';
+    return `<div style="display:inline-flex;flex-direction:column;align-items:center;background:${bg};border-radius:8px;padding:6px 8px;min-width:56px;gap:2px;">
+      <span style="font-size:.66rem;color:#64748b;font-weight:600;">${formatReportPeriod(r.REPORT_PERIOD)}</span>
+      <span style="font-size:.78rem;font-weight:700;color:${col};">${isNaN(v)?'—':sign+v.toFixed(1)+'%'}</span>
+    </div>`;
+  }).join('');
+
+  return `
+    <div style="padding:12px 16px;background:#f8fafc;border-bottom:1px solid #f1f5f9;display:flex;gap:20px;flex-wrap:wrap;">
+      <span style="font-size:.82rem;color:#16a34a;font-weight:700;"><i class="fas fa-circle" style="font-size:.55rem;margin-left:4px;"></i>${pos} חיוביים</span>
+      <span style="font-size:.82rem;color:#ef4444;font-weight:700;"><i class="fas fa-circle" style="font-size:.55rem;margin-left:4px;"></i>${neg} שליליים</span>
+      <span style="font-size:.82rem;color:#1d4ed8;font-weight:800;">${pct}% חיוביים</span>
+    </div>
+    <div style="padding:14px 16px;display:flex;flex-wrap:wrap;gap:6px;">${chips}</div>`;
+}
+
+// ── תוכן: מעל ממוצע המתחרים — דירוג כל הקופות לפי פער מצטבר ──
+function buildPeersCumGapsTable(peersCumGaps, myFundId) {
+  if (!peersCumGaps || !peersCumGaps.length) {
+    return `<div style="padding:28px;text-align:center;color:#94a3b8;font-size:.88rem;">
+      אין נתוני היסטוריה זמינים למסלול זה
+    </div>`;
+  }
+
+  const myRank = peersCumGaps.findIndex(p => p.isMe) + 1;
+  const total  = peersCumGaps.length;
+
+  // זהה מנהלים שמופיעים יותר מפעם אחת (שני מסלולים שונים)
+  const provCount = new Map();
+  for (const p of peersCumGaps) {
+    const n = getProviderDisplayName(p.ctrl, p.mgmt);
+    provCount.set(n, (provCount.get(n) || 0) + 1);
+  }
+
+  const maxGap = Math.max(...peersCumGaps.map(x => Math.abs(x.cumGap)), 0.1);
+
+  const rows = peersCumGaps.map((p, i) => {
+    const name     = getProviderDisplayName(p.ctrl, p.mgmt);
+    const isMe     = p.isMe;
+    const rank     = i + 1;
+    const gapPos   = p.cumGap >= 0;
+    const gapColor = gapPos ? '#16a34a' : '#ef4444';
+    const gapArrow = gapPos ? '▲' : '▼';
+    const gapSign  = gapPos ? '+' : '';
+    const bg       = isMe ? '#fffbeb' : rank % 2 === 0 ? '#f8fafc' : '#fff';
+    const rankBg   = isMe ? '#c9b772' : rank === 1 ? '#a88618' : rank === 2 ? '#94a3b8' : rank === 3 ? '#b45309' : '#e2e8f0';
+    const rankCol  = isMe || rank === 1 ? '#0c2134' : rank <= 3 ? '#fff' : '#475569';
+
+    // בר גרפי לפי גודל הפער
+    const barPct  = Math.round(Math.abs(p.cumGap) / maxGap * 100);
+    const barCol  = gapPos ? '#bbf7d0' : '#fecaca';
+    const barDir  = gapPos ? 'margin-right:auto' : 'margin-left:auto';
+
+    // שם המסלול — מוצג רק כשיש יותר ממסלול אחד למנהל
+    const fundSubLabel = provCount.get(name) > 1 && p.name
+      ? `<div style="font-size:.67rem;color:#94a3b8;margin-top:1px;font-weight:400;">${p.name}</div>`
+      : '';
+
+    return `<tr style="border-bottom:1px solid #f1f5f9;background:${bg};">
+      <td style="padding:8px 10px;text-align:center;width:36px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:${rankBg};color:${rankCol};font-size:.71rem;font-weight:800;">${rank}</span>
+      </td>
+      <td style="padding:8px 8px;font-size:.83rem;font-weight:${isMe?'900':'700'};color:${isMe?'#0c2134':'#1e293b'};">
+        <div>${name}${isMe?` <span style="font-size:.62rem;background:#fef3c7;color:#0c2134;border-radius:10px;padding:1px 6px;margin-right:4px;font-weight:800;">הקופה שלך</span>`:''}</div>
+        ${fundSubLabel}
+      </td>
+      <td style="padding:8px 10px;min-width:100px;">
+        <div style="display:flex;flex-direction:column;gap:3px;">
+          <span style="font-size:.84rem;font-weight:700;color:${gapColor};">${gapArrow} ${gapSign}${p.cumGap.toFixed(1)}%</span>
+          <div style="height:4px;border-radius:2px;background:#f1f5f9;overflow:hidden;">
+            <div style="height:100%;width:${barPct}%;background:${barCol};${barDir};border-radius:2px;"></div>
+          </div>
+        </div>
+      </td>
+      <td style="padding:8px 10px;font-size:.78rem;color:#64748b;text-align:center;white-space:nowrap;">
+        ${p.abovePct}%<br><span style="font-size:.68rem;color:#94a3b8;">${p.monthsValid} חו'</span>
+      </td>
+    </tr>`;
+  }).join('');
+
+  return `
+    <div style="padding:12px 16px;background:#fffbeb;border-bottom:1px solid #eadfbd;font-size:.8rem;color:#334155;line-height:1.6;display:flex;gap:14px;flex-wrap:wrap;">
+      ${myRank > 0 ? `הקופה שלך מדורגת <strong style="color:#0c2134;">#${myRank}</strong> מתוך ${total} קופות` : ''}
+      <span>פער מצטבר = תשואה הקופה מינוס ממוצע המסלול (ריבית דריבית, 36 חו')</span>
+    </div>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
+          <th style="padding:8px 10px;font-size:.71rem;color:#0c2134;font-weight:900;text-align:center;width:36px;">#</th>
+          <th style="padding:8px 8px;font-size:.71rem;color:#0c2134;font-weight:900;text-align:right;">חברה</th>
+          <th style="padding:8px 10px;font-size:.71rem;color:#0c2134;font-weight:900;text-align:right;">פער מצטבר</th>
+          <th style="padding:8px 10px;font-size:.71rem;color:#0c2134;font-weight:900;text-align:center;">% מעל ממוצע</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function buildSharpeDetail(peersSharpe, myFundId) {
+  if (!peersSharpe || !peersSharpe.length) {
+    return `<div style="padding:28px;text-align:center;color:#94a3b8;font-size:.88rem;">אין נתוני שארפ זמינים למסלול זה</div>`;
+  }
+
+  const ranked = peersSharpe
+    .filter(item => item.sharpe !== null && !isNaN(item.sharpe))
+    .sort((a, b) => b.sharpe - a.sharpe);
+
+  if (!ranked.length) {
+    return `<div style="padding:28px;text-align:center;color:#94a3b8;font-size:.88rem;">אין מספיק נתונים לחישוב מדד שארפ</div>`;
+  }
+
+  const rows = ranked.map((item, index) => {
+    const isMe = String(item.fundId) === String(myFundId);
+    const bg = isMe ? '#fffbeb' : index % 2 === 0 ? '#fff' : '#f8fafc';
+    const rankBg = isMe ? '#c9b772' : index === 0 ? '#a88618' : '#e2e8f0';
+    const rankCol = isMe || index === 0 ? '#0c2134' : '#475569';
+    const valClass = item.sharpe > 0 ? 'color:#16a34a;' : item.sharpe < 0 ? 'color:#ef4444;' : 'color:#475569;';
+    return `<tr style="background:${bg};border-bottom:1px solid #f1f5f9;">
+      <td style="padding:8px 8px;text-align:center;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:25px;height:25px;border-radius:50%;background:${rankBg};color:${rankCol};font-size:.72rem;font-weight:900;">${index + 1}</span>
+      </td>
+      <td style="padding:8px 8px;font-size:.83rem;font-weight:${isMe ? '900' : '700'};color:${isMe ? '#0c2134' : '#1e293b'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+        ${item.name}${isMe ? ` <span style="font-size:.62rem;background:#fef3c7;color:#0c2134;border-radius:10px;padding:1px 6px;margin-right:4px;font-weight:800;">הקופה שלך</span>` : ''}
+      </td>
+      <td style="padding:8px 8px;text-align:left;font-size:.84rem;font-weight:800;${valClass}">${item.sharpe.toFixed(2)}</td>
+    </tr>`;
+  }).join('');
+
+  return `
+    <div style="padding:12px 16px;background:#fffbeb;border-bottom:1px solid #eadfbd;font-size:.8rem;color:#334155;line-height:1.6;">
+      מדד שארפ בודק תשואה עודפת ביחס לסטיית התקן שלה ולריבית בשוק
+    </div>
+    <div style="padding:0 0 8px;">
+      <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
+        <colgroup>
+          <col style="width:46px;">
+          <col>
+          <col style="width:88px;">
+        </colgroup>
+        <thead>
+          <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
+            <th style="padding:9px 8px;text-align:center;font-size:.73rem;color:#0c2134;font-weight:900;">#</th>
+            <th style="padding:9px 8px;text-align:right;font-size:.73rem;color:#0c2134;font-weight:900;">חברה</th>
+            <th style="padding:9px 8px;text-align:left;font-size:.73rem;color:#0c2134;font-weight:900;">שארפ</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+// ── תוכן: מעל ממוצע המתחרים — טבלת חודש-חודש ──────────────
+function buildVsAvgDetail(hist36, peersMonthlyAvg) {
+  const sorted = [...hist36].sort((a,b) => Number(b.REPORT_PERIOD) - Number(a.REPORT_PERIOD));
+  let aboveCount = 0, validCount = 0;
+  let rows = '';
+
+  sorted.forEach(r => {
+    const myY  = parseFloat(r.MONTHLY_YIELD);
+    const peerY = peersMonthlyAvg?.get(String(r.REPORT_PERIOD));
+    if (isNaN(myY) || peerY == null) return;
+    validCount++;
+    const diff  = myY - peerY;
+    const above = diff >= 0;
+    if (above) aboveCount++;
+    const bg   = above ? '#f0fdf4' : '#fff1f2';
+    const col  = above ? '#16a34a' : '#ef4444';
+    const sign = above ? '+' : '';
+    rows += `<tr style="border-bottom:1px solid #f1f5f9;background:${bg};">
+      <td style="padding:7px 14px;font-size:.79rem;color:#475569;">${formatReportPeriod(r.REPORT_PERIOD)}</td>
+      <td style="padding:7px 10px;font-size:.83rem;font-weight:700;color:#1e293b;text-align:center;">${myY.toFixed(2)}%</td>
+      <td style="padding:7px 10px;font-size:.83rem;color:#475569;text-align:center;">${peerY.toFixed(2)}%</td>
+      <td style="padding:7px 14px;font-size:.83rem;font-weight:700;color:${col};text-align:center;">${sign}${diff.toFixed(2)}%</td>
+    </tr>`;
+  });
+
+  if (!rows) return `<div style="padding:24px;text-align:center;color:#94a3b8;font-size:.9rem;">נתונים טרם נטענו — יש לחכות לסיום הטעינה</div>`;
+
+  const sumPct = validCount ? Math.round(aboveCount / validCount * 100) : 0;
+  return `
+    <div style="padding:12px 16px;background:#fffbeb;border-bottom:1px solid #eadfbd;font-size:.82rem;color:#334155;line-height:1.6;">
+      מעל ממוצע ב-<strong style="color:#0c2134;">${aboveCount}</strong> מתוך ${validCount} חודשים (<strong style="color:${sumPct>=50?'#16a34a':'#ef4444'};">${sumPct}%</strong>)
+    </div>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
+          <th style="padding:9px 14px;font-size:.73rem;color:#0c2134;font-weight:900;text-align:right;">חודש</th>
+          <th style="padding:9px 10px;font-size:.73rem;color:#0c2134;font-weight:900;text-align:center;">הקופה</th>
+          <th style="padding:9px 10px;font-size:.73rem;color:#0c2134;font-weight:900;text-align:center;">ממוצע מתחרים</th>
+          <th style="padding:9px 14px;font-size:.73rem;color:#0c2134;font-weight:900;text-align:center;">פער</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+// ── תוכן: נכסים — דירוג כל הקופות במסלול ───────────────────
+function buildAssetsDetail(peers, myFundId) {
+  const sorted = [...peers]
+    .filter(p => parseFloat(p.TOTAL_ASSETS) > 0)
+    .sort((a,b) => parseFloat(b.TOTAL_ASSETS) - parseFloat(a.TOTAL_ASSETS));
+
+  const fmtAssets = v => {
+    const n = parseFloat(v);
+    return n >= 1000
+      ? `${(n/1000).toFixed(2)} מיליארד ₪`
+      : `${Math.round(n).toLocaleString('he-IL')} מיליון ₪`;
+  };
+
+  const rows = sorted.map((p, i) => {
+    const isMe    = String(p.FUND_ID) === String(myFundId);
+    const name    = getProviderDisplayName(p.CONTROLLING_CORPORATION, p.MANAGING_CORPORATION);
+    const assets  = fmtAssets(p.TOTAL_ASSETS);
+    const bg      = isMe ? '#fffbeb' : i % 2 === 0 ? '#fff' : '#f8fafc';
+    const rankBg  = isMe ? '#c9b772' : i === 0 ? '#a88618' : '#e2e8f0';
+    const rankCol = isMe || i === 0 ? '#0c2134' : '#475569';
+    return `<tr style="border-bottom:1px solid #f1f5f9;background:${bg};">
+      <td style="padding:8px 12px;text-align:center;width:40px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:25px;height:25px;border-radius:50%;background:${rankBg};color:${rankCol};font-size:.72rem;font-weight:900;">${i+1}</span>
+      </td>
+      <td style="padding:8px 12px;font-size:.84rem;font-weight:${isMe?'900':'700'};color:${isMe?'#0c2134':'#1e293b'};">
+        ${name}${isMe?' <span style="font-size:.62rem;background:#fef3c7;color:#0c2134;border-radius:10px;padding:1px 6px;margin-right:4px;font-weight:800;">הקופה שלך</span>':''}
+      </td>
+      <td style="padding:8px 14px;font-size:.86rem;font-weight:900;color:#0c2134;text-align:left;white-space:nowrap;">${assets}</td>
+    </tr>`;
+  }).join('');
+
+  return `
+    <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
+      <colgroup>
+        <col style="width:46px;">
+        <col>
+        <col style="width:170px;">
+      </colgroup>
+      <thead>
+        <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
+          <th style="padding:9px 8px;font-size:.73rem;color:#0c2134;font-weight:900;text-align:center;">#</th>
+          <th style="padding:9px 12px;font-size:.73rem;color:#0c2134;font-weight:900;text-align:right;">חברה</th>
+          <th style="padding:9px 14px;font-size:.73rem;color:#0c2134;font-weight:900;text-align:left;">סך נכסים</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function buildNetDepositsDetail(rows, myFundId) {
+  if (!rows || !rows.length) {
+    return `<div style="padding:28px;text-align:center;color:#94a3b8;font-size:.88rem;">
+      אין נתוני צבירה נטו זמינים למסלול זה
+    </div>`;
+  }
+
+  const ranked = [...rows].sort((a, b) => b.totalNetDeposits - a.totalNetDeposits);
+  const myRank = ranked.findIndex(row => String(row.fundId) === String(myFundId)) + 1;
+  const maxAbs = Math.max(...ranked.map(row => Math.abs(row.totalNetDeposits || 0)), 1);
+
+  const tableRows = ranked.map((row, index) => {
+    const isMe = String(row.fundId) === String(myFundId);
+    const name = getProviderDisplayName(row.ctrl, row.mgmt);
+    const value = Number(row.totalNetDeposits) || 0;
+    const isPositive = value >= 0;
+    const color = isPositive ? '#16a34a' : '#dc2626';
+    const barColor = isPositive ? '#bbf7d0' : '#fecaca';
+    const bg = isMe ? '#fffbeb' : index % 2 === 0 ? '#fff' : '#f8fafc';
+    const rankBg = isMe ? '#c9b772' : index === 0 ? '#a88618' : '#e2e8f0';
+    const rankCol = isMe || index === 0 ? '#0c2134' : '#475569';
+    const barPct = Math.max(6, Math.round(Math.abs(value) / maxAbs * 100));
+    const fundUrl = `fund.html?id=${encodeURIComponent(row.fundId)}&cat=${encodeURIComponent(_fundCatId || '')}`;
+
+    return `<tr style="border-bottom:1px solid #f1f5f9;background:${bg};">
+      <td style="padding:8px 10px;text-align:center;width:40px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:25px;height:25px;border-radius:50%;background:${rankBg};color:${rankCol};font-size:.72rem;font-weight:900;">${index + 1}</span>
+      </td>
+      <td style="padding:8px 8px;font-size:.84rem;font-weight:${isMe ? '900' : '700'};color:${isMe ? '#0c2134' : '#1e293b'};">
+        <div>${name}${isMe ? ` <span style="font-size:.62rem;background:#fef3c7;color:#0c2134;border-radius:10px;padding:1px 6px;margin-right:4px;font-weight:800;">הקופה שלך</span>` : ''}</div>
+        <a href="${fundUrl}" style="display:inline-flex;margin-top:2px;font-size:.68rem;color:#a88618;font-weight:800;text-decoration:none;">קופה #${row.fundId}</a>
+      </td>
+      <td style="padding:8px 10px;min-width:160px;">
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <span style="font-size:.86rem;font-weight:900;color:${color};">${formatMoneyMillions(value)}</span>
+          <div style="height:6px;border-radius:999px;background:#eef2f7;overflow:hidden;">
+            <div style="height:100%;width:${barPct}%;background:${barColor};border-radius:999px;"></div>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  return `
+    <div style="padding:12px 16px;background:#fffbeb;border-bottom:1px solid #eadfbd;font-size:.8rem;color:#334155;line-height:1.6;">
+      ${myRank > 0 ? `הקופה שלך מדורגת <strong style="color:#0c2134;">#${myRank}</strong> מתוך ${ranked.length} קופות. ` : ''}
+      צבירה נטו חיובית מצביעה על כניסת כספים ואמון משקיעים; צבירה שלילית עשויה להפעיל לחץ נזילות ופדיונות.
+    </div>
+    <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
+      <colgroup>
+        <col style="width:46px;">
+        <col>
+        <col style="width:190px;">
+      </colgroup>
+      <thead>
+        <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
+          <th style="padding:9px 8px;font-size:.73rem;color:#0c2134;font-weight:900;text-align:center;">#</th>
+          <th style="padding:9px 8px;font-size:.73rem;color:#0c2134;font-weight:900;text-align:right;">חברה</th>
+          <th style="padding:9px 10px;font-size:.73rem;color:#0c2134;font-weight:900;text-align:right;">צבירה נטו שנה</th>
+        </tr>
+      </thead>
+      <tbody>${tableRows}</tbody>
+    </table>`;
+}
+
+// ── task 21: מודל ציון מומנטום ────────────────────────────────
+function showMomentumModal(peers, myFundId, myName) {
+  // הסר מודל קיים
+  document.getElementById('momentum-modal')?.remove();
+
+  const ranked = calcAllPeersMomentum(peers, myFundId);
+
+  const rows = ranked.map((p, i) => {
+    const isMe = p.fundId === String(myFundId);
+    const barColor = p.score >= 70 ? '#16a34a' : p.score <= 30 ? '#dc2626' : '#c9b772';
+    const bar  = `<div style="width:${p.score}%;height:6px;background:${barColor};border-radius:999px;"></div>`;
+    const rowBg = isMe ? '#fffbeb' : i % 2 === 0 ? '#fff' : '#f8fafc';
+    const rankBg = isMe ? '#c9b772' : i === 0 ? '#a88618' : '#e2e8f0';
+    const rankCol = isMe || i === 0 ? '#0c2134' : '#475569';
+    const allocationBadge = allocationProfileIconBadge(p.allocation?.profile, p.trackLabel, { textFallback: false });
+    const stockOutlier = stockOutlierBadge(p.stockOutlier);
+    return `
+      <tr style="background:${rowBg};border-bottom:1px solid #f1f5f9;${isMe ? 'font-weight:900;' : ''}">
+        <td style="padding:8px 8px;text-align:center;">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:25px;height:25px;border-radius:50%;background:${rankBg};color:${rankCol};font-size:.72rem;font-weight:900;">${i+1}</span>
+        </td>
+        <td style="padding:8px 8px;font-size:.85rem;color:${isMe ? '#0c2134' : '#1e293b'};font-weight:${isMe ? '900' : '700'};">${p.name}${isMe?' <span style="font-size:.62rem;background:#fef3c7;color:#0c2134;border-radius:10px;padding:1px 6px;margin-right:4px;font-weight:800;">הקופה שלך</span>':''}${allocationBadge}${stockOutlier}</td>
+        <td style="padding:6px 8px;text-align:center;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="flex:1;background:#eef2f7;border-radius:999px;overflow:hidden;">${bar}</div>
+            <span style="font-weight:900;font-size:.85rem;color:${barColor};min-width:32px;">${p.score}</span>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+
+  const modal = document.createElement('div');
+  modal.id = 'momentum-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:16px;max-width:640px;width:100%;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.2);">
+      <div style="padding:18px 20px 14px;border-bottom:1px solid #eadfbd;display:flex;align-items:center;justify-content:space-between;background:#fffefa;">
+        <div>
+          <div style="font-weight:900;font-size:1.06rem;color:#0c2134;">מומנטום איכותי — ${_fundTrackFullLabel || 'כל קופות המסלול'}</div>
+          <div style="font-size:.8rem;color:#475569;margin-top:3px;font-weight:700;">${ranked.length} קופות מדורגות</div>
+        </div>
+        <button id="momentum-modal-close" style="border:none;background:none;font-size:1.2rem;cursor:pointer;color:#94a3b8;padding:4px;">✕</button>
+      </div>
+      <div style="overflow-y:auto;flex:1;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
+              <th style="padding:9px 8px;font-size:.73rem;color:#0c2134;text-align:center;width:46px;font-weight:900;">#</th>
+              <th style="padding:9px 8px;font-size:.73rem;color:#0c2134;text-align:right;font-weight:900;">חברה</th>
+              <th style="padding:9px 8px;font-size:.73rem;color:#0c2134;text-align:center;width:170px;font-weight:900;">ציון (0–100)</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <div style="padding:14px 20px;border-top:1px solid #eadfbd;background:#fffbeb;">
+        <div style="font-size:.74rem;color:#334155;line-height:1.6;">
+          <strong style="color:#0c2134;">מתודולוגיה:</strong>
+          6 חוד׳ (20%) · 12 חוד׳ (20%) · 3 שנים (15%) · 5 שנים (10%) · עקביות (15%) · שארפ (15%) · ניקיון אלוקציה (5%).
+          <span style="display:block;margin-top:6px;color:#92400e;">תגי האלוקציה הם סיווג זהיר בלבד, ללא קביעה שהחשיפה סייעה או פגעה.</span>
+        </div>
+      </div>
+    </div>`;
+
+  document.body.appendChild(modal);
+  modal.querySelector('#momentum-modal-close').addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+// ── task 10: בנה טאבים + חיפוש ב-sticky header ───────────────
+function buildFundPageHeader() {
+  const bar = document.getElementById('fund-category-tabs');
+  if (!bar) return;
+  bar.innerHTML = '';
+
+  const brandLink = document.createElement('a');
+  brandLink.href = 'index.html';
+  brandLink.className = 'fund-nav-brand';
+  brandLink.innerHTML = '<span class="fund-nav-logo-text">GemelHub</span><span class="fund-nav-logo-icon">💰</span>';
+  brandLink.addEventListener('click', () => { sessionStorage.setItem('gemelhubScrollTop', '1'); });
+  bar.appendChild(brandLink);
+
+  const backBtn = document.createElement('button');
+  backBtn.type = 'button';
+  backBtn.className = 'fund-nav-back';
+  backBtn.innerHTML = '<i class="fas fa-arrow-right"></i><span>חזרה</span>';
+  backBtn.addEventListener('click', () => {
+    window.scrollTo(0, 0);
+    history.back();
+  });
+  bar.appendChild(backBtn);
+
+  // home tab
+  const homeLink = document.createElement('a');
+  homeLink.href = 'index.html';
+  homeLink.className = 'cat-tab';
+  homeLink.style.textDecoration = 'none';
+  homeLink.innerHTML = '<span>דף בית</span>';
+  homeLink.addEventListener('click', () => { sessionStorage.setItem('gemelhubScrollTop', '1'); });
+  bar.appendChild(homeLink);
+
+  // category tabs — navigate to index.html?cat=xxx
+  CONFIG.PRODUCT_CATEGORIES.forEach(cat => {
+    const a = document.createElement('a');
+    a.href = `index.html?cat=${cat.id}`;
+    a.className = 'cat-tab' + (_fundCatId === cat.id ? ' active' : '');
+    a.style.textDecoration = 'none';
+    a.innerHTML = `<span>${cat.label}</span>`;
+    a.addEventListener('click', () => { sessionStorage.setItem('gemelhubScrollTop', '1'); });
+    bar.appendChild(a);
+  });
+
+  // show category name in title bar
+  const cat = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === _fundCatId);
+  const titleEl = document.getElementById('fund-cat-label');
+  if (titleEl && cat) titleEl.textContent = cat.label;
+
+  // search setup
+  setupFundSearch();
+}
+
+async function setupFundSearch() {
+  const input    = document.getElementById('fund-global-search');
+  const dropdown = document.getElementById('fund-search-dropdown');
+  if (!input || !dropdown) return;
+
+  let records = [];
+  let timer;
+
+  // טען גמל + פנסיה + פוליסות במקביל
+  try {
+    const [gemel, pension, polisa] = await Promise.all([
+      APIModule.getAllSearchable(),
+      APIModule.getAllSearchablePension().catch(() => []),
+      APIModule.getAllSearchablePolisa().catch(() => [])
+    ]);
+    records = [...gemel, ...pension, ...polisa];
+  } catch(e) {}
+
+  function doSearch(q) {
+    if (!q) { dropdown.style.display = 'none'; dropdown.innerHTML = ''; return; }
+    const ql = q.toLowerCase();
+    const seen = new Set(), results = [];
+    records.forEach(r => {
+      const name  = getProviderDisplayName(r.CONTROLLING_CORPORATION, r.MANAGING_CORPORATION);
+      const id    = String(r.FUND_ID || '');
+      const fname = (r.FUND_NAME || '');
+      const sub   = (r.SUB_SPECIALIZATION || '');
+      if (name.toLowerCase().includes(ql) || id.includes(ql) ||
+          fname.toLowerCase().includes(ql) || sub.toLowerCase().includes(ql)) {
+        if (!seen.has(id) && results.length < 12) {
+          seen.add(id);
+          const cls = r.FUND_CLASSIFICATION || '';
+          const catObj = CONFIG.PRODUCT_CATEGORIES.find(c =>
+            c.apiClassifications?.some(ac => cls === ac.trim()) ||
+            (c.pensionAPI && cls.includes('פנסי'))
+          );
+          results.push({ name, id, fname, sub, catId: catObj ? catObj.id : '' });
+        }
+      }
+    });
+    if (!results.length) { dropdown.style.display = 'none'; dropdown.innerHTML = ''; return; }
+    dropdown.innerHTML = results.map(res => `
+      <div class="sd-item" data-fundid="${res.id}" data-catid="${res.catId}">
+        <div class="sd-name">${res.name}</div>
+        <div class="sd-sub">${res.fname || res.sub} · <span class="sd-id">#${res.id}</span></div>
+      </div>`).join('');
+    dropdown.style.display = 'block';
+    dropdown.querySelectorAll('.sd-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const fid = item.dataset.fundid;
+        const cid = item.dataset.catid;
+        if (fid) window.location.href = `fund.html?id=${fid}&cat=${cid || ''}`;
+      });
+    });
+  }
+
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    const q = input.value.trim();
+    if (!q) { dropdown.style.display = 'none'; dropdown.innerHTML = ''; return; }
+    timer = setTimeout(() => doSearch(q), 180);
+  });
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { dropdown.style.display = 'none'; dropdown.innerHTML = ''; input.value = ''; }
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.hero-search')) { dropdown.style.display = 'none'; }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+  if (!location.hash) window.scrollTo(0, 0);
+  loadFundPage();
+  window.addEventListener('pageshow', () => {
+    if (!location.hash) window.scrollTo(0, 0);
+  });
+});
+</script>
+<button class="scroll-top-btn" id="scroll-top-btn" title="חזרה לראש העמוד" aria-label="חזרה לראש העמוד">
+  <i class="fas fa-chevron-up"></i>
+</button>
+<script>
+(function(){
+  const btn = document.getElementById('scroll-top-btn');
+  window.addEventListener('scroll', () => btn.classList.toggle('visible', window.scrollY > 300), {passive:true});
+  btn.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
+})();
+</script>
+
+<script>
+(function(){
+  function startFundPopups() {
+    try {
+      if (typeof startRotatingCtaPopup === 'function') {
+        startRotatingCtaPopup(10000);
+      }
+    } catch (e) {}
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof setupLeadsModal === 'function') setupLeadsModal();
+    startFundPopups();
+  });
+})();
+</script>
+
+<script>
+(function(){
+  function showFeatureLockMessage() {
+    var message = document.getElementById('feature-lock-message');
+    if (!message) return;
+    message.hidden = false;
+    message.classList.add('is-visible');
+    clearTimeout(message._hideTimer);
+    message._hideTimer = setTimeout(function() {
+      message.classList.remove('is-visible');
+      setTimeout(function() { message.hidden = true; }, 220);
+    }, 2800);
+  }
+
+  function ensureFundCategorySheet() {
+    var sheet = document.getElementById('mobile-category-sheet');
+    if (sheet) return sheet;
+    sheet = document.createElement('div');
+    sheet.id = 'mobile-category-sheet';
+    sheet.className = 'mobile-category-sheet';
+    sheet.hidden = true;
+    var cats = (typeof CONFIG !== 'undefined' && CONFIG.PRODUCT_CATEGORIES) ? CONFIG.PRODUCT_CATEGORIES : [];
+    sheet.innerHTML = [
+      '<div class="mobile-category-sheet-head">',
+      '<strong>קטגוריות</strong>',
+      '<button type="button" class="mobile-category-sheet-close" aria-label="סגור קטגוריות"><i class="fas fa-times" aria-hidden="true"></i></button>',
+      '</div>',
+      '<div class="mobile-category-sheet-list">',
+      cats.map(function(cat) {
+        return '<a class="mobile-category-option' + (cat.id === _fundCatId ? ' is-active' : '') + '" href="index.html?cat=' + encodeURIComponent(cat.id) + '">' +
+          '<span class="mobile-category-option-icon">' + (cat.icon || '') + '</span>' +
+          '<span>' + cat.label + '</span>' +
+        '</a>';
+      }).join(''),
+      '</div>'
+    ].join('');
+    document.body.appendChild(sheet);
+    sheet.querySelector('.mobile-category-sheet-close')?.addEventListener('click', function() {
+      sheet.classList.remove('is-open');
+      setTimeout(function() { if (!sheet.classList.contains('is-open')) sheet.hidden = true; }, 180);
+    });
+    return sheet;
+  }
+
+  function openFundCategorySheet() {
+    var sheet = ensureFundCategorySheet();
+    sheet.hidden = false;
+    requestAnimationFrame(function() { sheet.classList.add('is-open'); });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[data-fund-mobile-action]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        if (btn.dataset.fundMobileAction === 'categories') {
+          openFundCategorySheet();
+        }
+        if (btn.dataset.fundMobileAction === 'search') {
+          var search = document.getElementById('fund-global-search');
+          if (search) {
+            search.focus();
+            search.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+        if (btn.dataset.fundMobileAction === 'login') {
+          showFeatureLockMessage();
+        }
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

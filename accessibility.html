@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>הצהרת נגישות — GemelHub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .a11y-page { max-width: 800px; margin: 40px auto; padding: 0 20px 60px; }
+    .a11y-page h1 { font-size: 1.8rem; font-weight: 800; color: var(--blue); margin-bottom: 24px; }
+    .a11y-page h2 { font-size: 1.15rem; font-weight: 700; color: var(--gray-800); margin: 28px 0 10px; }
+    .a11y-page p, .a11y-page li { font-size: .95rem; color: var(--gray-700); line-height: 1.8; }
+    .a11y-page ul { padding-right: 20px; margin-bottom: 12px; }
+    .a11y-page a { color: var(--blue); }
+    .a11y-back { display: inline-block; margin-bottom: 28px; color: var(--blue); font-weight: 700; text-decoration: none; }
+    .a11y-back:hover { text-decoration: underline; }
+    .a11y-badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--blue-bg); border: 1.5px solid var(--blue);
+      border-radius: 10px; padding: 10px 18px; margin-bottom: 24px;
+      font-size: .88rem; font-weight: 700; color: var(--blue);
+    }
+    .a11y-badge i { font-size: 1.3rem; }
+  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
+</head>
+<body>
+<a href="#a11y-main" class="skip-link">דלג לתוכן הראשי</a>
+
+<header class="site-header" aria-label="כותרת האתר">
+  <div class="header-inner">
+    <a href="index.html" class="logo" style="text-decoration:none;">
+      <span class="logo-icon">💰</span>
+      <span class="logo-text">GemelHub</span>
+    </a>
+  </div>
+</header>
+
+<main id="a11y-main" class="a11y-page">
+  <a href="index.html" class="a11y-back"><i class="fas fa-arrow-right" aria-hidden="true"></i> חזרה לדף הבית</a>
+
+  <h1>הצהרת נגישות</h1>
+
+  <div class="a11y-badge">
+    <i class="fas fa-universal-access" aria-hidden="true"></i>
+    רמת נגישות: AA — תואם ת"י 5568 ו-WCAG 2.0
+  </div>
+
+  <p>
+    אתר <strong>GemelHub</strong> מחויב לנגישות דיגיטלית ומשקיע מאמצים כדי להנגיש את תכניו לכלל המשתמשים,
+    לרבות אנשים עם מוגבלויות.
+  </p>
+
+  <h2>תקן הנגישות</h2>
+  <p>
+    האתר תואם את המלצות <strong>התקן הישראלי ת"י 5568</strong> לנגישות תכנים באינטרנט ברמת
+    <strong>AA</strong>, ואת המלצות מסמך <strong>WCAG 2.0</strong> מאת ארגון W3C.
+  </p>
+
+  <h2>התאמות הנגישות באתר</h2>
+  <ul>
+    <li>כל הדפים כתובים בשפה עברית ומוגדרים עם <code>lang="he" dir="rtl"</code></li>
+    <li>ניתן לנווט בכל האתר באמצעות מקלדת בלבד (Tab, Shift+Tab, Enter, Space)</li>
+    <li>קיים קישור "דלג לתוכן הראשי" בראש כל עמוד עבור משתמשי מקלדת וקורא מסך</li>
+    <li>כל האלמנטים האינטראקטיביים (כפתורים, קישורים, שדות טפסים) מכילים תגיות aria מתאימות</li>
+    <li>טבלאות נתונים מכילות כותרות עמודות עם <code>scope="col"</code> ו-<code>aria-sort</code></li>
+    <li>מיון טבלה מוכרז לקוראי מסך בעת שינוי</li>
+    <li>אלמנטים דקורטיביים (אייקונים) מסומנים <code>aria-hidden="true"</code></li>
+    <li>חלוניות מודאל (popup) מכילות <code>role="dialog"</code> ו-<code>aria-modal="true"</code></li>
+    <li>שדות טופס מכילים <code>&lt;label&gt;</code> ו-<code>aria-required</code></li>
+    <li>אזורי ניהול חיים (<code>aria-live</code>) מודיעים על שינויים דינמיים בתוכן</li>
+    <li>מצבי טעינה מסומנים עם <code>role="status"</code></li>
+    <li>מוקד (Focus) גלוי ובולט בניווט מקלדת — מסגרת כתומה</li>
+    <li>גרפי canvas מכילים <code>role="img"</code> ותיאור טקסטואלי</li>
+    <li>קישורים חיצוניים פותחים בחלון חדש ומסומנים לקורא המסך</li>
+    <li>האתר מותאם לצפייה בדפדפנים הנפוצים: Chrome, Firefox, Edge, Safari</li>
+    <li>האתר מותאם לצפייה ושימוש בטלפון הסלולרי ובמכשירי מגע</li>
+    <li>ניתן להגדיל את גודל הטקסט עד 200% ללא פגיעה בתפקוד</li>
+  </ul>
+
+  <h2>דפדפנים ועזרי קריאה נתמכים</h2>
+  <ul>
+    <li>Chrome + NVDA</li>
+    <li>Firefox + NVDA</li>
+    <li>Edge + Narrator</li>
+    <li>Safari + VoiceOver (iOS)</li>
+  </ul>
+
+  <h2>מגבלות ידועות</h2>
+  <p>
+    גרפים ותרשימים מוצגים כאלמנטי canvas עם תיאור טקסטואלי כללי.
+    הנתונים המלאים זמינים בטבלאות הנגישות המופיעות באותו עמוד.
+  </p>
+
+  <h2>פניות בנושא נגישות</h2>
+  <p>
+    נתקלתם בבעיית נגישות? נשמח לשמוע ולשפר.
+    ניתן לפנות אלינו בדוא"ל:
+    <a href="mailto:roeir@ar-fo.co.il">roeir@ar-fo.co.il</a>
+  </p>
+
+  <h2>תאריך עדכון אחרון</h2>
+  <p>הצהרה זו עודכנה לאחרונה בחודש אפריל 2026.</p>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-logo">GemelHub 💰</div>
+      <p class="footer-disclaimer">
+        המידע באתר נועד לספק תמונת מצב כללית והשוואתית בלבד ואינו מהווה ייעוץ השקעות, שיווק פנסיוני או תחליף לייעוץ אישי המותאם לצרכי הלקוח. הנתונים מבוססים על מקורות פומביים ועשויים להכיל טעויות או אי-דיוקים. אין לראות בתשואות העבר התחייבות לתשואות עתידיות. לפני קבלת החלטה פיננסית מומלץ להתייעץ עם בעל רישיון.
+      </p>
+
+    <p class="footer-license">רועי רומנו, מתכנן פיננסי וסוכן פנסיוני מורשה | רישיון 00117164</p>
+    <p class="footer-contact"><a href="mailto:roeir@ar-fo.co.il">roeir@ar-fo.co.il</a> | <a href="tel:0528089808">052-8089808</a></p>
+    <div class="footer-legal">
+      <a href="disclosure.html">גילוי נאות</a>
+      <a href="privacy.html">מדיניות פרטיות</a>
+      <a href="terms.html">תנאי שימוש</a>
+      <a href="accessibility.html">הצהרת נגישות</a>
+    </div>
+
+  </div>
+</footer>
+
+<div class="cookie-banner" id="cookie-banner" aria-label="הודעת עוגיות">
+  <div class="cookie-banner-inner">
+    <p>האתר משתמש בעוגיות ובכלי מדידה לצורך תפעול תקין, אבטחה, שיפור חוויית המשתמש וניתוח שימוש. ניתן לקרוא עוד ב<a href="privacy.html">מדיניות הפרטיות</a>.</p>
+    <div class="cookie-banner-actions">
+      <button type="button" class="cookie-btn cookie-btn-secondary" id="cookie-close">סגור</button>
+      <button type="button" class="cookie-btn cookie-btn-primary" id="cookie-accept">הבנתי</button>
+    </div>
+  </div>
+</div>
+<script src="js/legal.js"></script>
+</body>
+</html>
