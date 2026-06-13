@@ -38,6 +38,10 @@
 }
 
 @media (max-width: 760px) {
+  html body {
+    zoom: .96;
+  }
+
   html body table.track-table th.col-sorted-head {
     top: auto !important;
     transform: none !important;

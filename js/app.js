@@ -3285,7 +3285,7 @@ const App = (() => {
   let mobileStickyCompactBlock = null;
   let mobileStickyScrollWrapper = null;
   let mobileStickyTheadRaf = 0;
-  const MOBILE_TABLE_ZOOM = 0.93;
+  const MOBILE_TABLE_ZOOM = 1;
 
   function ensureMobileStickyThead() {
     if (mobileStickyThead) return mobileStickyThead;
@@ -3426,11 +3426,14 @@ const App = (() => {
       if (cell) cell.textContent = getMobileStickyHeadText(th);
     });
 
+    const siteZoom = parseFloat(getComputedStyle(document.body).zoom) || 1;
+    const toZoomSpace = value => value / siteZoom;
+
     clone.hidden = false;
-    clone.style.top = `${Math.ceil(stickyHeaderBottom)}px`;
-    clone.style.left = `${Math.round(wrapperRect.left)}px`;
-    clone.style.width = `${Math.round(wrapperRect.width)}px`;
-    clone.style.height = `${Math.round(thead.getBoundingClientRect().height || 32)}px`;
+    clone.style.top = `${toZoomSpace(Math.ceil(stickyHeaderBottom))}px`;
+    clone.style.left = `${toZoomSpace(Math.round(wrapperRect.left))}px`;
+    clone.style.width = `${toZoomSpace(Math.round(wrapperRect.width))}px`;
+    clone.style.height = `${toZoomSpace(Math.round(thead.getBoundingClientRect().height || 32))}px`;
     const wrapperWidth = Math.round(wrapperRect.width);
     const managerRect = sourceThs[1]?.getBoundingClientRect();
     const stickyColumnsLeft = managerRect
@@ -3448,14 +3451,14 @@ const App = (() => {
       const leftClip = index < 2 ? 0 : Math.max(0, -rawLeft);
       const rightClip = index < 2 ? 0 : Math.max(0, rawLeft + width - visibleRight);
       const isOutsideWrapper = index >= 2 && visibleWidth <= 0;
-      cell.style.setProperty('left', `${rawLeft}px`, 'important');
+      cell.style.setProperty('left', `${toZoomSpace(rawLeft)}px`, 'important');
       cell.style.setProperty('right', 'auto', 'important');
-      cell.style.setProperty('width', `${width}px`, 'important');
-      cell.style.setProperty('min-width', `${width}px`, 'important');
-      cell.style.setProperty('max-width', `${width}px`, 'important');
+      cell.style.setProperty('width', `${toZoomSpace(width)}px`, 'important');
+      cell.style.setProperty('min-width', `${toZoomSpace(width)}px`, 'important');
+      cell.style.setProperty('max-width', `${toZoomSpace(width)}px`, 'important');
       cell.style.setProperty('overflow', 'hidden', 'important');
       cell.style.setProperty('text-overflow', 'clip', 'important');
-      cell.style.setProperty('clip-path', index < 2 ? 'none' : `inset(0 ${rightClip}px 0 ${leftClip}px)`, 'important');
+      cell.style.setProperty('clip-path', index < 2 ? 'none' : `inset(0 ${toZoomSpace(rightClip)}px 0 ${toZoomSpace(leftClip)}px)`, 'important');
       cell.style.setProperty('font-size', `${12 * MOBILE_TABLE_ZOOM}px`, 'important');
       cell.style.setProperty('line-height', '1.05', 'important');
       cell.style.setProperty('visibility', index < 2 || !isOutsideWrapper ? 'visible' : 'hidden', 'important');
