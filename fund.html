@@ -1271,11 +1271,15 @@ function renderYieldGroupedBars(labels, fundData, peerAvg) {
         }
       },
       scales: {
-        x: { ticks: { font: { family: 'Heebo', size: 9 }, maxRotation: 45, color: '#64748b' },
-             grid: { display: false } },
+        x: {
+          ticks: { font: { family: 'Heebo', size: 9 }, maxRotation: 45, color: '#64748b' },
+          grid: { display: false, drawBorder: false },
+          border: { display: !isMobileChart, color: '#e2e8f0' }
+        },
         y: { ticks: { font: { family: 'Heebo', size: 10 }, color: '#64748b',
                       callback: v => v.toFixed(1) + '%' },
-             grid: { color: '#e2e8f0' } }
+             grid: { color: '#e2e8f0', drawBorder: false },
+             border: { display: false } }
       }
     }
   });
