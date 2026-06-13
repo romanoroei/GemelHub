@@ -3364,7 +3364,11 @@ const App = (() => {
     let theadRect = thead.getBoundingClientRect();
     let controlsRect = activeBlock.querySelector('.track-header-controls')?.getBoundingClientRect();
     let stickyHeaderBottom = Math.max(headerRect.bottom, controlsRect?.bottom || 0);
-    const shouldShow = wrapperRect.bottom > stickyHeaderBottom + 36 && activeBlock.getBoundingClientRect().bottom > headerRect.height + 36;
+    const stickyHeadHeight = Math.ceil(theadRect.height || 32);
+    const stickyExitBuffer = stickyHeadHeight + 24;
+    const shouldShow =
+      wrapperRect.bottom > stickyHeaderBottom + stickyExitBuffer &&
+      activeBlock.getBoundingClientRect().bottom > stickyHeaderBottom + stickyExitBuffer;
     if (!shouldShow) {
       hideMobileStickyThead();
       return;
