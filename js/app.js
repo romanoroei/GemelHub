@@ -3285,6 +3285,7 @@ const App = (() => {
   let mobileStickyCompactBlock = null;
   let mobileStickyScrollWrapper = null;
   let mobileStickyTheadRaf = 0;
+  const MOBILE_TABLE_ZOOM = 0.87;
 
   function ensureMobileStickyThead() {
     if (mobileStickyThead) return mobileStickyThead;
@@ -3455,7 +3456,7 @@ const App = (() => {
       cell.style.setProperty('overflow', 'hidden', 'important');
       cell.style.setProperty('text-overflow', 'clip', 'important');
       cell.style.setProperty('clip-path', index < 2 ? 'none' : `inset(0 ${rightClip}px 0 ${leftClip}px)`, 'important');
-      cell.style.setProperty('font-size', '12px', 'important');
+      cell.style.setProperty('font-size', `${12 * MOBILE_TABLE_ZOOM}px`, 'important');
       cell.style.setProperty('line-height', '1.05', 'important');
       cell.style.setProperty('visibility', index < 2 || !isOutsideWrapper ? 'visible' : 'hidden', 'important');
     });
@@ -3871,6 +3872,7 @@ const App = (() => {
         table.style.removeProperty('width');
         table.style.removeProperty('min-width');
         table.style.removeProperty('max-width');
+        table.style.removeProperty('zoom');
         table.querySelector(':scope > colgroup')?.remove();
         table
           .querySelectorAll('th, td, td.yield-cell, td.exp-col, tr.average-row td, .yield-number, .exp-val, .th-yield-sub, thead th small')
@@ -3901,6 +3903,7 @@ const App = (() => {
       table.removeAttribute('data-mobile-layout');
       table.classList.add('mobile-finance-table');
       clearInlineMobileTableStyles();
+      table.style.setProperty('zoom', String(MOBILE_TABLE_ZOOM), 'important');
       const mobileColumnCount = table.querySelector('tr')?.children.length || 0;
       if (mobileColumnCount > 2) {
         const rankWidth = 24;
