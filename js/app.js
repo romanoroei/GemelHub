@@ -31,7 +31,7 @@ const App = (() => {
       loserIcon: 'tomato',
       winnerHighlightStyle: 'yellow',
       heatmap: false,
-      topThree: false
+      topThree: true
     },
     sandbox: {
       selections: [],  // pending selections (up to 6), not yet in portfolio
@@ -41,7 +41,7 @@ const App = (() => {
     }
   };
   const ADVANCED_OPTIONS_STORAGE_KEY = 'gemelhubAdvancedOptionsOpenV3';
-  const DISPLAY_OPTIONS_STORAGE_KEY = 'gemelhubDisplayOptionsV2';
+  const DISPLAY_OPTIONS_STORAGE_KEY = 'gemelhubDisplayOptionsV3';
   const FILTER_STATE_STORAGE_KEY = 'gemelhub_filter_state_v1';
   const DEFAULT_TARGET_POPULATION = 'כלל האוכלוסיה';
   const SANDBOX_STORAGE_KEY = 'gemelhub_sandbox_portfolio_v1';
@@ -64,7 +64,7 @@ const App = (() => {
     loserIcon: 'none',
     winnerHighlightStyle: 'none',
     heatmap: false,
-    topThree: false
+    topThree: true
   });
 
   const REMOVED_CATEGORY_IDS = new Set(['removed_legacy_category']);
@@ -3811,26 +3811,12 @@ const App = (() => {
           <span class="track-label">${categoryLabel ? `<span class="track-category">${categoryLabel}</span>` : ''}<span class="track-label-prefix">מסלול</span> <span class="track-name">${track.label}</span></span>
         </div>
         <div class="track-header-controls">${buildTrackHeaderControls(track)}</div>
-        <button class="track-toggle-btn" title="הצג/הסתר" aria-expanded="true" aria-label="הצג/הסתר טבלת מסלול">
-          <i class="fas fa-chevron-down" aria-hidden="true"></i>
-        </button>
       </div>
       <div class="track-table-wrapper">
         ${buildTrackTable(records, APIModule.computeAverage(records), latestPeriod, track.id, item.sortField, item.sortDir)}
       </div>
       <div class="track-block-note">הנתונים מעודכנים עד ${formatReportPeriod(latestPeriod)}, ומוצגים לצורכי מידע והשוואה בלבד ואינם מהווים ייעוץ, שיווק או המלצה אישית. התשואות מוצגות לפני דמי ניהול.</div>
     `;
-
-    // Toggle collapse
-    const hdr    = block.querySelector('.track-header');
-    const wrapper= block.querySelector('.track-table-wrapper');
-    const togBtn = block.querySelector('.track-toggle-btn');
-    hdr.addEventListener('click', e => {
-      if (e.target.closest('th') || e.target.closest('.tbl-ctrl-btn')) return;
-      const c = wrapper.classList.toggle('collapsed');
-      togBtn.classList.toggle('collapsed', c);
-      togBtn.setAttribute('aria-expanded', c ? 'false' : 'true');
-    });
 
     // מיון עצמאי לכל קובייה בלבד (event delegation)
     block.addEventListener('click', e => {
@@ -3911,7 +3897,7 @@ const App = (() => {
       if (mobileColumnCount > 2) {
         const rankWidth = 24;
         const managerWidth = 110;
-        const restWidth = mobileColumnCount > 8 ? 50 : 54;
+        const restWidth = mobileColumnCount > 8 ? 56 : 60;
         const tableWidth = rankWidth + managerWidth + (restWidth * (mobileColumnCount - 2));
         table.style.setProperty('width', `${tableWidth}px`, 'important');
         table.style.setProperty('min-width', `${tableWidth}px`, 'important');
