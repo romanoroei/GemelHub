@@ -39,7 +39,7 @@
 
 @media (max-width: 760px) {
   html body {
-    zoom: 1;
+    zoom: .97;
   }
 
   html body table.track-table th.col-sorted-head {
@@ -104,6 +104,18 @@
 
   html body table.track-table .prov-id {
     font-size: clamp(.4rem, 1.25vw, .48rem) !important;
+  }
+}
+
+@media (max-width: 374px) {
+  html body {
+    zoom: .95;
+  }
+}
+
+@media (min-width: 430px) and (max-width: 760px) {
+  html body {
+    zoom: 1;
   }
 }
 
@@ -2984,7 +2996,7 @@ table.track-table {
   table-layout: auto;
 }
 /* col widths: rank | מנהל | חודש | YTD | 1Y | 3Y | 5Y | מניות | חו"ל | מט"ח */
-table.track-table th:nth-child(1)  { width: 24px; }   /* rank */
+table.track-table th:nth-child(1)  { width: 30px; }   /* rank */
 table.track-table th:nth-child(2)  { width: 105px; }  /* מנהל */
 table.track-table th:nth-child(3)  { width: 74px; }   /* חודשי */
 table.track-table th:nth-child(4)  { width: 72px; }   /* YTD */
@@ -5149,9 +5161,9 @@ table.track-table.has-yearly-returns {
 
 table.track-table.has-yearly-returns th:nth-child(1),
 table.track-table.has-yearly-returns td:nth-child(1) {
-  width: 24px !important;
-  min-width: 24px !important;
-  max-width: 24px !important;
+  width: 30px !important;
+  min-width: 30px !important;
+  max-width: 30px !important;
 }
 
 table.track-table.has-yearly-returns th:nth-child(2),
@@ -15416,11 +15428,11 @@ body.h2h-active,
     z-index: 702 !important;
   }
 
-  /* Manager — just left of rank (offset = rankWidth = 24px) */
+  /* Manager — just left of rank (offset = rankWidth = 30px) */
   html body #tracks-container .track-table-wrapper table.track-table th:nth-child(2),
   html body #tracks-container .track-table-wrapper table.track-table td:nth-child(2) {
     position: sticky !important;
-    right: 24px !important;
+    right: 30px !important;
     background: #fff !important;
     z-index: 699 !important;
   }
@@ -15458,6 +15470,10 @@ body.h2h-active,
 }
 
 @media (max-width: 760px) {
+  :focus-visible {
+    outline-color: rgba(12, 33, 52, .55);
+  }
+
   html body #tracks-container .track-block.is-mobile-sticky-compact .track-header,
   html body #tracks-container:not(.tracks-two-col-blocked) .track-block.is-mobile-sticky-compact .track-header {
     grid-template-columns: minmax(0, 1fr) !important;
@@ -15500,6 +15516,44 @@ body.h2h-active,
     line-height: 1 !important;
     font-weight: 900 !important;
     z-index: 2 !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table .rank-cell {
+    overflow: visible !important;
+    white-space: nowrap !important;
+    padding-inline: 0 !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table .rank-number,
+  html body #tracks-container .track-table-wrapper table.track-table .rank-tag-icons {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    vertical-align: middle !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table .rank-tag-icons {
+    gap: 1px !important;
+    margin-inline-start: 2px !important;
+    max-width: 14px !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table .rank-tag-icons .table-allocation-icons {
+    display: inline-flex !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    transform: scale(.72) !important;
+    transform-origin: center !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table .rank-tag-icons .allocation-outlier-wrap,
+  html body #tracks-container .track-table-wrapper table.track-table .rank-tag-icons .allocation-outlier-btn,
+  html body #tracks-container .track-table-wrapper table.track-table .rank-tag-icons .table-allocation-icon,
+  html body #tracks-container .track-table-wrapper table.track-table .rank-tag-icons .table-allocation-flag-il,
+  html body #tracks-container .track-table-wrapper table.track-table .rank-tag-icons .table-allocation-warning {
+    margin: 0 !important;
+    transform: scale(.72) !important;
+    transform-origin: center !important;
   }
 
   html body .mobile-app-nav {

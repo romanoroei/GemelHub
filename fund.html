@@ -21,8 +21,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=mobile-100-fund-polish-20260613" />
-  <link rel="stylesheet" href="css/fund.css?v=mobile-100-fund-polish-20260613" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-97-chart-tags-20260613" />
+  <link rel="stylesheet" href="css/fund.css?v=mobile-97-chart-tags-20260613" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="fund-page">
@@ -371,8 +371,8 @@ const PieLeaderLines = {
       // שם
       ctx.fillStyle = '#0f172a';
       const isMobilePie = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
-      const labelFontSize = isMobilePie ? 16 : 12;
-      const valueFontSize = isMobilePie ? 17 : 12;
+      const labelFontSize = isMobilePie ? 18 : 12;
+      const valueFontSize = isMobilePie ? 19 : 12;
       ctx.font = `800 ${labelFontSize}px Heebo, Arial, sans-serif`;
       ctx.textAlign = isRight ? 'left' : 'right';
       ctx.textBaseline = 'bottom';
@@ -727,6 +727,15 @@ function buildPieCharts(r) {
   const stockPct   = Math.min(100, Math.max(0, (parseFloat(r.STOCK_MARKET_EXPOSURE)       || 0) / ta * 100));
   const fxPct      = Math.min(100, Math.max(0, (parseFloat(r.FOREIGN_CURRENCY_EXPOSURE)   || 0) / ta * 100));
   const foreignPct = Math.min(100, Math.max(0, (parseFloat(r.FOREIGN_EXPOSURE)             || 0) / ta * 100));
+  const isMobilePieChart = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+  const pieCanvasSize = isMobilePieChart ? 156 : 240;
+  const pieCtx = (id) => {
+    const canvas = document.getElementById(id);
+    if (!canvas) return null;
+    canvas.width = pieCanvasSize;
+    canvas.height = pieCanvasSize;
+    return canvas.getContext('2d');
+  };
 
   // task 15: padding פנימי לאפשר מקום לקווי leader lines
   const pieOpts = (label1, pct1, color1, label2, color2) => ({
@@ -738,7 +747,7 @@ function buildPieCharts(r) {
     },
     options: {
       responsive: false,
-      layout: { padding: 56 },
+      layout: { padding: isMobilePieChart ? 34 : 56 },
       plugins: {
         legend: { display: false },
         tooltip: { callbacks: { label: c => `${c.label}: ${c.raw.toFixed(1)}%` } },
@@ -747,11 +756,11 @@ function buildPieCharts(r) {
     }
   });
 
-  new Chart(document.getElementById('pie-stocks').getContext('2d'),
+  new Chart(pieCtx('pie-stocks'),
     pieOpts('מניות', stockPct, '#0c2134', 'אג"ח', '#c9b772'));
-  new Chart(document.getElementById('pie-fx').getContext('2d'),
+  new Chart(pieCtx('pie-fx'),
     pieOpts('מט"ח', fxPct, '#a88618', 'שקל', '#64748b'));
-  new Chart(document.getElementById('pie-foreign').getContext('2d'),
+  new Chart(pieCtx('pie-foreign'),
     pieOpts('חו"ל', foreignPct, '#0c2134', 'ישראל', '#c9b772'));
 }
 
@@ -1212,7 +1221,15 @@ function renderYieldGroupedBars(labels, fundData, peerAvg) {
   const chartW = isMobileChart ? Math.max(280, avail - 36) : Math.max(needW, avail - 36); // -36 לפצות על negative margins
   const chartH = 280;
   if (inner)  inner.style.minWidth  = chartW + 'px';
-  if (canvas) { canvas.width = chartW; canvas.height = chartH; }
+  if (canvas) {
+    canvas.width = chartW;
+    canvas.height = chartH;
+    canvas.style.border = '0';
+    canvas.style.borderTop = '0';
+    canvas.style.borderBottom = '0';
+    canvas.style.boxShadow = 'none';
+    canvas.style.outline = '0';
+  }
 
   // סיכום מעל/מתחת — הועבר לקובייה "מעל ממוצע המתחרים" בשורת הסטטיסטיקות
   const sumEl = document.getElementById('yield-chart-summary');
@@ -1306,36 +1323,38 @@ function renderAssetsChart(labels, monthly, cumulative, barColors, opts = {}) {
   });
   const tickFormatter = opts.tickFormatter || (v => `${v}%`);
   const ctx = document.getElementById('history-chart-static').getContext('2d');
+  const datasets = [
+    {
+      type: 'bar',
+      label: barLabel,
+      data: monthly,
+      backgroundColor: barColors,
+      borderRadius: 4,
+      borderSkipped: false,
+      yAxisID: 'yMonthly',
+      order: 2
+    }
+  ];
+  if (!isMobile) {
+    datasets.push({
+      type: 'line',
+      label: lineLabel,
+      data: cumulative,
+      borderColor: '#94a3b8',
+      backgroundColor: 'rgba(148,163,184,0.08)',
+      borderWidth: 2,
+      pointRadius: 3,
+      pointBackgroundColor: '#94a3b8',
+      tension: 0.35,
+      fill: true,
+      yAxisID: 'yCumulative',
+      order: 1
+    });
+  }
   historyChartStatic = new Chart(ctx, {
     data: {
       labels,
-      datasets: [
-        {
-          type: 'bar',
-          label: barLabel,
-          data: monthly,
-          backgroundColor: barColors,
-          borderRadius: 4,
-          borderSkipped: false,
-          yAxisID: 'yMonthly',
-          order: 2
-        },
-        {
-          type: 'line',
-          label: lineLabel,
-          data: cumulative,
-          hidden: isMobile,
-          borderColor: '#f97316',
-          backgroundColor: 'rgba(249,115,22,0.08)',
-          borderWidth: 2.5,
-          pointRadius: 3,
-          pointBackgroundColor: '#f97316',
-          tension: 0.35,
-          fill: true,
-          yAxisID: 'yCumulative',
-          order: 1
-        }
-      ]
+      datasets
     },
     options: {
       responsive: true,
@@ -1369,10 +1388,11 @@ function renderAssetsChart(labels, monthly, cumulative, barColors, opts = {}) {
           type: 'linear',
           display: !isMobile,
           position: 'left',
-          title: { display: true, text: cumulativeAxisTitle, font: { family: 'Heebo', size: 10 }, color: '#f97316' },
-          ticks: { font: { family: 'Heebo', size: 9 }, color: '#f97316',
+          title: { display: !isMobile, text: cumulativeAxisTitle, font: { family: 'Heebo', size: 10 }, color: '#64748b' },
+          ticks: { display: !isMobile, font: { family: 'Heebo', size: 9 }, color: '#64748b',
             callback: v => tickFormatter(v) },
-          grid: { drawOnChartArea: false }
+          grid: { drawOnChartArea: false, drawTicks: false },
+          border: { display: false }
         }
       }
     }
@@ -1709,6 +1729,7 @@ function renderPeersTable(myFundId, myName) {
       { textFallback: false }
     );
     const stockOutlier = stockOutlierBadge(calcStockExposureOutlier(r, sorted));
+    const rankTags = `${allocationIcon}${stockOutlier}`;
 
     const y12m   = _yields12M ? _yields12M.get(String(r.FUND_ID)) : undefined;
     const yr1Cell = y12m === null
@@ -1716,8 +1737,8 @@ function renderPeersTable(myFundId, myName) {
       : y12m !== undefined ? _peerYield(y12m, 'yr1', peerSort.field==='1yr' ? yieldClass(y12m) : '', di) : '-';
 
     const nameCell = isMe
-      ? `<span style="font-weight:800;color:${color}">${name} ★</span>${allocationIcon}${stockOutlier}`
-      : `<span class="peer-name-link" data-fundid="${r.FUND_ID}" style="cursor:pointer;font-weight:600;color:${color};text-decoration:underline dotted;">${name}</span>${allocationIcon}${stockOutlier}`;
+      ? `<span style="font-weight:800;color:${color}">${name} ★</span>`
+      : `<span class="peer-name-link" data-fundid="${r.FUND_ID}" style="cursor:pointer;font-weight:600;color:${color};text-decoration:underline dotted;">${name}</span>`;
 
     const yearlyCells = yearlyYears.map(year => {
       const value = peerYearlyState.yieldMap?.get(String(r.FUND_ID))?.get(year);
@@ -1728,7 +1749,7 @@ function renderPeersTable(myFundId, myName) {
 
     return `
       <tr class="${isMe ? 'peer-me' : ''}">
-        <td class="rank-cell"><span class="peer-rank${isMe?' peer-rank-me':''}">${rank}</span></td>
+        <td class="rank-cell"><span class="peer-rank${isMe?' peer-rank-me':''}">${rank}</span><span class="rank-tag-icons">${rankTags}</span></td>
         <td>${nameCell}</td>
         ${peerReturnMode === 'yearly' ? `
         <td class="${sc('yearly_ytd')}">${peerCell(r.YEAR_TO_DATE_YIELD, 'yearly_ytd', 'yearly_ytd', di)}</td>

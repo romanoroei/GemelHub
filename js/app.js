@@ -3490,7 +3490,7 @@ const App = (() => {
       }
       if (th2) {
         th2.style.setProperty('position', 'sticky', 'important');
-        th2.style.setProperty('right', '24px', 'important');
+        th2.style.setProperty('right', '30px', 'important');
         th2.style.setProperty('z-index', '700', 'important');
         th2.style.setProperty('background', '#fefce8', 'important');
         th2.style.setProperty('box-shadow', '-3px 0 8px -3px rgba(15,23,42,.2)', 'important');
@@ -3896,7 +3896,7 @@ const App = (() => {
       table.style.setProperty('zoom', String(MOBILE_TABLE_ZOOM), 'important');
       const mobileColumnCount = table.querySelector('tr')?.children.length || 0;
       if (mobileColumnCount > 2) {
-        const rankWidth = 24;
+        const rankWidth = 30;
         const managerWidth = 110;
         const restWidth = mobileColumnCount > 8 ? 56 : 60;
         const tableWidth = rankWidth + managerWidth + (restWidth * (mobileColumnCount - 2));
@@ -3984,7 +3984,7 @@ const App = (() => {
       table.querySelector(':scope > colgroup')?.remove();
       const columnCount = table.querySelector('tr')?.children.length || 0;
       if (columnCount > 2) {
-        const rankWidth = 24;
+        const rankWidth = 30;
         const managerWidth = 102;
         const restWidth = columnCount > 8 ? 56 : 62;
         const tableWidth = Math.max(560, managerWidth + restWidth * (columnCount - 2));
@@ -4009,15 +4009,15 @@ const App = (() => {
           rankCell.style.setProperty('right', '0', 'important');
           rankCell.style.setProperty('z-index', rankCell.tagName === 'TH' ? '13' : '9', 'important');
           rankCell.style.setProperty('background', rankCell.tagName === 'TH' ? '#fefce8' : '#fff', 'important');
-          rankCell.style.setProperty('width', '24px', 'important');
-          rankCell.style.setProperty('min-width', '24px', 'important');
-          rankCell.style.setProperty('max-width', '24px', 'important');
+          rankCell.style.setProperty('width', '30px', 'important');
+          rankCell.style.setProperty('min-width', '30px', 'important');
+          rankCell.style.setProperty('max-width', '30px', 'important');
           rankCell.style.setProperty('padding-inline', '0', 'important');
         }
         if (managerCell) {
           managerCell.style.setProperty('display', 'table-cell', 'important');
           managerCell.style.setProperty('position', 'sticky', 'important');
-          managerCell.style.setProperty('right', '24px', 'important');
+          managerCell.style.setProperty('right', '30px', 'important');
           managerCell.style.setProperty('z-index', managerCell.tagName === 'TH' ? '12' : '8', 'important');
           managerCell.style.setProperty('background', managerCell.tagName === 'TH' ? '#fefce8' : '#fff', 'important');
           managerCell.style.setProperty('width', '102px', 'important');
@@ -4171,7 +4171,7 @@ const App = (() => {
       }
       if (th2) {
         th2.style.setProperty('position', 'sticky', 'important');
-        th2.style.setProperty('right', '24px', 'important');
+        th2.style.setProperty('right', '30px', 'important');
         th2.style.setProperty('z-index', '700', 'important');
         th2.style.setProperty('top', 'auto', 'important');
         th2.style.setProperty('box-shadow', '-1px 0 0 rgba(203,213,225,.9), -8px 0 12px -12px rgba(15,23,42,.35)', 'important');
@@ -6543,6 +6543,7 @@ const App = (() => {
         { stock, abroad, fx }
       );
       const allocationProfileIcon = allocationProfileIcons(allocationProfile, `${r.FUND_NAME || ''} ${r.SUB_SPECIALIZATION || ''}`);
+      const rankTagIcons = `${allocationProfileIcon}${allocationIcon}`;
 
       // דירוג (task 10) — rank לפי הסדר הממוין הנוכחי
       const rank = idx + 1;
@@ -6561,7 +6562,7 @@ const App = (() => {
 
       rows += `
         <tr>
-          <td class="rank-cell">${rank}</td>
+          <td class="rank-cell"><span class="rank-number">${rank}</span><span class="rank-tag-icons">${rankTagIcons}</span></td>
           <td scope="row">
             <div class="provider-cell fund-link" data-fundid="${fundId}" title="לחץ לפרטי הקופה">
               <span class="provider-status-stack"
@@ -6591,7 +6592,7 @@ const App = (() => {
                   aria-label="הוסף ${escapeAttr(name)} לארגז החול שלי" />
               </span>
               <div>
-                <div class="prov-name" style="color:${color}"><span class="prov-name-text">${name}</span>${allocationProfileIcon}${allocationIcon}</div>
+                <div class="prov-name" style="color:${color}"><span class="prov-name-text">${name}</span></div>
                 <div class="prov-id">#${fundId}</div>
               </div>
               <span class="fund-link-icon"><i class="fas fa-external-link-alt"></i></span>
