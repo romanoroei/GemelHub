@@ -15474,15 +15474,20 @@ body.h2h-active,
     justify-content: center !important;
     gap: 0 !important;
     position: relative !important;
+    overflow: visible !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table .yield-value-wrap {
+    overflow: visible !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table .yield-value-wrap .yield-number-shell .yield-top-rank {
     display: inline-flex !important;
     position: absolute !important;
-    inset-inline-start: 1px !important;
+    inset-inline-start: 50% !important;
     inset-inline-end: auto !important;
-    top: -5px !important;
-    transform: none !important;
+    top: -8px !important;
+    transform: translateX(-50%) !important;
     width: 8px !important;
     height: 8px !important;
     min-width: 8px !important;
@@ -15501,10 +15506,22 @@ body.h2h-active,
     background: linear-gradient(180deg, #fff8dc 0%, #f4d06f 100%) !important;
     border: 1px solid rgba(146, 100, 14, .42) !important;
     box-shadow: 0 -10px 26px rgba(146, 100, 14, .22), inset 0 1px 0 rgba(255, 255, 255, .82) !important;
+    min-height: 66px !important;
+    padding: 8px !important;
+    gap: 5px !important;
+    border-radius: 20px !important;
   }
 
   html body .mobile-app-nav-item {
     color: #4a3108 !important;
+    min-height: 50px !important;
+    font-size: .74rem !important;
+    gap: 4px !important;
+    border-radius: 14px !important;
+  }
+
+  html body .mobile-app-nav-item i {
+    font-size: 1.12rem !important;
   }
 
   html body .mobile-app-nav-item i {
@@ -15519,6 +15536,13 @@ body.h2h-active,
 
   html body .mobile-app-nav-item.is-active i {
     color: #b8860b !important;
+  }
+
+  html body .feature-lock-message {
+    bottom: calc(142px + env(safe-area-inset-bottom, 0px)) !important;
+    z-index: 8350 !important;
+    min-height: 48px !important;
+    font-size: .92rem !important;
   }
 
   html body .sandbox-bar {

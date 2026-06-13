@@ -21,8 +21,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=mobile-table-polish-20260612an" />
-  <link rel="stylesheet" href="css/fund.css?v=mobile-table-polish-20260613c" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-rank-nav-fund-20260613" />
+  <link rel="stylesheet" href="css/fund.css?v=mobile-rank-nav-fund-20260613" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="fund-page">
@@ -1287,6 +1287,7 @@ function renderYieldGroupedBars(labels, fundData, peerAvg) {
 // ── גרף שינוי היקף נכסים: עמודות חודשיות + קו מצטבר ──────────
 function renderAssetsChart(labels, monthly, cumulative, barColors, opts = {}) {
   if (historyChartStatic) { historyChartStatic.destroy(); historyChartStatic = null; }
+  const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
   const barLabel = opts.barLabel || 'שינוי חודשי (%)';
   const lineLabel = opts.lineLabel || 'שינוי מצטבר (%)';
   const monthlyAxisTitle = opts.monthlyAxisTitle || 'חודשי (%)';
@@ -1315,6 +1316,7 @@ function renderAssetsChart(labels, monthly, cumulative, barColors, opts = {}) {
           type: 'line',
           label: lineLabel,
           data: cumulative,
+          hidden: isMobile,
           borderColor: '#f97316',
           backgroundColor: 'rgba(249,115,22,0.08)',
           borderWidth: 2.5,
@@ -1357,6 +1359,7 @@ function renderAssetsChart(labels, monthly, cumulative, barColors, opts = {}) {
         },
         yCumulative: {
           type: 'linear',
+          display: !isMobile,
           position: 'left',
           title: { display: true, text: cumulativeAxisTitle, font: { family: 'Heebo', size: 10 }, color: '#f97316' },
           ticks: { font: { family: 'Heebo', size: 9 }, color: '#f97316',
@@ -1648,16 +1651,34 @@ function renderPeersTable(myFundId, myName) {
     yr3:     _pSafeMin(sorted.map(r => parseFloat(r.YIELD_TRAILING_3_YRS))),
     yr5:     _pSafeMin(sorted.map(r => parseFloat(r.YIELD_TRAILING_5_YRS))),
   };
+  const _pRankMapFor = (values) => {
+    const ranked = values
+      .map((value, index) => ({ value: parseFloat(value), index }))
+      .filter(item => !isNaN(item.value) && isFinite(item.value))
+      .sort((a, b) => b.value - a.value);
+    const map = new Map();
+    ranked.slice(0, 3).forEach((item, rankIndex) => map.set(item.index, rankIndex + 1));
+    return map;
+  };
+  const _pRankVals = {
+    monthly: _pRankMapFor(sorted.map(r => parseFloat(r.MONTHLY_YIELD))),
+    ytd:     _pRankMapFor(sorted.map(r => parseFloat(r.YEAR_TO_DATE_YIELD))),
+    yr1:     _pRankMapFor(sorted.map(r => _yields12M?.get(String(r.FUND_ID)))),
+    yr3:     _pRankMapFor(sorted.map(r => parseFloat(r.YIELD_TRAILING_3_YRS))),
+    yr5:     _pRankMapFor(sorted.map(r => parseFloat(r.YIELD_TRAILING_5_YRS))),
+  };
   const _pGold   = (val, key) => { const n = parseFloat(val); return (!isNaN(n) && _pMaxVals[key] !== null && n === _pMaxVals[key]) ? '<span class="peer-yield-badge peer-yield-badge-best" aria-hidden="true">&#129351;</span>' : ''; };
   const _pTomato = (val, key) => { const n = parseFloat(val); return (!isNaN(n) && _pMinVals[key] !== null && n === _pMinVals[key]) ? '<span class="peer-yield-badge peer-yield-badge-worst" aria-hidden="true">&#127813;</span>' : ''; };
-  const _peerYield = (val, key, cls = '') => {
+  const _peerYield = (val, key, cls = '', rowIndex = null) => {
     const pct = formatPercent(val);
     if (pct === '-' || pct === '—') return pct;
     const classes = ['peer-yield-value', cls].filter(Boolean).join(' ');
-    return `<span class="${classes}">${_pGold(val, key)}${_pTomato(val, key)}<span class="peer-yield-number">${pct}</span></span>`;
+    const rank = rowIndex !== null ? _pRankVals[key]?.get(rowIndex) : null;
+    const rankHtml = rank ? `<span class="peer-yield-rank peer-yield-rank-${rank}" aria-hidden="true">${rank}</span>` : '';
+    return `<span class="${classes}">${_pGold(val, key)}${_pTomato(val, key)}<span class="peer-yield-number">${pct}</span>${rankHtml}</span>`;
   };
   // פונקציית עזר: צובעת תשואה רק כשהעמודה ממויינת
-  const peerCell = (val, key, sortKey) => _peerYield(val, key, peerSort.field === sortKey ? yieldClass(val) : '');
+  const peerCell = (val, key, sortKey, rowIndex = null) => _peerYield(val, key, peerSort.field === sortKey ? yieldClass(val) : '', rowIndex);
   const yearlyYears = peerReturnMode === 'yearly' ? (peerYearlyState.years || []) : [];
 
   // issue 4: זיהוי שמות מנהל כפולים — הוסף סיומת מ-FUND_NAME
@@ -1684,7 +1705,7 @@ function renderPeersTable(myFundId, myName) {
     const y12m   = _yields12M ? _yields12M.get(String(r.FUND_ID)) : undefined;
     const yr1Cell = y12m === null
       ? '<span title="אין נתוני 12 חודשים" style="color:var(--gray-300)">—</span>'
-      : y12m !== undefined ? _peerYield(y12m, 'yr1', peerSort.field==='1yr' ? yieldClass(y12m) : '') : '-';
+      : y12m !== undefined ? _peerYield(y12m, 'yr1', peerSort.field==='1yr' ? yieldClass(y12m) : '', di) : '-';
 
     const nameCell = isMe
       ? `<span style="font-weight:800;color:${color}">${name} ★</span>${allocationIcon}${stockOutlier}`
@@ -1693,7 +1714,7 @@ function renderPeersTable(myFundId, myName) {
     const yearlyCells = yearlyYears.map(year => {
       const value = peerYearlyState.yieldMap?.get(String(r.FUND_ID))?.get(year);
       const sortKey = `year_${year}`;
-      const content = value == null || isNaN(value) ? '<span style="color:var(--gray-300)">—</span>' : peerCell(value, sortKey, sortKey);
+      const content = value == null || isNaN(value) ? '<span style="color:var(--gray-300)">—</span>' : peerCell(value, sortKey, sortKey, di);
       return `<td class="${sc(sortKey)}">${content}</td>`;
     }).join('');
 
@@ -1702,13 +1723,13 @@ function renderPeersTable(myFundId, myName) {
         <td class="rank-cell"><span class="peer-rank${isMe?' peer-rank-me':''}">${rank}</span></td>
         <td>${nameCell}</td>
         ${peerReturnMode === 'yearly' ? `
-        <td class="${sc('yearly_ytd')}">${peerCell(r.YEAR_TO_DATE_YIELD, 'yearly_ytd', 'yearly_ytd')}</td>
+        <td class="${sc('yearly_ytd')}">${peerCell(r.YEAR_TO_DATE_YIELD, 'yearly_ytd', 'yearly_ytd', di)}</td>
         ${peerYearlyState.loading ? '<td colspan="4" style="color:var(--gray-400);font-style:italic;">טוען שנים...</td>' : yearlyCells || '<td colspan="4" style="color:var(--gray-400);">לא נמצאו שנים מלאות</td>'}` : `
-        <td class="${sc('monthly')}">${peerCell(r.MONTHLY_YIELD, 'monthly', 'monthly')}</td>
-        <td class="${sc('ytd')}">${peerCell(r.YEAR_TO_DATE_YIELD, 'ytd', 'ytd')}</td>
+        <td class="${sc('monthly')}">${peerCell(r.MONTHLY_YIELD, 'monthly', 'monthly', di)}</td>
+        <td class="${sc('ytd')}">${peerCell(r.YEAR_TO_DATE_YIELD, 'ytd', 'ytd', di)}</td>
         <td class="${sc('1yr')}">${yr1Cell}</td>
-        <td class="${sc('3yr')}">${peerCell(r.YIELD_TRAILING_3_YRS, 'yr3', '3yr')}</td>
-        <td class="${sc('5yr')}">${peerCell(r.YIELD_TRAILING_5_YRS, 'yr5', '5yr')}</td>`}
+        <td class="${sc('3yr')}">${peerCell(r.YIELD_TRAILING_3_YRS, 'yr3', '3yr', di)}</td>
+        <td class="${sc('5yr')}">${peerCell(r.YIELD_TRAILING_5_YRS, 'yr5', '5yr', di)}</td>`}
       </tr>`;
   }).join('');
 
@@ -1786,7 +1807,7 @@ function renderPeersTable(myFundId, myName) {
         const managerWidth = parseInt(getComputedStyle(document.body).getPropertyValue('--fund-mobile-manager-w')) || 128;
         const scroll = table.closest('.peers-table-scroll');
         // window.innerWidth - 30 = screen minus fund-card(8×2) + fund-page-main(6×2) + border(1×2) padding
-        const wrapperWidth = window.innerWidth - 30;
+        const wrapperWidth = window.innerWidth;
         // After layout, expand wrap+scroll container to screen edges
         requestAnimationFrame(() => {
           const r = wrap.getBoundingClientRect();
@@ -1798,7 +1819,7 @@ function renderPeersTable(myFundId, myName) {
           if (scroll) scroll.style.setProperty('width', `${window.innerWidth}px`, 'important');
         });
         const returnCount = columnCount - 2;
-        const restWidth = Math.floor((wrapperWidth - rankWidth - managerWidth) / returnCount);
+        const restWidth = Math.max(52, Math.floor((wrapperWidth - rankWidth - managerWidth) / returnCount));
         const totalWidth = rankWidth + managerWidth + (restWidth * returnCount);
         table.style.setProperty('width', `${totalWidth}px`, 'important');
         table.style.setProperty('min-width', '0', 'important');

@@ -2876,3 +2876,171 @@ body.fund-page .fund-sticky-bar .fsb-id {
     background: rgba(220, 38, 38, 0.1) !important;
   }
 }
+
+/* Final mobile peer-table pass: full-width table with compact rank markers. */
+@media (max-width: 760px) {
+  html body.fund-page .fund-page-main {
+    overflow-x: clip !important;
+  }
+
+  html body.fund-page #peers-table-wrap,
+  html body.fund-page .peers-table-scroll {
+    display: block !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table {
+    display: table !important;
+    width: 100vw !important;
+    min-width: 100vw !important;
+    max-width: none !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+    background: #fff !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table thead {
+    display: table-header-group !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table tbody {
+    display: table-row-group !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table tr,
+  html body.fund-page #peers-table-wrap table.track-table tr.average-row {
+    display: table-row !important;
+    width: auto !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table th,
+  html body.fund-page #peers-table-wrap table.track-table td {
+    display: table-cell !important;
+    position: static !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    padding: 6px 2px !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(229, 222, 191, .72) !important;
+    border-radius: 0 !important;
+    font-size: .74rem !important;
+    line-height: 1.14 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    background: #fff !important;
+    box-shadow: none !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table th {
+    background: #fefce8 !important;
+    font-size: .66rem !important;
+    font-weight: 900 !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table td::before {
+    content: none !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table th:nth-child(1),
+  html body.fund-page #peers-table-wrap table.track-table td:nth-child(1) {
+    width: 28px !important;
+    min-width: 28px !important;
+    max-width: 28px !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table th:nth-child(2),
+  html body.fund-page #peers-table-wrap table.track-table td:nth-child(2) {
+    position: sticky !important;
+    right: 0 !important;
+    z-index: 10 !important;
+    width: 112px !important;
+    min-width: 112px !important;
+    max-width: 112px !important;
+    text-align: right !important;
+    background: #fff !important;
+    box-shadow: -1px 0 0 rgba(229, 222, 191, .9), -8px 0 12px -12px rgba(15, 23, 42, .35) !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table thead th:nth-child(2) {
+    z-index: 12 !important;
+    background: #fefce8 !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table th:nth-child(n+3),
+  html body.fund-page #peers-table-wrap table.track-table td:nth-child(n+3) {
+    width: 52px !important;
+    min-width: 52px !important;
+    max-width: 52px !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table td:nth-child(2),
+  html body.fund-page #peers-table-wrap table.track-table td:nth-child(2) * {
+    font-size: .7rem !important;
+    line-height: 1.05 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table .peer-yield-value {
+    position: relative !important;
+    display: inline-flex !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: visible !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table .peer-yield-rank {
+    position: absolute !important;
+    top: -8px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 8px !important;
+    height: 8px !important;
+    min-width: 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 999px !important;
+    background: #dbeafe !important;
+    border: 1px solid #bfdbfe !important;
+    color: #1d4ed8 !important;
+    font-size: 5.5px !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table .peer-yield-rank-1 {
+    background: #fef3c7 !important;
+    border-color: #fbbf24 !important;
+    color: #92400e !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table .peer-yield-rank-2 {
+    background: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    color: #475569 !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table .peer-yield-rank-3 {
+    background: #ffedd5 !important;
+    border-color: #fdba74 !important;
+    color: #9a3412 !important;
+  }
+}
