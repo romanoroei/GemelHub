@@ -3283,6 +3283,8 @@ const App = (() => {
   let mobileStickyThead = null;
   let mobileStickyTheadBlock = null;
   let mobileStickyCompactBlock = null;
+  let mobileStickyScrollWrapper = null;
+  let mobileStickyTheadRaf = 0;
 
   function ensureMobileStickyThead() {
     if (mobileStickyThead) return mobileStickyThead;
@@ -3297,6 +3299,26 @@ const App = (() => {
     if (mobileStickyThead) mobileStickyThead.hidden = true;
     if (mobileStickyTheadBlock) mobileStickyTheadBlock.classList.remove('is-mobile-sticky-source');
     mobileStickyTheadBlock = null;
+    bindMobileStickyTheadScroll(null);
+  }
+
+  function scheduleMobileStickyTheadUpdate() {
+    if (mobileStickyTheadRaf) return;
+    mobileStickyTheadRaf = requestAnimationFrame(() => {
+      mobileStickyTheadRaf = 0;
+      updateMobileStickyThead();
+    });
+  }
+
+  function bindMobileStickyTheadScroll(wrapper) {
+    if (mobileStickyScrollWrapper === wrapper) return;
+    if (mobileStickyScrollWrapper) {
+      mobileStickyScrollWrapper.removeEventListener('scroll', scheduleMobileStickyTheadUpdate);
+    }
+    mobileStickyScrollWrapper = wrapper;
+    if (mobileStickyScrollWrapper) {
+      mobileStickyScrollWrapper.addEventListener('scroll', scheduleMobileStickyTheadUpdate, { passive: true });
+    }
   }
 
   function setMobileStickyCompactBlock(block) {
@@ -3358,6 +3380,7 @@ const App = (() => {
       hideMobileStickyThead();
       return;
     }
+    bindMobileStickyTheadScroll(wrapper);
 
     let headerRect = trackHeader.getBoundingClientRect();
     let wrapperRect = wrapper.getBoundingClientRect();
@@ -3407,33 +3430,30 @@ const App = (() => {
     clone.style.left = `${Math.round(wrapperRect.left)}px`;
     clone.style.width = `${Math.round(wrapperRect.width)}px`;
     clone.style.height = `${Math.round(thead.getBoundingClientRect().height || 32)}px`;
-    const managerRect = sourceThs[1]?.getBoundingClientRect();
-    const stickyColumnsLeft = managerRect
-      ? Math.round(managerRect.left - wrapperRect.left)
-      : Math.round(wrapperRect.width);
     sourceThs.forEach((th, index) => {
       const cell = clone.children[index];
       if (!cell) return;
       const thRect = th.getBoundingClientRect();
       const rawLeft = Math.round(thRect.left - wrapperRect.left);
       const width = Math.round(thRect.width);
-      const clippedByWrapper = Math.min(width, Math.round(wrapperRect.width) - rawLeft);
-      const visibleWidth = index < 2
-        ? width
-        : Math.min(width, clippedByWrapper, stickyColumnsLeft - rawLeft);
+      const isOutsideWrapper = rawLeft + width <= 0 || rawLeft >= Math.round(wrapperRect.width);
       cell.style.setProperty('left', `${rawLeft}px`, 'important');
       cell.style.setProperty('right', 'auto', 'important');
-      cell.style.setProperty('width', `${Math.max(0, visibleWidth)}px`, 'important');
-      cell.style.setProperty('min-width', `${Math.max(0, visibleWidth)}px`, 'important');
-      cell.style.setProperty('max-width', `${Math.max(0, visibleWidth)}px`, 'important');
-      cell.style.setProperty('visibility', index < 2 || visibleWidth > 4 ? 'visible' : 'hidden', 'important');
+      cell.style.setProperty('width', `${width}px`, 'important');
+      cell.style.setProperty('min-width', `${width}px`, 'important');
+      cell.style.setProperty('max-width', `${width}px`, 'important');
+      cell.style.setProperty('overflow', 'hidden', 'important');
+      cell.style.setProperty('text-overflow', 'clip', 'important');
+      cell.style.setProperty('font-size', '12px', 'important');
+      cell.style.setProperty('line-height', '1.05', 'important');
+      cell.style.setProperty('visibility', index < 2 || !isOutsideWrapper ? 'visible' : 'hidden', 'important');
     });
   }
 
   function setupMobileStickyThead() {
-    window.addEventListener('scroll', updateMobileStickyThead, { passive: true });
-    window.addEventListener('resize', updateMobileStickyThead);
-    document.addEventListener('scroll', updateMobileStickyThead, true);
+    window.addEventListener('scroll', scheduleMobileStickyTheadUpdate, { passive: true });
+    window.addEventListener('resize', scheduleMobileStickyTheadUpdate);
+    document.addEventListener('scroll', scheduleMobileStickyTheadUpdate, true);
   }
 
   // Apply inline sticky to rank+manager thead cells.
@@ -3889,8 +3909,8 @@ const App = (() => {
         table.insertBefore(colgroup, table.firstChild);
       }
       table.querySelectorAll('th, td').forEach(el => {
-        el.style.setProperty('font-size', '.82rem', 'important');
-        el.style.setProperty('line-height', '1.12', 'important');
+        el.style.setProperty('font-size', '12px', 'important');
+        el.style.setProperty('line-height', '1.05', 'important');
       });
       table.querySelectorAll('thead th').forEach(el => {
         el.style.setProperty('background', '#fefce8', 'important');
@@ -3903,21 +3923,21 @@ const App = (() => {
         el.style.setProperty('box-shadow', 'none', 'important');
       });
       table.querySelectorAll('td.yield-cell, td.exp-col, .yield-value-wrap, .yield-number-shell, .yield-number, .exp-val').forEach(el => {
-        el.style.setProperty('font-size', '.82rem', 'important');
-        el.style.setProperty('line-height', '1.12', 'important');
+        el.style.setProperty('font-size', '12px', 'important');
+        el.style.setProperty('line-height', '1.05', 'important');
         el.style.setProperty('font-weight', '800', 'important');
       });
       table.querySelectorAll('.prov-name').forEach(el => {
-        el.style.setProperty('font-size', '.74rem', 'important');
-        el.style.setProperty('line-height', '1.04', 'important');
+        el.style.setProperty('font-size', '12px', 'important');
+        el.style.setProperty('line-height', '1.05', 'important');
       });
       table.querySelectorAll('.prov-id').forEach(el => {
-        el.style.setProperty('font-size', '.61rem', 'important');
+        el.style.setProperty('font-size', '10px', 'important');
         el.style.setProperty('line-height', '1.02', 'important');
       });
       table.querySelectorAll('tr.average-row td, tr.average-row td *, tr.average-row .yield-number').forEach(el => {
-        el.style.setProperty('font-size', '.78rem', 'important');
-        el.style.setProperty('line-height', '1.08', 'important');
+        el.style.setProperty('font-size', '12px', 'important');
+        el.style.setProperty('line-height', '1.05', 'important');
         el.style.setProperty('font-weight', '850', 'important');
       });
       normalizeMobileFinanceTablePresentation(table);
@@ -4102,8 +4122,8 @@ const App = (() => {
     if (!isMobile) return;
     scope.querySelectorAll('table.mobile-finance-table, table.mobile-finance-table *').forEach(el => {
       if (el.matches('thead th')) {
-        el.style.setProperty('font-size', '.82rem', 'important');
-        el.style.setProperty('line-height', '1.12', 'important');
+        el.style.setProperty('font-size', '12px', 'important');
+        el.style.setProperty('line-height', '1.05', 'important');
         el.style.setProperty('font-weight', '900', 'important');
         el.style.setProperty('background', '#fefce8', 'important');
         el.style.setProperty('color', '#0c2134', 'important');
@@ -4114,21 +4134,21 @@ const App = (() => {
         el.style.setProperty('box-shadow', 'none', 'important');
       }
       if (el.matches('td.yield-cell, td.exp-col, .yield-value-wrap, .yield-number-shell, .yield-number, .exp-val')) {
-        el.style.setProperty('font-size', '.82rem', 'important');
-        el.style.setProperty('line-height', '1.12', 'important');
+        el.style.setProperty('font-size', '12px', 'important');
+        el.style.setProperty('line-height', '1.05', 'important');
         el.style.setProperty('font-weight', '800', 'important');
       }
       if (el.matches('.prov-name')) {
-        el.style.setProperty('font-size', '.74rem', 'important');
-        el.style.setProperty('line-height', '1.04', 'important');
+        el.style.setProperty('font-size', '12px', 'important');
+        el.style.setProperty('line-height', '1.05', 'important');
       }
       if (el.matches('.prov-id')) {
-        el.style.setProperty('font-size', '.61rem', 'important');
+        el.style.setProperty('font-size', '10px', 'important');
         el.style.setProperty('line-height', '1.02', 'important');
       }
       if (el.matches('tr.average-row td, tr.average-row td *, tr.average-row .yield-number')) {
-        el.style.setProperty('font-size', '.78rem', 'important');
-        el.style.setProperty('line-height', '1.08', 'important');
+        el.style.setProperty('font-size', '12px', 'important');
+        el.style.setProperty('line-height', '1.05', 'important');
         el.style.setProperty('font-weight', '850', 'important');
       }
     });
