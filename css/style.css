@@ -39,7 +39,7 @@
 
 @media (max-width: 760px) {
   html body {
-    zoom: .95;
+    zoom: 1;
   }
 
   html body table.track-table th.col-sorted-head {

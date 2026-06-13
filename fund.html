@@ -21,8 +21,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=mobile-rank-marker-size-20260613" />
-  <link rel="stylesheet" href="css/fund.css?v=mobile-rank-marker-size-20260613" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-100-fund-polish-20260613" />
+  <link rel="stylesheet" href="css/fund.css?v=mobile-100-fund-polish-20260613" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="fund-page">
@@ -182,8 +182,9 @@
         </div>
 
         <div id="peer-filter-banner-wrap"></div>
-        <div class="fund-card-title">
-          <i class="fas fa-balance-scale"></i> השוואה למתחרים — <span id="peers-section-title">אותו מסלול</span>
+        <div class="fund-card-title fund-compare-title">
+          <span class="fund-compare-title-main"><i class="fas fa-balance-scale"></i> השוואה למתחרים</span>
+          <span id="peers-section-title" class="fund-compare-title-sub">אותו מסלול</span>
         </div>
 <div id="peers-table-wrap"></div>
       </div>
@@ -369,13 +370,16 @@ const PieLeaderLines = {
       ctx.stroke();
       // שם
       ctx.fillStyle = '#0f172a';
-      ctx.font = '800 12px Heebo, Arial, sans-serif';
+      const isMobilePie = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+      const labelFontSize = isMobilePie ? 16 : 12;
+      const valueFontSize = isMobilePie ? 17 : 12;
+      ctx.font = `800 ${labelFontSize}px Heebo, Arial, sans-serif`;
       ctx.textAlign = isRight ? 'left' : 'right';
       ctx.textBaseline = 'bottom';
       ctx.fillText(label, xL, y2 - 1);
       // אחוז
       ctx.fillStyle = '#0f172a';
-      ctx.font = '900 12px Heebo, Arial, sans-serif';
+      ctx.font = `900 ${valueFontSize}px Heebo, Arial, sans-serif`;
       ctx.textBaseline = 'top';
       ctx.fillText(`${val.toFixed(1)}%`, xL, y2 + 1);
       ctx.restore();
@@ -1273,13 +1277,13 @@ function renderYieldGroupedBars(labels, fundData, peerAvg) {
       scales: {
         x: {
           ticks: { font: { family: 'Heebo', size: 9 }, maxRotation: 45, color: '#64748b' },
-          grid: { display: false, drawBorder: false },
-          border: { display: !isMobileChart, color: '#e2e8f0' }
+          grid: { display: false, drawOnChartArea: false, drawTicks: false, drawBorder: false },
+          border: { display: false, color: 'transparent', width: 0 }
         },
         y: { ticks: { font: { family: 'Heebo', size: 10 }, color: '#64748b',
                       callback: v => v.toFixed(1) + '%' },
-             grid: { color: '#e2e8f0', drawBorder: false },
-             border: { display: false } }
+             grid: { color: '#e2e8f0', drawTicks: false, drawBorder: false },
+             border: { display: false, color: 'transparent', width: 0 } }
       }
     }
   });
@@ -1808,7 +1812,7 @@ function renderPeersTable(myFundId, myName) {
       if (columnCount > 2) {
         // Read widths from CSS variables defined on body.fund-page in the mobile media query
         const rankWidth = parseInt(getComputedStyle(document.body).getPropertyValue('--fund-mobile-rank-w')) || 30;
-        const managerWidth = parseInt(getComputedStyle(document.body).getPropertyValue('--fund-mobile-manager-w')) || 128;
+        const managerWidth = parseInt(getComputedStyle(document.body).getPropertyValue('--fund-mobile-manager-w')) || 124;
         const scroll = table.closest('.peers-table-scroll');
         // window.innerWidth - 30 = screen minus fund-card(8×2) + fund-page-main(6×2) + border(1×2) padding
         const wrapperWidth = window.innerWidth;
@@ -1823,7 +1827,7 @@ function renderPeersTable(myFundId, myName) {
           if (scroll) scroll.style.setProperty('width', `${window.innerWidth}px`, 'important');
         });
         const returnCount = columnCount - 2;
-        const restWidth = Math.max(52, Math.floor((wrapperWidth - rankWidth - managerWidth) / returnCount));
+        const restWidth = Math.max(56, Math.floor((wrapperWidth - rankWidth - managerWidth) / returnCount));
         const totalWidth = rankWidth + managerWidth + (restWidth * returnCount);
         table.style.setProperty('width', `${totalWidth}px`, 'important');
         table.style.setProperty('min-width', '0', 'important');
