@@ -3403,17 +3403,26 @@ const App = (() => {
     clone.style.left = `${Math.round(wrapperRect.left)}px`;
     clone.style.width = `${Math.round(wrapperRect.width)}px`;
     clone.style.height = `${Math.round(thead.getBoundingClientRect().height || 32)}px`;
+    const managerRect = sourceThs[1]?.getBoundingClientRect();
+    const stickyColumnsLeft = managerRect
+      ? Math.round(managerRect.left - wrapperRect.left)
+      : Math.round(wrapperRect.width);
     sourceThs.forEach((th, index) => {
       const cell = clone.children[index];
-      if (!cell || index < 2) return;
+      if (!cell) return;
       const thRect = th.getBoundingClientRect();
       const rawLeft = Math.round(thRect.left - wrapperRect.left);
       const width = Math.round(thRect.width);
-      const managerLeft = Math.round(wrapperRect.width - 30 - 150);
-      const visibleWidth = Math.min(width, managerLeft - rawLeft);
-      cell.style.left = `${rawLeft}px`;
-      cell.style.width = `${Math.max(0, visibleWidth)}px`;
-      cell.style.visibility = visibleWidth > 4 ? 'visible' : 'hidden';
+      const clippedByWrapper = Math.min(width, Math.round(wrapperRect.width) - rawLeft);
+      const visibleWidth = index < 2
+        ? width
+        : Math.min(width, clippedByWrapper, stickyColumnsLeft - rawLeft);
+      cell.style.setProperty('left', `${rawLeft}px`, 'important');
+      cell.style.setProperty('right', 'auto', 'important');
+      cell.style.setProperty('width', `${Math.max(0, visibleWidth)}px`, 'important');
+      cell.style.setProperty('min-width', `${Math.max(0, visibleWidth)}px`, 'important');
+      cell.style.setProperty('max-width', `${Math.max(0, visibleWidth)}px`, 'important');
+      cell.style.setProperty('visibility', index < 2 || visibleWidth > 4 ? 'visible' : 'hidden', 'important');
     });
   }
 
