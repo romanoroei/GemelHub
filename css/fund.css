@@ -1196,6 +1196,22 @@ body.fund-page #peers-table-wrap .track-table th {
   vertical-align: top;
 }
 
+body.fund-page .fund-peers-card #yield-chart-scroll-wrap,
+body.fund-page .fund-peers-card #yield-chart-inner,
+body.fund-page .fund-peers-card #yield-chart-legend,
+body.fund-page .fund-peers-card #assets-chart-legend,
+body.fund-page .fund-peers-card #static-chart-wrap,
+body.fund-page .fund-peers-card canvas {
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+}
+
+body.fund-page .fund-peers-card #assets-chart-legend span:nth-child(2) {
+  display: none !important;
+}
+
 /* Sort arrows — black on fund page */
 body.fund-page .sort-arrow         { color: #1a1a1a !important; }
 body.fund-page .sort-arrow.active  { color: #92400e !important; }
@@ -3135,6 +3151,38 @@ body.fund-page .fund-sticky-bar .fsb-id {
   html body.fund-page #peers-table-wrap table.track-table .rank-tag-icons i,
   html body.fund-page #peers-table-wrap table.track-table .rank-tag-icons img {
     transform: scale(.76) !important;
+    transform-origin: center !important;
+    margin: 0 !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table .peer-fund-id {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+    margin-top: 1px !important;
+    color: #94a3b8 !important;
+    font-size: .64rem !important;
+    line-height: 1 !important;
+    font-weight: 800 !important;
+    direction: ltr !important;
+    unicode-bidi: isolate !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table .fund-id-tag-icons {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 1px !important;
+    margin-inline-start: 2px !important;
+    vertical-align: middle !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table .fund-id-tag-icons .allocation-profile-badge,
+  html body.fund-page #peers-table-wrap table.track-table .fund-id-tag-icons .allocation-outlier-badge,
+  html body.fund-page #peers-table-wrap table.track-table .fund-id-tag-icons .stock-outlier-badge,
+  html body.fund-page #peers-table-wrap table.track-table .fund-id-tag-icons i,
+  html body.fund-page #peers-table-wrap table.track-table .fund-id-tag-icons img {
+    transform: scale(.72) !important;
     transform-origin: center !important;
     margin: 0 !important;
   }

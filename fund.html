@@ -21,8 +21,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=mobile-97-chart-tags-20260613" />
-  <link rel="stylesheet" href="css/fund.css?v=mobile-97-chart-tags-20260613" />
+  <link rel="stylesheet" href="css/style.css?v=fund-id-tags-no-orange-line-20260614" />
+  <link rel="stylesheet" href="css/fund.css?v=fund-id-tags-no-orange-line-20260614" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="fund-page">
@@ -165,7 +165,6 @@
         <!-- אגדה לגרף היקף נכסים -->
         <div id="assets-chart-legend" style="display:none; justify-content:center; gap:20px; margin-top:6px; font-size:.78rem; color:var(--gray-600);">
           <span><span style="display:inline-block;width:12px;height:12px;background:#c9b772;border-radius:2px;margin-left:4px;vertical-align:middle;"></span>שינוי חודשי (%)</span>
-          <span><span style="display:inline-block;width:22px;height:3px;background:#f97316;border-radius:2px;margin-left:4px;vertical-align:middle;"></span>שינוי מצטבר (%)</span>
         </div>
       </div>
 
@@ -1101,10 +1100,8 @@ function updateAssetsChartLegend(mode = 'percent') {
   if (!legend) return;
   const isNetDeposits = mode === 'netDeposits';
   legend.innerHTML = isNetDeposits
-    ? `<span><span style="display:inline-block;width:12px;height:12px;background:#c9b772;border-radius:2px;margin-left:4px;vertical-align:middle;"></span>צבירה נטו חודשית</span>
-       <span><span style="display:inline-block;width:22px;height:3px;background:#f97316;border-radius:2px;margin-left:4px;vertical-align:middle;"></span>ממוצע נע 12 חודשים</span>`
-    : `<span><span style="display:inline-block;width:12px;height:12px;background:#c9b772;border-radius:2px;margin-left:4px;vertical-align:middle;"></span>שינוי חודשי (%)</span>
-       <span><span style="display:inline-block;width:22px;height:3px;background:#f97316;border-radius:2px;margin-left:4px;vertical-align:middle;"></span>שינוי מצטבר (%)</span>`;
+    ? `<span><span style="display:inline-block;width:12px;height:12px;background:#c9b772;border-radius:2px;margin-left:4px;vertical-align:middle;"></span>צבירה נטו חודשית</span>`
+    : `<span><span style="display:inline-block;width:12px;height:12px;background:#c9b772;border-radius:2px;margin-left:4px;vertical-align:middle;"></span>שינוי חודשי (%)</span>`;
 }
 
 // ── helpers: הצג/הסתר wrapper נכון לפי field ─────────────────
@@ -1335,22 +1332,6 @@ function renderAssetsChart(labels, monthly, cumulative, barColors, opts = {}) {
       order: 2
     }
   ];
-  if (!isMobile) {
-    datasets.push({
-      type: 'line',
-      label: lineLabel,
-      data: cumulative,
-      borderColor: '#94a3b8',
-      backgroundColor: 'rgba(148,163,184,0.08)',
-      borderWidth: 2,
-      pointRadius: 3,
-      pointBackgroundColor: '#94a3b8',
-      tension: 0.35,
-      fill: true,
-      yAxisID: 'yCumulative',
-      order: 1
-    });
-  }
   historyChartStatic = new Chart(ctx, {
     data: {
       labels,
@@ -1386,7 +1367,7 @@ function renderAssetsChart(labels, monthly, cumulative, barColors, opts = {}) {
         },
         yCumulative: {
           type: 'linear',
-          display: !isMobile,
+          display: false,
           position: 'left',
           title: { display: !isMobile, text: cumulativeAxisTitle, font: { family: 'Heebo', size: 10 }, color: '#64748b' },
           ticks: { display: !isMobile, font: { family: 'Heebo', size: 9 }, color: '#64748b',
@@ -1729,16 +1710,17 @@ function renderPeersTable(myFundId, myName) {
       { textFallback: false }
     );
     const stockOutlier = stockOutlierBadge(calcStockExposureOutlier(r, sorted));
-    const rankTags = `${allocationIcon}${stockOutlier}`;
+    const fundIdTags = `${allocationIcon}${stockOutlier}`;
 
     const y12m   = _yields12M ? _yields12M.get(String(r.FUND_ID)) : undefined;
     const yr1Cell = y12m === null
       ? '<span title="אין נתוני 12 חודשים" style="color:var(--gray-300)">—</span>'
       : y12m !== undefined ? _peerYield(y12m, 'yr1', peerSort.field==='1yr' ? yieldClass(y12m) : '', di) : '-';
 
+    const fundIdLine = `<span class="peer-fund-id">#${r.FUND_ID}<span class="fund-id-tag-icons">${fundIdTags}</span></span>`;
     const nameCell = isMe
-      ? `<span style="font-weight:800;color:${color}">${name} ★</span>`
-      : `<span class="peer-name-link" data-fundid="${r.FUND_ID}" style="cursor:pointer;font-weight:600;color:${color};text-decoration:underline dotted;">${name}</span>`;
+      ? `<span style="font-weight:800;color:${color}">${name} ★</span>${fundIdLine}`
+      : `<span class="peer-name-link" data-fundid="${r.FUND_ID}" style="cursor:pointer;font-weight:600;color:${color};text-decoration:underline dotted;">${name}</span>${fundIdLine}`;
 
     const yearlyCells = yearlyYears.map(year => {
       const value = peerYearlyState.yieldMap?.get(String(r.FUND_ID))?.get(year);
@@ -1749,7 +1731,7 @@ function renderPeersTable(myFundId, myName) {
 
     return `
       <tr class="${isMe ? 'peer-me' : ''}">
-        <td class="rank-cell"><span class="peer-rank${isMe?' peer-rank-me':''}">${rank}</span><span class="rank-tag-icons">${rankTags}</span></td>
+        <td class="rank-cell"><span class="peer-rank${isMe?' peer-rank-me':''}">${rank}</span></td>
         <td>${nameCell}</td>
         ${peerReturnMode === 'yearly' ? `
         <td class="${sc('yearly_ytd')}">${peerCell(r.YEAR_TO_DATE_YIELD, 'yearly_ytd', 'yearly_ytd', di)}</td>

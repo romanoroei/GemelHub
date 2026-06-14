@@ -150,7 +150,7 @@ body.advanced-options-open {
 
 /* Focus-visible ring for keyboard navigation */
 :focus-visible {
-  outline: 3px solid #f97316;
+  outline: 3px solid rgba(12, 33, 52, .55);
   outline-offset: 2px;
   border-radius: 3px;
 }
@@ -15530,6 +15530,33 @@ body.h2h-active,
     align-items: center !important;
     justify-content: center !important;
     vertical-align: middle !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 1px !important;
+    margin-inline-start: 3px !important;
+    vertical-align: middle !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-icons {
+    display: inline-flex !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    transform: scale(.72) !important;
+    transform-origin: center !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .allocation-outlier-wrap,
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .allocation-outlier-btn,
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-icon,
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-flag-il,
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-warning {
+    margin: 0 !important;
+    transform: scale(.72) !important;
+    transform-origin: center !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table .rank-tag-icons {

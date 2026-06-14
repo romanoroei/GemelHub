@@ -6543,7 +6543,7 @@ const App = (() => {
         { stock, abroad, fx }
       );
       const allocationProfileIcon = allocationProfileIcons(allocationProfile, `${r.FUND_NAME || ''} ${r.SUB_SPECIALIZATION || ''}`);
-      const rankTagIcons = `${allocationProfileIcon}${allocationIcon}`;
+      const fundIdTagIcons = `${allocationProfileIcon}${allocationIcon}`;
 
       // דירוג (task 10) — rank לפי הסדר הממוין הנוכחי
       const rank = idx + 1;
@@ -6562,7 +6562,7 @@ const App = (() => {
 
       rows += `
         <tr>
-          <td class="rank-cell"><span class="rank-number">${rank}</span><span class="rank-tag-icons">${rankTagIcons}</span></td>
+          <td class="rank-cell">${rank}</td>
           <td scope="row">
             <div class="provider-cell fund-link" data-fundid="${fundId}" title="לחץ לפרטי הקופה">
               <span class="provider-status-stack"
@@ -6593,7 +6593,7 @@ const App = (() => {
               </span>
               <div>
                 <div class="prov-name" style="color:${color}"><span class="prov-name-text">${name}</span></div>
-                <div class="prov-id">#${fundId}</div>
+                <div class="prov-id">#${fundId}<span class="fund-id-tag-icons">${fundIdTagIcons}</span></div>
               </div>
               <span class="fund-link-icon"><i class="fas fa-external-link-alt"></i></span>
             </div>
