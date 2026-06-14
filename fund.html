@@ -21,8 +21,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=mobile-controls-pie-labels-20260614" />
-  <link rel="stylesheet" href="css/fund.css?v=mobile-controls-pie-labels-20260614" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-pie-two-line-labels-20260614" />
+  <link rel="stylesheet" href="css/fund.css?v=mobile-pie-two-line-labels-20260614" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="fund-page">
@@ -354,18 +354,18 @@ const PieLeaderLines = {
       const isMobilePie = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
       if (isMobilePie) {
         const sliceRatio = val / 100;
-        const inside = sliceRatio >= 0.12;
-        const labelRadius = inside ? outerR * 0.6 : outerR + 7;
+        const labelRadius = outerR * (sliceRatio >= 0.12 ? 0.55 : 0.72);
         const x = cx + Math.cos(midAngle) * labelRadius;
         const y = cy + Math.sin(midAngle) * labelRadius;
         const darkSlice = ['#0c2134', '#64748b'].includes(String(color).toLowerCase());
         ctx.save();
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = '900 8.8px Heebo, Arial, sans-serif';
-        ctx.fillStyle = inside && darkSlice ? '#fff' : '#0f172a';
-        const text = `${label} ${val.toFixed(1)}%`;
-        ctx.fillText(text, x, y);
+        ctx.fillStyle = darkSlice ? '#c9b772' : '#0f172a';
+        ctx.font = '900 8.6px Heebo, Arial, sans-serif';
+        ctx.fillText(label, x, y - 5);
+        ctx.font = '900 8.2px Heebo, Arial, sans-serif';
+        ctx.fillText(`${val.toFixed(1)}%`, x, y + 5);
         ctx.restore();
         return;
       }

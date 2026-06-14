@@ -3349,10 +3349,9 @@ body.fund-page .fund-compare-title-sub .fund-track-link {
   display: inline-flex !important;
   align-items: center !important;
   gap: 6px !important;
-  color: #0b5cab !important;
-  text-decoration: underline !important;
-  text-decoration-thickness: 1.5px !important;
-  text-underline-offset: 4px !important;
+  color: #0f172a !important;
+  text-decoration: none !important;
+  border-bottom: 1px dashed rgba(15, 23, 42, .42) !important;
   font-weight: 950 !important;
 }
 
@@ -3527,10 +3526,10 @@ body.fund-page #peers-table-wrap table.track-table tbody td:nth-child(2) {
 }
 
 body.fund-page .fund-compare-title-sub {
-  font-size: 1.12rem !important;
+  font-size: 1.2rem !important;
   line-height: 1.24 !important;
   font-weight: 950 !important;
-  color: #0c2134 !important;
+  color: #0f172a !important;
 }
 
 body.fund-page #peers-table-wrap table.track-table tr.average-row td,
@@ -3542,14 +3541,16 @@ body.fund-page #peers-table-wrap table.track-table tr.average-row .peer-yield-nu
 
 @media (max-width: 760px) {
   body.fund-page .fund-compare-title-sub {
-    font-size: 1.36rem !important;
+    font-size: 1.48rem !important;
     line-height: 1.18 !important;
+    color: #0f172a !important;
   }
 
   body.fund-page .fund-compare-title-sub .fund-track-link {
     font-size: inherit !important;
-    text-decoration-thickness: 2px !important;
-    text-underline-offset: 5px !important;
+    color: #0f172a !important;
+    text-decoration: none !important;
+    border-bottom: 2px dashed rgba(15, 23, 42, .46) !important;
   }
 
   html body.fund-page #peers-table-wrap table.track-table tr.average-row td,
