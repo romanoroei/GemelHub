@@ -15951,6 +15951,7 @@ body.h2h-active,
     align-items: baseline !important;
     gap: 5px !important;
     word-spacing: 0 !important;
+    font-size: 1.2rem !important;
   }
 
   html body #tracks-container .track-category,
@@ -15958,6 +15959,7 @@ body.h2h-active,
   html body #tracks-container .track-name {
     margin: 0 !important;
     padding: 0 !important;
+    font-size: inherit !important;
   }
 
   html body #tracks-container .track-name {
@@ -15965,5 +15967,108 @@ body.h2h-active,
     background: #0c2134 !important;
     border-radius: 999px !important;
     padding: 3px 11px !important;
+  }
+}
+
+@media (max-width: 760px) {
+  html body #tracks-container .track-block.is-mobile-sticky-compact .track-header,
+  html body #tracks-container:not(.tracks-two-col-blocked) .track-block.is-mobile-sticky-compact .track-header {
+    padding: 6px 7px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas:
+      "title"
+      "controls" !important;
+    row-gap: 4px !important;
+    align-items: stretch !important;
+    overflow: visible !important;
+  }
+
+  html body #tracks-container .track-block.is-mobile-sticky-compact .track-title-group,
+  html body #tracks-container:not(.tracks-two-col-blocked) .track-block.is-mobile-sticky-compact .track-title-group {
+    grid-area: title !important;
+    justify-content: center !important;
+    padding-inline: 18px !important;
+    width: 100% !important;
+  }
+
+  html body #tracks-container .track-block.is-mobile-sticky-compact .track-label,
+  html body #tracks-container:not(.tracks-two-col-blocked) .track-block.is-mobile-sticky-compact .track-label {
+    justify-content: center !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+    font-size: 1.14rem !important;
+    line-height: 1.12 !important;
+    column-gap: 4px !important;
+  }
+
+  html body #tracks-container .track-block.is-mobile-sticky-compact .track-category,
+  html body #tracks-container .track-block.is-mobile-sticky-compact .track-label-prefix {
+    display: inline-flex !important;
+    align-items: baseline !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #0c2134 !important;
+  }
+
+  html body #tracks-container .track-block.is-mobile-sticky-compact .track-name {
+    display: inline-flex !important;
+    align-items: baseline !important;
+    margin: 0 !important;
+    padding: 2px 9px 3px !important;
+    color: #c9b772 !important;
+    background: #0c2134 !important;
+    border-radius: 999px !important;
+    font-size: 1.15rem !important;
+    line-height: 1 !important;
+    font-weight: 950 !important;
+  }
+
+  html body #tracks-container .track-block.is-mobile-sticky-compact .track-header-controls,
+  html body #tracks-container:not(.tracks-two-col-blocked) .track-block.is-mobile-sticky-compact .track-header-controls {
+    grid-area: controls !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 4px 5px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    justify-content: stretch !important;
+    align-items: stretch !important;
+  }
+
+  html body #tracks-container .track-block.is-mobile-sticky-compact .yield-toggle-group {
+    grid-column: 1 / -1 !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    width: 100% !important;
+  }
+
+  html body #tracks-container .track-block.is-mobile-sticky-compact .yield-toggle-group .tbl-ctrl-btn,
+  html body #tracks-container .track-block.is-mobile-sticky-compact .yearly-mode-btn,
+  html body #tracks-container .track-block.is-mobile-sticky-compact .yearly-expand-btn,
+  html body #tracks-container .track-block.is-mobile-sticky-compact .exp-toggle-btn {
+    min-height: 23px !important;
+    width: 100% !important;
+    font-size: .65rem !important;
+  }
+
+  html body #tracks-container .track-block.is-mobile-sticky-compact .yearly-mode-btn {
+    grid-column: 1 / 2 !important;
+  }
+
+  html body #tracks-container .track-block.is-mobile-sticky-compact .yearly-expand-btn {
+    grid-column: 2 / 3 !important;
+  }
+
+  html body #tracks-container .track-block.is-mobile-sticky-compact .exp-toggle-btn {
+    grid-column: 3 / 4 !important;
+  }
+
+  html body #tracks-container .track-block.is-mobile-sticky-compact .track-header-controls:not(:has(.yearly-expand-btn)) .exp-toggle-btn {
+    grid-column: 2 / 4 !important;
   }
 }
