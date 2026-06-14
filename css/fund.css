@@ -3306,6 +3306,28 @@ body.fund-page #peers-table-wrap table.track-table th {
   box-shadow: none !important;
 }
 
+body.fund-page #peers-table-wrap table.track-table th.col-sorted-head {
+  position: relative !important;
+  border-bottom-color: rgba(226, 232, 240, .9) !important;
+  box-shadow: none !important;
+}
+
+body.fund-page #peers-table-wrap table.track-table th.col-sorted-head::after {
+  content: "" !important;
+  position: absolute !important;
+  right: 50% !important;
+  left: auto !important;
+  bottom: 0 !important;
+  width: 42px !important;
+  max-width: calc(100% - 10px) !important;
+  height: 2px !important;
+  background: #c9a621 !important;
+  border-radius: 999px !important;
+  transform: translateX(50%) !important;
+  animation: none !important;
+  pointer-events: none !important;
+}
+
 body.fund-page .fund-peers-card #assets-chart-legend span:nth-child(2) {
   display: inline-flex !important;
   align-items: center !important;
