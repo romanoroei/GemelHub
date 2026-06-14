@@ -3824,7 +3824,7 @@ const App = (() => {
     block.innerHTML = `
       <div class="track-header">
         <div class="track-title-group">
-          <span class="track-label">${categoryLabel ? `<span class="track-category">${categoryLabel}</span>` : ''}<span class="track-label-prefix">מסלול</span> <span class="track-name">${track.label}</span></span>
+          <span class="track-label">${categoryLabel ? `<span class="track-category">${categoryLabel}</span>` : ''}<span class="track-label-prefix">מסלול</span><span class="track-name">${track.label}</span></span>
         </div>
         <div class="track-header-controls">${buildTrackHeaderControls(track)}</div>
       </div>
@@ -4289,8 +4289,8 @@ const App = (() => {
       <div class="yield-toggle-group">
         <button class="tbl-ctrl-btn yield-mode-btn${!isTrackYearlyActive && state.yieldMode==='cumulative'?' is-active':''}" data-mode="cumulative"><strong>תשואה מצטברת</strong></button>
         <button class="tbl-ctrl-btn yield-mode-btn${!isTrackYearlyActive && state.yieldMode==='annualized'?' is-active':''}" data-mode="annualized"><strong>ממוצע שנתי</strong></button>
-        <button class="tbl-ctrl-btn yield-mode-btn${isTrackYearlyActive?' is-active':''}" data-mode="yearly">תשואה לפי שנים</button>
       </div>
+      <button class="tbl-ctrl-btn yield-mode-btn yearly-mode-btn${isTrackYearlyActive?' is-active':''}" data-mode="yearly">תשואה לפי שנים</button>
       ${additionalYearsVisible ? `<button class="tbl-ctrl-btn yearly-expand-btn${additionalYearsActive ? ' is-active' : ''}" ${trackYearlyState.loading ? 'disabled' : ''}>${trackYearlyState.loading ? 'טוען...' : (additionalYearsActive ? 'הסר שנים נוספות' : 'הצג שנים נוספות')}</button>` : ''}
       <button class="tbl-ctrl-btn exp-toggle-btn${state.showExposure?' is-active':''}"><i class="fas fa-layer-group"></i> אלוקציית השקעות</button>
     `;

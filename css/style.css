@@ -15846,3 +15846,111 @@ body.h2h-active,
     font-size: .58rem !important;
   }
 }
+
+@media (max-width: 760px) {
+  html body #tracks-container .track-title-group,
+  html body #tracks-container:not(.tracks-two-col-blocked) .track-title-group {
+    padding-inline: 18px !important;
+  }
+
+  html body #tracks-container .track-label,
+  html body #tracks-container:not(.tracks-two-col-blocked) .track-label {
+    display: inline-flex !important;
+    align-items: baseline !important;
+    justify-content: center !important;
+    flex-wrap: nowrap !important;
+    column-gap: 4px !important;
+    row-gap: 0 !important;
+    font-size: 1.06rem !important;
+    line-height: 1.12 !important;
+    font-weight: 950 !important;
+    letter-spacing: 0 !important;
+    word-spacing: 0 !important;
+    color: #0c2134 !important;
+  }
+
+  html body #tracks-container .track-category,
+  html body #tracks-container .track-label-prefix {
+    display: inline-flex !important;
+    align-items: baseline !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #0c2134 !important;
+    font-size: inherit !important;
+    white-space: nowrap !important;
+  }
+
+  html body #tracks-container .track-name {
+    display: inline-flex !important;
+    align-items: baseline !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #a88618 !important;
+    font-size: 1.12rem !important;
+    font-weight: 950 !important;
+    white-space: nowrap !important;
+  }
+
+  html body #tracks-container .track-header-controls,
+  html body #tracks-container:not(.tracks-two-col-blocked) .track-header-controls {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 4px 5px !important;
+  }
+
+  html body #tracks-container .yield-toggle-group {
+    grid-column: 1 / -1 !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  html body #tracks-container .yearly-mode-btn {
+    grid-column: 1 / 2 !important;
+    min-height: 23px !important;
+    padding: 2px 6px !important;
+    border-radius: 7px !important;
+    border: 1px solid rgba(12, 33, 52, .42) !important;
+    background: rgba(255, 255, 255, .72) !important;
+    color: #0c2134 !important;
+    font-size: .65rem !important;
+    font-weight: 850 !important;
+    box-shadow: none !important;
+  }
+
+  html body #tracks-container .yearly-mode-btn.is-active {
+    background: #0c2134 !important;
+    border-color: #0c2134 !important;
+    color: #fff !important;
+  }
+
+  html body #tracks-container .yearly-expand-btn {
+    grid-column: 2 / 3 !important;
+  }
+
+  html body #tracks-container .exp-toggle-btn {
+    grid-column: 3 / 4 !important;
+  }
+
+  html body #tracks-container .track-header-controls:not(:has(.yearly-expand-btn)) .exp-toggle-btn {
+    grid-column: 2 / 4 !important;
+    width: 100% !important;
+  }
+}
+
+@media (min-width: 761px) {
+  html body #tracks-container .track-label {
+    display: inline-flex !important;
+    align-items: baseline !important;
+    gap: 5px !important;
+    word-spacing: 0 !important;
+  }
+
+  html body #tracks-container .track-category,
+  html body #tracks-container .track-label-prefix,
+  html body #tracks-container .track-name {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  html body #tracks-container .track-name {
+    color: #a88618 !important;
+  }
+}
