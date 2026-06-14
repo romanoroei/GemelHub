@@ -1192,7 +1192,7 @@ body.fund-page #peers-table-wrap .track-table th {
   position: static !important;
   top: auto !important;
   background: #fefce8;
-  box-shadow: 0 1.5px 0 #ca8a04;  /* קו תחתון זהוב */
+  box-shadow: none !important;
   vertical-align: top;
 }
 
@@ -1201,6 +1201,8 @@ body.fund-page .fund-peers-card #yield-chart-inner,
 body.fund-page .fund-peers-card #yield-chart-legend,
 body.fund-page .fund-peers-card #assets-chart-legend,
 body.fund-page .fund-peers-card #static-chart-wrap,
+body.fund-page .fund-peers-card .yield-scroll-wrap,
+body.fund-page .fund-peers-card .yield-chart-inner,
 body.fund-page .fund-peers-card canvas {
   border-top: 0 !important;
   border-bottom: 0 !important;
@@ -3155,17 +3157,24 @@ body.fund-page .fund-sticky-bar .fsb-id {
     margin: 0 !important;
   }
 
-  html body.fund-page #peers-table-wrap table.track-table .peer-fund-id {
+  html body.fund-page #peers-table-wrap table.track-table .fund-name-tag-icons {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 2px !important;
-    margin-top: 1px !important;
-    color: #94a3b8 !important;
-    font-size: .64rem !important;
-    line-height: 1 !important;
-    font-weight: 800 !important;
-    direction: ltr !important;
-    unicode-bidi: isolate !important;
+    justify-content: center !important;
+    gap: 1px !important;
+    margin-inline-start: 3px !important;
+    vertical-align: middle !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table .fund-name-tag-icons .allocation-profile-badge,
+  html body.fund-page #peers-table-wrap table.track-table .fund-name-tag-icons .allocation-outlier-badge,
+  html body.fund-page #peers-table-wrap table.track-table .fund-name-tag-icons .stock-outlier-badge,
+  html body.fund-page #peers-table-wrap table.track-table .fund-name-tag-icons i,
+  html body.fund-page #peers-table-wrap table.track-table .fund-name-tag-icons img,
+  html body.fund-page #peers-table-wrap table.track-table .fund-id-tag-icons {
+    transform: scale(.76) !important;
+    transform-origin: center !important;
+    margin: 0 !important;
   }
 
   html body.fund-page #peers-table-wrap table.track-table .fund-id-tag-icons {

@@ -15677,3 +15677,61 @@ body.h2h-active,
     word-break: normal !important;
   }
 }
+
+@media (max-width: 760px) {
+  html body #tracks-container .track-table-wrapper table.track-table th:nth-child(2),
+  html body #tracks-container .track-table-wrapper table.track-table td:nth-child(2) {
+    width: 102px !important;
+    min-width: 102px !important;
+    max-width: 102px !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table .provider-cell {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table .prov-id {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 2px !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons {
+    gap: 2px !important;
+    margin-inline-start: 4px !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-icons,
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .allocation-outlier-wrap,
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .allocation-outlier-btn,
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-icon,
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-flag-il,
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-warning {
+    transform: scale(.86) !important;
+  }
+
+  html body #tracks-container .track-header-controls,
+  html body #tracks-container .yield-toggle-group,
+  html body #tracks-container .tbl-ctrl-btn,
+  html body #tracks-container .yield-mode-btn,
+  html body #tracks-container .yearly-expand-btn,
+  html body #tracks-container .exp-toggle-btn {
+    font-size: .72rem !important;
+    line-height: 1.2 !important;
+  }
+
+  html body #tracks-container .yield-toggle-group .tbl-ctrl-btn,
+  html body #tracks-container .tbl-ctrl-btn {
+    min-height: 25px !important;
+    padding: 4px 8px !important;
+  }
+
+  html body #tracks-container table.track-table .th-yield-sub,
+  html body #tracks-container table.track-table.match-yearly-height .th-yield-sub {
+    font-size: .58rem !important;
+    line-height: 1.1 !important;
+    margin-top: 2px !important;
+  }
+}

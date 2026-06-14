@@ -21,8 +21,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=fund-id-tags-no-orange-line-20260614" />
-  <link rel="stylesheet" href="css/fund.css?v=fund-id-tags-no-orange-line-20260614" />
+  <link rel="stylesheet" href="css/style.css?v=fund-chart-clean-tags-fonts-20260614" />
+  <link rel="stylesheet" href="css/fund.css?v=fund-chart-clean-tags-fonts-20260614" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="fund-page">
@@ -1710,17 +1710,17 @@ function renderPeersTable(myFundId, myName) {
       { textFallback: false }
     );
     const stockOutlier = stockOutlierBadge(calcStockExposureOutlier(r, sorted));
-    const fundIdTags = `${allocationIcon}${stockOutlier}`;
+    const fundNameTags = `${allocationIcon}${stockOutlier}`;
 
     const y12m   = _yields12M ? _yields12M.get(String(r.FUND_ID)) : undefined;
     const yr1Cell = y12m === null
       ? '<span title="אין נתוני 12 חודשים" style="color:var(--gray-300)">—</span>'
       : y12m !== undefined ? _peerYield(y12m, 'yr1', peerSort.field==='1yr' ? yieldClass(y12m) : '', di) : '-';
 
-    const fundIdLine = `<span class="peer-fund-id">#${r.FUND_ID}<span class="fund-id-tag-icons">${fundIdTags}</span></span>`;
+    const nameTags = fundNameTags ? `<span class="fund-name-tag-icons">${fundNameTags}</span>` : '';
     const nameCell = isMe
-      ? `<span style="font-weight:800;color:${color}">${name} ★</span>${fundIdLine}`
-      : `<span class="peer-name-link" data-fundid="${r.FUND_ID}" style="cursor:pointer;font-weight:600;color:${color};text-decoration:underline dotted;">${name}</span>${fundIdLine}`;
+      ? `<span style="font-weight:800;color:${color}">${name} ★</span>${nameTags}`
+      : `<span class="peer-name-link" data-fundid="${r.FUND_ID}" style="cursor:pointer;font-weight:600;color:${color};text-decoration:underline dotted;">${name}</span>${nameTags}`;
 
     const yearlyCells = yearlyYears.map(year => {
       const value = peerYearlyState.yieldMap?.get(String(r.FUND_ID))?.get(year);
