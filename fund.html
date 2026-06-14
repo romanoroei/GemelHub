@@ -21,8 +21,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=fund-sort-underline-contained-20260614" />
-  <link rel="stylesheet" href="css/fund.css?v=fund-sort-underline-contained-20260614" />
+  <link rel="stylesheet" href="css/style.css?v=fund-peer-bottom-align-pies-20260614" />
+  <link rel="stylesheet" href="css/fund.css?v=fund-peer-bottom-align-pies-20260614" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="fund-page">
@@ -370,8 +370,8 @@ const PieLeaderLines = {
       // שם
       ctx.fillStyle = '#0f172a';
       const isMobilePie = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
-      const labelFontSize = isMobilePie ? 10 : 12;
-      const valueFontSize = isMobilePie ? 11 : 12;
+      const labelFontSize = isMobilePie ? 9 : 12;
+      const valueFontSize = isMobilePie ? 10 : 12;
       ctx.font = `800 ${labelFontSize}px Heebo, Arial, sans-serif`;
       ctx.textAlign = isRight ? 'left' : 'right';
       ctx.textBaseline = 'bottom';
@@ -727,7 +727,7 @@ function buildPieCharts(r) {
   const fxPct      = Math.min(100, Math.max(0, (parseFloat(r.FOREIGN_CURRENCY_EXPOSURE)   || 0) / ta * 100));
   const foreignPct = Math.min(100, Math.max(0, (parseFloat(r.FOREIGN_EXPOSURE)             || 0) / ta * 100));
   const isMobilePieChart = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
-  const pieCanvasSize = isMobilePieChart ? 118 : 240;
+  const pieCanvasSize = isMobilePieChart ? 112 : 240;
   const pieCtx = (id) => {
     const canvas = document.getElementById(id);
     if (!canvas) return null;
@@ -746,7 +746,7 @@ function buildPieCharts(r) {
     },
     options: {
       responsive: false,
-      layout: { padding: isMobilePieChart ? 20 : 56 },
+      layout: { padding: isMobilePieChart ? 18 : 56 },
       plugins: {
         legend: { display: false },
         tooltip: { callbacks: { label: c => `${c.label}: ${c.raw.toFixed(1)}%` } },
