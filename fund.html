@@ -21,8 +21,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=fund-mobile-pies-agach25-20260614" />
-  <link rel="stylesheet" href="css/fund.css?v=fund-mobile-pies-agach25-20260614" />
+  <link rel="stylesheet" href="css/style.css?v=fund-compare-link-pies2-20260614" />
+  <link rel="stylesheet" href="css/fund.css?v=fund-compare-link-pies2-20260614" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="fund-page">
@@ -362,11 +362,8 @@ const PieLeaderLines = {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.font = '900 10.5px Heebo, Arial, sans-serif';
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = inside ? 'rgba(255,255,255,.9)' : 'rgba(255,255,255,.95)';
         ctx.fillStyle = inside && color === '#0c2134' ? '#fff' : '#0f172a';
         const text = `${val.toFixed(1)}%`;
-        ctx.strokeText(text, x, y);
         ctx.fillText(text, x, y);
         ctx.restore();
         return;
