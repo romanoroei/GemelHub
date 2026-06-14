@@ -21,8 +21,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=fund-peer-ranks-yearly-mobile-tight-20260614" />
-  <link rel="stylesheet" href="css/fund.css?v=fund-peer-ranks-yearly-mobile-tight-20260614" />
+  <link rel="stylesheet" href="css/style.css?v=fund-peer-ranks-above-soft-width-20260614" />
+  <link rel="stylesheet" href="css/fund.css?v=fund-peer-ranks-above-soft-width-20260614" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="fund-page">
@@ -1820,11 +1820,11 @@ function renderPeersTable(myFundId, myName) {
       if (columnCount > 2) {
         // Read widths from CSS variables defined on body.fund-page in the mobile media query
         const isYearlyPeerTable = table.classList.contains('fund-peer-yearly-table');
-        const rankWidth = parseInt(getComputedStyle(document.body).getPropertyValue('--fund-mobile-rank-w')) || 22;
-        const managerWidth = parseInt(getComputedStyle(document.body).getPropertyValue('--fund-mobile-manager-w')) || 78;
+        const rankWidth = parseInt(getComputedStyle(document.body).getPropertyValue('--fund-mobile-rank-w')) || 28;
+        const managerWidth = parseInt(getComputedStyle(document.body).getPropertyValue('--fund-mobile-manager-w')) || 112;
         const scroll = table.closest('.peers-table-scroll');
         // window.innerWidth - 30 = screen minus fund-card(8×2) + fund-page-main(6×2) + border(1×2) padding
-        const wrapperWidth = Math.max(348, Math.floor(window.innerWidth * (isYearlyPeerTable ? 0.94 : 0.96)));
+        const wrapperWidth = Math.max(isYearlyPeerTable ? 400 : 410, Math.floor(window.innerWidth * .99));
         // After layout, expand wrap+scroll container to screen edges
         requestAnimationFrame(() => {
           const r = wrap.getBoundingClientRect();
@@ -1836,8 +1836,8 @@ function renderPeersTable(myFundId, myName) {
           if (scroll) scroll.style.setProperty('width', `${window.innerWidth}px`, 'important');
         });
         const returnCount = columnCount - 2;
-        const minReturnWidth = isYearlyPeerTable ? 42 : 48;
-        const maxReturnWidth = isYearlyPeerTable ? 44 : 52;
+        const minReturnWidth = isYearlyPeerTable ? 52 : 54;
+        const maxReturnWidth = isYearlyPeerTable ? 54 : 56;
         const restWidth = Math.min(maxReturnWidth, Math.max(minReturnWidth, Math.floor((wrapperWidth - rankWidth - managerWidth) / returnCount)));
         const totalWidth = rankWidth + managerWidth + (restWidth * returnCount);
         table.style.setProperty('width', `${totalWidth}px`, 'important');
