@@ -3911,10 +3911,18 @@ const App = (() => {
       table.style.setProperty('zoom', String(MOBILE_TABLE_ZOOM), 'important');
       const mobileColumnCount = table.querySelector('tr')?.children.length || 0;
       if (mobileColumnCount > 2) {
-        const rankWidth = 30;
-        const managerWidth = 110;
-        const restWidth = mobileColumnCount > 8 ? 56 : 60;
-        const tableWidth = rankWidth + managerWidth + (restWidth * (mobileColumnCount - 2));
+        const rankWidth = 28;
+        const managerWidth = 104;
+        const restWidth = mobileColumnCount > 8 ? 54 : 56;
+        const compactReturnWidth = 48;
+        const getMobileColumnWidth = (index) => {
+          if (index === 0) return rankWidth;
+          if (index === 1) return managerWidth;
+          if (index === 2 || index === 3) return compactReturnWidth;
+          return restWidth;
+        };
+        const tableWidth = Array.from({ length: mobileColumnCount })
+          .reduce((sum, _, index) => sum + getMobileColumnWidth(index), 0);
         table.style.setProperty('width', `${tableWidth}px`, 'important');
         table.style.setProperty('min-width', `${tableWidth}px`, 'important');
         table.style.setProperty('max-width', 'none', 'important');
@@ -3922,7 +3930,7 @@ const App = (() => {
         const colgroup = document.createElement('colgroup');
         Array.from({ length: mobileColumnCount }).forEach((_, index) => {
           const col = document.createElement('col');
-          col.style.width = index === 0 ? `${rankWidth}px` : index === 1 ? `${managerWidth}px` : `${restWidth}px`;
+          col.style.width = `${getMobileColumnWidth(index)}px`;
           colgroup.appendChild(col);
         });
         table.insertBefore(colgroup, table.firstChild);

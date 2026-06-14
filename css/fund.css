@@ -3585,4 +3585,15 @@ body.fund-page #peers-table-wrap table.track-table tr.average-row .peer-yield-nu
     line-height: 1.02 !important;
     font-weight: 950 !important;
   }
+
+  html body.fund-page #peers-table-wrap table.track-table thead th {
+    font-size: .8rem !important;
+    line-height: 1.08 !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table thead th .th-yield-sub,
+  html body.fund-page #peers-table-wrap table.track-table thead th small {
+    font-size: .62rem !important;
+    line-height: 1.05 !important;
+  }
 }
