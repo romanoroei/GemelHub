@@ -46,6 +46,17 @@ body.fund-page .sticky-header::after,
 body.fund-page .category-tabs-bar,
 body.fund-page .category-tabs-bar::before,
 body.fund-page .category-tabs-bar::after {
+  border-top-color: transparent !important;
+  border-bottom-color: transparent !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+}
+
+body.fund-page .fund-sticky-bar,
+body.fund-page .fund-sticky-bar::before,
+body.fund-page .fund-sticky-bar::after {
+  border-top-color: rgba(226, 232, 240, .9) !important;
+  border-bottom-color: rgba(226, 232, 240, .9) !important;
   box-shadow: none !important;
   outline: 0 !important;
 }
@@ -1205,7 +1216,17 @@ body.fund-page #peers-table-wrap .track-table th {
   top: auto !important;
   background: #fefce8;
   box-shadow: none !important;
+  border-top: 0 !important;
+  border-bottom: 1px solid rgba(226, 232, 240, .9) !important;
   vertical-align: top;
+}
+
+body.fund-page #peers-table-wrap .track-table,
+body.fund-page #peers-table-wrap .track-table thead,
+body.fund-page #peers-table-wrap .track-table tr,
+body.fund-page #peers-table-wrap .track-table th,
+body.fund-page #peers-table-wrap .track-table td {
+  border-top-color: rgba(226, 232, 240, .9) !important;
 }
 
 body.fund-page .fund-peers-card #yield-chart-scroll-wrap,
@@ -1269,7 +1290,9 @@ body.fund-page #peers-table-wrap .track-table th:nth-child(7) {
 
 body.fund-page #peers-table-wrap .peer-yield-value {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 3.85em;
   text-align: center;
   direction: ltr;
@@ -1290,6 +1313,46 @@ body.fund-page #peers-table-wrap .peer-yield-badge {
   line-height: 1;
   font-size: .84em;
   pointer-events: none;
+}
+
+body.fund-page #peers-table-wrap .peer-yield-rank {
+  position: absolute;
+  top: -9px;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  width: 15px;
+  height: 15px;
+  min-width: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #dbeafe;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: .58rem;
+  line-height: 1;
+  font-weight: 900;
+  pointer-events: none;
+  z-index: 2;
+}
+
+body.fund-page #peers-table-wrap .peer-yield-rank-1 {
+  background: #fef3c7;
+  border-color: #fbbf24;
+  color: #92400e;
+}
+
+body.fund-page #peers-table-wrap .peer-yield-rank-2 {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+body.fund-page #peers-table-wrap .peer-yield-rank-3 {
+  background: #ffedd5;
+  border-color: #fdba74;
+  color: #9a3412;
 }
 
 body.fund-page #peers-table-wrap .track-table td:nth-child(2),
@@ -3219,4 +3282,27 @@ body.fund-page .fund-sticky-bar .fsb-id {
     transform-origin: center !important;
     margin: 0 !important;
   }
+}
+
+/* Final fund-page line cleanup: keep late brand accent rules from drawing gold scroll lines. */
+body.fund-page .fund-sticky-bar,
+body.fund-page .fund-sticky-bar.fsb-visible {
+  border: 1px solid rgba(226, 232, 240, .95) !important;
+  border-top-color: rgba(226, 232, 240, .95) !important;
+  border-bottom-color: rgba(226, 232, 240, .95) !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+}
+
+body.fund-page #peers-table-wrap table.track-table,
+body.fund-page #peers-table-wrap table.track-table thead,
+body.fund-page #peers-table-wrap table.track-table tr,
+body.fund-page #peers-table-wrap table.track-table th,
+body.fund-page #peers-table-wrap table.track-table td {
+  border-top-color: rgba(226, 232, 240, .9) !important;
+}
+
+body.fund-page #peers-table-wrap table.track-table th {
+  border-bottom: 1px solid rgba(226, 232, 240, .9) !important;
+  box-shadow: none !important;
 }
