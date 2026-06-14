@@ -2849,7 +2849,7 @@ body.fund-page .fund-sticky-bar .fsb-id {
     display: inline-flex !important;
     align-items: center !important;
     gap: 6px !important;
-    font-size: 1.16rem !important;
+    font-size: 1.04rem !important;
     line-height: 1.18 !important;
     font-weight: 950 !important;
     color: #0c2134 !important;
@@ -2857,7 +2857,7 @@ body.fund-page .fund-sticky-bar .fsb-id {
 
   body.fund-page .fund-compare-title-sub {
     display: block !important;
-    font-size: 1.16rem !important;
+    font-size: 1.25rem !important;
     line-height: 1.18 !important;
     font-weight: 950 !important;
     color: #0c2134 !important;
@@ -3394,10 +3394,10 @@ body.fund-page #peers-table-wrap table.track-table tbody td:nth-child(2) {
   }
 
   body.fund-page .fh-pie-item canvas {
-    width: 82px !important;
-    height: 82px !important;
-    max-width: 23vw !important;
-    max-height: 23vw !important;
+    width: 96px !important;
+    height: 96px !important;
+    max-width: 28vw !important;
+    max-height: 28vw !important;
   }
 
   html body.fund-page #peers-table-wrap table.track-table {
@@ -3415,7 +3415,7 @@ body.fund-page #peers-table-wrap table.track-table tbody td:nth-child(2) {
     padding: 5px 1px !important;
     height: 38px !important;
     min-height: 38px !important;
-    font-size: .72rem !important;
+    font-size: .75rem !important;
     vertical-align: bottom !important;
   }
 
@@ -3461,6 +3461,7 @@ body.fund-page #peers-table-wrap table.track-table tbody td:nth-child(2) {
     right: auto !important;
     bottom: -3px !important;
     transform: translateX(-50%) !important;
+    font-size: .83rem !important;
     line-height: 1.02 !important;
   }
 
@@ -3484,7 +3485,7 @@ body.fund-page #peers-table-wrap table.track-table tbody td:nth-child(2) {
 
   html body.fund-page #peers-table-wrap table.track-table tbody td:nth-child(2),
   html body.fund-page #peers-table-wrap table.track-table tbody td:nth-child(2) * {
-    font-size: .82rem !important;
+    font-size: .83rem !important;
     line-height: 1.08 !important;
   }
 
@@ -3513,14 +3514,14 @@ body.fund-page #peers-table-wrap table.track-table tr.average-row .peer-yield-nu
 
 @media (max-width: 760px) {
   body.fund-page .fund-compare-title-sub {
-    font-size: 1.22rem !important;
+    font-size: 1.28rem !important;
     line-height: 1.18 !important;
   }
 
   html body.fund-page #peers-table-wrap table.track-table tr.average-row td,
   html body.fund-page #peers-table-wrap table.track-table tr.average-row td *,
   html body.fund-page #peers-table-wrap table.track-table tr.average-row .peer-yield-number {
-    font-size: 13.12px !important;
+    font-size: 13.28px !important;
     line-height: 1.02 !important;
   }
 }
@@ -3546,7 +3547,7 @@ body.fund-page #peers-table-wrap table.track-table tr.average-row .peer-yield-nu
   }
 
   html body.fund-page #peers-table-wrap table.track-table tr.average-row .average-label {
-    font-size: 13.12px !important;
+    font-size: 13.28px !important;
     line-height: 1.02 !important;
     font-weight: 950 !important;
   }

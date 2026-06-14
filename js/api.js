@@ -25,6 +25,7 @@ const APIModule = (() => {
     };
 
     const byId = (id) => CONFIG.INVESTMENT_TRACKS.find(track => track.id === id);
+    const okevAgachManiot25FundIds = ['15258', '15351', '8684', '15290'];
 
     const agachSahar = byId('agach_sahar');
     if (agachSahar) agachSahar.fundNameExcludes = Array.from(new Set([...(agachSahar.fundNameExcludes || []), '25%']));
@@ -35,10 +36,21 @@ const APIModule = (() => {
     const polisaAgachSahar = byId('polisa_agach_sahar');
     if (polisaAgachSahar) polisaAgachSahar.fundNameExcludes = Array.from(new Set([...(polisaAgachSahar.fundNameExcludes || []), '25%']));
 
+    const okevAgach = byId('okev_agach');
+    if (okevAgach) okevAgach.fundIdExcludes = Array.from(new Set([...(okevAgach.fundIdExcludes || []), ...okevAgachManiot25FundIds]));
+
     ensureTrack({
       id: 'agach_sahar_maniot25',
       label: 'אג"ח סחיר עד 25% במניות',
       subSpecializationKeys: ['אג"ח סחיר'],
+      fundNameIncludes: ['25%']
+    });
+
+    ensureTrack({
+      id: 'okev_agach_maniot25',
+      label: 'עוקב מדדי אג"ח עד 25% במניות',
+      subSpecializationKeys: ['עוקב מדדי אג"ח'],
+      fundIds: okevAgachManiot25FundIds,
       fundNameIncludes: ['25%']
     });
 
@@ -59,6 +71,7 @@ const APIModule = (() => {
     ['gemel_tagmulim', 'gemel_hashkaa', 'hashtalamot'].forEach(categoryId => {
       const category = CONFIG.PRODUCT_CATEGORIES.find(item => item.id === categoryId);
       if (category?.trackList) insertAfter(category.trackList, 'agach_sahar', 'agach_sahar_maniot25');
+      if (category?.trackList) insertAfter(category.trackList, 'okev_agach', 'okev_agach_maniot25');
     });
 
     ['pension_mekafit', 'pension_mashlima'].forEach(categoryId => {
@@ -464,6 +477,10 @@ const APIModule = (() => {
   function matchTrackBySubSpec(record, track) {
     const sub  = (record.SUB_SPECIALIZATION || '').trim().toLowerCase();
     const name = (record.FUND_NAME || '').toLowerCase();
+    const fundId = String(record.FUND_ID || '').trim();
+
+    if (track.fundIdExcludes && track.fundIdExcludes.map(String).includes(fundId)) return false;
+    if (track.fundIds && track.fundIds.map(String).includes(fundId)) return true;
 
     // אם למסלול יש subSpecializationKeys — בדוק אותם
     if (track.subSpecializationKeys && track.subSpecializationKeys.length) {

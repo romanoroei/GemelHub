@@ -151,6 +151,7 @@ const App = (() => {
     };
 
     const byId = (id) => CONFIG.INVESTMENT_TRACKS.find(track => track.id === id);
+    const okevAgachManiot25FundIds = ['15258', '15351', '8684', '15290'];
 
     const agachSahar = byId('agach_sahar');
     if (agachSahar) {
@@ -167,10 +168,23 @@ const App = (() => {
       polisaAgachSahar.fundNameExcludes = Array.from(new Set([...(polisaAgachSahar.fundNameExcludes || []), '25%']));
     }
 
+    const okevAgach = byId('okev_agach');
+    if (okevAgach) {
+      okevAgach.fundIdExcludes = Array.from(new Set([...(okevAgach.fundIdExcludes || []), ...okevAgachManiot25FundIds]));
+    }
+
     ensureTrack({
       id: 'agach_sahar_maniot25',
       label: 'אג"ח סחיר עד 25% במניות',
       subSpecializationKeys: ['אג"ח סחיר'],
+      fundNameIncludes: ['25%']
+    });
+
+    ensureTrack({
+      id: 'okev_agach_maniot25',
+      label: 'עוקב מדדי אג"ח עד 25% במניות',
+      subSpecializationKeys: ['עוקב מדדי אג"ח'],
+      fundIds: okevAgachManiot25FundIds,
       fundNameIncludes: ['25%']
     });
 
@@ -191,6 +205,7 @@ const App = (() => {
     ['gemel_tagmulim', 'gemel_hashkaa', 'hashtalamot'].forEach(categoryId => {
       const category = CONFIG.PRODUCT_CATEGORIES.find(item => item.id === categoryId);
       if (category?.trackList) insertAfter(category.trackList, 'agach_sahar', 'agach_sahar_maniot25');
+      if (category?.trackList) insertAfter(category.trackList, 'okev_agach', 'okev_agach_maniot25');
     });
 
     ['pension_mekafit', 'pension_mashlima'].forEach(categoryId => {

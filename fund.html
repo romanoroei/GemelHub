@@ -21,8 +21,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=fund-mobile-peer-final2-20260614" />
-  <link rel="stylesheet" href="css/fund.css?v=fund-mobile-peer-final2-20260614" />
+  <link rel="stylesheet" href="css/style.css?v=fund-mobile-pies-agach25-20260614" />
+  <link rel="stylesheet" href="css/fund.css?v=fund-mobile-pies-agach25-20260614" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="fund-page">
@@ -287,8 +287,8 @@
   </div>
 </div>
 
-  <script src="js/config.js?v=provider-subfilters-20260603"></script>
-  <script src="js/api.js?v=provider-subfilters-20260603"></script>
+  <script src="js/config.js?v=fund-mobile-pies-agach25-20260614"></script>
+  <script src="js/api.js?v=fund-mobile-pies-agach25-20260614"></script>
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
 <script>
@@ -351,10 +351,30 @@ const PieLeaderLines = {
       const color    = data.datasets[0].backgroundColor[i];
       const label    = data.labels[i];
 
+      const isMobilePie = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+      if (isMobilePie) {
+        const sliceRatio = val / 100;
+        const inside = sliceRatio >= 0.12;
+        const labelRadius = inside ? outerR * 0.58 : outerR + 7;
+        const x = cx + Math.cos(midAngle) * labelRadius;
+        const y = cy + Math.sin(midAngle) * labelRadius;
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = '900 10.5px Heebo, Arial, sans-serif';
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = inside ? 'rgba(255,255,255,.9)' : 'rgba(255,255,255,.95)';
+        ctx.fillStyle = inside && color === '#0c2134' ? '#fff' : '#0f172a';
+        const text = `${val.toFixed(1)}%`;
+        ctx.strokeText(text, x, y);
+        ctx.fillText(text, x, y);
+        ctx.restore();
+        return;
+      }
+
       // נקודות הקו
       const x1 = cx + Math.cos(midAngle) * (outerR + 3);
       const y1 = cy + Math.sin(midAngle) * (outerR + 3);
-      const isMobilePie = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
       const leaderOffset = isMobilePie ? 10 : 16;
       const leaderTextGap = isMobilePie ? 2 : 4;
       const x2 = cx + Math.cos(midAngle) * (outerR + leaderOffset);
@@ -540,7 +560,10 @@ function findFundTrack(record, category) {
     : CONFIG.INVESTMENT_TRACKS;
   const fundName = (record?.FUND_NAME || '').toLowerCase();
   const sub = (record?.SUB_SPECIALIZATION || '').toLowerCase();
+  const fundId = String(record?.FUND_ID || '').trim();
   for (const track of tracksToSearch) {
+    if (track.fundIdExcludes?.map(String).includes(fundId)) continue;
+    if (track.fundIds?.map(String).includes(fundId)) return track;
     if (track.subSpecializationKeys?.length) {
       if (!track.subSpecializationKeys.some(key => sub === key.trim().toLowerCase())) continue;
     } else if (!track.fundNameIncludes?.length) {
@@ -729,7 +752,7 @@ function buildPieCharts(r) {
   const fxPct      = Math.min(100, Math.max(0, (parseFloat(r.FOREIGN_CURRENCY_EXPOSURE)   || 0) / ta * 100));
   const foreignPct = Math.min(100, Math.max(0, (parseFloat(r.FOREIGN_EXPOSURE)             || 0) / ta * 100));
   const isMobilePieChart = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
-  const pieCanvasSize = isMobilePieChart ? 100 : 240;
+  const pieCanvasSize = isMobilePieChart ? 118 : 240;
   const pieCtx = (id) => {
     const canvas = document.getElementById(id);
     if (!canvas) return null;
@@ -748,7 +771,7 @@ function buildPieCharts(r) {
     },
     options: {
       responsive: false,
-      layout: { padding: isMobilePieChart ? 26 : 56 },
+      layout: { padding: isMobilePieChart ? 12 : 56 },
       plugins: {
         legend: { display: false },
         tooltip: { callbacks: { label: c => `${c.label}: ${c.raw.toFixed(1)}%` } },
