@@ -21,8 +21,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=fund-peer-ranks-above-soft-width-20260614" />
-  <link rel="stylesheet" href="css/fund.css?v=fund-peer-ranks-above-soft-width-20260614" />
+  <link rel="stylesheet" href="css/style.css?v=restore-assets-rolling-average-20260614" />
+  <link rel="stylesheet" href="css/fund.css?v=restore-assets-rolling-average-20260614" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="fund-page">
@@ -1099,9 +1099,11 @@ function updateAssetsChartLegend(mode = 'percent') {
   const legend = document.getElementById('assets-chart-legend');
   if (!legend) return;
   const isNetDeposits = mode === 'netDeposits';
-  legend.innerHTML = isNetDeposits
-    ? `<span><span style="display:inline-block;width:12px;height:12px;background:#c9b772;border-radius:2px;margin-left:4px;vertical-align:middle;"></span>צבירה נטו חודשית</span>`
-    : `<span><span style="display:inline-block;width:12px;height:12px;background:#c9b772;border-radius:2px;margin-left:4px;vertical-align:middle;"></span>שינוי חודשי (%)</span>`;
+  const barText = isNetDeposits ? 'צבירה נטו חודשית' : 'שינוי חודשי (%)';
+  const lineText = isNetDeposits ? 'ממוצע נע 12 חודשים' : 'שינוי מצטבר (%)';
+  legend.innerHTML = `
+    <span><span style="display:inline-block;width:12px;height:12px;background:#c9b772;border-radius:2px;margin-left:4px;vertical-align:middle;"></span>${barText}</span>
+    <span><span style="display:inline-block;width:18px;height:3px;background:#64748b;border-radius:999px;margin-left:4px;vertical-align:middle;"></span>${lineText}</span>`;
 }
 
 // ── helpers: הצג/הסתר wrapper נכון לפי field ─────────────────
@@ -1332,6 +1334,24 @@ function renderAssetsChart(labels, monthly, cumulative, barColors, opts = {}) {
       order: 2
     }
   ];
+  if (cumulative && cumulative.some(v => v !== null && v !== undefined && !isNaN(v))) {
+    datasets.push({
+      type: 'line',
+      label: lineLabel,
+      data: cumulative,
+      borderColor: '#64748b',
+      backgroundColor: '#64748b',
+      pointBackgroundColor: '#64748b',
+      pointBorderColor: '#ffffff',
+      pointRadius: isMobile ? 2 : 2.5,
+      pointHoverRadius: 4,
+      borderWidth: isMobile ? 2 : 2.5,
+      tension: 0.28,
+      fill: false,
+      yAxisID: 'yCumulative',
+      order: 1
+    });
+  }
   historyChartStatic = new Chart(ctx, {
     data: {
       labels,

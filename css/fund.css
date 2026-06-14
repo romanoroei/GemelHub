@@ -3306,6 +3306,11 @@ body.fund-page #peers-table-wrap table.track-table th {
   box-shadow: none !important;
 }
 
+body.fund-page .fund-peers-card #assets-chart-legend span:nth-child(2) {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
 /* Fund peer ranking: keep the rank badge in-flow so it never covers returns. */
 body.fund-page #peers-table-wrap table.track-table .peer-yield-value {
   position: relative !important;
