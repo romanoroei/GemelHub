@@ -21,8 +21,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=fund-chart-clean-tags-fonts-20260614" />
-  <link rel="stylesheet" href="css/fund.css?v=fund-chart-clean-tags-fonts-20260614" />
+  <link rel="stylesheet" href="css/style.css?v=fund-chart-line-ranks-pies-20260614" />
+  <link rel="stylesheet" href="css/fund.css?v=fund-chart-line-ranks-pies-20260614" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="fund-page">
@@ -370,8 +370,8 @@ const PieLeaderLines = {
       // שם
       ctx.fillStyle = '#0f172a';
       const isMobilePie = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
-      const labelFontSize = isMobilePie ? 18 : 12;
-      const valueFontSize = isMobilePie ? 19 : 12;
+      const labelFontSize = isMobilePie ? 13 : 12;
+      const valueFontSize = isMobilePie ? 14 : 12;
       ctx.font = `800 ${labelFontSize}px Heebo, Arial, sans-serif`;
       ctx.textAlign = isRight ? 'left' : 'right';
       ctx.textBaseline = 'bottom';
@@ -727,7 +727,7 @@ function buildPieCharts(r) {
   const fxPct      = Math.min(100, Math.max(0, (parseFloat(r.FOREIGN_CURRENCY_EXPOSURE)   || 0) / ta * 100));
   const foreignPct = Math.min(100, Math.max(0, (parseFloat(r.FOREIGN_EXPOSURE)             || 0) / ta * 100));
   const isMobilePieChart = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
-  const pieCanvasSize = isMobilePieChart ? 156 : 240;
+  const pieCanvasSize = isMobilePieChart ? 128 : 240;
   const pieCtx = (id) => {
     const canvas = document.getElementById(id);
     if (!canvas) return null;
@@ -746,7 +746,7 @@ function buildPieCharts(r) {
     },
     options: {
       responsive: false,
-      layout: { padding: isMobilePieChart ? 34 : 56 },
+      layout: { padding: isMobilePieChart ? 24 : 56 },
       plugins: {
         legend: { display: false },
         tooltip: { callbacks: { label: c => `${c.label}: ${c.raw.toFixed(1)}%` } },
@@ -1676,15 +1676,13 @@ function renderPeersTable(myFundId, myName) {
     yr3:     _pRankMapFor(sorted.map(r => parseFloat(r.YIELD_TRAILING_3_YRS))),
     yr5:     _pRankMapFor(sorted.map(r => parseFloat(r.YIELD_TRAILING_5_YRS))),
   };
-  const _pGold   = (val, key) => { const n = parseFloat(val); return (!isNaN(n) && _pMaxVals[key] !== null && n === _pMaxVals[key]) ? '<span class="peer-yield-badge peer-yield-badge-best" aria-hidden="true">&#129351;</span>' : ''; };
-  const _pTomato = (val, key) => { const n = parseFloat(val); return (!isNaN(n) && _pMinVals[key] !== null && n === _pMinVals[key]) ? '<span class="peer-yield-badge peer-yield-badge-worst" aria-hidden="true">&#127813;</span>' : ''; };
   const _peerYield = (val, key, cls = '', rowIndex = null) => {
     const pct = formatPercent(val);
     if (pct === '-' || pct === '—') return pct;
     const classes = ['peer-yield-value', cls].filter(Boolean).join(' ');
     const rank = rowIndex !== null ? _pRankVals[key]?.get(rowIndex) : null;
     const rankHtml = rank ? `<span class="peer-yield-rank peer-yield-rank-${rank}" aria-hidden="true">${rank}</span>` : '';
-    return `<span class="${classes}">${_pGold(val, key)}${_pTomato(val, key)}<span class="peer-yield-number">${pct}</span>${rankHtml}</span>`;
+    return `<span class="${classes}"><span class="peer-yield-number">${pct}</span>${rankHtml}</span>`;
   };
   // פונקציית עזר: צובעת תשואה רק כשהעמודה ממויינת
   const peerCell = (val, key, sortKey, rowIndex = null) => _peerYield(val, key, peerSort.field === sortKey ? yieldClass(val) : '', rowIndex);

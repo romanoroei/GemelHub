@@ -35,7 +35,19 @@ body.fund-page .sticky-header > * {
 }
 
 body.fund-page .category-tabs-bar {
-  border-bottom-color: rgba(201, 183, 114, .65);
+  border-bottom-color: transparent !important;
+  border-bottom-width: 0 !important;
+  box-shadow: none !important;
+}
+
+body.fund-page .sticky-header,
+body.fund-page .sticky-header::before,
+body.fund-page .sticky-header::after,
+body.fund-page .category-tabs-bar,
+body.fund-page .category-tabs-bar::before,
+body.fund-page .category-tabs-bar::after {
+  box-shadow: none !important;
+  outline: 0 !important;
 }
 
 body.fund-page .category-tabs-inner {
@@ -1211,6 +1223,18 @@ body.fund-page .fund-peers-card canvas {
 }
 
 body.fund-page .fund-peers-card #assets-chart-legend span:nth-child(2) {
+  display: none !important;
+}
+
+body.fund-page #peers-table-wrap .fund-name-tag-icons .fund-allocation-mini-badge,
+body.fund-page #peers-table-wrap .fund-name-tag-icons .fund-allocation-img,
+body.fund-page #peers-table-wrap .fund-name-tag-icons .fund-allocation-flag-svg,
+body.fund-page #peers-table-wrap .fund-name-tag-icons .fund-allocation-warning {
+  transform: scale(.82);
+  transform-origin: center;
+}
+
+body.fund-page #peers-table-wrap .peer-yield-badge {
   display: none !important;
 }
 
@@ -2739,14 +2763,14 @@ body.fund-page .fund-sticky-bar .fsb-id {
   }
 
   body.fund-page .fh-pie-title {
-    font-size: .72rem !important;
+    font-size: .66rem !important;
     line-height: 1.08 !important;
-    margin-bottom: -5px !important;
+    margin-bottom: -3px !important;
   }
 
   body.fund-page .fh-pie-item canvas {
-    width: 116px !important;
-    height: 116px !important;
+    width: 96px !important;
+    height: 96px !important;
     max-width: none !important;
     max-height: none !important;
   }
