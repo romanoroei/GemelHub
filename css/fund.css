@@ -3348,9 +3348,10 @@ body.fund-page #peers-table-wrap table.track-table .peer-yield-value {
 
 body.fund-page #peers-table-wrap table.track-table .peer-yield-number {
   position: absolute !important;
-  right: 50% !important;
+  left: 50% !important;
+  right: auto !important;
   bottom: 0 !important;
-  transform: translateX(50%) !important;
+  transform: translateX(-50%) !important;
   display: block !important;
   min-width: 0 !important;
   line-height: 1.05 !important;
@@ -3359,8 +3360,9 @@ body.fund-page #peers-table-wrap table.track-table .peer-yield-number {
 body.fund-page #peers-table-wrap table.track-table .peer-yield-rank {
   position: absolute !important;
   top: 0 !important;
-  right: 50% !important;
-  transform: translateX(50%) !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
   width: 15px !important;
   height: 15px !important;
   min-width: 15px !important;
@@ -3385,9 +3387,9 @@ body.fund-page #peers-table-wrap table.track-table tbody td:nth-child(2) {
 
 @media (max-width: 760px) {
   body.fund-page .fh-pie-title {
-    font-size: .44rem !important;
-    line-height: 1 !important;
-    margin-bottom: -4px !important;
+    font-size: .72rem !important;
+    line-height: 1.05 !important;
+    margin-bottom: -1px !important;
     letter-spacing: 0 !important;
   }
 
@@ -3449,27 +3451,29 @@ body.fund-page #peers-table-wrap table.track-table tbody td:nth-child(2) {
     display: inline-block !important;
     width: 100% !important;
     min-width: 0 !important;
-    height: 27px !important;
+    height: 31px !important;
     margin-top: 0 !important;
   }
 
   html body.fund-page #peers-table-wrap table.track-table .peer-yield-number {
     position: absolute !important;
-    right: 50% !important;
-    bottom: 0 !important;
-    transform: translateX(50%) !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: -3px !important;
+    transform: translateX(-50%) !important;
     line-height: 1.02 !important;
   }
 
   html body.fund-page #peers-table-wrap table.track-table .peer-yield-rank {
     position: absolute !important;
-    top: -1px !important;
-    right: 50% !important;
-    transform: translateX(50%) !important;
-    width: 12px !important;
-    height: 12px !important;
-    min-width: 12px !important;
-    font-size: 7px !important;
+    top: -3px !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    width: 15px !important;
+    height: 15px !important;
+    min-width: 15px !important;
+    font-size: 8.4px !important;
   }
 
   html body.fund-page #peers-table-wrap table.track-table tbody td:nth-child(1),
@@ -3480,15 +3484,15 @@ body.fund-page #peers-table-wrap table.track-table tbody td:nth-child(2) {
 
   html body.fund-page #peers-table-wrap table.track-table tbody td:nth-child(2),
   html body.fund-page #peers-table-wrap table.track-table tbody td:nth-child(2) * {
-    font-size: .76rem !important;
+    font-size: .82rem !important;
     line-height: 1.08 !important;
   }
 
   html body.fund-page #peers-table-wrap table.track-table tr.average-row td,
   html body.fund-page #peers-table-wrap table.track-table tr.average-row td *,
   html body.fund-page #peers-table-wrap table.track-table tr.average-row .peer-yield-number {
-    font-size: .72rem !important;
-    line-height: 1.08 !important;
+    font-size: .82rem !important;
+    line-height: 1.02 !important;
     font-weight: 900 !important;
   }
 }
@@ -3516,7 +3520,34 @@ body.fund-page #peers-table-wrap table.track-table tr.average-row .peer-yield-nu
   html body.fund-page #peers-table-wrap table.track-table tr.average-row td,
   html body.fund-page #peers-table-wrap table.track-table tr.average-row td *,
   html body.fund-page #peers-table-wrap table.track-table tr.average-row .peer-yield-number {
-    font-size: .72rem !important;
-    line-height: 1.08 !important;
+    font-size: 13.12px !important;
+    line-height: 1.02 !important;
+  }
+}
+
+@media (max-width: 760px) {
+  body.fund-page .peer-rank-toolbar {
+    padding: 4px 0 8px !important;
+    gap: 4px !important;
+  }
+
+  body.fund-page .peer-return-toggle {
+    justify-self: end !important;
+    width: min(100%, 236px) !important;
+    min-height: 30px !important;
+    border-radius: 7px !important;
+  }
+
+  body.fund-page .peer-return-btn {
+    padding: 3px 7px !important;
+    min-height: 30px !important;
+    font-size: .69rem !important;
+    line-height: 1.05 !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table tr.average-row .average-label {
+    font-size: 13.12px !important;
+    line-height: 1.02 !important;
+    font-weight: 950 !important;
   }
 }

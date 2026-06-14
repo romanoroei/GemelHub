@@ -21,8 +21,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=fund-peer-rank-pies-title-20260614" />
-  <link rel="stylesheet" href="css/fund.css?v=fund-peer-rank-pies-title-20260614" />
+  <link rel="stylesheet" href="css/style.css?v=fund-mobile-peer-final2-20260614" />
+  <link rel="stylesheet" href="css/fund.css?v=fund-mobile-peer-final2-20260614" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="fund-page">
@@ -354,10 +354,13 @@ const PieLeaderLines = {
       // נקודות הקו
       const x1 = cx + Math.cos(midAngle) * (outerR + 3);
       const y1 = cy + Math.sin(midAngle) * (outerR + 3);
-      const x2 = cx + Math.cos(midAngle) * (outerR + 16);
-      const y2 = cy + Math.sin(midAngle) * (outerR + 16);
+      const isMobilePie = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+      const leaderOffset = isMobilePie ? 10 : 16;
+      const leaderTextGap = isMobilePie ? 2 : 4;
+      const x2 = cx + Math.cos(midAngle) * (outerR + leaderOffset);
+      const y2 = cy + Math.sin(midAngle) * (outerR + leaderOffset);
       const isRight = Math.cos(midAngle) >= 0;
-      const xL = x2 + (isRight ? 4 : -4);
+      const xL = x2 + (isRight ? leaderTextGap : -leaderTextGap);
 
       ctx.save();
       // קו
@@ -369,9 +372,8 @@ const PieLeaderLines = {
       ctx.stroke();
       // שם
       ctx.fillStyle = '#0f172a';
-      const isMobilePie = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
-      const labelFontSize = isMobilePie ? 8 : 12;
-      const valueFontSize = isMobilePie ? 9 : 12;
+      const labelFontSize = isMobilePie ? 10 : 12;
+      const valueFontSize = isMobilePie ? 10 : 12;
       ctx.font = `800 ${labelFontSize}px Heebo, Arial, sans-serif`;
       ctx.textAlign = isRight ? 'left' : 'right';
       ctx.textBaseline = 'bottom';
@@ -746,7 +748,7 @@ function buildPieCharts(r) {
     },
     options: {
       responsive: false,
-      layout: { padding: isMobilePieChart ? 14 : 56 },
+      layout: { padding: isMobilePieChart ? 26 : 56 },
       plugins: {
         legend: { display: false },
         tooltip: { callbacks: { label: c => `${c.label}: ${c.raw.toFixed(1)}%` } },
@@ -1713,6 +1715,9 @@ function renderPeersTable(myFundId, myName) {
   };
   // פונקציית עזר: צובעת תשואה רק כשהעמודה ממויינת
   const peerCell = (val, key, sortKey, rowIndex = null) => _peerYield(val, key, peerSort.field === sortKey ? yieldClass(val) : '', rowIndex);
+  const avgYield = (val, cls = '') => val !== null && val !== undefined
+    ? `<span class="peer-yield-value average-yield ${cls}"><span class="peer-yield-number">${formatPercent(val)}</span></span>`
+    : '-';
   const yearlyYears = peerReturnMode === 'yearly' ? (peerYearlyState.years || []) : [];
 
   // issue 4: זיהוי שמות מנהל כפולים — הוסף סיומת מ-FUND_NAME
@@ -1776,20 +1781,20 @@ function renderPeersTable(myFundId, myName) {
       .filter(v => v != null && !isNaN(v));
     const avgYear = vals.length ? vals.reduce((a,b) => a+b, 0) / vals.length : null;
     const sortKey = `year_${year}`;
-    return `<td class="${sc(sortKey)}">${avgYear!==null?formatPercent(avgYear):'-'}</td>`;
+    return `<td class="${sc(sortKey)}">${avgYield(avgYear)}</td>`;
   }).join('');
   const avgRow = `
     <tr class="average-row">
       <td></td>
-      <td>ממוצע קבוצה</td>
+      <td><span class="average-label">ממוצע קבוצה</span></td>
       ${peerReturnMode === 'yearly' ? `
-      <td class="${peerSort.field==='yearly_ytd'?yieldClass(avgs.YEAR_TO_DATE_YIELD):''}${sc('yearly_ytd')}">${avgs.YEAR_TO_DATE_YIELD!==null?formatPercent(avgs.YEAR_TO_DATE_YIELD):'-'}</td>
+      <td class="${peerSort.field==='yearly_ytd'?yieldClass(avgs.YEAR_TO_DATE_YIELD):''}${sc('yearly_ytd')}">${avgYield(avgs.YEAR_TO_DATE_YIELD)}</td>
       ${peerYearlyState.loading ? '<td colspan="4">-</td>' : yearlyAvgCells || '<td colspan="4">-</td>'}` : `
-      <td class="${peerSort.field==='monthly'?yieldClass(avgs.MONTHLY_YIELD):''}${sc('monthly')}">${avgs.MONTHLY_YIELD!==null?formatPercent(avgs.MONTHLY_YIELD):'-'}</td>
-      <td class="${peerSort.field==='ytd'?yieldClass(avgs.YEAR_TO_DATE_YIELD):''}${sc('ytd')}">${avgs.YEAR_TO_DATE_YIELD!==null?formatPercent(avgs.YEAR_TO_DATE_YIELD):'-'}</td>
-      <td class="${peerSort.field==='1yr'?yieldClass(avg12m):''}${sc('1yr')}">${avg12m!==null?formatPercent(avg12m):'-'}</td>
-      <td class="${peerSort.field==='3yr'?yieldClass(avgs.YIELD_TRAILING_3_YRS):''}${sc('3yr')}">${avgs.YIELD_TRAILING_3_YRS!==null?formatPercent(avgs.YIELD_TRAILING_3_YRS):'-'}</td>
-      <td class="${peerSort.field==='5yr'?yieldClass(avgs.YIELD_TRAILING_5_YRS):''}${sc('5yr')}">${avgs.YIELD_TRAILING_5_YRS!==null?formatPercent(avgs.YIELD_TRAILING_5_YRS):'-'}</td>`}
+      <td class="${peerSort.field==='monthly'?yieldClass(avgs.MONTHLY_YIELD):''}${sc('monthly')}">${avgYield(avgs.MONTHLY_YIELD)}</td>
+      <td class="${peerSort.field==='ytd'?yieldClass(avgs.YEAR_TO_DATE_YIELD):''}${sc('ytd')}">${avgYield(avgs.YEAR_TO_DATE_YIELD)}</td>
+      <td class="${peerSort.field==='1yr'?yieldClass(avg12m):''}${sc('1yr')}">${avgYield(avg12m)}</td>
+      <td class="${peerSort.field==='3yr'?yieldClass(avgs.YIELD_TRAILING_3_YRS):''}${sc('3yr')}">${avgYield(avgs.YIELD_TRAILING_3_YRS)}</td>
+      <td class="${peerSort.field==='5yr'?yieldClass(avgs.YIELD_TRAILING_5_YRS):''}${sc('5yr')}">${avgYield(avgs.YIELD_TRAILING_5_YRS)}</td>`}
     </tr>`;
   const yearlyHeaderCells = peerYearlyState.loading
     ? '<th colspan="4">טוען שנים...</th>'
