@@ -15850,14 +15850,15 @@ body.h2h-active,
 @media (max-width: 760px) {
   html body #tracks-container .track-title-group,
   html body #tracks-container:not(.tracks-two-col-blocked) .track-title-group {
-    padding-inline: 18px !important;
+    justify-content: flex-start !important;
+    padding-inline: 8px 18px !important;
   }
 
   html body #tracks-container .track-label,
   html body #tracks-container:not(.tracks-two-col-blocked) .track-label {
     display: inline-flex !important;
-    align-items: baseline !important;
-    justify-content: center !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
     flex-wrap: nowrap !important;
     column-gap: 4px !important;
     row-gap: 0 !important;
@@ -15882,7 +15883,8 @@ body.h2h-active,
 
   html body #tracks-container .track-name {
     display: inline-flex !important;
-    align-items: baseline !important;
+    align-items: center !important;
+    justify-content: center !important;
     margin: 0 !important;
     padding: 2px 9px 3px !important;
     color: #c9b772 !important;
@@ -15948,10 +15950,11 @@ body.h2h-active,
 @media (min-width: 761px) {
   html body #tracks-container .track-label {
     display: inline-flex !important;
-    align-items: baseline !important;
+    align-items: center !important;
     gap: 5px !important;
     word-spacing: 0 !important;
     font-size: 1.2rem !important;
+    line-height: 1.18 !important;
   }
 
   html body #tracks-container .track-category,
@@ -15966,7 +15969,11 @@ body.h2h-active,
     color: #c9b772 !important;
     background: #0c2134 !important;
     border-radius: 999px !important;
-    padding: 3px 11px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 4px 13px 5px !important;
+    line-height: 1 !important;
   }
 }
 
@@ -15987,14 +15994,15 @@ body.h2h-active,
   html body #tracks-container .track-block.is-mobile-sticky-compact .track-title-group,
   html body #tracks-container:not(.tracks-two-col-blocked) .track-block.is-mobile-sticky-compact .track-title-group {
     grid-area: title !important;
-    justify-content: center !important;
-    padding-inline: 18px !important;
+    justify-content: flex-start !important;
+    padding-inline: 8px 18px !important;
     width: 100% !important;
   }
 
   html body #tracks-container .track-block.is-mobile-sticky-compact .track-label,
   html body #tracks-container:not(.tracks-two-col-blocked) .track-block.is-mobile-sticky-compact .track-label {
-    justify-content: center !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
     flex-wrap: nowrap !important;
     white-space: nowrap !important;
     font-size: 1.14rem !important;
@@ -16015,7 +16023,8 @@ body.h2h-active,
 
   html body #tracks-container .track-block.is-mobile-sticky-compact .track-name {
     display: inline-flex !important;
-    align-items: baseline !important;
+    align-items: center !important;
+    justify-content: center !important;
     margin: 0 !important;
     padding: 2px 9px 3px !important;
     color: #c9b772 !important;
