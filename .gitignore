@@ -1,0 +1,18 @@
+# Archives
+*.zip
+
+# Temporary screenshots / recordings
+recording-*.png
+whatsapp-*.png
+
+# Backup files
+*.bak
+
+# Old push worktree
+.push-gemelhub/
+
+# Chrome test directories
+.chrome-*/
+
+# Local Claude settings
+.claude/
