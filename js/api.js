@@ -1965,6 +1965,224 @@ const APIModule = (() => {
       .sort((a, b) => Number(b.REPORT_PERIOD) - Number(a.REPORT_PERIOD))[0] || null;
   }
 
+  // ─── GemelHub Score ────────────────────────────────────────────────
+  // מחשב ציון גמלהאב לכל הקופות במסלול ומחזיר את הציון של הקופה הנוכחית
+  // ביחד עם רשימת כל המתחרים.
+  const _cachedGHScores = new Map();
+
+  async function computeGemelHubScores(fundId, catId) {
+    const cacheKey = `${catId}_${fundId}`;
+    if (_cachedGHScores.has(cacheKey)) return _cachedGHScores.get(cacheKey);
+    const lsKey = `gemelhub_ghscore_v11_${cacheKey}`;
+    const lsCached = _lsLoad(lsKey);
+    if (lsCached) { _cachedGHScores.set(cacheKey, lsCached); return lsCached; }
+
+    const cat       = catId ? CONFIG.PRODUCT_CATEGORIES.find(c => c.id === catId) : null;
+    const isPension = !!(cat && cat.pensionAPI);
+    const isPolisa  = !!(cat && cat.polisaAPI);
+
+    // שלוף נתונים נוכחיים לכל סוג (כדי לדעת אילו קרנות פעילות במסלול)
+    const currentRaw = isPension
+      ? await fetchPensionData()
+      : isPolisa
+        ? await fetchPolisaData()
+        : await fetchCurrentGemelData();
+
+    // מצא רשומה עדכנית של הקרן הנוכחית — אם לא קיימת, לא ניתן לחשב
+    const fundLatestRec = getLatestRecords(currentRaw).find(r => String(r.FUND_ID) === String(fundId));
+    if (!fundLatestRec) return null;
+
+    const cls     = (fundLatestRec.FUND_CLASSIFICATION || '').trim();
+    const subSpec = (fundLatestRec.SUB_SPECIALIZATION   || '').trim();
+
+    // שלוף נתונים היסטוריים מלאים לפי סוג המוצר
+    let allRaw;
+    if (isPension) {
+      allRaw = await fetchPensionHistoricalRangeData();
+    } else if (isPolisa) {
+      allRaw = await fetchPolisaHistoricalRangeData();
+    } else {
+      // גמל/השתלמות: שלוף היסטוריה לפי סיווג בלבד — SUB_SPECIALIZATION עלול להשתנות בנתונים ישנים
+      // הסינון המדויק לפי מסלול מבוצע ב-trackRecords על ידי subMatchFn
+      const tf = { FUND_CLASSIFICATION: cls };
+      const [h2023, h9922] = await Promise.all([
+        fetchFilteredRecords(CONFIG.API.GEMEL_2023_RESOURCE_ID,      tf),
+        fetchFilteredRecords(CONFIG.API.GEMEL_1999_2022_RESOURCE_ID, tf)
+      ]);
+      allRaw = dedupeRecordsByFundAndPeriod([
+        ...currentRaw.filter(r => (r.FUND_CLASSIFICATION || '').trim() === cls),
+        ...h2023, ...h9922
+      ]);
+    }
+
+    // מצא track מתאים לסינון מדויק — לכל סוג מוצר
+    const catTrackIds = cat?.trackList ? new Set(cat.trackList) : null;
+    const tracksToSearch = catTrackIds
+      ? CONFIG.INVESTMENT_TRACKS.filter(t => catTrackIds.has(t.id))
+      : CONFIG.INVESTMENT_TRACKS;
+    let matchedTrack = null;
+    for (const t of tracksToSearch) {
+      if (matchTrackBySubSpec(fundLatestRec, t)) { matchedTrack = t; break; }
+    }
+
+    const subMatchFn = matchedTrack
+      ? r => matchTrackBySubSpec(r, matchedTrack)
+      : r => (r.SUB_SPECIALIZATION || '').trim().toLowerCase() === subSpec.toLowerCase();
+
+    // פילטר TARGET_POPULATION רלוונטי רק לתגמולים (יש בהם ריבוי אוכלוסיות), לא לשאר
+    const needsPopFilter = cls === 'תגמולים ואישית לפיצויים';
+
+    // סנן לרשומות הסיווג הנכון בלבד — subMatchFn לא מופעל כאן כי שמות/SUB_SPECIALIZATION
+    // משתנים בנתונים ישנים; סינון המסלול מתבצע דרך activeFundIds (נתונים נוכחיים בלבד)
+    const trackRecords = allRaw.filter(r =>
+      isProviderAllowed(r.CONTROLLING_CORPORATION, r.MANAGING_CORPORATION) &&
+      !(r.FUND_NAME || '').includes('בניהול אישי') &&
+      !(isPolisa && _isPolisaExcluded(r.FUND_NAME)) &&
+      (r.FUND_CLASSIFICATION || '').trim() === cls &&
+      (needsPopFilter ? (r.TARGET_POPULATION || '').trim() === 'כלל האוכלוסיה' : true)
+    );
+
+    // קבץ רשומות לפי קרן (כולל היסטוריה)
+    const byFund = new Map();
+    for (const r of trackRecords) {
+      const fid = String(r.FUND_ID);
+      if (!byFund.has(fid)) byFund.set(fid, { recs: new Map(), latest: r });
+      const entry = byFund.get(fid);
+      entry.recs.set(Number(r.REPORT_PERIOD), r);
+      if (Number(r.REPORT_PERIOD) > Number(entry.latest.REPORT_PERIOD)) entry.latest = r;
+    }
+
+    // סנן byFund לקרנות הפעילות במסלול בלבד — קורא ישירות ל-getTrackPeers
+    // כדי להבטיח התאמה מושלמת לרשימה המוצגת בטבלה הראשית
+    {
+      const activePeersList = await getTrackPeers(fundId, catId);
+      const activeFundIds   = new Set(activePeersList.map(r => String(r.FUND_ID)));
+      for (const fid of [...byFund.keys()]) {
+        if (!activeFundIds.has(fid)) byFund.delete(fid);
+      }
+    }
+
+    // מצא שנים קלנדריות שלמות (12 חודשים) — מתוך הקרנות הפעילות בלבד
+    const periodsByYear = new Map();
+    for (const [, { recs }] of byFund) {
+      for (const period of recs.keys()) {
+        const year  = Math.floor(period / 100);
+        const month = period % 100;
+        if (month < 1 || month > 12) continue;
+        if (!periodsByYear.has(year)) periodsByYear.set(year, new Set());
+        periodsByYear.get(year).add(period);
+      }
+    }
+    const completeYears = Array.from(periodsByYear.entries())
+      .filter(([, ps]) => ps.size >= 12)
+      .map(([y]) => y)
+      .sort((a, b) => b - a);
+    const targetYears = completeYears.slice(0, 5);
+
+    if (targetYears.length < 5) {
+      const result = { insufficient: true, targetYears };
+      _cachedGHScores.set(cacheKey, result);
+      return result;
+    }
+
+    // בנה מיפוי תקופות צפויות לכל שנה
+    const expectedByYear = new Map(targetYears.map(y => [
+      y,
+      new Set(Array.from({ length: 12 }, (_, i) => y * 100 + i + 1))
+    ]));
+
+    // חשב תשואה שנתית מצטברת לכל קרן לכל שנה
+    const annualByYear = new Map(targetYears.map(y => [y, new Map()]));
+    byFund.forEach(({ recs }, fid) => {
+      for (const year of targetYears) {
+        const expected = expectedByYear.get(year);
+        let compound = 1, valid = true;
+        for (const period of expected) {
+          const m = parseFloat(recs.get(period)?.MONTHLY_YIELD);
+          if (isNaN(m)) { valid = false; break; }
+          compound *= (1 + m / 100);
+        }
+        if (valid) annualByYear.get(year).set(fid, (compound - 1) * 100);
+      }
+    });
+
+    // שלוף שארפ ו-12M
+    const [sharpeMap, yields12M] = await Promise.all([
+      isPension ? getAllSharpeRatiosPension() : isPolisa ? getAllSharpeRatiosPolisa() : getAllSharpeRatios(),
+      isPension ? get12MYieldsPension()       : isPolisa ? get12MYieldsPolisa()       : get12MYields()
+    ]);
+
+    const trackFundIds = new Set(byFund.keys());
+
+    // אחוזון שארפ בתוך המסלול
+    const tsArr = Array.from(sharpeMap.entries())
+      .filter(([id, v]) => trackFundIds.has(id) && v !== null && !isNaN(v))
+      .sort((a, b) => b[1] - a[1]);
+    const sharpePercentile = new Map();
+    tsArr.forEach(([id], i) => {
+      const n = tsArr.length;
+      sharpePercentile.set(id, n > 1 ? ((n - i - 1) / (n - 1)) * 100 : 50);
+    });
+
+    // אחוזון 12M בתוך המסלול
+    const t12Arr = Array.from(yields12M.entries())
+      .filter(([id, v]) => trackFundIds.has(id) && v !== null && !isNaN(v))
+      .sort((a, b) => b[1] - a[1]);
+    const recentPercentile = new Map();
+    t12Arr.forEach(([id], i) => {
+      const n = t12Arr.length;
+      recentPercentile.set(id, n > 1 ? ((n - i - 1) / (n - 1)) * 100 : 50);
+    });
+
+    // חשב ציון לכל קרן שיש לה נתונים מלאים ל-5 שנים
+    const allScores = [];
+    byFund.forEach(({ latest }, fid) => {
+      const yearDetails = [];
+      for (const year of targetYears) {
+        const yearMap = annualByYear.get(year);
+        if (!yearMap || !yearMap.has(fid)) return;
+        const sorted = Array.from(yearMap.entries()).sort((a, b) => b[1] - a[1]);
+        const total  = sorted.length;
+        const rank   = sorted.findIndex(([id]) => id === fid) + 1;
+        const pct    = total > 1 ? ((total - rank) / (total - 1)) * 100 : 50;
+        yearDetails.push({
+          year,
+          rank,
+          total,
+          percentile:   parseFloat(pct.toFixed(2)),
+          annualReturn: parseFloat(yearMap.get(fid).toFixed(2))
+        });
+      }
+      if (yearDetails.length < 5) return;
+
+      const consistencyScore = yearDetails.reduce((s, y) => s + y.percentile, 0) / yearDetails.length;
+      const sharpeScore      = sharpePercentile.get(fid)  ?? null;
+      const recentScore      = recentPercentile.get(fid)  ?? null;
+      const rawScore = consistencyScore * 0.70 + (sharpeScore ?? 50) * 0.20 + (recentScore ?? 50) * 0.10;
+
+      allScores.push({
+        fundId:      fid,
+        controlling: latest.CONTROLLING_CORPORATION || '',
+        managing:    latest.MANAGING_CORPORATION    || '',
+        score: parseFloat((rawScore / 10).toFixed(2)),
+        components: {
+          consistencyScore:        parseFloat(consistencyScore.toFixed(2)),
+          sharpeScore:             sharpeScore !== null ? parseFloat(sharpeScore.toFixed(2)) : null,
+          recentPerformanceScore:  recentScore !== null ? parseFloat(recentScore.toFixed(2)) : null,
+          rawScore:                parseFloat(rawScore.toFixed(2)),
+          years:                   yearDetails
+        }
+      });
+    });
+
+    allScores.sort((a, b) => b.score - a.score);
+    const thisFund = allScores.find(s => s.fundId === String(fundId)) || null;
+    const result   = { fundId: String(fundId), thisFund, allScores, targetYears, insufficient: false };
+    _cachedGHScores.set(cacheKey, result);
+    _lsSave(lsKey, result);
+    return result;
+  }
+
   return {
     loadCachesFromLocalStorage,
     getFundLatestRecord,
@@ -2004,6 +2222,7 @@ const APIModule = (() => {
     getStdDevMapPension,
     getMomentumMapPension,
     getTrackPeersCumGaps,
-    getTrackPeersNetDeposits
+    getTrackPeersNetDeposits,
+    computeGemelHubScores
   };
 })();

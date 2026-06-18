@@ -3598,3 +3598,89 @@ body.fund-page #peers-table-wrap table.track-table tr.average-row .peer-yield-nu
     line-height: 1.05 !important;
   }
 }
+
+/* ══════════════════════════════════════════════
+   GemelHub Score Badge
+   ══════════════════════════════════════════════ */
+
+.fund-hero-cat-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 36px;
+  min-height: 32px;
+}
+
+.gh-score-badge-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+@keyframes gh-stamp-drop {
+  0%,45%  { transform: rotate(-8deg) scale(2.4); opacity: 0; }
+  46%      { opacity: 1; }
+  75%      { transform: rotate(-8deg) scale(0.88); }
+  89%      { transform: rotate(-8deg) scale(1.05); }
+  100%     { transform: rotate(-8deg) scale(1); }
+}
+
+@keyframes gh-stamp-ink {
+  0%   { filter: none; }
+  40%  { filter: drop-shadow(0 0 14px rgba(26,53,96,0.55)); }
+  100% { filter: none; }
+}
+
+.gh-stamp-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: block;
+  transform: rotate(-8deg);
+  transition: transform .18s ease;
+  animation: gh-stamp-drop 0.65s ease-out;
+}
+
+.gh-score-badge-wrap {
+  animation: gh-stamp-ink 0.8s ease-out 0.3s both;
+}
+
+.gh-stamp-btn:hover,
+.gh-stamp-btn:focus-visible {
+  transform: rotate(-8deg) scale(1.07);
+  outline: none;
+}
+
+/* drop-shadow על הWrapper ולא על הבאטון עצמו —
+   מונע טשטוש שנגרם מ-filter+transform על אותו אלמנט */
+.gh-score-badge-wrap {
+  transition: filter .18s ease;
+}
+.gh-score-badge-wrap:has(.gh-stamp-btn:hover),
+.gh-score-badge-wrap:has(.gh-stamp-btn:focus-visible) {
+  filter: drop-shadow(0 6px 22px rgba(0,0,0,.28));
+}
+
+.gh-stamp-svg {
+  width: 118px;
+  height: 118px;
+  display: block;
+}
+
+.gh-score-loading {
+  font-size: .76rem;
+  color: #94a3b8;
+  font-style: italic;
+  padding: 8px 4px;
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .gh-stamp-svg {
+    width: 96px;
+    height: 96px;
+  }
+}
