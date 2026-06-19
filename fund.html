@@ -255,10 +255,6 @@
     <i class="fas fa-layer-group" aria-hidden="true"></i>
     <span>אפשרויות</span>
   </button>
-  <a class="mobile-app-nav-item" href="index.html" data-mobile-app-target="sidebar-filter" aria-label="סינון">
-    <i class="fas fa-filter" aria-hidden="true"></i>
-    <span>סינון</span>
-  </a>
   <a class="mobile-app-nav-item" href="index.html?app=h2h" data-mobile-app-target="h2h" aria-label="ראש בראש">
     <i class="fas fa-balance-scale" aria-hidden="true"></i>
     <span>ראש בראש</span>
@@ -2307,6 +2303,7 @@ function showStatModal(modalId, titleHtml, contentHtml, dialogStyle = '') {
       <div data-modal-body style="overflow-y:auto;flex:1;">${contentHtml}</div>
     </div>`;
   document.body.appendChild(modal);
+  history.pushState({ fundSheet: 'modal' }, '');
   modal.querySelector('[data-close]').addEventListener('click', () => modal.remove());
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
 }
@@ -2848,7 +2845,7 @@ function ghGradeColor(score) {
 }
 
 function ghProvName(controlling, managing) {
-  return (managing && managing !== controlling) ? managing : controlling;
+  return getProviderDisplayName(controlling, managing);
 }
 
 function renderGemelHubScoreBadge(container, data, fundId, catId) {
@@ -2940,10 +2937,8 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
   const titleHtml = `
     <div>
       <div style="font-size:.72rem;color:#64748b;font-weight:700;margin-bottom:3px;letter-spacing:.3px;">ציון גמל האב*</div>
-      <div style="font-size:1.05rem;font-weight:800;color:#0f2744;">
-        דירוג קופה במסלול
-        ${thisFund ? `— <span style="color:#c9a227;">${thisFund.score.toFixed(2)}</span> / 10` : ''}
-      </div>
+      <div style="font-size:1.05rem;font-weight:800;color:#0f2744;">דירוג קופה במסלול</div>
+      ${_fundTrackFullLabel ? `<div style="font-size:.78rem;color:#64748b;font-weight:700;margin-top:3px;">${_fundTrackFullLabel}</div>` : ''}
     </div>`;
 
   // ── 1. ציון ודירוג ──
@@ -3217,6 +3212,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function openFundSearchSheet() {
     var sheet = ensureFundSearchSheet();
     sheet.hidden = false;
+    history.pushState({ fundSheet: 'search' }, '');
     var inp = document.getElementById('mobile-fund-search-input');
     if (inp) setTimeout(function() { inp.focus(); }, 50);
   }
@@ -3310,8 +3306,24 @@ document.addEventListener('DOMContentLoaded', () => {
     var btn = document.querySelector('[data-fund-mobile-action="categories"]');
     if (btn) btn.classList.add('is-active');
     sheet.hidden = false;
+    history.pushState({ fundSheet: 'category' }, '');
     requestAnimationFrame(function() { sheet.classList.add('is-open'); });
   }
+
+  window.addEventListener('popstate', function(e) {
+    var catSheet    = document.getElementById('mobile-category-sheet');
+    var searchSheet = document.getElementById('mobile-fund-search-sheet');
+    var anyModal    = document.querySelector('[id$="-modal"][style*="position:fixed"]');
+    if (catSheet && catSheet.classList.contains('is-open')) {
+      closeFundCategorySheet(); return;
+    }
+    if (searchSheet && !searchSheet.hidden) {
+      searchSheet.hidden = true; return;
+    }
+    if (anyModal) {
+      anyModal.remove(); return;
+    }
+  });
 
   document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('[data-fund-mobile-action]').forEach(function(btn) {
