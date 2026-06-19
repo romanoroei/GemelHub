@@ -2938,11 +2938,13 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
   const { thisFund, allScores, targetYears } = data;
   const yearsLabel = [...targetYears].sort((a, b) => a - b).join(', ');
 
+  const _myScore = allScores.find(s => String(s.fundId) === String(currentFundId));
+  const _myProvName = _myScore ? ghProvName(_myScore.controlling, _myScore.managing) : '';
   const titleHtml = `
     <div>
       <div style="font-size:.72rem;color:#64748b;font-weight:700;margin-bottom:3px;letter-spacing:.3px;">ציון גמל האב*</div>
-      <div style="font-size:1.05rem;font-weight:800;color:#0f2744;">דירוג קופה במסלול</div>
-      ${_fundTrackFullLabel ? `<div style="font-size:.78rem;color:#64748b;font-weight:700;margin-top:3px;">${_fundTrackFullLabel}</div>` : ''}
+      <div style="font-size:1.12rem;font-weight:800;color:#0f2744;">דירוג${_myProvName ? ' ' + _myProvName : ' קופה במסלול'}</div>
+      ${_fundTrackFullLabel ? `<div style="font-size:.86rem;color:#475569;font-weight:700;margin-top:4px;">${_fundTrackFullLabel}</div>` : ''}
     </div>`;
 
   // ── 1. ציון ודירוג ──
