@@ -3097,7 +3097,7 @@ document.addEventListener('DOMContentLoaded', () => {
       '</div>',
       '<div id="mobile-fund-search-results" style="margin-top:8px;"></div>'
     ].join('');
-    document.body.appendChild(sheet);
+    document.documentElement.appendChild(sheet);
 
     var closeBtn = sheet.querySelector('.mobile-category-sheet-close');
     closeBtn.addEventListener('click', function() {
@@ -3160,11 +3160,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function openFundSearchSheet() {
     var sheet = ensureFundSearchSheet();
     sheet.hidden = false;
-    requestAnimationFrame(function() { sheet.classList.add('is-open'); });
-    setTimeout(function() {
-      var inp = document.getElementById('mobile-fund-search-input');
-      if (inp) inp.focus();
-    }, 200);
+    var inp = document.getElementById('mobile-fund-search-input');
+    if (inp) setTimeout(function() { inp.focus(); }, 50);
   }
 
   function ensureFundCategorySheet() {
