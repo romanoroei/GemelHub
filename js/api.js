@@ -1973,7 +1973,7 @@ const APIModule = (() => {
   async function computeGemelHubScores(fundId, catId) {
     const cacheKey = `${catId}_${fundId}`;
     if (_cachedGHScores.has(cacheKey)) return _cachedGHScores.get(cacheKey);
-    const lsKey = `gemelhub_ghscore_v11_${cacheKey}`;
+    const lsKey = `gemelhub_ghscore_v12_${cacheKey}`;
     const lsCached = _lsLoad(lsKey);
     if (lsCached) { _cachedGHScores.set(cacheKey, lsCached); return lsCached; }
 
@@ -2176,6 +2176,16 @@ const APIModule = (() => {
     });
 
     allScores.sort((a, b) => b.score - a.score);
+
+    // Remap scores to 5–10 range based on rank position within the track
+    // rank 1 (best) → 10, rank n (worst) → 5, linear interpolation
+    const _n = allScores.length;
+    allScores.forEach((s, i) => {
+      s.score = _n > 1
+        ? parseFloat((10 - (i / (_n - 1)) * 5).toFixed(2))
+        : 10;
+    });
+
     const thisFund = allScores.find(s => s.fundId === String(fundId)) || null;
     const result   = { fundId: String(fundId), thisFund, allScores, targetYears, insufficient: false };
     _cachedGHScores.set(cacheKey, result);
