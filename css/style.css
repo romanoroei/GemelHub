@@ -14962,6 +14962,31 @@ body.h2h-active,
   [data-mobile-app-action="sidebar-filter"] {
     position: relative;
   }
+
+  .mob-nav-icon-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mob-nav-badge {
+    position: absolute;
+    top: -6px;
+    right: -8px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background: #f59e0b;
+    color: #1e293b;
+    font-size: .6rem;
+    font-weight: 800;
+    line-height: 16px;
+    text-align: center;
+    pointer-events: none;
+    z-index: 2;
+  }
 }
 
 /* Final mobile table specificity pass. */

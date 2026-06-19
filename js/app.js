@@ -1468,12 +1468,11 @@ const App = (() => {
 
     sheet.querySelector('.mob-extra-fund-search')?.addEventListener('click', () => {
       closeMobileCategorySheet();
-      setTimeout(() => {
-        const searchWrap = document.querySelector('.title-search-bar .hero-search');
-        if (searchWrap) searchWrap.style.display = '';
-        const inp = document.getElementById('global-search');
-        if (inp) { inp.focus(); inp.select(); inp.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-      }, 200);
+      const searchWrap = document.querySelector('.title-search-bar .hero-search');
+      if (searchWrap) searchWrap.style.display = '';
+      const inp = document.getElementById('global-search');
+      if (inp) { inp.focus(); inp.select(); }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
     return sheet;
@@ -5214,11 +5213,11 @@ const App = (() => {
   }
 
   function _sbUpdateTabBadge() {
-    const badge = document.querySelector('.sandbox-tab .sandbox-tab-badge');
-    if (!badge) return;
     const total = state.sandbox.portfolio.length;
-    badge.textContent = total;
-    badge.style.display = total > 0 ? '' : 'none';
+    const tabBadge = document.querySelector('.sandbox-tab .sandbox-tab-badge');
+    if (tabBadge) { tabBadge.textContent = total; tabBadge.style.display = total > 0 ? '' : 'none'; }
+    const navBadge = document.getElementById('sandbox-nav-badge');
+    if (navBadge) { navBadge.textContent = total; navBadge.hidden = total === 0; }
   }
 
   function toggleSandboxSelection(data) {
@@ -10049,10 +10048,10 @@ const App = (() => {
   }
 
   function updateH2HTabBadge(total = state.h2h.items.length) {
-    const badge = document.querySelector('.h2h-tab .h2h-tab-badge');
-    if (!badge) return;
-    badge.textContent = total;
-    badge.style.display = total > 0 ? '' : 'none';
+    const tabBadge = document.querySelector('.h2h-tab .h2h-tab-badge');
+    if (tabBadge) { tabBadge.textContent = total; tabBadge.style.display = total > 0 ? '' : 'none'; }
+    const navBadge = document.getElementById('h2h-nav-badge');
+    if (navBadge) { navBadge.textContent = total; navBadge.hidden = total === 0; }
   }
 
   async function restoreH2HState() {
