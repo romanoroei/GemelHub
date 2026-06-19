@@ -1387,7 +1387,7 @@ const App = (() => {
         ${CONFIG.PRODUCT_CATEGORIES.filter(cat => !REMOVED_CATEGORY_IDS.has(cat.id)).map(cat => `
           <button type="button" class="mobile-category-option" data-mobile-cat="${cat.id}">
             <span class="mobile-category-option-icon">${cat.icon || ''}</span>
-            <span>${cat.label}</span>
+            <span class="mobile-category-option-label">${cat.label}</span>
           </button>
           ${PENSION_ACTUARIAL_CATS.has(cat.id) ? `<button type="button" class="mobile-category-sub" data-mobile-cat-actuarial="${cat.id}"><i class="fas fa-balance-scale" aria-hidden="true"></i><span>${ACTUARIAL_LABELS[cat.id]}</span></button>` : ''}
         `).join('')}
@@ -1396,11 +1396,11 @@ const App = (() => {
       <div class="mobile-category-sheet-extras">
         <button type="button" class="mobile-category-option mob-extra-range">
           <span class="mobile-category-option-icon">📅</span>
-          <span>טווח השקעה מותאם</span>
+          <span class="mobile-category-option-label">טווח השקעה מותאם</span>
         </button>
         <button type="button" class="mobile-category-option mob-extra-search">
           <span class="mobile-category-option-icon">🔍</span>
-          <span>חיפוש מתקדם</span>
+          <span class="mobile-category-option-label">חיפוש מתקדם</span>
         </button>
       </div>
     `;
@@ -4111,28 +4111,35 @@ const App = (() => {
       table.classList.add('mobile-finance-table');
       clearInlineMobileTableStyles();
       table.style.setProperty('zoom', String(MOBILE_TABLE_ZOOM), 'important');
-      const mobileColumnCount = table.querySelector('tr')?.children.length || 0;
+      const isExposureOnly = table.classList.contains('exposure-only');
+      const firstRowTHs = Array.from(table.querySelector('tr')?.children || []);
+      const mobileColumnCount = firstRowTHs.length;
       if (mobileColumnCount > 2) {
         const rankWidth = 28;
         const managerWidth = 104;
+        const expColWidth = 68;
         const restWidth = mobileColumnCount > 8 ? 54 : 56;
         const compactReturnWidth = 48;
-        const getMobileColumnWidth = (index) => {
-          if (index === 0) return rankWidth;
-          if (index === 1) return managerWidth;
-          if (index === 2 || index === 3) return compactReturnWidth;
-          return restWidth;
+        let visibleIdx = 0;
+        const getColWidth = (th) => {
+          if (isExposureOnly && th.classList.contains('yield-col')) return 0;
+          const w = visibleIdx === 0 ? rankWidth
+            : visibleIdx === 1 ? managerWidth
+            : (isExposureOnly ? expColWidth
+              : (visibleIdx === 2 || visibleIdx === 3 ? compactReturnWidth : restWidth));
+          visibleIdx++;
+          return w;
         };
-        const tableWidth = Array.from({ length: mobileColumnCount })
-          .reduce((sum, _, index) => sum + getMobileColumnWidth(index), 0);
+        const colWidths = firstRowTHs.map(th => getColWidth(th));
+        const tableWidth = colWidths.reduce((s, w) => s + w, 0);
         table.style.setProperty('width', `${tableWidth}px`, 'important');
         table.style.setProperty('min-width', `${tableWidth}px`, 'important');
         table.style.setProperty('max-width', 'none', 'important');
         table.style.setProperty('table-layout', 'fixed', 'important');
         const colgroup = document.createElement('colgroup');
-        Array.from({ length: mobileColumnCount }).forEach((_, index) => {
+        colWidths.forEach(w => {
           const col = document.createElement('col');
-          col.style.width = `${getMobileColumnWidth(index)}px`;
+          col.style.width = w > 0 ? `${w}px` : '0';
           colgroup.appendChild(col);
         });
         table.insertBefore(colgroup, table.firstChild);
@@ -6886,10 +6893,10 @@ const App = (() => {
       : yearlyYears.length
         ? yearlyYears.map(year => {
             const sortKey = `year_${year}`;
-            return `<th${sortedThClass(sortKey)} data-sortfield="${sortKey}" ${ariaSort(sortKey)} scope="col">${year} ${arrow(sortKey)}</th>`;
+            return `<th${sortedThClass(sortKey, 'yield-col')} data-sortfield="${sortKey}" ${ariaSort(sortKey)} scope="col">${year} ${arrow(sortKey)}</th>`;
           }).join('')
         : `<th scope="col">${yearlyState?.error === 'timeout' ? 'הטעינה ארוכה מדי, לחץ שוב לטעינה' : yearlyState?.error === 'failed' ? 'הטעינה נכשלה, לחץ שוב לטעינה' : 'לא נמצאו שנים מלאות'}</th>`;
-    const yearlyHeaderCells = `<th${sortedThClass(yearlyYtdSortKey)} data-sortfield="${yearlyYtdSortKey}" ${ariaSort(yearlyYtdSortKey)} scope="col">YTD ${arrow(yearlyYtdSortKey)}</th>${yearlyYearHeaderCells}`;
+    const yearlyHeaderCells = `<th${sortedThClass(yearlyYtdSortKey, 'yield-col')} data-sortfield="${yearlyYtdSortKey}" ${ariaSort(yearlyYtdSortKey)} scope="col">YTD ${arrow(yearlyYtdSortKey)}</th>${yearlyYearHeaderCells}`;
     const matchYearlyHeight = !yearlyActive && (
       state.compactTracksView ||
       (state.showExposure && (state.yieldMode === 'cumulative' || state.yieldMode === 'annualized'))
@@ -6901,13 +6908,13 @@ const App = (() => {
           <tr>
             <th title="דירוג" scope="col">#</th>
             <th scope="col">מנהל</th>
-            ${!yearlyActive && customRangeActive ? `<th${sortedThClass('customRange', 'custom-range-col')} data-sortfield="customRange" ${ariaSort('customRange')} scope="col"><span class="custom-range-th">טווח מותאם</span> ${arrow('customRange')}<small class="custom-range-th-dates">${formatRangePeriodOnly(state.customRange.startPeriod, state.customRange.endPeriod)}</small></th>` : ''}
-            ${yearlyActive ? yearlyHeaderCells : `<th${sortedThClass('monthly')} data-sortfield="monthly" ${ariaSort('monthly')} scope="col">${monthCol} ${arrow('monthly')}</th>
-            <th${sortedThClass('ytd')} data-sortfield="ytd" ${ariaSort('ytd')} scope="col">YTD ${arrow('ytd')}</th>
-            <th${sortedThClass('1yr')} data-sortfield="1yr" ${ariaSort('1yr')} scope="col">12 חוד׳ ${arrow('1yr')}</th>
-            <th${sortedThClass('3yr')} data-sortfield="3yr" ${ariaSort('3yr')} scope="col">${_yr3Lbl} ${arrow('3yr')}${_yieldSubLabel}</th>
-            <th${sortedThClass('5yr')} data-sortfield="5yr" ${ariaSort('5yr')} scope="col">${_yr5Lbl} ${arrow('5yr')}${_yieldSubLabel}</th>
-            <th${sortedThClass('7yr')} data-sortfield="7yr" ${ariaSort('7yr')} scope="col">7 שנים ${arrow('7yr')}${_yieldSubLabel}</th>`}
+            ${!yearlyActive && customRangeActive ? `<th${sortedThClass('customRange', 'custom-range-col yield-col')} data-sortfield="customRange" ${ariaSort('customRange')} scope="col"><span class="custom-range-th">טווח מותאם</span> ${arrow('customRange')}<small class="custom-range-th-dates">${formatRangePeriodOnly(state.customRange.startPeriod, state.customRange.endPeriod)}</small></th>` : ''}
+            ${yearlyActive ? yearlyHeaderCells : `<th${sortedThClass('monthly', 'yield-col')} data-sortfield="monthly" ${ariaSort('monthly')} scope="col">${monthCol} ${arrow('monthly')}</th>
+            <th${sortedThClass('ytd', 'yield-col')} data-sortfield="ytd" ${ariaSort('ytd')} scope="col">YTD ${arrow('ytd')}</th>
+            <th${sortedThClass('1yr', 'yield-col')} data-sortfield="1yr" ${ariaSort('1yr')} scope="col">12 חוד׳ ${arrow('1yr')}</th>
+            <th${sortedThClass('3yr', 'yield-col')} data-sortfield="3yr" ${ariaSort('3yr')} scope="col">${_yr3Lbl} ${arrow('3yr')}${_yieldSubLabel}</th>
+            <th${sortedThClass('5yr', 'yield-col')} data-sortfield="5yr" ${ariaSort('5yr')} scope="col">${_yr5Lbl} ${arrow('5yr')}${_yieldSubLabel}</th>
+            <th${sortedThClass('7yr', 'yield-col')} data-sortfield="7yr" ${ariaSort('7yr')} scope="col">7 שנים ${arrow('7yr')}${_yieldSubLabel}</th>`}
             ${state.showExposure ? `<th${sortedThClass('stock', 'exp-col')} data-sortfield="stock" ${ariaSort('stock')} scope="col">% מניות ${arrow('stock')}</th>
             <th${sortedThClass('abroad', 'exp-col')} data-sortfield="abroad" ${ariaSort('abroad')} scope="col">% חו"ל ${arrow('abroad')}</th>
             <th${sortedThClass('fx', 'exp-col')} data-sortfield="fx" ${ariaSort('fx')} scope="col">% מט"ח ${arrow('fx')}</th>` : ''}
