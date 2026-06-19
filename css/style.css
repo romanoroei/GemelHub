@@ -16447,16 +16447,16 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     white-space: normal !important;
     height: 36px !important;
     min-height: 36px !important;
-    padding-top: 3px !important;
-    padding-bottom: 3px !important;
+    padding: 3px 4px !important;
     line-height: 1 !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table th.custom-range-col .custom-range-th {
     display: block !important;
-    font-size: .7rem !important;
-    line-height: 1.02 !important;
+    font-size: .54rem !important;
+    line-height: 1 !important;
     font-weight: 900 !important;
+    white-space: nowrap !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table th.custom-range-col .custom-range-th-dates {
@@ -16477,13 +16477,30 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     font-size: .6rem !important;
   }
 
+  html body .mobile-sticky-head-cell.is-custom-range {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    padding: 3px 4px !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    line-height: 1 !important;
+  }
+
+  html body .mobile-sticky-head-cell.is-custom-range span,
   html body .mobile-sticky-head-cell small {
     display: block !important;
-    margin-top: 2px !important;
+    margin: 0 !important;
     color: #64748b !important;
     font-size: .54rem !important;
     line-height: 1 !important;
-    font-weight: 800 !important;
+    font-weight: 900 !important;
     white-space: nowrap !important;
+  }
+
+  html body .mobile-sticky-head-cell.is-custom-range span {
+    color: #0c2134 !important;
   }
 }

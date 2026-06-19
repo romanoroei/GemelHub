@@ -3576,11 +3576,13 @@ const App = (() => {
     const datesEl = th?.querySelector('.custom-range-th-dates');
     if (datesEl) {
       const labelEl = th.querySelector('.custom-range-th');
-      cell.innerHTML = `<span>${labelEl ? labelEl.textContent.trim() : 'טווח מותאם'}</span><br><small>${datesEl.textContent.trim()}</small>`;
+      cell.classList.add('is-custom-range');
+      cell.innerHTML = `<span>${labelEl ? labelEl.textContent.trim() : 'טווח מותאם'}</span><small>${datesEl.textContent.trim()}</small>`;
       cell.style.setProperty('white-space', 'normal', 'important');
       cell.style.setProperty('line-height', '1.08', 'important');
       return;
     }
+    cell.classList.remove('is-custom-range');
     cell.textContent = getMobileStickyHeadText(th);
     cell.style.removeProperty('white-space');
     cell.style.removeProperty('line-height');
@@ -3687,11 +3689,13 @@ const App = (() => {
       const thRect = th.getBoundingClientRect();
       const rawLeft = Math.round(thRect.left - wrapperRect.left);
       const width = Math.round(thRect.width);
-      const visibleLeft = index < 2 ? rawLeft : Math.max(rawLeft, 0);
-      const visibleRight = index < 2 ? rawLeft + width : Math.min(rawLeft + width, stickyColumnsLeft, wrapperWidth);
+      const isCustomRangeHead = th.classList.contains('custom-range-col');
+      const keepFullWidth = index < 2 || isCustomRangeHead;
+      const visibleLeft = keepFullWidth ? rawLeft : Math.max(rawLeft, 0);
+      const visibleRight = keepFullWidth ? rawLeft + width : Math.min(rawLeft + width, stickyColumnsLeft, wrapperWidth);
       const visibleWidth = Math.max(0, visibleRight - visibleLeft);
-      const leftClip = index < 2 ? 0 : Math.max(0, -rawLeft);
-      const rightClip = index < 2 ? 0 : Math.max(0, rawLeft + width - visibleRight);
+      const leftClip = keepFullWidth ? 0 : Math.max(0, -rawLeft);
+      const rightClip = keepFullWidth ? 0 : Math.max(0, rawLeft + width - visibleRight);
       const isOutsideWrapper = index >= 2 && visibleWidth <= 0;
       cell.style.setProperty('left', `${toZoomSpace(rawLeft)}px`, 'important');
       cell.style.setProperty('right', 'auto', 'important');
@@ -3700,7 +3704,7 @@ const App = (() => {
       cell.style.setProperty('max-width', `${toZoomSpace(width)}px`, 'important');
       cell.style.setProperty('overflow', 'hidden', 'important');
       cell.style.setProperty('text-overflow', 'clip', 'important');
-      cell.style.setProperty('clip-path', index < 2 ? 'none' : `inset(0 ${toZoomSpace(rightClip)}px 0 ${toZoomSpace(leftClip)}px)`, 'important');
+      cell.style.setProperty('clip-path', keepFullWidth ? 'none' : `inset(0 ${toZoomSpace(rightClip)}px 0 ${toZoomSpace(leftClip)}px)`, 'important');
       cell.style.setProperty('font-size', `${12 * MOBILE_TABLE_ZOOM}px`, 'important');
       cell.style.setProperty('line-height', '1.05', 'important');
       cell.style.setProperty('visibility', index < 2 || !isOutsideWrapper ? 'visible' : 'hidden', 'important');
@@ -4143,6 +4147,7 @@ const App = (() => {
         const rankWidth = 28;
         const managerWidth = 104;
         const expColWidth = 76;
+        const customRangeWidth = 68;
         const restWidth = mobileColumnCount > 8 ? 54 : 56;
         const compactReturnWidth = 48;
         let visibleIdx = 0;
@@ -4150,6 +4155,7 @@ const App = (() => {
           if (isExposureOnly && th.classList.contains('yield-col')) return 0;
           const w = visibleIdx === 0 ? rankWidth
             : visibleIdx === 1 ? managerWidth
+            : th.classList.contains('custom-range-col') ? customRangeWidth
             : (isExposureOnly ? expColWidth
               : (visibleIdx === 2 || visibleIdx === 3 ? compactReturnWidth : restWidth));
           visibleIdx++;
