@@ -86,11 +86,11 @@ const App = (() => {
     if (hasStock && hasAbroad && hasFx && stock > 99 && abroad > 99 && fx > 99) return 'מסלול מחקה מדד חו״ל צמוד מט״ח';
     if (hasStock && hasAbroad && hasFx && stock > 75 && abroad < 5 && fx < 5) return 'מסלול מניות ישראלי';
     if (hasStock && hasAbroad && hasFx && stock > 75 && abroad > 75 && fx > 75) return 'מניות מוטה חו״ל צמוד מט״ח';
-    if (hasStock && hasAbroad && hasFx && stock > 75 && abroad > 75 && fx < 25) return 'מניות מוטה חו״ל מנוטרל מטבע';
+    if (hasStock && hasAbroad && hasFx && stock > 75 && abroad > 75 && fx < 20) return 'מניות מוטה חו״ל מנוטרל מטבע';
     if (hasStock && hasAbroad && hasFx && stock > 75 && abroad < 25 && fx < 25) return 'מניות מוטה ישראל';
     if (hasStock && hasAbroad && hasFx && stock === 0 && abroad > 75 && fx > 75) return 'אג״ח מוטה חו״ל צמוד מט״ח';
     if (hasStock && hasAbroad && hasFx && stock >= 10 && stock <= 25 && abroad < 25 && fx < 25) return 'אג״ח ומניות עד 25% מוטה ישראל';
-    if (hasFx && fx < 25 && hasAbroad && abroad > 75) return 'חו״ל מנוטרל מטבע';
+    if (hasFx && fx < 20 && hasAbroad && abroad > 75) return 'חו״ל מנוטרל מטבע';
     if (hasAbroad && abroad > 75) return hasFx && fx > 75 ? 'חו״ל צמוד מט״ח' : 'חו״ל';
     if (hasAbroad && hasFx && abroad < 25 && fx < 25) return 'מוטה ישראל';
     if (hasFx && fx > 75) return 'צמוד מט״ח';
@@ -6236,11 +6236,11 @@ const App = (() => {
       if (isGeneral && hasAbroad && hasFx && abroad > 75 && fx > 75) return 'כללי מוטה חו״ל צמוד מט״ח';
       if (isGeneral && hasAbroad && hasFx && abroad < 25 && fx < 25) return 'כללי מוטה ישראל';
       if (hasStock && hasAbroad && hasFx && stock > 75 && abroad > 75 && fx > 75) return 'מניות מוטה חו״ל צמוד מט״ח';
-      if (hasStock && hasAbroad && hasFx && stock > 75 && abroad > 75 && fx < 25) return 'מניות מוטה חו״ל מנוטרל מטבע';
+      if (hasStock && hasAbroad && hasFx && stock > 75 && abroad > 75 && fx < 20) return 'מניות מוטה חו״ל מנוטרל מטבע';
       if (hasStock && hasAbroad && hasFx && stock > 75 && abroad < 25 && fx < 25) return 'מניות מוטה ישראל';
       if (hasStock && hasAbroad && hasFx && stock === 0 && abroad > 75 && fx > 75) return 'אג״ח מוטה חו״ל צמוד מט״ח';
       if (hasStock && hasAbroad && hasFx && stock >= 10 && stock <= 25 && abroad < 25 && fx < 25) return 'אג״ח ומניות עד 25% מוטה ישראל';
-      if (hasFx && fx < 25 && hasAbroad && abroad > 75) return 'חו״ל מנוטרל מטבע';
+      if (hasFx && fx < 20 && hasAbroad && abroad > 75) return 'חו״ל מנוטרל מטבע';
       if (hasAbroad && abroad > 75) return hasFx && fx > 75 ? 'חו״ל צמוד מט״ח' : 'חו״ל';
       if (hasAbroad && hasFx && abroad < 25 && fx < 25) return 'מוטה ישראל';
       if (hasFx && fx > 75) return 'צמוד מט״ח';

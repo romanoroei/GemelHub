@@ -1782,10 +1782,11 @@ function renderPeersTable(myFundId, myName) {
       ? '<span title="אין נתוני 12 חודשים" style="color:var(--gray-300)">—</span>'
       : y12m !== undefined ? _peerYield(y12m, 'yr1', peerSort.field==='1yr' ? yieldClass(y12m) : '', di) : '-';
 
-    const nameTags = fundNameTags ? `<span class="fund-name-tag-icons">${fundNameTags}</span>` : '';
-    const nameCell = isMe
-      ? `<span style="font-weight:800;color:${color}">${name} ★</span>${nameTags}`
-      : `<span class="peer-name-link" data-fundid="${r.FUND_ID}" style="cursor:pointer;font-weight:600;color:${color};text-decoration:underline dotted;">${name}</span>${nameTags}`;
+    const allocTags = fundNameTags ? `<span class="fund-name-tag-icons">${fundNameTags}</span>` : '';
+    const nameRow = isMe
+      ? `<div class="prov-name" style="color:${color};font-weight:800;"><span class="prov-name-text">${name} <span style="color:#c9a227;">★</span></span></div>`
+      : `<div class="prov-name"><span class="peer-name-link prov-name-text" data-fundid="${r.FUND_ID}" style="cursor:pointer;color:${color};font-weight:600;text-decoration:underline dotted;">${name}</span></div>`;
+    const nameCell = `<div>${nameRow}<div class="prov-id" style="display:flex;align-items:center;gap:4px;">#${r.FUND_ID}${allocTags}</div></div>`;
 
     const yearlyCells = yearlyYears.map(year => {
       const value = peerYearlyState.yieldMap?.get(String(r.FUND_ID))?.get(year);
@@ -2223,7 +2224,7 @@ function calcAllocationDiagnostics(record, peers) {
     profile = 'כללי מוטה ישראל';
   } else if (hasStock && hasForeign && hasFx && stockPct > 75 && foreignPct > 75 && fxPct > 75) {
     profile = 'מניות מוטה חו״ל צמוד מט״ח';
-  } else if (hasStock && hasForeign && hasFx && stockPct > 75 && foreignPct > 75 && fxPct < 25) {
+  } else if (hasStock && hasForeign && hasFx && stockPct > 75 && foreignPct > 75 && fxPct < 20) {
     profile = 'מניות מוטה חו״ל מנוטרל מטבע';
   } else if (hasStock && hasForeign && hasFx && stockPct > 75 && foreignPct < 25 && fxPct < 25) {
     profile = 'מניות מוטה ישראל';
@@ -2895,7 +2896,7 @@ function renderGemelHubScoreBadge(container, data, fundId) {
 
         <!-- ציון גמלהאב — מוגדל -->
         <text x="120" y="97" text-anchor="middle" fill="#1a3560" font-size="19"
-              font-weight="700" font-family="'Segoe UI',Arial,sans-serif" letter-spacing="0.5">ציון גמלהאב</text>
+              font-weight="700" font-family="'Segoe UI',Arial,sans-serif" letter-spacing="0.5">ציון גמלהאב*</text>
 
         <!-- קו מפריד עליון -->
         <line x1="46" y1="100" x2="194" y2="100" stroke="#1a3560" stroke-width="1.5"/>
@@ -2903,6 +2904,7 @@ function renderGemelHubScoreBadge(container, data, fundId) {
         <!-- ציון — baseline=148, top≈108, מרכז חזותי ≈ y=128 (קרוב למרכז החותמת) -->
         <text x="120" y="148" text-anchor="middle" fill="#c9a227" font-size="56"
               font-weight="900" font-family="'Arial Black',Arial,sans-serif">${scoreStr}</text>
+
 
         <!-- קו מפריד תחתון -->
         <line x1="46" y1="155" x2="194" y2="155" stroke="#1a3560" stroke-width="1.5"/>
@@ -2927,9 +2929,9 @@ function showGemelHubScoreModal(data, currentFundId) {
 
   const titleHtml = `
     <div>
-      <div style="font-size:.72rem;color:#64748b;font-weight:700;margin-bottom:3px;letter-spacing:.3px;">מהו ציון גמלהאב?</div>
+      <div style="font-size:.72rem;color:#64748b;font-weight:700;margin-bottom:3px;letter-spacing:.3px;">מהו ציון גמלהאב*?</div>
       <div style="font-size:1.05rem;font-weight:800;color:#0f2744;">
-        ציון גמלהאב
+        ציון גמלהאב*
         ${thisFund ? `— <span style="color:#c9a227;">${thisFund.score.toFixed(2)}</span> / 10` : ''}
       </div>
     </div>`;
@@ -3011,7 +3013,15 @@ function showGemelHubScoreModal(data, currentFundId) {
       </table>
     </div>`;
 
-  showStatModal('gh-score-modal', titleHtml, explanationHtml + compHtml + tableHtml, 'max-width:640px;');
+  const disclaimerHtml = `
+    <div style="padding:12px 16px 16px;border-top:1px solid #eef2f7;margin-top:4px;">
+      <p style="font-size:.72rem;color:#94a3b8;line-height:1.6;margin:0;text-align:center;">
+        ★ הציון מבוסס על ביצועי עבר בלבד ואינו מהווה המלצה, ייעוץ השקעות או תחזית לביצועים עתידיים.
+        ביצועי עבר אינם ערובה לתוצאות עתידיות. לפני כל החלטה פיננסית יש להיוועץ בבעל רישיון.
+      </p>
+    </div>`;
+
+  showStatModal('gh-score-modal', titleHtml, explanationHtml + compHtml + tableHtml + disclaimerHtml, 'max-width:640px;');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
