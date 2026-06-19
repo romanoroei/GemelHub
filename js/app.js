@@ -1468,8 +1468,9 @@ const App = (() => {
 
     sheet.querySelector('.mob-extra-fund-search')?.addEventListener('click', () => {
       closeMobileCategorySheet();
-      const inp = document.getElementById('global-search');
-      if (inp) { inp.focus(); inp.select(); inp.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      state._pendingFundSearch = true;
+      state.advancedOptionsOpen = true;
+      syncAdvancedOptionsUi();
     });
 
     return sheet;
@@ -1700,7 +1701,16 @@ const App = (() => {
     if (filterBtn) filterBtn.style.display = isComparison && state.advancedOptionsOpen && !isSandbox ? '' : 'none';
     if (searchWrap) {
       const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
-      searchWrap.style.display = isSandbox || (isMobile && state.advancedOptionsOpen) ? 'none' : '';
+      const fundSearchPending = !!state._pendingFundSearch;
+      state._pendingFundSearch = false;
+      searchWrap.style.display = isSandbox || (isMobile && state.advancedOptionsOpen && !fundSearchPending) ? 'none' : '';
+      if (fundSearchPending) {
+        setTimeout(() => {
+          searchWrap.style.display = '';
+          const inp = document.getElementById('global-search');
+          if (inp) { inp.focus(); inp.select(); inp.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+        }, 80);
+      }
     }
     if (customRangeEntry && !isComparison) customRangeEntry.hidden = true;
     if (advancedSearchBtn) advancedSearchBtn.hidden = isSandbox || !isComparison || !state.advancedOptionsOpen;
@@ -4936,9 +4946,10 @@ const App = (() => {
           b.classList.toggle('is-active', state.showExposure);
         });
         // toggle class על כל הטבלאות — CSS מסתיר/מציג .exp-col
+        const _isMobExp = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
         document.querySelectorAll('table.track-table').forEach(t => {
           t.classList.toggle('hide-exposure', !state.showExposure);
-          t.classList.toggle('exposure-only', state.showExposure);
+          t.classList.toggle('exposure-only', state.showExposure && _isMobExp);
         });
         syncTracksDensityClasses();
         state._blockRenderers.forEach(fn => fn());
@@ -6996,7 +7007,7 @@ const App = (() => {
     );
 
     return `
-      <table class="track-table${customRangeActive && !yearlyActive ? ' has-custom-range' : ''}${yearlyActive ? ' has-yearly-returns' : ''}${matchYearlyHeight ? ' match-yearly-height' : ''}${!state.showExposure ? ' hide-exposure' : ''}${state.showExposure ? ' exposure-only' : ''}">
+      <table class="track-table${customRangeActive && !yearlyActive ? ' has-custom-range' : ''}${yearlyActive ? ' has-yearly-returns' : ''}${matchYearlyHeight ? ' match-yearly-height' : ''}${!state.showExposure ? ' hide-exposure' : ''}${state.showExposure && (window.matchMedia && window.matchMedia('(max-width: 760px)').matches) ? ' exposure-only' : ''}">
         <thead>
           <tr>
             <th title="דירוג" scope="col">#</th>
@@ -7263,6 +7274,7 @@ const App = (() => {
     syncAdvancedSearchCategoryChip();
     syncAdvancedSearchModeButtons();
     renderAdvancedSearchRows();
+    renderAdvancedSearchHistory();
     renderAdvancedSearchResults();
     const runBtn = document.getElementById('advanced-search-run');
     if (runBtn) {
@@ -7899,7 +7911,71 @@ const App = (() => {
     state.advancedSearch.loading = false;
     state.advancedSearch.results = ranked;
     setAdvancedSearchStatus(ranked.length ? `נמצאו ${ranked.length} תוצאות מובילות לפי הקריטריונים שבחרת.` : 'לא נמצאו תוצאות.');
+    if (ranked.length) saveAdvancedSearchToHistory(selectedParams);
     renderAdvancedSearchResults();
+  }
+
+  const ADVANCED_SEARCH_HISTORY_KEY = 'gemelhub_recent_searches_v1';
+
+  function saveAdvancedSearchToHistory(params) {
+    const metrics = getAvailableAdvancedMetrics();
+    const snapshot = {
+      ts: Date.now(),
+      catId: state.activeCategoryId,
+      catLabel: CONFIG.PRODUCT_CATEGORIES.find(c => c.id === state.activeCategoryId)?.label || '',
+      params: params.map(p => ({
+        metricId: p.metricId,
+        metricLabel: metrics.find(m => m.id === p.metricId)?.label || p.metricId,
+        direction: p.direction,
+        weight: p.weight
+      }))
+    };
+    try {
+      const raw = localStorage.getItem(ADVANCED_SEARCH_HISTORY_KEY);
+      const hist = raw ? JSON.parse(raw) : [];
+      const filtered = hist.filter(h => JSON.stringify(h.params.map(p=>p.metricId)) !== JSON.stringify(snapshot.params.map(p=>p.metricId)));
+      filtered.unshift(snapshot);
+      localStorage.setItem(ADVANCED_SEARCH_HISTORY_KEY, JSON.stringify(filtered.slice(0, 3)));
+    } catch(e) {}
+    renderAdvancedSearchHistory();
+  }
+
+  function loadAdvancedSearchHistory() {
+    try {
+      const raw = localStorage.getItem(ADVANCED_SEARCH_HISTORY_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch(e) { return []; }
+  }
+
+  function renderAdvancedSearchHistory() {
+    const container = document.getElementById('advanced-search-history');
+    if (!container) return;
+    const hist = loadAdvancedSearchHistory();
+    if (!hist.length) { container.hidden = true; return; }
+    container.hidden = false;
+    container.innerHTML = `
+      <div class="adv-hist-title">חיפושים אחרונים</div>
+      ${hist.map((h, i) => `
+        <button type="button" class="adv-hist-item" data-hist-idx="${i}">
+          <span class="adv-hist-cat">${h.catLabel || h.catId}</span>
+          <span class="adv-hist-params">${h.params.map(p => p.metricLabel).join(' · ')}</span>
+        </button>
+      `).join('')}
+    `;
+    container.querySelectorAll('.adv-hist-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const h = hist[+btn.dataset.histIdx];
+        if (!h) return;
+        state.advancedSearch.params = h.params.map(p => ({
+          id: Date.now() + Math.random(),
+          metricId: p.metricId,
+          direction: p.direction || 'high',
+          weight: p.weight || 'medium'
+        }));
+        renderAdvancedSearchRows();
+        runAdvancedSearch();
+      });
+    });
   }
 
   // ─── MODAL ────────────────────────────────────────────────────

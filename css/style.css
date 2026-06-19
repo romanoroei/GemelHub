@@ -734,6 +734,50 @@ body.sticky-gap-mask-active:not(.fund-page)::before {
   gap: 8px;
   direction: rtl;
 }
+/* ── Advanced search history ── */
+.advanced-search-history {
+  margin-bottom: 10px;
+}
+.adv-hist-title {
+  font-size: .7rem;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  margin-bottom: 6px;
+  padding: 0 2px;
+}
+.adv-hist-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 12px;
+  margin-bottom: 4px;
+  border: 1px solid rgba(12, 33, 52, .15);
+  border-radius: 9px;
+  background: rgba(255,255,255,.8);
+  cursor: pointer;
+  text-align: right;
+  transition: background .14s;
+}
+.adv-hist-item:hover { background: #f0f4ff; }
+.adv-hist-cat {
+  font-size: .68rem;
+  font-weight: 800;
+  color: #0c2134;
+  white-space: nowrap;
+  border-left: 1px solid rgba(12,33,52,.2);
+  padding-left: 8px;
+}
+.adv-hist-params {
+  font-size: .7rem;
+  color: #475569;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .advanced-search-empty {
   border: 1px dashed var(--gray-300);
   border-radius: 14px;
@@ -3160,6 +3204,13 @@ table.track-table thead th {
 /* הסתרת עמודות חשיפה — toggle class על הטבלה, ללא שינוי DOM */
 table.track-table.hide-exposure .exp-col {
   display: none;
+}
+/* דסקטופ: הפרדה עדינה בין עמודות תשואה לאלוקציה */
+@media (min-width: 761px) {
+  table.track-table:not(.hide-exposure):not(.exposure-only) th.exp-col:first-of-type,
+  table.track-table:not(.hide-exposure):not(.exposure-only) td.exp-col:first-child {
+    border-right: 2px solid rgba(12, 33, 52, .12);
+  }
 }
 /* מצב אלוקציה בלבד — מסתיר תשואות ומגדיל סרגל */
 table.track-table.exposure-only th.yield-col,
@@ -13503,6 +13554,11 @@ body.h2h-active,
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
+  }
+  .cat-tab.sandbox-tab,
+  .cat-tab.h2h-tab {
+    max-width: 130px !important;
+    overflow: visible !important;
   }
 
   .track-header,
