@@ -4950,9 +4950,10 @@ const App = (() => {
           b.classList.toggle('is-active', state.showExposure);
         });
         // toggle class על כל הטבלאות — CSS מסתיר/מציג .exp-col
+        const _isMobExp = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
         document.querySelectorAll('table.track-table').forEach(t => {
           t.classList.toggle('hide-exposure', !state.showExposure);
-          t.classList.remove('exposure-only');
+          t.classList.toggle('exposure-only', state.showExposure && _isMobExp);
         });
         syncTracksDensityClasses();
         state._blockRenderers.forEach(fn => fn());
@@ -7010,7 +7011,7 @@ const App = (() => {
     );
 
     return `
-      <table class="track-table${customRangeActive && !yearlyActive ? ' has-custom-range' : ''}${yearlyActive ? ' has-yearly-returns' : ''}${matchYearlyHeight ? ' match-yearly-height' : ''}${!state.showExposure ? ' hide-exposure' : ''}">
+      <table class="track-table${customRangeActive && !yearlyActive ? ' has-custom-range' : ''}${yearlyActive ? ' has-yearly-returns' : ''}${matchYearlyHeight ? ' match-yearly-height' : ''}${!state.showExposure ? ' hide-exposure' : ''}${state.showExposure && (window.matchMedia && window.matchMedia('(max-width: 760px)').matches) ? ' exposure-only' : ''}">
         <thead>
           <tr>
             <th title="דירוג" scope="col">#</th>

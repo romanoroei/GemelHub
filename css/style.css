@@ -9953,8 +9953,16 @@ body.h2h-active,
 }
 
 /* Sandbox tab badge */
+.cat-tab.sandbox-tab,
+.cat-tab.h2h-tab {
+  position: relative;
+  overflow: visible !important;
+}
 .sandbox-tab-badge,
 .h2h-tab-badge {
+  position: absolute;
+  top: -5px;
+  left: -6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -9966,8 +9974,9 @@ body.h2h-active,
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
-  margin-inline-start: 4px;
   line-height: 1;
+  z-index: 2;
+  pointer-events: none;
 }
 
 /* ── Floating selection bar ── */
