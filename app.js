@@ -4159,7 +4159,15 @@ const App = (() => {
       if (columnCount > 2) {
         const rankWidth = 24;
         const managerWidth = 102;
-        const expColWidth = 72;
+        let expColWidth = 72;
+        if (isExposureOnly) {
+          const wrapper = table.closest('.track-table-wrapper');
+          const containerWidth = wrapper ? wrapper.clientWidth : 0;
+          const expColCount = firstRowTHs.filter(th => th.classList.contains('exp-col')).length || 3;
+          if (containerWidth > 0) {
+            expColWidth = Math.max(72, Math.floor((containerWidth - rankWidth - managerWidth) / expColCount));
+          }
+        }
         const restWidth = columnCount > 8 ? 56 : 62;
         let visibleIdx = 0;
         const getColWidth = (th) => {
@@ -4722,6 +4730,15 @@ const App = (() => {
       btn.addEventListener('click', e => {
         e.stopPropagation();
         const newMode = btn.dataset.mode;
+        const wasExposure = state.showExposure;
+        if (state.showExposure) {
+          state.showExposure = false;
+          document.querySelectorAll('.exp-toggle-btn').forEach(b => b.classList.remove('is-active'));
+          document.querySelectorAll('table.track-table').forEach(t => {
+            t.classList.add('hide-exposure');
+            t.classList.remove('exposure-only');
+          });
+        }
         if (newMode === 'yearly') {
           const trackId = block.dataset.trackId || null;
           if (!trackId) return;
@@ -4734,7 +4751,7 @@ const App = (() => {
           ensureYearlyTrackLoaded(trackId, 5);
           return;
         }
-        if (state.yieldMode === newMode && !Array.from(state.yearlyByTrack.values()).some(entry => entry.active)) return;
+        if (!wasExposure && state.yieldMode === newMode && !Array.from(state.yearlyByTrack.values()).some(entry => entry.active)) return;
         state.yieldMode = newMode;
         clearAllYearlyTrackStates();
         // עדכון is-active על כל הכפתורים בכל הבלוקים

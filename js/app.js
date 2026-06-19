@@ -4159,7 +4159,15 @@ const App = (() => {
       if (mobileColumnCount > 2) {
         const rankWidth = 28;
         const managerWidth = 104;
-        const expColWidth = 76;
+        let expColWidth = 76;
+        if (isExposureOnly) {
+          const wrapper = table.closest('.track-table-wrapper');
+          const containerWidth = wrapper ? wrapper.clientWidth : 0;
+          const expColCount = firstRowTHs.filter(th => th.classList.contains('exp-col')).length || 3;
+          if (containerWidth > 0) {
+            expColWidth = Math.max(76, Math.floor((containerWidth - rankWidth - managerWidth) / expColCount));
+          }
+        }
         const customRangeWidth = 68;
         const restWidth = mobileColumnCount > 8 ? 54 : 56;
         const compactReturnWidth = 48;
@@ -4844,6 +4852,7 @@ const App = (() => {
       btn.addEventListener('click', e => {
         e.stopPropagation();
         const newMode = btn.dataset.mode;
+        const wasExposure = state.showExposure;
         if (state.showExposure) {
           state.showExposure = false;
           document.querySelectorAll('.exp-toggle-btn').forEach(b => b.classList.remove('is-active'));
@@ -4864,7 +4873,7 @@ const App = (() => {
           ensureYearlyTrackLoaded(trackId, 5);
           return;
         }
-        if (state.yieldMode === newMode && !Array.from(state.yearlyByTrack.values()).some(entry => entry.active)) return;
+        if (!wasExposure && state.yieldMode === newMode && !Array.from(state.yearlyByTrack.values()).some(entry => entry.active)) return;
         state.yieldMode = newMode;
         clearAllYearlyTrackStates();
         // עדכון is-active על כל הכפתורים בכל הבלוקים
