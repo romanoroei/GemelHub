@@ -2771,6 +2771,7 @@ async function setupFundSearch() {
       APIModule.getAllSearchablePolisa().catch(() => [])
     ]);
     records = [...gemel, ...pension, ...polisa];
+    window._fundAllSearchRecords = records; // שיתוף עם sheet מובייל
   } catch(e) {}
 
   function doSearch(q) {
@@ -3077,6 +3078,95 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 2800);
   }
 
+  function ensureFundSearchSheet() {
+    var sheet = document.getElementById('mobile-fund-search-sheet');
+    if (sheet) return sheet;
+    sheet = document.createElement('div');
+    sheet.id = 'mobile-fund-search-sheet';
+    sheet.className = 'mobile-category-sheet';
+    sheet.hidden = true;
+    sheet.innerHTML = [
+      '<div class="mobile-category-sheet-head">',
+      '<strong>חיפוש קופה</strong>',
+      '<button type="button" class="mobile-category-sheet-close" aria-label="סגור חיפוש"><i class="fas fa-times" aria-hidden="true"></i></button>',
+      '</div>',
+      '<div class="mobile-fund-search-wrap">',
+      '<i class="fas fa-search" aria-hidden="true" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:.9rem;pointer-events:none;"></i>',
+      '<input type="text" id="mobile-fund-search-input" placeholder="שם, מנהל או מספר קופה..." autocomplete="off"',
+      ' style="width:100%;padding:10px 36px 10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:.92rem;outline:none;direction:rtl;box-sizing:border-box;" />',
+      '</div>',
+      '<div id="mobile-fund-search-results" style="margin-top:8px;"></div>'
+    ].join('');
+    document.body.appendChild(sheet);
+
+    var closeBtn = sheet.querySelector('.mobile-category-sheet-close');
+    closeBtn.addEventListener('click', function() {
+      sheet.classList.remove('is-open');
+      setTimeout(function() { if (!sheet.classList.contains('is-open')) sheet.hidden = true; }, 180);
+    });
+
+    var input = sheet.querySelector('#mobile-fund-search-input');
+    var results = sheet.querySelector('#mobile-fund-search-results');
+    var timer;
+
+    function doMobileSearch(q) {
+      var records = window._fundAllSearchRecords || [];
+      if (!q || !records.length) { results.innerHTML = ''; return; }
+      var ql = q.toLowerCase();
+      var seen = new Set(), hits = [];
+      records.forEach(function(r) {
+        var name = (typeof getProviderDisplayName === 'function')
+          ? getProviderDisplayName(r.CONTROLLING_CORPORATION, r.MANAGING_CORPORATION)
+          : (r.MANAGING_CORPORATION || r.CONTROLLING_CORPORATION || '');
+        var id   = String(r.FUND_ID || '');
+        var fname = r.FUND_NAME || '';
+        var sub   = r.SUB_SPECIALIZATION || '';
+        if ((name.toLowerCase().includes(ql) || id.includes(ql) || fname.toLowerCase().includes(ql) || sub.toLowerCase().includes(ql)) && !seen.has(id) && hits.length < 12) {
+          seen.add(id);
+          var catObj = (CONFIG && CONFIG.PRODUCT_CATEGORIES || []).find(function(c) {
+            var cls = r.FUND_CLASSIFICATION || '';
+            return (c.apiClassifications && c.apiClassifications.some(function(ac){ return cls === ac.trim(); })) ||
+                   (c.pensionAPI && cls.includes('פנסי'));
+          });
+          hits.push({ name: name, id: id, fname: fname, sub: sub, catId: catObj ? catObj.id : '' });
+        }
+      });
+      if (!hits.length) { results.innerHTML = '<div style="padding:16px;text-align:center;color:#94a3b8;font-size:.85rem;">לא נמצאו תוצאות</div>'; return; }
+      results.innerHTML = hits.map(function(res) {
+        return '<div class="sd-item" data-fundid="' + res.id + '" data-catid="' + res.catId + '" style="padding:10px 12px;border-radius:8px;cursor:pointer;margin-bottom:4px;background:#f8fafc;">' +
+          '<div class="sd-name" style="font-size:.88rem;font-weight:700;color:#0f2744;">' + res.name + '</div>' +
+          '<div class="sd-sub" style="font-size:.75rem;color:#64748b;">' + (res.fname || res.sub) + ' · <span style="color:#94a3b8;">#' + res.id + '</span></div>' +
+        '</div>';
+      }).join('');
+      results.querySelectorAll('.sd-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+          var fid = item.dataset.fundid;
+          var cid = item.dataset.catid;
+          if (fid) window.location.href = 'fund.html?id=' + fid + '&cat=' + (cid || '');
+        });
+      });
+    }
+
+    input.addEventListener('input', function() {
+      clearTimeout(timer);
+      var q = input.value.trim();
+      if (!q) { results.innerHTML = ''; return; }
+      timer = setTimeout(function() { doMobileSearch(q); }, 180);
+    });
+
+    return sheet;
+  }
+
+  function openFundSearchSheet() {
+    var sheet = ensureFundSearchSheet();
+    sheet.hidden = false;
+    requestAnimationFrame(function() { sheet.classList.add('is-open'); });
+    setTimeout(function() {
+      var inp = document.getElementById('mobile-fund-search-input');
+      if (inp) inp.focus();
+    }, 200);
+  }
+
   function ensureFundCategorySheet() {
     var sheet = document.getElementById('mobile-category-sheet');
     if (sheet) return sheet;
@@ -3120,11 +3210,7 @@ document.addEventListener('DOMContentLoaded', () => {
           openFundCategorySheet();
         }
         if (btn.dataset.fundMobileAction === 'search') {
-          var search = document.getElementById('fund-global-search');
-          if (search) {
-            search.focus();
-            search.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
+          openFundSearchSheet();
         }
         if (btn.dataset.fundMobileAction === 'login') {
           showFeatureLockMessage();
