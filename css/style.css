@@ -16283,14 +16283,14 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
 @media (max-width: 760px) {
   html body .mobile-category-sheet {
     top: max(8px, env(safe-area-inset-top, 0px)) !important;
-    bottom: calc(var(--mobile-app-nav-clearance, 72px) + 8px) !important;
+    bottom: auto !important;
     inset-inline: 8px !important;
-    max-height: none !important;
+    max-height: calc(100dvh - var(--mobile-app-nav-clearance, 72px) - 24px) !important;
     height: auto !important;
     display: flex !important;
     flex-direction: column !important;
-    overflow: hidden !important;
-    padding: 10px 10px 12px !important;
+    overflow: visible !important;
+    padding: 12px 10px 14px !important;
     border-radius: 18px !important;
   }
 
@@ -16308,9 +16308,9 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     display: flex !important;
     align-items: center !important;
     gap: 8px !important;
-    margin: 4px 2px 6px !important;
+    margin: 6px 2px 7px !important;
     color: #64748b !important;
-    font-size: .72rem !important;
+    font-size: .82rem !important;
     font-weight: 900 !important;
     letter-spacing: 0 !important;
   }
@@ -16327,28 +16327,28 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     flex: 0 0 auto !important;
     display: grid !important;
     grid-template-columns: 1fr !important;
-    gap: 4px !important;
+    gap: 5px !important;
     overflow: visible !important;
   }
 
   html body .mobile-category-sheet-divider {
     flex: 0 0 auto !important;
-    margin: 8px 0 4px !important;
+    margin: 10px 0 5px !important;
   }
 
   html body .mobile-category-option {
-    min-height: 32px !important;
-    padding: 4px 9px !important;
-    gap: 6px !important;
-    font-size: .8rem !important;
-    line-height: 1.1 !important;
+    min-height: 38px !important;
+    padding: 6px 10px !important;
+    gap: 8px !important;
+    font-size: .92rem !important;
+    line-height: 1.15 !important;
   }
 
   html body .mobile-category-sub {
-    min-height: 26px !important;
+    min-height: 30px !important;
     margin-right: 18px !important;
-    padding: 2px 8px !important;
-    font-size: .76rem !important;
+    padding: 3px 8px !important;
+    font-size: .84rem !important;
   }
 
   html body .mobile-category-option.has-active-filters {
@@ -16359,6 +16359,20 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     margin-inline-start: 6px !important;
     flex: 0 0 auto !important;
     background: #0c2134 !important;
+    gap: 4px !important;
+    min-width: 34px !important;
+    height: 21px !important;
+    padding: 0 7px !important;
+    font-size: .7rem !important;
+  }
+
+  html body .mobile-category-option .cat-filter-badge i {
+    font-size: .66rem !important;
+    color: #f4d06f !important;
+  }
+
+  html body .mobile-category-option .cat-filter-badge span {
+    line-height: 1 !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table.exposure-only th.yield-col,
@@ -16370,27 +16384,44 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   html body #tracks-container .track-table-wrapper table.track-table.exposure-only th.exp-col,
   html body #tracks-container .track-table-wrapper table.track-table.exposure-only td.exp-col {
     display: table-cell !important;
-    width: 78px !important;
-    min-width: 78px !important;
-    max-width: 78px !important;
-    padding: 6px 7px !important;
+    width: 104px !important;
+    min-width: 104px !important;
+    max-width: 104px !important;
+    padding: 7px 8px !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table.exposure-only .exp-wrap {
-    gap: 5px !important;
-    justify-content: center !important;
+    display: grid !important;
+    grid-template-columns: 38px minmax(58px, 1fr) !important;
+    align-items: center !important;
+    gap: 7px !important;
+    justify-content: stretch !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table.exposure-only .exp-bar-bg {
-    width: 44px !important;
-    min-width: 44px !important;
-    height: 8px !important;
+    display: block !important;
+    width: 100% !important;
+    min-width: 58px !important;
+    height: 9px !important;
+    min-height: 9px !important;
+    border-radius: 999px !important;
+    background: #e2e8f0 !important;
+    overflow: hidden !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table.exposure-only .exp-bar {
+    display: block !important;
+    height: 100% !important;
+    min-height: 9px !important;
+    border-radius: 999px !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table.exposure-only .exp-val {
-    min-width: 34px !important;
-    font-size: .76rem !important;
+    min-width: 38px !important;
+    font-size: .84rem !important;
     line-height: 1 !important;
+    font-weight: 900 !important;
+    text-align: left !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table th.custom-range-col {

@@ -1498,7 +1498,8 @@ const App = (() => {
       let badge = btn.querySelector('.cat-filter-badge');
       if (filterCount > 0) {
         if (!badge) { badge = document.createElement('span'); badge.className = 'cat-filter-badge'; btn.appendChild(badge); }
-        badge.textContent = filterCount;
+        badge.innerHTML = `<i class="fas fa-filter" aria-hidden="true"></i><span>${filterCount}</span>`;
+        badge.setAttribute('aria-label', `${filterCount} סינונים פעילים`);
       } else if (badge) {
         badge.remove();
       }
@@ -4131,7 +4132,7 @@ const App = (() => {
       if (mobileColumnCount > 2) {
         const rankWidth = 28;
         const managerWidth = 104;
-        const expColWidth = 68;
+        const expColWidth = 104;
         const restWidth = mobileColumnCount > 8 ? 54 : 56;
         const compactReturnWidth = 48;
         let visibleIdx = 0;
@@ -4202,6 +4203,18 @@ const App = (() => {
         el.style.setProperty('font-weight', '850', 'important');
       });
       normalizeMobileFinanceTablePresentation(table);
+      if (isExposureOnly) {
+        table.querySelectorAll('.exp-val').forEach(el => {
+          el.style.setProperty('font-size', '14px', 'important');
+          el.style.setProperty('line-height', '1', 'important');
+          el.style.setProperty('font-weight', '900', 'important');
+        });
+        table.querySelectorAll('.exp-bar-bg').forEach(el => {
+          el.style.setProperty('display', 'block', 'important');
+          el.style.setProperty('height', '9px', 'important');
+          el.style.setProperty('min-height', '9px', 'important');
+        });
+      }
       setupMobileTableScrollbar(table.closest('.track-table-wrapper'));
       return;
 
@@ -4395,9 +4408,15 @@ const App = (() => {
         el.style.setProperty('box-shadow', 'none', 'important');
       }
       if (el.matches('td.yield-cell, td.exp-col, .yield-value-wrap, .yield-number-shell, .yield-number, .exp-val')) {
-        el.style.setProperty('font-size', '12px', 'important');
+        const isExposureOnlyValue = el.matches('.exp-val') && !!el.closest('table.exposure-only');
+        el.style.setProperty('font-size', isExposureOnlyValue ? '14px' : '12px', 'important');
         el.style.setProperty('line-height', '1.05', 'important');
-        el.style.setProperty('font-weight', '800', 'important');
+        el.style.setProperty('font-weight', isExposureOnlyValue ? '900' : '800', 'important');
+      }
+      if (el.matches('table.exposure-only .exp-bar-bg')) {
+        el.style.setProperty('display', 'block', 'important');
+        el.style.setProperty('height', '9px', 'important');
+        el.style.setProperty('min-height', '9px', 'important');
       }
       if (el.matches('.prov-name')) {
         el.style.setProperty('font-size', '12px', 'important');
