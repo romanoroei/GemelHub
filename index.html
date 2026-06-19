@@ -23,57 +23,11 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="css/style.css?v=track-title-long-pill-wrap-20260614" />
   <style>
-    /* ═══ MOBILE GOLD HEADER ═══ */
-    #mobile-gold-header { display: none; }
     @media (max-width: 760px) {
-      #mobile-gold-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        position: fixed;
-        top: 0; left: 0; right: 0;
-        height: 52px;
-        background: linear-gradient(135deg, #d4aa2e 0%, #b8911f 100%);
-        padding: 0 16px;
-        z-index: 9100;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.18);
-      }
-      .mobile-gold-logo {
-        font-family: 'Heebo', sans-serif;
-        font-size: 1.05rem;
-        font-weight: 800;
-        color: #0f2744;
-        letter-spacing: .3px;
-        user-select: none;
-      }
-      .mobile-gold-hamburger {
-        background: none; border: none; cursor: pointer;
-        padding: 6px; display: flex; flex-direction: column; gap: 5px;
-        -webkit-tap-highlight-color: transparent;
-      }
-      .mobile-gold-hamburger span {
-        display: block; width: 22px; height: 2.5px;
-        background: #0f2744; border-radius: 2px;
-        transition: transform .22s ease, opacity .22s ease;
-      }
-      .mobile-gold-hamburger.is-open span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
-      .mobile-gold-hamburger.is-open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
-      .mobile-gold-hamburger.is-open span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
-
-      /* push page content below gold header */
-      .hero-banner { margin-top: 52px; }
-      .sticky-header { top: 52px !important; }
-      body.mobile-sticky-header-fixed .sticky-header { top: 52px !important; }
-      body.mobile-sticky-header-fixed .page-body {
-        padding-top: calc(var(--mobile-sticky-header-h, 42px) + 52px) !important;
-      }
-
-      /* ═══ z-index fixes — overlays must be above gold bar (2500) ═══ */
-      #mobile-gold-header { z-index: 2500 !important; }
       .advanced-search-overlay { z-index: 9500 !important; }
       #custom-range-panel:not([hidden]) {
         position: fixed !important;
-        top: calc(52px + var(--mobile-sticky-header-h, 46px)) !important;
+        top: var(--mobile-sticky-header-h, 46px) !important;
         left: 8px !important; right: 8px !important;
         z-index: 9200 !important;
         background: #fff !important;
@@ -86,9 +40,9 @@
       body.mobile-filter-open #sidebar,
       body.mobile-filter-open #sidebar.sidebar-collapsed {
         position: fixed !important;
-        top: 52px !important; right: 0 !important;
+        top: 0 !important; right: 0 !important;
         width: min(290px, 88vw) !important;
-        height: calc(100dvh - 52px) !important;
+        height: 100dvh !important;
         z-index: 9050 !important;
         background: #fff !important;
         padding: 20px 16px !important;
@@ -105,11 +59,10 @@
         width: auto !important;
       }
       body.mobile-filter-open #sidebar-filters { display: block !important; }
-      /* Dimmed backdrop behind drawer */
       body.mobile-filter-open::before {
         content: '';
         position: fixed;
-        top: 52px; left: 0; right: 0; bottom: 0;
+        top: 0; left: 0; right: 0; bottom: 0;
         background: rgba(15,39,68,0.42);
         z-index: 9040;
       }
@@ -158,14 +111,6 @@
 <body>
 <a href="#content-area" class="skip-link">דלג לתוכן הראשי</a>
 <div id="a11y-live" aria-live="polite" aria-atomic="true" role="status"></div>
-
-<!-- ════════ MOBILE GOLD HEADER ════════ -->
-<div id="mobile-gold-header" aria-label="כותרת">
-  <button class="mobile-gold-hamburger" id="mobile-gold-hamburger" aria-label="תפריט סינון" aria-expanded="false">
-    <span></span><span></span><span></span>
-  </button>
-  <span class="mobile-gold-logo">GemelHub</span>
-</div>
 
 <!-- ════════ HERO BANNER (תמיד מוצג בכל העמודים) ════════ -->
 <section class="hero-banner" id="hero-banner" aria-label="כותרת ראשית">
@@ -513,6 +458,10 @@
   <button type="button" class="mobile-app-nav-item" data-mobile-app-action="categories" data-mobile-app-target="categories" aria-label="קטגוריות">
     <i class="fas fa-layer-group" aria-hidden="true"></i>
     <span>קטגוריות</span>
+  </button>
+  <button type="button" class="mobile-app-nav-item" data-mobile-app-action="sidebar-filter" data-mobile-app-target="sidebar-filter" aria-label="סינון">
+    <i class="fas fa-filter" aria-hidden="true"></i>
+    <span>סינון</span>
   </button>
   <button type="button" class="mobile-app-nav-item" data-mobile-app-action="filter" data-mobile-app-target="filter" aria-label="אפשרויות מתקדמות">
     <i class="fas fa-sliders-h" aria-hidden="true"></i>

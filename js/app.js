@@ -1461,6 +1461,13 @@ const App = (() => {
       const action = item.dataset.mobileAppAction;
       if (action === 'categories') {
         openMobileCategorySheet();
+      } else if (action === 'sidebar-filter') {
+        closeMobileCategorySheet();
+        if (document.body.classList.contains('mobile-filter-open')) {
+          closeMobileFilterDrawer();
+        } else {
+          openMobileFilterDrawer();
+        }
       } else if (action === 'filter') {
         closeMobileCategorySheet();
         openMobileOptionsSheet();
@@ -1474,67 +1481,53 @@ const App = (() => {
     });
     syncMobileAppNav('home');
 
-    // Gold header hamburger → mobile filter drawer
-    const hamburger = document.getElementById('mobile-gold-hamburger');
-    if (hamburger) {
-      function openMobileFilterDrawer() {
-        const sidebar = document.getElementById('sidebar');
-        const filters = document.getElementById('sidebar-filters');
-        if (!sidebar) return;
-        const sticky = sidebar.querySelector('.sidebar-sticky');
-        sidebar.style.setProperty('position', 'fixed', 'important');
-        sidebar.style.setProperty('top', '52px', 'important');
-        sidebar.style.setProperty('right', '0', 'important');
-        sidebar.style.setProperty('width', 'min(290px, 88vw)', 'important');
-        sidebar.style.setProperty('height', 'calc(100dvh - 52px)', 'important');
-        sidebar.style.setProperty('z-index', '9050', 'important');
-        sidebar.style.setProperty('background', '#fff', 'important');
-        sidebar.style.setProperty('padding', '20px 16px', 'important');
-        sidebar.style.setProperty('overflow-y', 'auto', 'important');
-        sidebar.style.setProperty('box-shadow', '-4px 0 24px rgba(15,39,68,0.22)', 'important');
-        sidebar.style.setProperty('max-width', 'none', 'important');
-        sidebar.style.setProperty('display', 'block', 'important');
-        sidebar.style.setProperty('pointer-events', 'auto', 'important');
-        sidebar.style.setProperty('opacity', '1', 'important');
-        sidebar.style.setProperty('visibility', 'visible', 'important');
-        sidebar.style.setProperty('transform', 'none', 'important');
-        sidebar.style.setProperty('transition', 'none', 'important');
-        if (sticky) {
-          sticky.style.setProperty('transition', 'none', 'important');
-          sticky.style.setProperty('animation', 'none', 'important');
-          sticky.style.setProperty('visibility', 'visible', 'important');
-          sticky.style.setProperty('opacity', '1', 'important');
-          sticky.style.setProperty('width', 'auto', 'important');
-        }
-        if (filters) filters.style.setProperty('display', 'block', 'important');
-        document.body.classList.add('mobile-filter-open');
-        hamburger.classList.add('is-open');
+    function openMobileFilterDrawer() {
+      const sidebar = document.getElementById('sidebar');
+      const filters = document.getElementById('sidebar-filters');
+      if (!sidebar) return;
+      const sticky = sidebar.querySelector('.sidebar-sticky');
+      sidebar.style.setProperty('position', 'fixed', 'important');
+      sidebar.style.setProperty('top', '0', 'important');
+      sidebar.style.setProperty('right', '0', 'important');
+      sidebar.style.setProperty('width', 'min(290px, 88vw)', 'important');
+      sidebar.style.setProperty('height', '100dvh', 'important');
+      sidebar.style.setProperty('z-index', '9050', 'important');
+      sidebar.style.setProperty('background', '#fff', 'important');
+      sidebar.style.setProperty('padding', '20px 16px', 'important');
+      sidebar.style.setProperty('overflow-y', 'auto', 'important');
+      sidebar.style.setProperty('box-shadow', '-4px 0 24px rgba(15,39,68,0.22)', 'important');
+      sidebar.style.setProperty('max-width', 'none', 'important');
+      sidebar.style.setProperty('display', 'block', 'important');
+      sidebar.style.setProperty('pointer-events', 'auto', 'important');
+      sidebar.style.setProperty('opacity', '1', 'important');
+      sidebar.style.setProperty('visibility', 'visible', 'important');
+      sidebar.style.setProperty('transform', 'none', 'important');
+      sidebar.style.setProperty('transition', 'none', 'important');
+      if (sticky) {
+        sticky.style.setProperty('transition', 'none', 'important');
+        sticky.style.setProperty('animation', 'none', 'important');
+        sticky.style.setProperty('visibility', 'visible', 'important');
+        sticky.style.setProperty('opacity', '1', 'important');
+        sticky.style.setProperty('width', 'auto', 'important');
       }
-      function closeMobileFilterDrawer() {
-        const sidebar = document.getElementById('sidebar');
-        const sticky = sidebar && sidebar.querySelector('.sidebar-sticky');
-        const filters = document.getElementById('sidebar-filters');
-        if (sidebar) sidebar.removeAttribute('style');
-        if (sticky) sticky.removeAttribute('style');
-        if (filters) filters.removeAttribute('style');
-        document.body.classList.remove('mobile-filter-open');
-        hamburger.classList.remove('is-open');
-      }
-      hamburger.addEventListener('click', e => {
-        e.stopPropagation();
-        if (document.body.classList.contains('mobile-filter-open')) {
-          closeMobileFilterDrawer();
-        } else {
-          openMobileFilterDrawer();
-        }
-      });
-      document.addEventListener('click', e => {
-        if (!document.body.classList.contains('mobile-filter-open')) return;
-        if (!e.target.closest('#sidebar') && !e.target.closest('#mobile-gold-hamburger')) {
-          closeMobileFilterDrawer();
-        }
-      });
+      if (filters) filters.style.setProperty('display', 'block', 'important');
+      document.body.classList.add('mobile-filter-open');
     }
+    function closeMobileFilterDrawer() {
+      const sidebar = document.getElementById('sidebar');
+      const sticky = sidebar && sidebar.querySelector('.sidebar-sticky');
+      const filters = document.getElementById('sidebar-filters');
+      if (sidebar) sidebar.removeAttribute('style');
+      if (sticky) sticky.removeAttribute('style');
+      if (filters) filters.removeAttribute('style');
+      document.body.classList.remove('mobile-filter-open');
+    }
+    document.addEventListener('click', e => {
+      if (!document.body.classList.contains('mobile-filter-open')) return;
+      if (!e.target.closest('#sidebar') && !e.target.closest('[data-mobile-app-action="sidebar-filter"]')) {
+        closeMobileFilterDrawer();
+      }
+    });
   }
 
   function ensureMobileOptionsSheet() {
@@ -1547,6 +1540,7 @@ const App = (() => {
     sheet.hidden = true;
     sheet.innerHTML = `
       <div class="mob-opts-title">אפשרויות</div>
+      <div id="mob-opts-no-category" hidden style="font-size:.8rem;color:#e53e3e;text-align:center;margin-bottom:8px;font-family:'Heebo',sans-serif;">אנא בחר קטגוריה תחילה</div>
       <button class="mob-opts-btn" id="mob-opts-range">
         <i class="fas fa-calendar-alt"></i>
         <span>טווח השקעה מותאם</span>
@@ -1559,11 +1553,16 @@ const App = (() => {
     document.documentElement.appendChild(sheet);
 
     sheet.querySelector('#mob-opts-range').addEventListener('click', () => {
+      if (!state.activeCategoryId || state.isHomePage) {
+        const msg = document.getElementById('mob-opts-no-category');
+        if (msg) { msg.hidden = false; setTimeout(() => { msg.hidden = true; }, 2500); }
+        return;
+      }
       closeMobileOptionsSheet();
-      const entry = document.getElementById('custom-range-entry');
-      const toggle = document.getElementById('custom-range-toggle');
-      if (entry) entry.hidden = false;
-      if (toggle) toggle.click();
+      state.advancedOptionsOpen = true;
+      state.customRange.open = true;
+      syncAdvancedOptionsUi();
+      syncCustomRangeControls();
     });
     sheet.querySelector('#mob-opts-search').addEventListener('click', () => {
       closeMobileOptionsSheet();
