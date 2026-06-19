@@ -1973,7 +1973,7 @@ const APIModule = (() => {
   async function computeGemelHubScores(fundId, catId) {
     const cacheKey = `${catId}_${fundId}`;
     if (_cachedGHScores.has(cacheKey)) return _cachedGHScores.get(cacheKey);
-    const lsKey = `gemelhub_ghscore_v12_${cacheKey}`;
+    const lsKey = `gemelhub_ghscore_v13_${cacheKey}`;
     const lsCached = _lsLoad(lsKey);
     if (lsCached) { _cachedGHScores.set(cacheKey, lsCached); return lsCached; }
 
@@ -2106,11 +2106,43 @@ const APIModule = (() => {
       }
     });
 
-    // שלוף שארפ ו-12M
-    const [sharpeMap, yields12M] = await Promise.all([
-      isPension ? getAllSharpeRatiosPension() : isPolisa ? getAllSharpeRatiosPolisa() : getAllSharpeRatios(),
-      isPension ? get12MYieldsPension()       : isPolisa ? get12MYieldsPolisa()       : get12MYields()
-    ]);
+    // זיהוי שנה נוכחית חלקית (השנה הכי קרובה שאין לה 12 חודשים שלמים)
+    const allYearsSorted = Array.from(periodsByYear.keys()).sort((a, b) => b - a);
+    const mostRecentYear = allYearsSorted[0];
+    const partialYearPeriods = (mostRecentYear && !completeYears.includes(mostRecentYear))
+      ? Array.from(periodsByYear.get(mostRecentYear)).sort((a, b) => a - b)
+      : [];
+    const partialMonthCount = partialYearPeriods.length;
+    // משקל יחסי: עד 14% כאשר יש 12 חודשים, רק אם יש לפחות 3 חודשים
+    const currentYearWeightFrac = partialMonthCount >= 3 ? (partialMonthCount / 12) * 0.14 : 0;
+    const eachCompleteYearWeightFrac = (0.84 - currentYearWeightFrac) / 5;
+
+    // חשב תשואה מצטברת לשנה הנוכחית החלקית לכל קרן
+    const partialYearReturn = new Map();
+    if (partialMonthCount >= 3) {
+      byFund.forEach(({ recs }, fid) => {
+        let compound = 1, valid = true;
+        for (const period of partialYearPeriods) {
+          const m = parseFloat(recs.get(period)?.MONTHLY_YIELD);
+          if (isNaN(m)) { valid = false; break; }
+          compound *= (1 + m / 100);
+        }
+        if (valid) partialYearReturn.set(fid, (compound - 1) * 100);
+      });
+    }
+
+    // אחוזון שנה נוכחית בתוך המסלול
+    const partialYearPercentile = new Map();
+    if (partialYearReturn.size > 0) {
+      const pArr = Array.from(partialYearReturn.entries()).sort((a, b) => b[1] - a[1]);
+      pArr.forEach(([id], i) => {
+        const n = pArr.length;
+        partialYearPercentile.set(id, n > 1 ? ((n - i - 1) / (n - 1)) * 100 : 50);
+      });
+    }
+
+    // שלוף שארפ
+    const sharpeMap = await (isPension ? getAllSharpeRatiosPension() : isPolisa ? getAllSharpeRatiosPolisa() : getAllSharpeRatios());
 
     const trackFundIds = new Set(byFund.keys());
 
@@ -2122,16 +2154,6 @@ const APIModule = (() => {
     tsArr.forEach(([id], i) => {
       const n = tsArr.length;
       sharpePercentile.set(id, n > 1 ? ((n - i - 1) / (n - 1)) * 100 : 50);
-    });
-
-    // אחוזון 12M בתוך המסלול
-    const t12Arr = Array.from(yields12M.entries())
-      .filter(([id, v]) => trackFundIds.has(id) && v !== null && !isNaN(v))
-      .sort((a, b) => b[1] - a[1]);
-    const recentPercentile = new Map();
-    t12Arr.forEach(([id], i) => {
-      const n = t12Arr.length;
-      recentPercentile.set(id, n > 1 ? ((n - i - 1) / (n - 1)) * 100 : 50);
     });
 
     // חשב ציון לכל קרן שיש לה נתונים מלאים ל-5 שנים
@@ -2155,10 +2177,15 @@ const APIModule = (() => {
       }
       if (yearDetails.length < 5) return;
 
-      const consistencyScore = yearDetails.reduce((s, y) => s + y.percentile, 0) / yearDetails.length;
-      const sharpeScore      = sharpePercentile.get(fid)  ?? null;
-      const recentScore      = recentPercentile.get(fid)  ?? null;
-      const rawScore = consistencyScore * 0.70 + (sharpeScore ?? 50) * 0.20 + (recentScore ?? 50) * 0.10;
+      const consistencyScore   = yearDetails.reduce((s, y) => s + y.percentile, 0) / yearDetails.length;
+      const sharpeScore        = sharpePercentile.get(fid) ?? null;
+      const currentYearScore   = partialYearPercentile.get(fid) ?? null;
+
+      // משקל: 5 שנות עקביות + שארפ 16% + שנה נוכחית יחסית (עד 14%, מינ' 3 חודשים)
+      const rawScore =
+        consistencyScore * (eachCompleteYearWeightFrac * 5) +
+        (sharpeScore ?? 50) * 0.16 +
+        (currentYearScore ?? 50) * currentYearWeightFrac;
 
       allScores.push({
         fundId:      fid,
@@ -2166,11 +2193,14 @@ const APIModule = (() => {
         managing:    latest.MANAGING_CORPORATION    || '',
         score: parseFloat((rawScore / 10).toFixed(2)),
         components: {
-          consistencyScore:        parseFloat(consistencyScore.toFixed(2)),
-          sharpeScore:             sharpeScore !== null ? parseFloat(sharpeScore.toFixed(2)) : null,
-          recentPerformanceScore:  recentScore !== null ? parseFloat(recentScore.toFixed(2)) : null,
-          rawScore:                parseFloat(rawScore.toFixed(2)),
-          years:                   yearDetails
+          consistencyScore:      parseFloat(consistencyScore.toFixed(2)),
+          sharpeScore:           sharpeScore !== null ? parseFloat(sharpeScore.toFixed(2)) : null,
+          currentYearScore:      currentYearScore !== null ? parseFloat(currentYearScore.toFixed(2)) : null,
+          currentYearMonths:     partialMonthCount,
+          currentYearWeightPct:  parseFloat((currentYearWeightFrac * 100).toFixed(1)),
+          eachYearWeightPct:     parseFloat((eachCompleteYearWeightFrac * 100).toFixed(1)),
+          rawScore:              parseFloat(rawScore.toFixed(2)),
+          years:                 yearDetails
         }
       });
     });

@@ -293,7 +293,7 @@
 </div>
 
   <script src="js/config.js?v=fund-mobile-pies-agach25-20260614"></script>
-  <script src="js/api.js?v=gh-score-20260619b"></script>
+  <script src="js/api.js?v=gh-score-20260619c"></script>
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
 <script>
@@ -2984,31 +2984,42 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
         הציון הסופי נע בין <strong>5 (מקום אחרון)</strong> ל-<strong>10 (מקום ראשון)</strong> ומשקף את מיקום הקופה ביחס לשאר הקופות במסלול.
       </div>
       <div style="margin-top:9px;display:flex;gap:8px;flex-wrap:wrap;">
-        <span style="background:#dbeafe;color:#1d4ed8;padding:3px 9px;border-radius:6px;font-weight:700;font-size:.76rem;">70% עקביות 5 שנים</span>
-        <span style="background:#dcfce7;color:#15803d;padding:3px 9px;border-radius:6px;font-weight:700;font-size:.76rem;">20% שארפ</span>
-        <span style="background:#fef9c3;color:#92400e;padding:3px 9px;border-radius:6px;font-weight:700;font-size:.76rem;">10% ביצועי 12 חודשים</span>
+        ${(() => {
+          const c = thisFund?.components;
+          const eachPct = c ? c.eachYearWeightPct.toFixed(1) : '—';
+          const curPct  = c ? c.currentYearWeightPct.toFixed(1) : '—';
+          const curM    = c ? c.currentYearMonths : 0;
+          return `
+          <span style="background:#dbeafe;color:#1d4ed8;padding:3px 9px;border-radius:6px;font-weight:700;font-size:.76rem;">${eachPct}% × 5 שנות עקביות</span>
+          <span style="background:#dcfce7;color:#15803d;padding:3px 9px;border-radius:6px;font-weight:700;font-size:.76rem;">16% שארפ</span>
+          ${curM >= 3
+            ? `<span style="background:#fef9c3;color:#92400e;padding:3px 9px;border-radius:6px;font-weight:700;font-size:.76rem;">${curPct}% שנה נוכחית (${curM} חודשים)</span>`
+            : `<span style="background:#f1f5f9;color:#94a3b8;padding:3px 9px;border-radius:6px;font-weight:700;font-size:.76rem;">שנה נוכחית — פחות מ-3 חודשים (לא נכלל)</span>`
+          }`;
+        })()}
       </div>
     </div>`;
 
   let compHtml = '';
   if (thisFund) {
-    const { consistencyScore, sharpeScore, recentPerformanceScore, years } = thisFund.components;
+    const { consistencyScore, sharpeScore, currentYearScore, currentYearMonths, currentYearWeightPct, years } = thisFund.components;
     compHtml = `
       <div style="padding:13px 16px;border-bottom:1px solid #eef2f7;">
         <div style="font-size:.76rem;font-weight:800;color:#0f2744;margin-bottom:10px;">פירוט ציון הקופה הנוכחית</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
           <div style="flex:1;min-width:90px;background:#eff6ff;border-radius:10px;padding:9px;text-align:center;">
-            <div style="font-size:.69rem;color:#3b82f6;font-weight:700;margin-bottom:3px;">עקביות (70%)</div>
+            <div style="font-size:.69rem;color:#3b82f6;font-weight:700;margin-bottom:3px;">עקביות 5 שנים</div>
             <div style="font-size:1.25rem;font-weight:900;color:#1d4ed8;">${consistencyScore.toFixed(1)}<span style="font-size:.65rem;color:#93c5fd;">/100</span></div>
           </div>
           <div style="flex:1;min-width:90px;background:#f0fdf4;border-radius:10px;padding:9px;text-align:center;">
-            <div style="font-size:.69rem;color:#22c55e;font-weight:700;margin-bottom:3px;">שארפ (20%)</div>
+            <div style="font-size:.69rem;color:#22c55e;font-weight:700;margin-bottom:3px;">שארפ (16%)</div>
             <div style="font-size:1.25rem;font-weight:900;color:#15803d;">${sharpeScore !== null ? sharpeScore.toFixed(1) : '—'}<span style="font-size:.65rem;color:#86efac;">/100</span></div>
           </div>
+          ${currentYearMonths >= 3 ? `
           <div style="flex:1;min-width:90px;background:#fffbeb;border-radius:10px;padding:9px;text-align:center;">
-            <div style="font-size:.69rem;color:#f59e0b;font-weight:700;margin-bottom:3px;">12 חודשים (10%)</div>
-            <div style="font-size:1.25rem;font-weight:900;color:#92400e;">${recentPerformanceScore !== null ? recentPerformanceScore.toFixed(1) : '—'}<span style="font-size:.65rem;color:#fcd34d;">/100</span></div>
-          </div>
+            <div style="font-size:.69rem;color:#f59e0b;font-weight:700;margin-bottom:3px;">שנה נוכחית (${currentYearWeightPct}%)</div>
+            <div style="font-size:1.25rem;font-weight:900;color:#92400e;">${currentYearScore !== null ? currentYearScore.toFixed(1) : '—'}<span style="font-size:.65rem;color:#fcd34d;">/100</span></div>
+          </div>` : ''}
         </div>
         <div style="font-size:.72rem;color:#64748b;font-weight:700;margin-bottom:6px;">עקביות לפי שנה — מיקום בתוך הקטגוריה:</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
