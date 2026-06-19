@@ -6680,6 +6680,7 @@ const App = (() => {
     };
     const sc = (f) => sortField === f ? ' col-sorted' : '';
 
+    const _isDesktopExp = state.showExposure && !(window.matchMedia && window.matchMedia('(max-width: 760px)').matches);
     let rows = '';
     records.forEach((r, idx) => {
       const baseName = getProviderDisplayName(r.CONTROLLING_CORPORATION, r.MANAGING_CORPORATION);

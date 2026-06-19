@@ -6814,6 +6814,7 @@ const App = (() => {
     };
     const sc = (f) => sortField === f ? ' col-sorted' : '';
 
+    const _isDesktopExp = state.showExposure && !(window.matchMedia && window.matchMedia('(max-width: 760px)').matches);
     let rows = '';
     records.forEach((r, idx) => {
       const baseName = getProviderDisplayName(r.CONTROLLING_CORPORATION, r.MANAGING_CORPORATION);
@@ -6939,8 +6940,8 @@ const App = (() => {
               <span class="fund-link-icon"><i class="fas fa-external-link-alt"></i></span>
             </div>
           </td>
-          ${!state.showExposure && !yearlyActive && customRangeActive ? `<td class="yield-cell custom-range-col ${customRangeValue != null && Number.isFinite(customRangeValue) ? yieldClass(customRangeValue) : ''}${sc('customRange')}">${customRangeCell}</td>` : ''}
-          ${!state.showExposure ? (yearlyActive ? yearlyReturnCells : `
+          ${(!state.showExposure || _isDesktopExp) && !yearlyActive && customRangeActive ? `<td class="yield-cell custom-range-col ${customRangeValue != null && Number.isFinite(customRangeValue) ? yieldClass(customRangeValue) : ''}${sc('customRange')}">${customRangeCell}</td>` : ''}
+          ${(!state.showExposure || _isDesktopExp) ? (yearlyActive ? yearlyReturnCells : `
           <td class="yield-cell ${(sortField==='monthly'?yieldClass(r.MONTHLY_YIELD):'')}${sc('monthly')}">${_yieldWithBadge(r.MONTHLY_YIELD, _badge(_gold(r.MONTHLY_YIELD,'monthly'), _tomato(r.MONTHLY_YIELD,'monthly')), '', _rankVals.monthly.get(idx), _heatScales.monthly)}</td>
           <td class="yield-cell ${(sortField==='ytd'?yieldClass(r.YEAR_TO_DATE_YIELD):'')}${sc('ytd')}">${_yieldWithBadge(r.YEAR_TO_DATE_YIELD, _badge(_gold(r.YEAR_TO_DATE_YIELD,'ytd'), _tomato(r.YEAR_TO_DATE_YIELD,'ytd')), '', _rankVals.ytd.get(idx), _heatScales.ytd)}</td>
           <td class="yield-cell ${sortField === '1yr' && y12m !== undefined && y12m !== null ? yieldClass(y12m) : ''}${sc('1yr')}">${yr1Cell}</td>
@@ -6971,8 +6972,8 @@ const App = (() => {
       <tr class="average-row">
         <td></td>
         <td>ממוצע קבוצה</td>
-        ${!state.showExposure && !yearlyActive && customRangeActive ? `<td class="yield-cell custom-range-col ${sortField==='customRange'?yieldClass(_expAvg.avgCustomRange):''}">${_expAvg.avgCustomRange!==null?formatPercent(_expAvg.avgCustomRange):'-'}</td>` : ''}
-        ${!state.showExposure ? (yearlyActive ? yearlyAverageReturnCells : `<td class="yield-cell ${sortField==='monthly'?yieldClass(avg.MONTHLY_YIELD):''}">${avg.MONTHLY_YIELD!==null?formatPercent(avg.MONTHLY_YIELD):'-'}</td>
+        ${(!state.showExposure || _isDesktopExp) && !yearlyActive && customRangeActive ? `<td class="yield-cell custom-range-col ${sortField==='customRange'?yieldClass(_expAvg.avgCustomRange):''}">${_expAvg.avgCustomRange!==null?formatPercent(_expAvg.avgCustomRange):'-'}</td>` : ''}
+        ${(!state.showExposure || _isDesktopExp) ? (yearlyActive ? yearlyAverageReturnCells : `<td class="yield-cell ${sortField==='monthly'?yieldClass(avg.MONTHLY_YIELD):''}">${avg.MONTHLY_YIELD!==null?formatPercent(avg.MONTHLY_YIELD):'-'}</td>
         <td class="yield-cell ${sortField==='ytd'?yieldClass(avg.YEAR_TO_DATE_YIELD):''}">${avg.YEAR_TO_DATE_YIELD!==null?formatPercent(avg.YEAR_TO_DATE_YIELD):'-'}</td>
         <td class="yield-cell ${sortField==='1yr'?yieldClass(_expAvg.avg12m):''}">${_expAvg.avg12m!==null?formatPercent(_expAvg.avg12m):'-'}</td>
         <td class="yield-cell ${sortField==='3yr'?(state.yieldMode==='annualized'?yieldClass(_ann3Avg):yieldClass(avg.YIELD_TRAILING_3_YRS)):''}">
@@ -7016,8 +7017,8 @@ const App = (() => {
           <tr>
             <th title="דירוג" scope="col">#</th>
             <th scope="col">מנהל</th>
-            ${!state.showExposure && !yearlyActive && customRangeActive ? `<th${sortedThClass('customRange', 'custom-range-col yield-col')} data-sortfield="customRange" ${ariaSort('customRange')} scope="col"><span class="custom-range-th">טווח מותאם</span> ${arrow('customRange')}<small class="custom-range-th-dates">${formatRangePeriodOnly(state.customRange.startPeriod, state.customRange.endPeriod)}</small></th>` : ''}
-            ${!state.showExposure ? (yearlyActive ? yearlyHeaderCells : `<th${sortedThClass('monthly', 'yield-col')} data-sortfield="monthly" ${ariaSort('monthly')} scope="col">${monthCol} ${arrow('monthly')}</th>
+            ${(!state.showExposure || _isDesktopExp) && !yearlyActive && customRangeActive ? `<th${sortedThClass('customRange', 'custom-range-col yield-col')} data-sortfield="customRange" ${ariaSort('customRange')} scope="col"><span class="custom-range-th">טווח מותאם</span> ${arrow('customRange')}<small class="custom-range-th-dates">${formatRangePeriodOnly(state.customRange.startPeriod, state.customRange.endPeriod)}</small></th>` : ''}
+            ${(!state.showExposure || _isDesktopExp) ? (yearlyActive ? yearlyHeaderCells : `<th${sortedThClass('monthly', 'yield-col')} data-sortfield="monthly" ${ariaSort('monthly')} scope="col">${monthCol} ${arrow('monthly')}</th>
             <th${sortedThClass('ytd', 'yield-col')} data-sortfield="ytd" ${ariaSort('ytd')} scope="col">YTD ${arrow('ytd')}</th>
             <th${sortedThClass('1yr', 'yield-col')} data-sortfield="1yr" ${ariaSort('1yr')} scope="col">12 חוד׳ ${arrow('1yr')}</th>
             <th${sortedThClass('3yr', 'yield-col')} data-sortfield="3yr" ${ariaSort('3yr')} scope="col">${_yr3Lbl} ${arrow('3yr')}${_yieldSubLabel}</th>
