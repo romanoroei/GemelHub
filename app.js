@@ -1471,8 +1471,17 @@ const App = (() => {
   function syncMobileCategorySheet() {
     const sheet = document.getElementById('mobile-category-sheet');
     if (!sheet) return;
+    const filterCount = getActiveFilterCount();
     sheet.querySelectorAll('[data-mobile-cat]').forEach(btn => {
-      btn.classList.toggle('is-active', btn.dataset.mobileCat === state.activeCategoryId);
+      const isActive = btn.dataset.mobileCat === state.activeCategoryId;
+      btn.classList.toggle('is-active', isActive);
+      let badge = btn.querySelector('.cat-filter-badge');
+      if (isActive && filterCount > 0) {
+        if (!badge) { badge = document.createElement('span'); badge.className = 'cat-filter-badge'; btn.appendChild(badge); }
+        badge.textContent = filterCount;
+      } else if (badge) {
+        badge.remove();
+      }
     });
   }
 
@@ -6810,7 +6819,7 @@ const App = (() => {
     );
 
     return `
-      <table class="track-table${customRangeActive && !yearlyActive ? ' has-custom-range' : ''}${yearlyActive ? ' has-yearly-returns' : ''}${matchYearlyHeight ? ' match-yearly-height' : ''}${!state.showExposure ? ' hide-exposure' : ''}">
+      <table class="track-table${customRangeActive && !yearlyActive ? ' has-custom-range' : ''}${yearlyActive ? ' has-yearly-returns' : ''}${matchYearlyHeight ? ' match-yearly-height' : ''}${!state.showExposure ? ' hide-exposure' : ''}${state.showExposure ? ' exposure-only' : ''}">
         <thead>
           <tr>
             <th title="דירוג" scope="col">#</th>

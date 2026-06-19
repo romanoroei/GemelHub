@@ -1544,11 +1544,12 @@ body.sticky-gap-mask-active:not(.fund-page)::before {
 }
 .custom-range-th-dates {
   display: block;
-  font-size: .68rem;
+  font-size: .58rem;
   font-weight: 400;
   color: var(--blue);
-  margin-top: 2px;
-  white-space: nowrap;
+  margin-top: 1px;
+  white-space: normal;
+  line-height: 1.2;
 }
 .track-table thead th small {
   display: block;
@@ -4226,6 +4227,28 @@ table.track-table tr.average-row td.exp-col:nth-last-child(3) {
 }
 .actuarial-heatmap-scroll {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 760px) {
+  .actuarial-heatmap-table {
+    min-width: auto !important;
+    font-size: .62rem !important;
+    border-spacing: 3px !important;
+  }
+  .actuarial-heatmap-table th:first-child,
+  .actuarial-heatmap-table td:first-child {
+    min-width: 72px !important;
+    width: 72px !important;
+    font-size: .62rem !important;
+  }
+  .actuarial-heatmap-table th {
+    font-size: .62rem !important;
+  }
+  .actuarial-heatmap-table td {
+    padding: 5px 3px !important;
+    font-size: .62rem !important;
+    border-radius: 7px !important;
+  }
 }
 .actuarial-heatmap-table {
   width: 100%;
@@ -4259,6 +4282,8 @@ table.track-table tr.average-row td.exp-col:nth-last-child(3) {
   text-align: center;
   font-size: .76rem;
   font-weight: 800;
+  direction: ltr;
+  unicode-bidi: isolate;
 }
 .actuarial-heatmap-cell.is-empty {
   background: #f8fafc;
@@ -14703,9 +14728,9 @@ body.h2h-active,
     position: fixed;
     inset-inline: 6px;
     bottom: var(--mobile-app-nav-clearance);
+    top: 8px;
     z-index: 2760;
     display: block;
-    max-height: calc(100dvh - var(--mobile-app-nav-clearance, 72px) - 4px);
     overflow: hidden auto;
     padding: 10px 12px;
     border: 1px solid rgba(201, 183, 114, .42);
@@ -14819,6 +14844,22 @@ body.h2h-active,
     display: grid;
     grid-template-columns: 1fr;
     gap: 7px;
+  }
+
+  .cat-filter-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--blue, #2563eb);
+    color: #fff;
+    font-size: .65rem;
+    font-weight: 900;
+    line-height: 1;
+    margin-inline-start: auto;
   }
 
   .nav-filter-dot {
