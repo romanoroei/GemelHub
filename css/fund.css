@@ -1098,8 +1098,8 @@ body.fund-page .category-tabs-inner {
 }
 
 .fund-inline-cta-btn {
-  background: var(--blue);
-  color: #fff;
+  background: #c9a227;
+  color: #0f2744;
   padding: 10px 20px;
   border-radius: 999px;
   border: none;
@@ -1111,11 +1111,11 @@ body.fund-page .category-tabs-inner {
   flex: 0 0 auto;
   text-decoration: none;
   transition: background .15s, transform .12s;
-  box-shadow: 0 8px 18px rgba(37, 99, 235, .24);
+  box-shadow: 0 8px 18px rgba(201, 162, 39, .35);
 }
 
 .fund-inline-cta-btn:hover {
-  background: var(--gray-900);
+  background: #b8911f;
   transform: translateY(-1px);
 }
 
@@ -1253,6 +1253,26 @@ body.fund-page #peers-table-wrap .fund-name-tag-icons .fund-allocation-flag-svg,
 body.fund-page #peers-table-wrap .fund-name-tag-icons .fund-allocation-warning {
   transform: scale(.82);
   transform-origin: center;
+}
+
+/* גדלי פונט מוגדלים לעמודת שם בטבלת ההשוואה */
+body.fund-page #peers-table-wrap .track-table .prov-name {
+  font-size: .88rem !important;
+  line-height: 1.25 !important;
+}
+body.fund-page #peers-table-wrap .track-table .prov-id {
+  font-size: .76rem !important;
+  line-height: 1.3 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+body.fund-page #peers-table-wrap .track-table .fund-name-tag-icons .fund-allocation-mini-badge,
+body.fund-page #peers-table-wrap .track-table .fund-name-tag-icons .fund-allocation-img,
+body.fund-page #peers-table-wrap .track-table .fund-name-tag-icons .fund-allocation-flag-svg,
+body.fund-page #peers-table-wrap .track-table .fund-name-tag-icons .fund-allocation-warning {
+  transform: scale(1) !important;
+  transform-origin: center !important;
 }
 
 body.fund-page #peers-table-wrap .peer-yield-badge {
