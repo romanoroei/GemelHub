@@ -68,8 +68,23 @@
         padding-top: calc(var(--mobile-sticky-header-h, 42px) + 52px) !important;
       }
 
-      /* ═══ MOBILE FILTER DRAWER (shows existing #sidebar as overlay) ═══ */
-      body.mobile-filter-open #sidebar {
+      /* ═══ z-index fixes — overlays must be above gold bar (2500) ═══ */
+      #mobile-gold-header { z-index: 2500 !important; }
+      .advanced-search-overlay { z-index: 9500 !important; }
+      #custom-range-panel:not([hidden]) {
+        position: fixed !important;
+        top: calc(52px + var(--mobile-sticky-header-h, 46px)) !important;
+        left: 8px !important; right: 8px !important;
+        z-index: 9200 !important;
+        background: #fff !important;
+        border-radius: 12px !important;
+        box-shadow: 0 10px 32px rgba(15,39,68,0.22) !important;
+        padding: 12px !important;
+      }
+
+      /* ═══ MOBILE FILTER DRAWER ═══ */
+      body.mobile-filter-open #sidebar,
+      body.mobile-filter-open #sidebar.sidebar-collapsed {
         position: fixed !important;
         top: 52px !important; right: 0 !important;
         width: min(290px, 88vw) !important;
@@ -79,10 +94,15 @@
         padding: 20px 16px !important;
         overflow-y: auto !important;
         box-shadow: -4px 0 24px rgba(15,39,68,0.22) !important;
-        visibility: visible !important; opacity: 1 !important;
         pointer-events: auto !important; transform: none !important;
         max-width: none !important; margin: 0 !important;
         display: block !important;
+      }
+      body.mobile-filter-open #sidebar .sidebar-sticky,
+      body.mobile-filter-open #sidebar.sidebar-collapsed .sidebar-sticky {
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: auto !important;
       }
       body.mobile-filter-open #sidebar-filters { display: block !important; }
       /* Dimmed backdrop behind drawer */

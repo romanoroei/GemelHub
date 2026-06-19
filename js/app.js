@@ -1477,16 +1477,61 @@ const App = (() => {
     // Gold header hamburger → mobile filter drawer
     const hamburger = document.getElementById('mobile-gold-hamburger');
     if (hamburger) {
+      function openMobileFilterDrawer() {
+        const sidebar = document.getElementById('sidebar');
+        const filters = document.getElementById('sidebar-filters');
+        if (!sidebar) return;
+        const sticky = sidebar.querySelector('.sidebar-sticky');
+        sidebar.style.setProperty('position', 'fixed', 'important');
+        sidebar.style.setProperty('top', '52px', 'important');
+        sidebar.style.setProperty('right', '0', 'important');
+        sidebar.style.setProperty('width', 'min(290px, 88vw)', 'important');
+        sidebar.style.setProperty('height', 'calc(100dvh - 52px)', 'important');
+        sidebar.style.setProperty('z-index', '9050', 'important');
+        sidebar.style.setProperty('background', '#fff', 'important');
+        sidebar.style.setProperty('padding', '20px 16px', 'important');
+        sidebar.style.setProperty('overflow-y', 'auto', 'important');
+        sidebar.style.setProperty('box-shadow', '-4px 0 24px rgba(15,39,68,0.22)', 'important');
+        sidebar.style.setProperty('max-width', 'none', 'important');
+        sidebar.style.setProperty('display', 'block', 'important');
+        sidebar.style.setProperty('pointer-events', 'auto', 'important');
+        sidebar.style.setProperty('opacity', '1', 'important');
+        sidebar.style.setProperty('visibility', 'visible', 'important');
+        sidebar.style.setProperty('transform', 'none', 'important');
+        sidebar.style.setProperty('transition', 'none', 'important');
+        if (sticky) {
+          sticky.style.setProperty('transition', 'none', 'important');
+          sticky.style.setProperty('animation', 'none', 'important');
+          sticky.style.setProperty('visibility', 'visible', 'important');
+          sticky.style.setProperty('opacity', '1', 'important');
+          sticky.style.setProperty('width', 'auto', 'important');
+        }
+        if (filters) filters.style.setProperty('display', 'block', 'important');
+        document.body.classList.add('mobile-filter-open');
+        hamburger.classList.add('is-open');
+      }
+      function closeMobileFilterDrawer() {
+        const sidebar = document.getElementById('sidebar');
+        const sticky = sidebar && sidebar.querySelector('.sidebar-sticky');
+        const filters = document.getElementById('sidebar-filters');
+        if (sidebar) sidebar.removeAttribute('style');
+        if (sticky) sticky.removeAttribute('style');
+        if (filters) filters.removeAttribute('style');
+        document.body.classList.remove('mobile-filter-open');
+        hamburger.classList.remove('is-open');
+      }
       hamburger.addEventListener('click', e => {
         e.stopPropagation();
-        const isOpen = document.body.classList.toggle('mobile-filter-open');
-        hamburger.classList.toggle('is-open', isOpen);
+        if (document.body.classList.contains('mobile-filter-open')) {
+          closeMobileFilterDrawer();
+        } else {
+          openMobileFilterDrawer();
+        }
       });
       document.addEventListener('click', e => {
         if (!document.body.classList.contains('mobile-filter-open')) return;
         if (!e.target.closest('#sidebar') && !e.target.closest('#mobile-gold-hamburger')) {
-          document.body.classList.remove('mobile-filter-open');
-          hamburger.classList.remove('is-open');
+          closeMobileFilterDrawer();
         }
       });
     }
@@ -7680,6 +7725,7 @@ const App = (() => {
     if (!sidebar) return;
 
     function syncMobileSidebarStyle() {
+      if (document.body.classList.contains('mobile-filter-open')) return;
       const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
       if (!isMobile) {
         sidebar.removeAttribute('style');
