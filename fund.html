@@ -3228,13 +3228,25 @@ document.addEventListener('DOMContentLoaded', () => {
     sheet.id = 'mobile-category-sheet';
     sheet.className = 'mobile-category-sheet';
     sheet.hidden = true;
-    var cats = (typeof CONFIG !== 'undefined' && CONFIG.PRODUCT_CATEGORIES) ? CONFIG.PRODUCT_CATEGORIES : [];
+    var FUND_REMOVED_CAT_IDS = new Set(['removed_legacy_category']);
+    var FUND_ACTUARIAL_CATS  = new Set(['pension_mekafit', 'pension_mashlima']);
+    var FUND_ACTUARIAL_LABELS = { pension_mekafit: 'איזון אקטוארי – מקיפה', pension_mashlima: 'איזון אקטוארי – כללית' };
+    var cats = (typeof CONFIG !== 'undefined' && CONFIG.PRODUCT_CATEGORIES)
+      ? CONFIG.PRODUCT_CATEGORIES.filter(function(c) { return !FUND_REMOVED_CAT_IDS.has(c.id) && c.label; })
+      : [];
     var catListHtml = cats.map(function(cat) {
       var isActive = cat.id === _fundCatId ? ' is-active' : '';
-      return '<a class="mobile-category-option' + isActive + '" href="index.html?cat=' + encodeURIComponent(cat.id) + '">' +
+      var catLink = '<a class="mobile-category-option' + isActive + '" href="index.html?cat=' + encodeURIComponent(cat.id) + '">' +
         '<span class="mobile-category-option-icon">' + (cat.icon || '') + '</span>' +
         '<span class="mobile-category-option-label">' + cat.label + '</span>' +
         '</a>';
+      var actuarialBtn = FUND_ACTUARIAL_CATS.has(cat.id)
+        ? '<a class="mobile-category-sub" href="index.html?cat=' + encodeURIComponent(cat.id) + '&view=actuarial">' +
+            '<i class="fas fa-balance-scale" aria-hidden="true"></i>' +
+            '<span>' + FUND_ACTUARIAL_LABELS[cat.id] + '</span>' +
+          '</a>'
+        : '';
+      return catLink + actuarialBtn;
     }).join('');
 
     sheet.innerHTML =

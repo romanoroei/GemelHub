@@ -660,6 +660,9 @@ const App = (() => {
       state.pendingCompareTopScroll = false;
       switchCategory('hashtalamot');
     }
+    if (urlParams.get('openAdvanced') === '1') {
+      setTimeout(() => openAdvancedSearch(), 700);
+    }
   }
 
   function setupSandboxCheckboxes() {
@@ -1386,6 +1389,10 @@ const App = (() => {
           <span class="mobile-category-option-icon">🔍</span>
           <span class="mobile-category-option-label">חיפוש מתקדם</span>
         </button>
+        <button type="button" class="mobile-category-option mob-extra-fund-search">
+          <span class="mobile-category-option-icon">🏦</span>
+          <span class="mobile-category-option-label">חיפוש קופה</span>
+        </button>
       </div>
     `;
     document.body.appendChild(sheet);
@@ -1438,6 +1445,12 @@ const App = (() => {
     sheet.querySelector('.mob-extra-search')?.addEventListener('click', () => {
       closeMobileCategorySheet();
       openAdvancedSearch();
+    });
+
+    sheet.querySelector('.mob-extra-fund-search')?.addEventListener('click', () => {
+      closeMobileCategorySheet();
+      const inp = document.getElementById('global-search');
+      if (inp) { inp.focus(); inp.select(); inp.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
     });
 
     return sheet;
