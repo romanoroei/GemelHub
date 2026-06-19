@@ -1354,11 +1354,7 @@ const App = (() => {
     let sheet = document.getElementById('mobile-category-sheet');
     if (sheet) return sheet;
 
-    const ACTUARIAL_SUB = `
-      <button type="button" class="mobile-category-sub" data-mobile-cat-actuarial="__CAT__">
-        <i class="fas fa-balance-scale" aria-hidden="true"></i>
-        <span>איזון אקטוארי</span>
-      </button>`;
+    const ACTUARIAL_LABELS = { pension_mekafit: 'איזון אקטוארי – מקיפה', pension_mashlima: 'איזון אקטוארי – כללית' };
 
     sheet = document.createElement('div');
     sheet.id = 'mobile-category-sheet';
@@ -1377,7 +1373,7 @@ const App = (() => {
             <span class="mobile-category-option-icon">${cat.icon || ''}</span>
             <span>${cat.label}</span>
           </button>
-          ${PENSION_ACTUARIAL_CATS.has(cat.id) ? ACTUARIAL_SUB.replace('__CAT__', cat.id) : ''}
+          ${PENSION_ACTUARIAL_CATS.has(cat.id) ? `<button type="button" class="mobile-category-sub" data-mobile-cat-actuarial="${cat.id}"><i class="fas fa-balance-scale" aria-hidden="true"></i><span>${ACTUARIAL_LABELS[cat.id]}</span></button>` : ''}
         `).join('')}
       </div>
       <div class="mobile-category-sheet-divider"></div>
@@ -2276,6 +2272,14 @@ const App = (() => {
 
   function updateFilterBadge() {
     const count = getActiveFilterCount();
+    const navFilterBtn = document.querySelector('[data-mobile-app-action="sidebar-filter"]');
+    if (navFilterBtn) {
+      const hasFilters = count > 0;
+      let dot = navFilterBtn.querySelector('.nav-filter-dot');
+      if (!dot) { dot = document.createElement('span'); dot.className = 'nav-filter-dot'; navFilterBtn.appendChild(dot); }
+      dot.hidden = !hasFilters;
+      if (hasFilters) dot.textContent = String(count);
+    }
     ['sidebar-toggle-btn', 'mobile-filter-btn'].forEach(id => {
       const btn = document.getElementById(id);
       if (!btn) return;

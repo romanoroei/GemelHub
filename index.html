@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=mobile-nav-filter-20260619" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-filter-dot-20260619" />
   <style>
     @media (max-width: 760px) {
       .advanced-search-overlay { z-index: 9500 !important; }
@@ -60,13 +60,7 @@
         width: auto !important;
       }
       body.mobile-filter-open #sidebar-filters { display: block !important; }
-      body.mobile-filter-open::before {
-        content: '';
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(15,39,68,0.42);
-        z-index: 9040;
-      }
+      /* no backdrop for filter drawer */
 
       /* ═══ MOBILE OPTIONS SHEET ═══ */
       #mobile-options-sheet {
@@ -502,6 +496,6 @@
 <script src="js/api.js?v=fund-mobile-pies-agach25-20260614"></script>
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
-<script src="js/app.js?v=mobile-options-sheet-20260619"></script>
+<script src="js/app.js?v=mobile-filter-dot-20260619"></script>
 </body>
 </html>
