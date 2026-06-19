@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=mobile-filter-dot-20260619" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-fixes3-20260619" />
   <style>
     @media (max-width: 760px) {
       .advanced-search-overlay { z-index: 9500 !important; }
@@ -60,7 +60,14 @@
         width: auto !important;
       }
       body.mobile-filter-open #sidebar-filters { display: block !important; }
-      /* no backdrop for filter drawer */
+      body.mobile-filter-open::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.14);
+        z-index: 9040;
+        pointer-events: auto;
+      }
 
       /* ═══ MOBILE OPTIONS SHEET ═══ */
       #mobile-options-sheet {
@@ -307,15 +314,6 @@
             <!-- Filters only (ללא badge) -->
             <div id="sidebar-filters" style="display:none;">
 
-              <!-- Tracks -->
-              <div class="sidebar-section">
-                <div class="sidebar-section-title">
-                  <i class="fas fa-road"></i> מסלולי השקעה
-                  <button class="btn-clear-filter" id="clear-tracks" aria-label="נקה סינון מסלולים">נקה</button>
-                </div>
-                <div class="filter-checkboxes" id="filter-tracks"></div>
-              </div>
-
               <!-- Providers -->
               <div class="sidebar-section">
                 <div class="sidebar-section-title">
@@ -323,6 +321,15 @@
                   <button class="btn-clear-filter" id="clear-providers" aria-label="נקה סינון מנהלים">נקה</button>
                 </div>
                 <div class="filter-checkboxes" id="filter-providers"></div>
+              </div>
+
+              <!-- Tracks -->
+              <div class="sidebar-section">
+                <div class="sidebar-section-title">
+                  <i class="fas fa-road"></i> מסלולי השקעה
+                  <button class="btn-clear-filter" id="clear-tracks" aria-label="נקה סינון מסלולים">נקה</button>
+                </div>
+                <div class="filter-checkboxes" id="filter-tracks"></div>
               </div>
 
             </div><!-- /#sidebar-filters -->
@@ -496,6 +503,6 @@
 <script src="js/api.js?v=fund-mobile-pies-agach25-20260614"></script>
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
-<script src="js/app.js?v=mobile-filter-dot-20260619"></script>
+<script src="js/app.js?v=mobile-fixes3-20260619"></script>
 </body>
 </html>

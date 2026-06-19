@@ -3152,6 +3152,31 @@ table.track-table thead th {
 table.track-table.hide-exposure .exp-col {
   display: none;
 }
+/* מצב אלוקציה בלבד — מסתיר תשואות ומגדיל סרגל */
+table.track-table.exposure-only .yield-cell {
+  display: none;
+}
+table.track-table.exposure-only td.exp-col,
+table.track-table.exposure-only th.exp-col {
+  padding: 8px 10px;
+}
+table.track-table.exposure-only .exp-bar-bg {
+  width: 90px !important;
+  height: 10px !important;
+  border-radius: 5px !important;
+}
+table.track-table.exposure-only .exp-bar {
+  height: 100% !important;
+  border-radius: 5px !important;
+}
+table.track-table.exposure-only .exp-val {
+  font-size: .88rem !important;
+  font-weight: 700 !important;
+  min-width: 46px !important;
+}
+table.track-table.exposure-only .exp-wrap {
+  gap: 8px !important;
+}
 
 /* כפתורי toggle בטבלת מסלול */
 .tbl-ctrl-btn {
@@ -14676,13 +14701,13 @@ body.h2h-active,
 
   .mobile-category-sheet {
     position: fixed;
-    inset-inline: 10px;
+    inset-inline: 6px;
     bottom: var(--mobile-app-nav-clearance);
     z-index: 2760;
     display: block;
-    max-height: calc(100dvh - var(--mobile-app-nav-clearance, 72px) - 16px);
+    max-height: calc(100dvh - var(--mobile-app-nav-clearance, 72px) - 8px);
     overflow: hidden auto;
-    padding: 10px 12px;
+    padding: 8px 10px;
     border: 1px solid rgba(201, 183, 114, .42);
     border-radius: 18px;
     background: rgba(255,255,255,.98);
@@ -14724,7 +14749,7 @@ body.h2h-active,
   .mobile-category-sheet-list {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 5px;
+    gap: 3px;
   }
 
   .mobile-category-option {
@@ -14732,8 +14757,8 @@ body.h2h-active,
     grid-template-columns: 22px minmax(0, 1fr);
     align-items: center;
     gap: 6px;
-    min-height: 36px;
-    padding: 5px 10px;
+    min-height: 32px;
+    padding: 3px 8px;
     border: 1px solid rgba(226, 232, 240, .95);
     border-radius: 12px;
     background: #fff;
@@ -14764,10 +14789,10 @@ body.h2h-active,
     margin-top: -2px;
     margin-right: 20px;
     padding: 6px 10px;
-    border: 1px solid rgba(201, 183, 114, .5);
+    border: none;
     border-radius: 10px;
-    background: #fffdf2;
-    color: #7a6420;
+    background: transparent;
+    color: #475569;
     font: inherit;
     font-size: .82rem;
     font-weight: 700;

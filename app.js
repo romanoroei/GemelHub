@@ -1409,15 +1409,30 @@ const App = (() => {
     });
 
     sheet.querySelector('.mob-extra-range')?.addEventListener('click', () => {
-      if (!state.activeCategoryId || state.isHomePage) {
-        closeMobileCategorySheet();
-        return;
-      }
       closeMobileCategorySheet();
+      if (!state.activeCategoryId || state.isHomePage) return;
       state.advancedOptionsOpen = true;
       state.customRange.open = true;
       syncAdvancedOptionsUi();
+      const panel = document.getElementById('custom-range-panel');
+      if (panel && panel.parentElement !== document.documentElement) {
+        document.documentElement.appendChild(panel);
+      }
       syncCustomRangeControls();
+      if (panel) {
+        panel.removeAttribute('hidden');
+        Object.assign(panel.style, {
+          position: 'fixed',
+          top: '50px',
+          left: '8px',
+          right: '8px',
+          zIndex: '9200',
+          background: '#fff',
+          borderRadius: '12px',
+          boxShadow: '0 10px 32px rgba(15,39,68,0.22)',
+          padding: '12px',
+        });
+      }
     });
 
     sheet.querySelector('.mob-extra-search')?.addEventListener('click', () => {
@@ -1488,10 +1503,11 @@ const App = (() => {
       if (!item || !nav.contains(item)) return;
       event.preventDefault();
       const action = item.dataset.mobileAppAction;
+      if (action !== 'categories') closeMobileCategorySheet();
+      if (action !== 'sidebar-filter' && document.body.classList.contains('mobile-filter-open')) closeMobileFilterDrawer();
       if (action === 'categories') {
         openMobileCategorySheet();
       } else if (action === 'sidebar-filter') {
-        closeMobileCategorySheet();
         if (document.body.classList.contains('mobile-filter-open')) {
           closeMobileFilterDrawer();
         } else {
@@ -4731,6 +4747,7 @@ const App = (() => {
         // toggle class על כל הטבלאות — CSS מסתיר/מציג .exp-col
         document.querySelectorAll('table.track-table').forEach(t => {
           t.classList.toggle('hide-exposure', !state.showExposure);
+          t.classList.toggle('exposure-only', state.showExposure);
         });
         syncTracksDensityClasses();
         state._blockRenderers.forEach(fn => fn());
