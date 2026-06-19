@@ -3726,6 +3726,22 @@ body.fund-page #peers-table-wrap table.track-table tr.average-row .peer-yield-nu
   text-align: center;
 }
 
+.gh-stamp-tap-hint {
+  font-size: .7rem;
+  font-weight: 700;
+  color: #1a3560;
+  text-align: center;
+  margin-top: 4px;
+  letter-spacing: .3px;
+  opacity: .75;
+  transition: opacity .18s ease;
+}
+
+.gh-stamp-btn:hover .gh-stamp-tap-hint,
+.gh-stamp-btn:focus-visible .gh-stamp-tap-hint {
+  opacity: 1;
+}
+
 @media (max-width: 700px) {
   .gh-stamp-svg {
     width: 96px;

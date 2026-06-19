@@ -21,8 +21,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=mobile-fixes10-20260619" />
-  <link rel="stylesheet" href="css/fund.css?v=mobile-fixes10-20260619" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-fixes11-20260619" />
+  <link rel="stylesheet" href="css/fund.css?v=mobile-fixes11-20260619" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="fund-page">
@@ -293,7 +293,7 @@
 </div>
 
   <script src="js/config.js?v=fund-mobile-pies-agach25-20260614"></script>
-  <script src="js/api.js?v=gh-score-20260618p"></script>
+  <script src="js/api.js?v=gh-score-20260619b"></script>
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
 <script>
@@ -2832,11 +2832,19 @@ async function setupFundSearch() {
 // ════════════════════════════════════════════════════════════════
 
 function ghGrade(score) {
-  if (score >= 9)   return 'מצוין';
+  if (score >= 9)  return 'מצוין';
   if (score >= 7.5) return 'טוב מאוד';
-  if (score >= 6)   return 'טוב';
-  if (score >= 4)   return 'ממוצע';
-  return 'חלש';
+  if (score >= 6)  return 'טוב';
+  if (score >  5)  return 'חלש';
+  return 'טעון שיפור';
+}
+
+function ghGradeColor(score) {
+  if (score >= 9)  return '#15803d';
+  if (score >= 7.5) return '#1d4ed8';
+  if (score >= 6)  return '#0f2744';
+  if (score >  5)  return '#b45309';
+  return '#dc2626';
 }
 
 function ghProvName(controlling, managing) {
@@ -2855,22 +2863,22 @@ function renderGemelHubScoreBadge(container, data, fundId) {
   const total = data.allScores.length;
   const yearLabel = new Date().getFullYear();
   const scoreStr  = score.toFixed(2);
+  const grade     = ghGrade(score);
+  const gradeColor = ghGradeColor(score);
   const uid = 'f' + String(fundId).replace(/\D/g, '');
 
   container.innerHTML = `
     <button class="gh-stamp-btn" id="gh-score-badge-btn"
-            aria-label="ציון גמלהאב ${scoreStr} — מקום ${rank} מתוך ${total} — לחץ לפרטים">
+            aria-label="ציון גמל האב ${scoreStr} — ${grade} — לחץ לפרטים">
       <svg class="gh-stamp-svg" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <!-- קשת עליונה ל-GEMELHUB -->
           <path id="ghTop${uid}" d="M 43,72 A 94,94 0 0,1 197,72"/>
-          <!-- קשת שנייה לעקביות ביצועים — רדיוס קטן יותר, מתחת ל-GEMELHUB -->
           <path id="ghMid${uid}" d="M 57,78 A 76,76 0 0,1 183,78"/>
         </defs>
 
         <!-- רקע לבן -->
         <circle cx="120" cy="120" r="119" fill="white"/>
-        <!-- טבעת חיצונית מנוקדת — אפקט חותמת אמיתית -->
+        <!-- טבעת חיצונית מנוקדת -->
         <circle cx="120" cy="120" r="111" fill="none" stroke="#1a3560" stroke-width="12"
                 stroke-dasharray="7 5.5" stroke-linecap="round"/>
         <!-- גבול פנימי דק -->
@@ -2884,40 +2892,41 @@ function renderGemelHubScoreBadge(container, data, fundId) {
           <textPath href="#ghTop${uid}" startOffset="50%" text-anchor="middle">GEMELHUB</textPath>
         </text>
 
-        <!-- עקביות ביצועים — מעוגל בחלק העליון הפנימי מתחת ל-GEMELHUB (עברית RTL) -->
+        <!-- עקביות ביצועים -->
         <text font-size="11" font-weight="700" fill="#1a3560"
               font-family="'Segoe UI',Arial,sans-serif"
               direction="rtl" unicode-bidi="bidi-override">
           <textPath href="#ghMid${uid}" startOffset="50%" text-anchor="middle">עקביות ביצועים ל-5 שנים</textPath>
         </text>
 
-        <!-- כוכבים בצדדים — ממוקמים על טבעת הזהב -->
+        <!-- כוכבים -->
         <text x="21"  y="124" fill="#c9a227" font-size="18" text-anchor="middle">★</text>
         <text x="219" y="124" fill="#c9a227" font-size="18" text-anchor="middle">★</text>
 
-        <!-- ציון גמלהאב — מוגדל -->
+        <!-- ציון גמל האב -->
         <text x="120" y="97" text-anchor="middle" fill="#1a3560" font-size="19"
-              font-weight="700" font-family="'Segoe UI',Arial,sans-serif" letter-spacing="0.5">ציון גמלהאב*</text>
+              font-weight="700" font-family="'Segoe UI',Arial,sans-serif" letter-spacing="0.5">ציון גמל האב*</text>
 
         <!-- קו מפריד עליון -->
         <line x1="46" y1="100" x2="194" y2="100" stroke="#1a3560" stroke-width="1.5"/>
 
-        <!-- ציון — baseline=148, top≈108, מרכז חזותי ≈ y=128 (קרוב למרכז החותמת) -->
+        <!-- הציון -->
         <text x="120" y="148" text-anchor="middle" fill="#c9a227" font-size="56"
               font-weight="900" font-family="'Arial Black',Arial,sans-serif">${scoreStr}</text>
-
 
         <!-- קו מפריד תחתון -->
         <line x1="46" y1="155" x2="194" y2="155" stroke="#1a3560" stroke-width="1.5"/>
 
-        <!-- מקום X מתוך Y -->
-        <text x="120" y="172" text-anchor="middle" fill="#1a3560" font-size="17"
-              font-weight="700" font-family="'Segoe UI',Arial,sans-serif">מקום ${rank} מתוך ${total}</text>
+        <!-- דירוג (במקום מקום X מתוך Y) -->
+        <text x="120" y="174" text-anchor="middle" fill="${gradeColor}" font-size="18"
+              font-weight="900" font-family="'Segoe UI',Arial,sans-serif">${grade}</text>
 
         <!-- שנה -->
         <text x="120" y="207" text-anchor="middle" fill="#c9a227" font-size="10"
               font-weight="700" font-family="'Segoe UI',Arial,sans-serif" letter-spacing="2">— ${yearLabel} —</text>
       </svg>
+      <!-- אינדיקטור לחיצה מתחת לחותמת -->
+      <div class="gh-stamp-tap-hint">לחץ לפרטים מלאים ▼</div>
     </button>`;
 
   document.getElementById('gh-score-badge-btn')
@@ -2930,20 +2939,42 @@ function showGemelHubScoreModal(data, currentFundId) {
 
   const titleHtml = `
     <div>
-      <div style="font-size:.72rem;color:#64748b;font-weight:700;margin-bottom:3px;letter-spacing:.3px;">מהו ציון גמלהאב*?</div>
+      <div style="font-size:.72rem;color:#64748b;font-weight:700;margin-bottom:3px;letter-spacing:.3px;">ציון גמל האב*</div>
       <div style="font-size:1.05rem;font-weight:800;color:#0f2744;">
-        ציון גמלהאב*
+        דירוג קופה במסלול
         ${thisFund ? `— <span style="color:#c9a227;">${thisFund.score.toFixed(2)}</span> / 10` : ''}
       </div>
     </div>`;
 
+  // ── 1. ציון ודירוג ──
+  const scoreHeaderHtml = thisFund ? (() => {
+    const grade = ghGrade(thisFund.score);
+    const color = ghGradeColor(thisFund.score);
+    const rank  = allScores.findIndex(s => s.fundId === String(currentFundId)) + 1;
+    const total = allScores.length;
+    return `
+    <div style="padding:16px;background:linear-gradient(135deg,#0f2744 0%,#1a3560 100%);display:flex;align-items:center;gap:16px;">
+      <div style="text-align:center;min-width:72px;">
+        <div style="font-size:2.6rem;font-weight:900;color:#c9a227;line-height:1;">${thisFund.score.toFixed(2)}</div>
+        <div style="font-size:.65rem;color:#93c5fd;font-weight:700;margin-top:2px;">מתוך 10</div>
+      </div>
+      <div style="flex:1;border-right:2px solid rgba(201,162,39,.35);padding-right:16px;">
+        <div style="font-size:1.4rem;font-weight:900;color:${color};line-height:1.1;">${grade}</div>
+        <div style="font-size:.75rem;color:#cbd5e1;margin-top:4px;">מקום <strong style="color:#fff;">${rank}</strong> מתוך <strong style="color:#fff;">${total}</strong> גופים במסלול</div>
+      </div>
+    </div>`;
+  })() : '';
+
+  // ── 2. הסבר מהו ציון גמל האב ──
   const explanationHtml = `
-    <div style="padding:13px 16px;background:#f8fafc;border-bottom:1px solid #eef2f7;font-size:.8rem;color:#475569;line-height:1.65;">
-      GemelHub Score הוא מדד פנימי הבוחן את איכות ועקביות ביצועי המסלול ביחס למתחריו באותה קטגוריה.
-      הציון מבוסס על דירוג המסלול בכל אחת מחמש השנים האחרונות (${yearsLabel}),
-      מדד שארפ וביצועי 12 החודשים האחרונים.
-      מטרת המדד לזהות מסלולים שהציגו ביצועים טובים באופן עקבי לאורך זמן ולא רק בשנה בודדת.
-      הציון הסופי נע בין <strong>5 (מקום אחרון)</strong> ל-<strong>10 (מקום ראשון)</strong> ומשקף את מיקום הקופה ביחס לשאר הקופות במסלול.
+    <div style="padding:13px 16px;background:#f8fafc;border-bottom:1px solid #eef2f7;">
+      <div style="font-size:.76rem;font-weight:800;color:#0f2744;margin-bottom:7px;">מהו ציון גמל האב*?</div>
+      <div style="font-size:.8rem;color:#475569;line-height:1.65;">
+        GemelHub Score הוא מדד פנימי הבוחן את איכות ועקביות ביצועי המסלול ביחס למתחריו באותה קטגוריה.
+        הציון מבוסס על דירוג המסלול בכל אחת מחמש השנים האחרונות (${yearsLabel}),
+        מדד שארפ וביצועי 12 החודשים האחרונים.
+        הציון הסופי נע בין <strong>5 (מקום אחרון)</strong> ל-<strong>10 (מקום ראשון)</strong> ומשקף את מיקום הקופה ביחס לשאר הקופות במסלול.
+      </div>
       <div style="margin-top:9px;display:flex;gap:8px;flex-wrap:wrap;">
         <span style="background:#dbeafe;color:#1d4ed8;padding:3px 9px;border-radius:6px;font-weight:700;font-size:.76rem;">70% עקביות 5 שנים</span>
         <span style="background:#dcfce7;color:#15803d;padding:3px 9px;border-radius:6px;font-weight:700;font-size:.76rem;">20% שארפ</span>
@@ -3023,7 +3054,7 @@ function showGemelHubScoreModal(data, currentFundId) {
       </p>
     </div>`;
 
-  showStatModal('gh-score-modal', titleHtml, explanationHtml + compHtml + tableHtml + disclaimerHtml, 'max-width:640px;');
+  showStatModal('gh-score-modal', titleHtml, scoreHeaderHtml + explanationHtml + tableHtml + compHtml + disclaimerHtml, 'max-width:640px;');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
