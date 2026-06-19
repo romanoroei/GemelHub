@@ -14972,8 +14972,9 @@ body.h2h-active,
 
   .mob-nav-badge {
     position: absolute;
-    top: -6px;
-    right: -8px;
+    top: -4px;
+    left: 50%;
+    transform: translateX(6px);
     min-width: 16px;
     height: 16px;
     padding: 0 4px;
@@ -16466,6 +16467,13 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
 
   html body .mobile-category-option .cat-filter-badge span {
     line-height: 1 !important;
+  }
+
+  html body .mobile-category-option.is-disabled,
+  html body .mobile-category-option:disabled {
+    opacity: .38 !important;
+    cursor: default !important;
+    pointer-events: none !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table.exposure-only th.yield-col,

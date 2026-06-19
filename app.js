@@ -1499,6 +1499,13 @@ const App = (() => {
         badge.remove();
       }
     });
+    const isSbOrH2H = state.activeCategoryId === 'sandbox' || state.activeCategoryId === 'h2h';
+    ['.mob-extra-range', '.mob-extra-search', '.mob-extra-fund-search'].forEach(sel => {
+      const btn = sheet.querySelector(sel);
+      if (!btn) return;
+      btn.disabled = isSbOrH2H;
+      btn.classList.toggle('is-disabled', isSbOrH2H);
+    });
   }
 
   function syncMobileAppNav(activeTarget = state.activeCategoryId) {
