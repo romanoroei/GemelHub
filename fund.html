@@ -251,23 +251,23 @@
 </div>
 
 <nav class="mobile-app-nav" aria-label="ניווט תחתון במובייל">
-  <button type="button" class="mobile-app-nav-item" data-fund-mobile-action="categories" aria-label="קטגוריות">
+  <button type="button" class="mobile-app-nav-item" data-fund-mobile-action="categories" aria-label="אפשרויות" data-mobile-app-target="categories">
     <i class="fas fa-layer-group" aria-hidden="true"></i>
-    <span>קטגוריות</span>
-  </button>
-  <button type="button" class="mobile-app-nav-item" data-fund-mobile-action="search" aria-label="אפשרויות">
-    <i class="fas fa-sliders-h" aria-hidden="true"></i>
     <span>אפשרויות</span>
   </button>
-  <a class="mobile-app-nav-item" href="index.html?app=h2h" aria-label="ראש בראש">
+  <a class="mobile-app-nav-item" href="index.html" data-mobile-app-target="sidebar-filter" aria-label="סינון">
+    <i class="fas fa-filter" aria-hidden="true"></i>
+    <span>סינון</span>
+  </a>
+  <a class="mobile-app-nav-item" href="index.html?app=h2h" data-mobile-app-target="h2h" aria-label="ראש בראש">
     <i class="fas fa-balance-scale" aria-hidden="true"></i>
     <span>ראש בראש</span>
   </a>
-  <a class="mobile-app-nav-item" href="index.html?app=sandbox" aria-label="ארגז החול שלי">
+  <a class="mobile-app-nav-item" href="index.html?app=sandbox" data-mobile-app-target="sandbox" aria-label="ארגז החול שלי">
     <i class="fas fa-flask" aria-hidden="true"></i>
     <span>ארגז החול</span>
   </a>
-  <button type="button" class="mobile-app-nav-item mobile-app-nav-lock" data-fund-mobile-action="login" aria-label="התחברות">
+  <button type="button" class="mobile-app-nav-item mobile-app-nav-lock" data-fund-mobile-action="login" data-mobile-app-target="login" aria-label="התחברות">
     <i class="fas fa-user-lock" aria-hidden="true"></i>
     <span>התחברות</span>
   </button>

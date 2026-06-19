@@ -3995,6 +3995,7 @@ const App = (() => {
       bindFundLinks(block);
       bindTableControls(block);
       requestAnimationFrame(() => syncAllocationIconOverflow(block));
+      applyMobileTheadSticky();
     };
 
     // רישום ה-renderer לטעינה גורפת בעת toggle
