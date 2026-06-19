@@ -13916,6 +13916,7 @@ body.h2h-active,
     z-index: 2700;
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: stretch;
     min-height: 58px;
     padding: 6px;
     gap: 4px;

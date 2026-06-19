@@ -1536,7 +1536,7 @@ const App = (() => {
       sidebar.style.setProperty('top', '0', 'important');
       sidebar.style.setProperty('right', '0', 'important');
       sidebar.style.setProperty('width', 'min(290px, 88vw)', 'important');
-      sidebar.style.setProperty('height', '100dvh', 'important');
+      sidebar.style.setProperty('bottom', 'var(--mobile-app-nav-clearance, 72px)', 'important');
       sidebar.style.setProperty('z-index', '9050', 'important');
       sidebar.style.setProperty('background', '#fff', 'important');
       sidebar.style.setProperty('padding', '20px 16px', 'important');
