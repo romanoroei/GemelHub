@@ -1364,9 +1364,17 @@ const App = (() => {
     }, 2800);
   }
 
+  const PENSION_ACTUARIAL_CATS = new Set(['pension_mekafit', 'pension_mashlima']);
+
   function ensureMobileCategorySheet() {
     let sheet = document.getElementById('mobile-category-sheet');
     if (sheet) return sheet;
+
+    const ACTUARIAL_SUB = `
+      <button type="button" class="mobile-category-sub" data-mobile-cat-actuarial="true">
+        <i class="fas fa-balance-scale" aria-hidden="true"></i>
+        <span>איזון אקטוארי</span>
+      </button>`;
 
     sheet = document.createElement('div');
     sheet.id = 'mobile-category-sheet';
@@ -1374,8 +1382,8 @@ const App = (() => {
     sheet.hidden = true;
     sheet.innerHTML = `
       <div class="mobile-category-sheet-head">
-        <strong>קטגוריות</strong>
-        <button type="button" class="mobile-category-sheet-close" aria-label="סגור קטגוריות">
+        <strong>אפשרויות</strong>
+        <button type="button" class="mobile-category-sheet-close" aria-label="סגור">
           <i class="fas fa-times" aria-hidden="true"></i>
         </button>
       </div>
@@ -1385,17 +1393,58 @@ const App = (() => {
             <span class="mobile-category-option-icon">${cat.icon || ''}</span>
             <span>${cat.label}</span>
           </button>
+          ${PENSION_ACTUARIAL_CATS.has(cat.id) ? ACTUARIAL_SUB.replace('data-mobile-cat-actuarial="true"', `data-mobile-cat-actuarial="${cat.id}"`) : ''}
         `).join('')}
+      </div>
+      <div class="mobile-category-sheet-divider"></div>
+      <div class="mobile-category-sheet-extras">
+        <button type="button" class="mobile-category-option mob-extra-range">
+          <span class="mobile-category-option-icon">📅</span>
+          <span>טווח השקעה מותאם</span>
+        </button>
+        <button type="button" class="mobile-category-option mob-extra-search">
+          <span class="mobile-category-option-icon">🔍</span>
+          <span>חיפוש מתקדם</span>
+        </button>
       </div>
     `;
     document.body.appendChild(sheet);
     sheet.querySelector('.mobile-category-sheet-close')?.addEventListener('click', closeMobileCategorySheet);
+
     sheet.querySelectorAll('[data-mobile-cat]').forEach(btn => {
       btn.addEventListener('click', () => {
         closeMobileCategorySheet();
         switchCategory(btn.dataset.mobileCat);
       });
     });
+
+    sheet.querySelectorAll('[data-mobile-cat-actuarial]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const catId = btn.dataset.mobileCatActuarial;
+        closeMobileCategorySheet();
+        state.pendingCompareMode = 'actuarial';
+        switchCategory(catId);
+      });
+    });
+
+    sheet.querySelector('.mob-extra-range')?.addEventListener('click', () => {
+      if (!state.activeCategoryId || state.isHomePage) {
+        closeMobileCategorySheet();
+        return;
+      }
+      closeMobileCategorySheet();
+      state.advancedOptionsOpen = true;
+      state.customRange.open = true;
+      syncAdvancedOptionsUi();
+      syncCustomRangeControls();
+    });
+
+    sheet.querySelector('.mob-extra-search')?.addEventListener('click', () => {
+      closeMobileCategorySheet();
+      openAdvancedSearch();
+    });
+
     return sheet;
   }
 
@@ -1468,9 +1517,6 @@ const App = (() => {
         } else {
           openMobileFilterDrawer();
         }
-      } else if (action === 'filter') {
-        closeMobileCategorySheet();
-        openMobileOptionsSheet();
       } else if (action === 'h2h') {
         switchToH2H();
       } else if (action === 'sandbox') {
