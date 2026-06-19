@@ -22,10 +22,130 @@
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="css/style.css?v=track-title-long-pill-wrap-20260614" />
+  <style>
+    /* ═══ MOBILE GOLD HEADER ═══ */
+    #mobile-gold-header { display: none; }
+    @media (max-width: 760px) {
+      #mobile-gold-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: 52px;
+        background: linear-gradient(135deg, #d4aa2e 0%, #b8911f 100%);
+        padding: 0 16px;
+        z-index: 9100;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+      }
+      .mobile-gold-logo {
+        font-family: 'Heebo', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #0f2744;
+        letter-spacing: .3px;
+        user-select: none;
+      }
+      .mobile-gold-hamburger {
+        background: none; border: none; cursor: pointer;
+        padding: 6px; display: flex; flex-direction: column; gap: 5px;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .mobile-gold-hamburger span {
+        display: block; width: 22px; height: 2.5px;
+        background: #0f2744; border-radius: 2px;
+        transition: transform .22s ease, opacity .22s ease;
+      }
+      .mobile-gold-hamburger.is-open span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+      .mobile-gold-hamburger.is-open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+      .mobile-gold-hamburger.is-open span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+      /* push page content below gold header */
+      .hero-banner { margin-top: 52px; }
+      .sticky-header { top: 52px !important; }
+      body.mobile-sticky-header-fixed .sticky-header { top: 52px !important; }
+      body.mobile-sticky-header-fixed .page-body {
+        padding-top: calc(var(--mobile-sticky-header-h, 42px) + 52px) !important;
+      }
+
+      /* ═══ MOBILE FILTER DRAWER (shows existing #sidebar as overlay) ═══ */
+      body.mobile-filter-open #sidebar {
+        position: fixed !important;
+        top: 52px !important; right: 0 !important;
+        width: min(290px, 88vw) !important;
+        height: calc(100dvh - 52px) !important;
+        z-index: 9050 !important;
+        background: #fff !important;
+        padding: 20px 16px !important;
+        overflow-y: auto !important;
+        box-shadow: -4px 0 24px rgba(15,39,68,0.22) !important;
+        visibility: visible !important; opacity: 1 !important;
+        pointer-events: auto !important; transform: none !important;
+        max-width: none !important; margin: 0 !important;
+        display: block !important;
+      }
+      body.mobile-filter-open #sidebar-filters { display: block !important; }
+      /* Dimmed backdrop behind drawer */
+      body.mobile-filter-open::before {
+        content: '';
+        position: fixed;
+        top: 52px; left: 0; right: 0; bottom: 0;
+        background: rgba(15,39,68,0.42);
+        z-index: 9040;
+      }
+
+      /* ═══ MOBILE OPTIONS SHEET ═══ */
+      #mobile-options-sheet {
+        position: fixed !important;
+        left: 10px !important; right: 10px !important;
+        bottom: var(--mobile-app-nav-clearance, 72px) !important;
+        z-index: 9600 !important;
+        display: block !important;
+        opacity: 1 !important; transform: none !important;
+        background: #fff !important;
+        border-radius: 18px !important;
+        padding: 16px !important;
+        box-shadow: 0 18px 44px rgba(15,23,42,.28) !important;
+        border: 1px solid rgba(201,183,114,.42) !important;
+      }
+      #mobile-options-sheet[hidden] { display: none !important; }
+      .mob-opts-title {
+        font-size: .82rem; font-weight: 700; color: #64748b;
+        text-align: center; margin-bottom: 10px;
+        font-family: 'Heebo', sans-serif;
+      }
+      .mob-opts-btn {
+        display: flex; align-items: center; gap: 10px;
+        width: 100%; background: #f8f9fc;
+        border: 1px solid #e2e8f0; border-radius: 12px;
+        padding: 13px 16px; margin-bottom: 8px;
+        font-size: .9rem; font-weight: 600; color: #0f2744;
+        cursor: pointer; text-align: right; direction: rtl;
+        font-family: 'Heebo', sans-serif;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .mob-opts-btn:active { background: #edf2f7; }
+      .mob-opts-btn i { color: #c9a227; font-size: 1.05rem; min-width: 18px; text-align: center; }
+      .mob-opts-close {
+        display: block; width: 100%; background: none; border: none;
+        color: #94a3b8; font-size: .8rem; cursor: pointer;
+        padding: 8px 0 2px; text-align: center;
+        font-family: 'Heebo', sans-serif;
+      }
+    }
+  </style>
 </head>
 <body>
 <a href="#content-area" class="skip-link">דלג לתוכן הראשי</a>
 <div id="a11y-live" aria-live="polite" aria-atomic="true" role="status"></div>
+
+<!-- ════════ MOBILE GOLD HEADER ════════ -->
+<div id="mobile-gold-header" aria-label="כותרת">
+  <button class="mobile-gold-hamburger" id="mobile-gold-hamburger" aria-label="תפריט סינון" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <span class="mobile-gold-logo">GemelHub</span>
+</div>
 
 <!-- ════════ HERO BANNER (תמיד מוצג בכל העמודים) ════════ -->
 <section class="hero-banner" id="hero-banner" aria-label="כותרת ראשית">

@@ -1447,15 +1447,7 @@ const App = (() => {
         openMobileCategorySheet();
       } else if (action === 'filter') {
         closeMobileCategorySheet();
-        if (state.isHomePage || state.activeCategoryId === 'h2h' || state.activeCategoryId === 'sandbox') return;
-        state.advancedOptionsOpen = !state.advancedOptionsOpen;
-        syncAdvancedOptionsUi();
-        syncMobileAppNav();
-        const sidebar = document.getElementById('sidebar');
-        const filterBtn = document.getElementById('sidebar-toggle-btn');
-        if (sidebar) sidebar.classList.toggle('sidebar-collapsed', !state.advancedOptionsOpen);
-        if (filterBtn) filterBtn.classList.toggle('active', state.advancedOptionsOpen);
-        if (state.advancedOptionsOpen) scheduleAdvancedOptionsAutoClose();
+        openMobileOptionsSheet();
       } else if (action === 'h2h') {
         switchToH2H();
       } else if (action === 'sandbox') {
@@ -1465,6 +1457,75 @@ const App = (() => {
       }
     });
     syncMobileAppNav('home');
+
+    // Gold header hamburger → mobile filter drawer
+    const hamburger = document.getElementById('mobile-gold-hamburger');
+    if (hamburger) {
+      hamburger.addEventListener('click', e => {
+        e.stopPropagation();
+        const isOpen = document.body.classList.toggle('mobile-filter-open');
+        hamburger.classList.toggle('is-open', isOpen);
+      });
+      document.addEventListener('click', e => {
+        if (!document.body.classList.contains('mobile-filter-open')) return;
+        if (!e.target.closest('#sidebar') && !e.target.closest('#mobile-gold-hamburger')) {
+          document.body.classList.remove('mobile-filter-open');
+          hamburger.classList.remove('is-open');
+        }
+      });
+    }
+  }
+
+  function ensureMobileOptionsSheet() {
+    let sheet = document.getElementById('mobile-options-sheet');
+    if (sheet) return sheet;
+    sheet = document.createElement('div');
+    sheet.id = 'mobile-options-sheet';
+    sheet.setAttribute('role', 'dialog');
+    sheet.setAttribute('aria-label', 'אפשרויות');
+    sheet.hidden = true;
+    sheet.innerHTML = `
+      <div class="mob-opts-title">אפשרויות</div>
+      <button class="mob-opts-btn" id="mob-opts-range">
+        <i class="fas fa-calendar-alt"></i>
+        <span>טווח השקעה מותאם</span>
+      </button>
+      <button class="mob-opts-btn" id="mob-opts-search">
+        <i class="fas fa-sliders"></i>
+        <span>חיפוש מתקדם</span>
+      </button>
+      <button class="mob-opts-close" id="mob-opts-close">סגור</button>`;
+    document.documentElement.appendChild(sheet);
+
+    sheet.querySelector('#mob-opts-range').addEventListener('click', () => {
+      closeMobileOptionsSheet();
+      const entry = document.getElementById('custom-range-entry');
+      const toggle = document.getElementById('custom-range-toggle');
+      if (entry) entry.hidden = false;
+      if (toggle) toggle.click();
+    });
+    sheet.querySelector('#mob-opts-search').addEventListener('click', () => {
+      closeMobileOptionsSheet();
+      openAdvancedSearch();
+    });
+    sheet.querySelector('#mob-opts-close').addEventListener('click', () => closeMobileOptionsSheet());
+    document.addEventListener('click', e => {
+      if (!sheet || sheet.hidden) return;
+      if (!sheet.contains(e.target) && !e.target.closest('[data-mobile-app-action="filter"]')) {
+        closeMobileOptionsSheet();
+      }
+    }, { capture: true });
+    return sheet;
+  }
+
+  function openMobileOptionsSheet() {
+    const sheet = ensureMobileOptionsSheet();
+    sheet.hidden = false;
+  }
+
+  function closeMobileOptionsSheet() {
+    const sheet = document.getElementById('mobile-options-sheet');
+    if (sheet) sheet.hidden = true;
   }
 
   function setupCompactViewToggle() {
