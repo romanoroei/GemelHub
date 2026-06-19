@@ -3188,14 +3188,32 @@ document.addEventListener('DOMContentLoaded', () => {
     ].join('');
     document.body.appendChild(sheet);
     sheet.querySelector('.mobile-category-sheet-close')?.addEventListener('click', function() {
-      sheet.classList.remove('is-open');
-      setTimeout(function() { if (!sheet.classList.contains('is-open')) sheet.hidden = true; }, 180);
+      closeFundCategorySheet();
     });
     return sheet;
   }
 
+  function closeFundCategorySheet() {
+    var sheet = document.getElementById('mobile-category-sheet');
+    document.body.classList.remove('mobile-category-sheet-open');
+    var btn = document.querySelector('[data-fund-mobile-action="categories"]');
+    if (btn) btn.classList.remove('is-active');
+    if (!sheet) return;
+    sheet.classList.remove('is-open');
+    setTimeout(function() {
+      if (!sheet.classList.contains('is-open')) sheet.hidden = true;
+    }, 180);
+  }
+
   function openFundCategorySheet() {
     var sheet = ensureFundCategorySheet();
+    if (!sheet.hidden && sheet.classList.contains('is-open')) {
+      closeFundCategorySheet();
+      return;
+    }
+    document.body.classList.add('mobile-category-sheet-open');
+    var btn = document.querySelector('[data-fund-mobile-action="categories"]');
+    if (btn) btn.classList.add('is-active');
     sheet.hidden = false;
     requestAnimationFrame(function() { sheet.classList.add('is-open'); });
   }
@@ -3213,6 +3231,13 @@ document.addEventListener('DOMContentLoaded', () => {
           showFeatureLockMessage();
         }
       });
+    });
+    // סגור sheet בלחיצה מחוץ לו
+    document.addEventListener('click', function(e) {
+      if (!document.body.classList.contains('mobile-category-sheet-open')) return;
+      if (!e.target.closest('#mobile-category-sheet') && !e.target.closest('[data-fund-mobile-action="categories"]')) {
+        closeFundCategorySheet();
+      }
     });
   });
 })();

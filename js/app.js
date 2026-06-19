@@ -1471,6 +1471,7 @@ const App = (() => {
     sheet.hidden = false;
     requestAnimationFrame(() => sheet.classList.add('is-open'));
     syncMobileCategorySheet();
+    syncMobileAppNav();
   }
 
   function closeMobileCategorySheet() {
@@ -1481,6 +1482,7 @@ const App = (() => {
     setTimeout(() => {
       if (!sheet.classList.contains('is-open')) sheet.hidden = true;
     }, 180);
+    syncMobileAppNav();
   }
 
   function syncMobileCategorySheet() {
@@ -1497,7 +1499,9 @@ const App = (() => {
     const current = state.isHomePage ? 'home' : String(activeTarget || '');
     nav.querySelectorAll('[data-mobile-app-target]').forEach(item => {
       const target = item.dataset.mobileAppTarget;
-      const active = (target !== 'categories' && target === current) ||
+      const active = (target !== 'categories' && target !== 'sidebar-filter' && target === current) ||
+        (target === 'categories' && document.body.classList.contains('mobile-category-sheet-open')) ||
+        (target === 'sidebar-filter' && document.body.classList.contains('mobile-filter-open')) ||
         (target === 'filter' && !!state.advancedOptionsOpen && !state.isHomePage) ||
         (target === 'h2h' && current === 'h2h') ||
         (target === 'sandbox' && current === 'sandbox');
@@ -1572,6 +1576,7 @@ const App = (() => {
       }
       if (filters) filters.style.setProperty('display', 'block', 'important');
       document.body.classList.add('mobile-filter-open');
+      syncMobileAppNav();
     }
     function closeMobileFilterDrawer() {
       const sidebar = document.getElementById('sidebar');
@@ -1581,6 +1586,7 @@ const App = (() => {
       if (sticky) sticky.removeAttribute('style');
       if (filters) filters.removeAttribute('style');
       document.body.classList.remove('mobile-filter-open');
+      syncMobileAppNav();
     }
     document.addEventListener('click', e => {
       if (!document.body.classList.contains('mobile-filter-open')) return;
@@ -3599,7 +3605,15 @@ const App = (() => {
       clone.replaceChildren(...sourceThs.map((th, index) => {
         const cell = document.createElement('div');
         cell.className = `mobile-sticky-head-cell${index === 0 ? ' is-rank' : ''}${index === 1 ? ' is-manager' : ''}`;
-        cell.textContent = getMobileStickyHeadText(th);
+        const datesEl = th.querySelector('.custom-range-th-dates');
+        if (datesEl) {
+          const labelEl = th.querySelector('.custom-range-th');
+          cell.innerHTML = `<span>${labelEl ? labelEl.textContent.trim() : 'טווח'}</span><br><small style="font-size:9px;opacity:.8">${datesEl.textContent.trim()}</small>`;
+          cell.style.setProperty('white-space', 'normal', 'important');
+          cell.style.setProperty('line-height', '1.1', 'important');
+        } else {
+          cell.textContent = getMobileStickyHeadText(th);
+        }
         return cell;
       }));
       clone.dataset.columnCount = String(sourceThs.length);
