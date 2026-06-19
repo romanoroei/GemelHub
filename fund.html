@@ -3229,23 +3229,49 @@ document.addEventListener('DOMContentLoaded', () => {
     sheet.className = 'mobile-category-sheet';
     sheet.hidden = true;
     var cats = (typeof CONFIG !== 'undefined' && CONFIG.PRODUCT_CATEGORIES) ? CONFIG.PRODUCT_CATEGORIES : [];
-    sheet.innerHTML = [
-      '<div class="mobile-category-sheet-head">',
-      '<strong>קטגוריות</strong>',
-      '<button type="button" class="mobile-category-sheet-close" aria-label="סגור קטגוריות"><i class="fas fa-times" aria-hidden="true"></i></button>',
-      '</div>',
-      '<div class="mobile-category-sheet-list">',
-      cats.map(function(cat) {
-        return '<a class="mobile-category-option' + (cat.id === _fundCatId ? ' is-active' : '') + '" href="index.html?cat=' + encodeURIComponent(cat.id) + '">' +
-          '<span class="mobile-category-option-icon">' + (cat.icon || '') + '</span>' +
-          '<span>' + cat.label + '</span>' +
+    var catListHtml = cats.map(function(cat) {
+      var isActive = cat.id === _fundCatId ? ' is-active' : '';
+      return '<a class="mobile-category-option' + isActive + '" href="index.html?cat=' + encodeURIComponent(cat.id) + '">' +
+        '<span class="mobile-category-option-icon">' + (cat.icon || '') + '</span>' +
+        '<span class="mobile-category-option-label">' + cat.label + '</span>' +
         '</a>';
-      }).join(''),
-      '</div>'
-    ].join('');
+    }).join('');
+
+    sheet.innerHTML =
+      '<div class="mobile-category-sheet-head">' +
+        '<strong>אפשרויות</strong>' +
+        '<button type="button" class="mobile-category-sheet-close" aria-label="סגור"><i class="fas fa-times" aria-hidden="true"></i></button>' +
+      '</div>' +
+      '<div class="mobile-category-section-title">קטגוריות</div>' +
+      '<div class="mobile-category-sheet-list">' + catListHtml + '</div>' +
+      '<div class="mobile-category-sheet-divider"></div>' +
+      '<div class="mobile-category-section-title">מתקדם</div>' +
+      '<div class="mobile-category-sheet-extras">' +
+        '<button type="button" class="mobile-category-option mob-extra-range" disabled style="opacity:.4;cursor:not-allowed;">' +
+          '<span class="mobile-category-option-icon">📅</span>' +
+          '<span class="mobile-category-option-label">טווח השקעה מותאם</span>' +
+          '<span style="font-size:.65rem;color:#94a3b8;margin-inline-start:auto;">לא זמין</span>' +
+        '</button>' +
+        '<button type="button" class="mobile-category-option mob-extra-search">' +
+          '<span class="mobile-category-option-icon">🔍</span>' +
+          '<span class="mobile-category-option-label">חיפוש מתקדם</span>' +
+        '</button>' +
+        '<button type="button" class="mobile-category-option mob-extra-fund-search">' +
+          '<span class="mobile-category-option-icon">🏦</span>' +
+          '<span class="mobile-category-option-label">חיפוש קופה</span>' +
+        '</button>' +
+      '</div>';
+
     document.body.appendChild(sheet);
-    sheet.querySelector('.mobile-category-sheet-close')?.addEventListener('click', function() {
+    sheet.querySelector('.mobile-category-sheet-close').addEventListener('click', closeFundCategorySheet);
+    sheet.querySelector('.mob-extra-search').addEventListener('click', function() {
       closeFundCategorySheet();
+      // חיפוש מתקדם זמין רק בדף הראשי
+      window.location.href = 'index.html?cat=' + encodeURIComponent(_fundCatId || '') + '&openAdvanced=1';
+    });
+    sheet.querySelector('.mob-extra-fund-search').addEventListener('click', function() {
+      closeFundCategorySheet();
+      openFundSearchSheet();
     });
     return sheet;
   }
