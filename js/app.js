@@ -2062,6 +2062,7 @@ const App = (() => {
       setCustomRangeMeta(`הטווח שנבחר כולל ${getMonthCountBetween(startPeriod, endPeriod)} חודשים`);
       // מיון אוטומטי לפי עמודת הטווח המותאם (מהגבוה לנמוך)
       if (getCurrentCompareMode() !== 'actuarial') {
+        state.showExposure = false;
         state.yieldMode = 'cumulative';
         clearAllYearlyTrackStates();
         state.organizedData.forEach(item => {
@@ -2528,6 +2529,9 @@ const App = (() => {
 
   // ─── HOME PAGE ───────────────────────────────────────────────
   async function showHomePage() {
+    state.pendingTrackId = null;
+    state.pendingCompareTopScroll = false;
+    return switchCategory('hashtalamot');
     window.scrollTo({ top: 0, behavior: 'smooth' });
     updateHeroContent('home');
     state.isHomePage = true;
@@ -3568,6 +3572,20 @@ const App = (() => {
       .trim();
   }
 
+  function renderMobileStickyHeadCell(cell, th) {
+    const datesEl = th?.querySelector('.custom-range-th-dates');
+    if (datesEl) {
+      const labelEl = th.querySelector('.custom-range-th');
+      cell.innerHTML = `<span>${labelEl ? labelEl.textContent.trim() : 'טווח מותאם'}</span><br><small>${datesEl.textContent.trim()}</small>`;
+      cell.style.setProperty('white-space', 'normal', 'important');
+      cell.style.setProperty('line-height', '1.08', 'important');
+      return;
+    }
+    cell.textContent = getMobileStickyHeadText(th);
+    cell.style.removeProperty('white-space');
+    cell.style.removeProperty('line-height');
+  }
+
   function updateMobileStickyThead() {
     const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
     if (!isMobile || getCurrentCompareMode() !== 'tracks') {
@@ -3629,15 +3647,7 @@ const App = (() => {
       clone.replaceChildren(...sourceThs.map((th, index) => {
         const cell = document.createElement('div');
         cell.className = `mobile-sticky-head-cell${index === 0 ? ' is-rank' : ''}${index === 1 ? ' is-manager' : ''}`;
-        const datesEl = th.querySelector('.custom-range-th-dates');
-        if (datesEl) {
-          const labelEl = th.querySelector('.custom-range-th');
-          cell.innerHTML = `<span>${labelEl ? labelEl.textContent.trim() : 'טווח'}</span><br><small style="font-size:9px;opacity:.8">${datesEl.textContent.trim()}</small>`;
-          cell.style.setProperty('white-space', 'normal', 'important');
-          cell.style.setProperty('line-height', '1.1', 'important');
-        } else {
-          cell.textContent = getMobileStickyHeadText(th);
-        }
+        renderMobileStickyHeadCell(cell, th);
         return cell;
       }));
       clone.dataset.columnCount = String(sourceThs.length);
@@ -3655,7 +3665,7 @@ const App = (() => {
     }
     sourceThs.forEach((th, index) => {
       const cell = clone.children[index];
-      if (cell) cell.textContent = getMobileStickyHeadText(th);
+      if (cell) renderMobileStickyHeadCell(cell, th);
     });
 
     const siteZoom = parseFloat(getComputedStyle(document.body).zoom) || 1;
@@ -4132,7 +4142,7 @@ const App = (() => {
       if (mobileColumnCount > 2) {
         const rankWidth = 28;
         const managerWidth = 104;
-        const expColWidth = 104;
+        const expColWidth = 76;
         const restWidth = mobileColumnCount > 8 ? 54 : 56;
         const compactReturnWidth = 48;
         let visibleIdx = 0;
@@ -4205,14 +4215,14 @@ const App = (() => {
       normalizeMobileFinanceTablePresentation(table);
       if (isExposureOnly) {
         table.querySelectorAll('.exp-val').forEach(el => {
-          el.style.setProperty('font-size', '14px', 'important');
+          el.style.setProperty('font-size', '12px', 'important');
           el.style.setProperty('line-height', '1', 'important');
           el.style.setProperty('font-weight', '900', 'important');
         });
         table.querySelectorAll('.exp-bar-bg').forEach(el => {
           el.style.setProperty('display', 'block', 'important');
-          el.style.setProperty('height', '9px', 'important');
-          el.style.setProperty('min-height', '9px', 'important');
+          el.style.setProperty('height', '7px', 'important');
+          el.style.setProperty('min-height', '7px', 'important');
         });
       }
       setupMobileTableScrollbar(table.closest('.track-table-wrapper'));
@@ -4409,14 +4419,14 @@ const App = (() => {
       }
       if (el.matches('td.yield-cell, td.exp-col, .yield-value-wrap, .yield-number-shell, .yield-number, .exp-val')) {
         const isExposureOnlyValue = el.matches('.exp-val') && !!el.closest('table.exposure-only');
-        el.style.setProperty('font-size', isExposureOnlyValue ? '14px' : '12px', 'important');
+        el.style.setProperty('font-size', '12px', 'important');
         el.style.setProperty('line-height', '1.05', 'important');
         el.style.setProperty('font-weight', isExposureOnlyValue ? '900' : '800', 'important');
       }
       if (el.matches('table.exposure-only .exp-bar-bg')) {
         el.style.setProperty('display', 'block', 'important');
-        el.style.setProperty('height', '9px', 'important');
-        el.style.setProperty('min-height', '9px', 'important');
+        el.style.setProperty('height', '7px', 'important');
+        el.style.setProperty('min-height', '7px', 'important');
       }
       if (el.matches('.prov-name')) {
         el.style.setProperty('font-size', '12px', 'important');
@@ -4530,7 +4540,7 @@ const App = (() => {
   // ─── כפתורי בקרה בשורת מסלול ההשקעה ────────────────────────
   function buildTrackHeaderControls(track) {
     const trackYearlyState = getYearlyTrackState(track.id);
-    const isTrackYearlyActive = !!trackYearlyState?.active;
+    const isTrackYearlyActive = !state.showExposure && !!trackYearlyState?.active;
     const additionalYearsVisible = isTrackYearlyActive && (
       trackYearlyState.loading ||
       trackYearlyState.canExpandTo10 ||
@@ -4540,11 +4550,11 @@ const App = (() => {
 
     return `
       <div class="yield-toggle-group">
-        <button class="tbl-ctrl-btn yield-mode-btn${!isTrackYearlyActive && state.yieldMode==='cumulative'?' is-active':''}" data-mode="cumulative"><strong>תשואה מצטברת</strong></button>
-        <button class="tbl-ctrl-btn yield-mode-btn${!isTrackYearlyActive && state.yieldMode==='annualized'?' is-active':''}" data-mode="annualized"><strong>ממוצע שנתי</strong></button>
+        <button class="tbl-ctrl-btn yield-mode-btn${!state.showExposure && !isTrackYearlyActive && state.yieldMode==='cumulative'?' is-active':''}" data-mode="cumulative"><strong>תשואה מצטברת</strong></button>
+        <button class="tbl-ctrl-btn yield-mode-btn${!state.showExposure && !isTrackYearlyActive && state.yieldMode==='annualized'?' is-active':''}" data-mode="annualized"><strong>ממוצע שנתי</strong></button>
       </div>
-      <button class="tbl-ctrl-btn yield-mode-btn yearly-mode-btn${isTrackYearlyActive?' is-active':''}" data-mode="yearly">תשואה לפי שנים</button>
-      ${additionalYearsVisible ? `<button class="tbl-ctrl-btn yearly-expand-btn${additionalYearsActive ? ' is-active' : ''}" ${trackYearlyState.loading ? 'disabled' : ''}>${trackYearlyState.loading ? 'טוען...' : (additionalYearsActive ? 'הסר שנים נוספות' : 'הצג שנים נוספות')}</button>` : ''}
+      <button class="tbl-ctrl-btn yield-mode-btn yearly-mode-btn${!state.showExposure && isTrackYearlyActive?' is-active':''}" data-mode="yearly">תשואה לפי שנים</button>
+      ${additionalYearsVisible ? `<button class="tbl-ctrl-btn yearly-expand-btn${!state.showExposure && additionalYearsActive ? ' is-active' : ''}" ${trackYearlyState.loading ? 'disabled' : ''}>${trackYearlyState.loading ? 'טוען...' : (additionalYearsActive ? 'הסר שנים נוספות' : 'הצג שנים נוספות')}</button>` : ''}
       <button class="tbl-ctrl-btn exp-toggle-btn${state.showExposure?' is-active':''}"><i class="fas fa-layer-group"></i> אלוקציית השקעות</button>
     `;
   }
@@ -4890,6 +4900,9 @@ const App = (() => {
         e.stopPropagation();
         state.showExposure = !state.showExposure;
         const shouldReturnToCompactTrack = !state.showExposure && state.compactTracksView;
+        if (state.showExposure) {
+          document.querySelectorAll('.yield-mode-btn, .yearly-expand-btn').forEach(b => b.classList.remove('is-active'));
+        }
         // עדכון כל כפתורי האלוקציה
         document.querySelectorAll('.exp-toggle-btn').forEach(b => {
           b.classList.toggle('is-active', state.showExposure);
