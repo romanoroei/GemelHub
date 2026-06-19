@@ -521,7 +521,7 @@ async function loadFundPage() {
     if (_ghWrap) {
       _ghWrap.innerHTML = '<div class="gh-score-loading">מחשב ציון גמלהאב…</div>';
       APIModule.computeGemelHubScores(fundId, _fundCatId).then(scoreData => {
-        renderGemelHubScoreBadge(_ghWrap, scoreData, fundId);
+        renderGemelHubScoreBadge(_ghWrap, scoreData, fundId, _fundCatId);
       }).catch(() => { _ghWrap.innerHTML = ''; });
     }
 
@@ -2851,7 +2851,7 @@ function ghProvName(controlling, managing) {
   return (managing && managing !== controlling) ? managing : controlling;
 }
 
-function renderGemelHubScoreBadge(container, data, fundId) {
+function renderGemelHubScoreBadge(container, data, fundId, catId) {
   // DEBUG — למחיקה אחרי בדיקה
   if (!data || data.insufficient || !data.thisFund) {
     container.innerHTML = '';
@@ -2918,7 +2918,7 @@ function renderGemelHubScoreBadge(container, data, fundId) {
         <line x1="46" y1="155" x2="194" y2="155" stroke="#1a3560" stroke-width="1.5"/>
 
         <!-- דירוג (במקום מקום X מתוך Y) -->
-        <text x="120" y="174" text-anchor="middle" fill="${gradeColor}" font-size="18"
+        <text x="120" y="174" text-anchor="middle" fill="${gradeColor}" font-size="21"
               font-weight="900" font-family="'Segoe UI',Arial,sans-serif">${grade}</text>
 
         <!-- שנה -->
@@ -2930,10 +2930,10 @@ function renderGemelHubScoreBadge(container, data, fundId) {
     </button>`;
 
   document.getElementById('gh-score-badge-btn')
-    ?.addEventListener('click', () => showGemelHubScoreModal(data, fundId));
+    ?.addEventListener('click', () => showGemelHubScoreModal(data, fundId, catId));
 }
 
-function showGemelHubScoreModal(data, currentFundId) {
+function showGemelHubScoreModal(data, currentFundId, catId) {
   const { thisFund, allScores, targetYears } = data;
   const yearsLabel = [...targetYears].sort((a, b) => a - b).join(', ');
 
@@ -2947,9 +2947,17 @@ function showGemelHubScoreModal(data, currentFundId) {
     </div>`;
 
   // ── 1. ציון ודירוג ──
+  // צבעים בהירים לרקע כהה
+  function ghGradeColorDark(score) {
+    if (score >= 9)  return '#fbbf24';  // זהב
+    if (score >= 7.5) return '#60a5fa'; // כחול בהיר
+    if (score >= 6)  return '#ffffff';  // לבן
+    if (score >  5)  return '#fb923c'; // כתום
+    return '#f87171';                   // אדום בהיר
+  }
   const scoreHeaderHtml = thisFund ? (() => {
     const grade = ghGrade(thisFund.score);
-    const color = ghGradeColor(thisFund.score);
+    const color = ghGradeColorDark(thisFund.score);
     const rank  = allScores.findIndex(s => s.fundId === String(currentFundId)) + 1;
     const total = allScores.length;
     return `
@@ -3020,10 +3028,16 @@ function showGemelHubScoreModal(data, currentFundId) {
     const grade  = ghGrade(s.score);
     const bg     = isMe ? '#eff6ff' : idx % 2 === 0 ? '#fff' : '#fafafa';
     const border = isMe ? 'border-right:3px solid #2563eb;' : '';
+    const fundUrl = `fund.html?id=${encodeURIComponent(s.fundId)}&cat=${encodeURIComponent(catId || '')}`;
     return `<tr style="background:${bg};${border}">
       <td style="padding:7px 10px;font-size:.76rem;font-weight:700;color:#94a3b8;">${idx + 1}</td>
-      <td style="padding:7px 10px;font-size:.8rem;font-weight:${isMe ? '800' : '500'};color:${isMe ? '#1d4ed8' : '#1e293b'};">
-        ${name}${isMe ? ' <span style="font-size:.66rem;background:#dbeafe;color:#1d4ed8;padding:1px 5px;border-radius:4px;margin-right:4px;">הקופה שלך</span>' : ''}
+      <td style="padding:7px 6px 7px 10px;font-size:.8rem;font-weight:${isMe ? '800' : '500'};">
+        <a href="${fundUrl}" style="color:${isMe ? '#1d4ed8' : '#1e293b'};text-decoration:none;display:flex;align-items:center;gap:5px;">
+          <span>${name}</span>
+          ${isMe ? '<span style="font-size:.66rem;background:#dbeafe;color:#1d4ed8;padding:1px 5px;border-radius:4px;flex-shrink:0;">הקופה שלך</span>' : ''}
+          <span style="font-size:.65rem;color:#94a3b8;margin-inline-start:auto;flex-shrink:0;">${s.fundId}</span>
+          <i class="fas fa-external-link-alt" style="font-size:.6rem;color:#94a3b8;flex-shrink:0;"></i>
+        </a>
       </td>
       <td style="padding:7px 10px;font-size:.9rem;font-weight:900;color:#0f2744;text-align:center;">${s.score.toFixed(2)}</td>
       <td style="padding:7px 10px;font-size:.74rem;color:#64748b;text-align:center;">${grade}</td>
