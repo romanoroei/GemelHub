@@ -1383,6 +1383,7 @@ const App = (() => {
           <i class="fas fa-times" aria-hidden="true"></i>
         </button>
       </div>
+      <div class="mobile-category-section-title">קטגוריות</div>
       <div class="mobile-category-sheet-list">
         ${CONFIG.PRODUCT_CATEGORIES.filter(cat => !REMOVED_CATEGORY_IDS.has(cat.id)).map(cat => `
           <button type="button" class="mobile-category-option" data-mobile-cat="${cat.id}">
@@ -1393,6 +1394,7 @@ const App = (() => {
         `).join('')}
       </div>
       <div class="mobile-category-sheet-divider"></div>
+      <div class="mobile-category-section-title">מתקדם</div>
       <div class="mobile-category-sheet-extras">
         <button type="button" class="mobile-category-option mob-extra-range">
           <span class="mobile-category-option-icon">📅</span>
@@ -1488,12 +1490,13 @@ const App = (() => {
   function syncMobileCategorySheet() {
     const sheet = document.getElementById('mobile-category-sheet');
     if (!sheet) return;
-    const filterCount = getActiveFilterCount();
     sheet.querySelectorAll('[data-mobile-cat]').forEach(btn => {
       const isActive = btn.dataset.mobileCat === state.activeCategoryId;
+      const filterCount = getSavedFilterCountForCategory(btn.dataset.mobileCat);
       btn.classList.toggle('is-active', isActive);
+      btn.classList.toggle('has-active-filters', filterCount > 0);
       let badge = btn.querySelector('.cat-filter-badge');
-      if (isActive && filterCount > 0) {
+      if (filterCount > 0) {
         if (!badge) { badge = document.createElement('span'); badge.className = 'cat-filter-badge'; btn.appendChild(badge); }
         badge.textContent = filterCount;
       } else if (badge) {
@@ -2319,6 +2322,16 @@ const App = (() => {
     return count;
   }
 
+  function getSavedFilterCountForCategory(catId) {
+    const key = getFilterStorageCategoryKey(catId);
+    if (!key) return 0;
+    if (key === getFilterStorageCategoryKey(state.activeCategoryId)) return getActiveFilterCount(catId);
+    const saved = normalizeFilterState(readFilterStorage()[key]);
+    let count = saved.selectedTracks.length + saved.selectedProviders.length + saved.excludedProviders.length;
+    if (categoryUsesTargetPopulation(catId) && saved.targetPopulation !== DEFAULT_TARGET_POPULATION) count += 1;
+    return count;
+  }
+
   function updateFilterBadge() {
     const count = getActiveFilterCount();
     ['sidebar-toggle-btn', 'mobile-filter-btn'].forEach(id => {
@@ -2351,6 +2364,7 @@ const App = (() => {
       dot.hidden = !hasFilters;
       if (hasFilters) dot.textContent = String(count);
     }
+    syncMobileCategorySheet();
   }
 
   function saveCurrentFilterState(catId = state.activeCategoryId) {
@@ -4143,6 +4157,17 @@ const App = (() => {
           colgroup.appendChild(col);
         });
         table.insertBefore(colgroup, table.firstChild);
+        if (isExposureOnly) {
+          table.querySelectorAll('th.yield-col, td.yield-cell, .custom-range-col').forEach(el => {
+            el.style.setProperty('display', 'none', 'important');
+          });
+          table.querySelectorAll('th.exp-col, td.exp-col').forEach(el => {
+            el.style.setProperty('display', 'table-cell', 'important');
+            el.style.setProperty('width', `${expColWidth}px`, 'important');
+            el.style.setProperty('min-width', `${expColWidth}px`, 'important');
+            el.style.setProperty('max-width', `${expColWidth}px`, 'important');
+          });
+        }
       }
       table.querySelectorAll('th, td').forEach(el => {
         el.style.setProperty('font-size', '12px', 'important');
@@ -4771,6 +4796,14 @@ const App = (() => {
       btn.addEventListener('click', e => {
         e.stopPropagation();
         const newMode = btn.dataset.mode;
+        if (state.showExposure) {
+          state.showExposure = false;
+          document.querySelectorAll('.exp-toggle-btn').forEach(b => b.classList.remove('is-active'));
+          document.querySelectorAll('table.track-table').forEach(t => {
+            t.classList.add('hide-exposure');
+            t.classList.remove('exposure-only');
+          });
+        }
         if (newMode === 'yearly') {
           const trackId = block.dataset.trackId || null;
           if (!trackId) return;
@@ -6831,14 +6864,14 @@ const App = (() => {
               <span class="fund-link-icon"><i class="fas fa-external-link-alt"></i></span>
             </div>
           </td>
-          ${!yearlyActive && customRangeActive ? `<td class="yield-cell custom-range-col ${customRangeValue != null && Number.isFinite(customRangeValue) ? yieldClass(customRangeValue) : ''}${sc('customRange')}">${customRangeCell}</td>` : ''}
-          ${yearlyActive ? yearlyReturnCells : `
+          ${!state.showExposure && !yearlyActive && customRangeActive ? `<td class="yield-cell custom-range-col ${customRangeValue != null && Number.isFinite(customRangeValue) ? yieldClass(customRangeValue) : ''}${sc('customRange')}">${customRangeCell}</td>` : ''}
+          ${!state.showExposure ? (yearlyActive ? yearlyReturnCells : `
           <td class="yield-cell ${(sortField==='monthly'?yieldClass(r.MONTHLY_YIELD):'')}${sc('monthly')}">${_yieldWithBadge(r.MONTHLY_YIELD, _badge(_gold(r.MONTHLY_YIELD,'monthly'), _tomato(r.MONTHLY_YIELD,'monthly')), '', _rankVals.monthly.get(idx), _heatScales.monthly)}</td>
           <td class="yield-cell ${(sortField==='ytd'?yieldClass(r.YEAR_TO_DATE_YIELD):'')}${sc('ytd')}">${_yieldWithBadge(r.YEAR_TO_DATE_YIELD, _badge(_gold(r.YEAR_TO_DATE_YIELD,'ytd'), _tomato(r.YEAR_TO_DATE_YIELD,'ytd')), '', _rankVals.ytd.get(idx), _heatScales.ytd)}</td>
           <td class="yield-cell ${sortField === '1yr' && y12m !== undefined && y12m !== null ? yieldClass(y12m) : ''}${sc('1yr')}">${yr1Cell}</td>
           <td class="yield-cell ${(sortField==='3yr'?yieldClass(_yr3Val):'')}${sc('3yr')}">${yr3Disp}</td>
           <td class="yield-cell ${(sortField==='5yr'?yieldClass(_yr5Val):'')}${sc('5yr')}">${yr5Disp}</td>
-          <td class="yield-cell ${(sortField==='7yr'?yieldClass(_yr7Val):'')}${sc('7yr')}">${yr7Disp}</td>`}
+          <td class="yield-cell ${(sortField==='7yr'?yieldClass(_yr7Val):'')}${sc('7yr')}">${yr7Disp}</td>`) : ''}
           ${state.showExposure ? `<td class="exp-col${sc('stock')}">${expCell(stock, 'stock')}</td>
           <td class="exp-col${sc('abroad')}">${expCell(abroad, 'abroad')}</td>
           <td class="exp-col${sc('fx')}">${expCell(fx, 'fx')}</td>` : ''}
@@ -6863,8 +6896,8 @@ const App = (() => {
       <tr class="average-row">
         <td></td>
         <td>ממוצע קבוצה</td>
-        ${!yearlyActive && customRangeActive ? `<td class="yield-cell custom-range-col ${sortField==='customRange'?yieldClass(_expAvg.avgCustomRange):''}">${_expAvg.avgCustomRange!==null?formatPercent(_expAvg.avgCustomRange):'-'}</td>` : ''}
-        ${yearlyActive ? yearlyAverageReturnCells : `<td class="yield-cell ${sortField==='monthly'?yieldClass(avg.MONTHLY_YIELD):''}">${avg.MONTHLY_YIELD!==null?formatPercent(avg.MONTHLY_YIELD):'-'}</td>
+        ${!state.showExposure && !yearlyActive && customRangeActive ? `<td class="yield-cell custom-range-col ${sortField==='customRange'?yieldClass(_expAvg.avgCustomRange):''}">${_expAvg.avgCustomRange!==null?formatPercent(_expAvg.avgCustomRange):'-'}</td>` : ''}
+        ${!state.showExposure ? (yearlyActive ? yearlyAverageReturnCells : `<td class="yield-cell ${sortField==='monthly'?yieldClass(avg.MONTHLY_YIELD):''}">${avg.MONTHLY_YIELD!==null?formatPercent(avg.MONTHLY_YIELD):'-'}</td>
         <td class="yield-cell ${sortField==='ytd'?yieldClass(avg.YEAR_TO_DATE_YIELD):''}">${avg.YEAR_TO_DATE_YIELD!==null?formatPercent(avg.YEAR_TO_DATE_YIELD):'-'}</td>
         <td class="yield-cell ${sortField==='1yr'?yieldClass(_expAvg.avg12m):''}">${_expAvg.avg12m!==null?formatPercent(_expAvg.avg12m):'-'}</td>
         <td class="yield-cell ${sortField==='3yr'?(state.yieldMode==='annualized'?yieldClass(_ann3Avg):yieldClass(avg.YIELD_TRAILING_3_YRS)):''}">
@@ -6873,7 +6906,7 @@ const App = (() => {
         <td class="yield-cell ${sortField==='5yr'?(state.yieldMode==='annualized'?yieldClass(_ann5Avg):yieldClass(avg.YIELD_TRAILING_5_YRS)):''}">
           ${state.yieldMode==='annualized'?(_ann5Avg!==null?formatPercent(_ann5Avg):'-'):(avg.YIELD_TRAILING_5_YRS!==null?formatPercent(avg.YIELD_TRAILING_5_YRS):'-')}
         </td>
-        <td class="yield-cell ${sortField==='7yr'?yieldClass(state.yieldMode==='annualized'?_expAvg.avg7yAnn:_expAvg.avg7y):''}">${state.yieldMode==='annualized'?(_expAvg.avg7yAnn!==null?formatPercent(_expAvg.avg7yAnn):(trailing7Loading?'...':'-')):(_expAvg.avg7y!==null?formatPercent(_expAvg.avg7y):(trailing7Loading?'...':'-'))}</td>`}
+        <td class="yield-cell ${sortField==='7yr'?yieldClass(state.yieldMode==='annualized'?_expAvg.avg7yAnn:_expAvg.avg7y):''}">${state.yieldMode==='annualized'?(_expAvg.avg7yAnn!==null?formatPercent(_expAvg.avg7yAnn):(trailing7Loading?'...':'-')):(_expAvg.avg7y!==null?formatPercent(_expAvg.avg7y):(trailing7Loading?'...':'-'))}</td>`) : ''}
         ${state.showExposure ? `<td class="exp-col">${_expAvg.stock!==null?_expAvg.stock.toFixed(1)+'%':'-'}</td>
         <td class="exp-col">${_expAvg.abroad!==null?_expAvg.abroad.toFixed(1)+'%':'-'}</td>
         <td class="exp-col">${_expAvg.fx!==null?_expAvg.fx.toFixed(1)+'%':'-'}</td>` : ''}
@@ -6908,13 +6941,13 @@ const App = (() => {
           <tr>
             <th title="דירוג" scope="col">#</th>
             <th scope="col">מנהל</th>
-            ${!yearlyActive && customRangeActive ? `<th${sortedThClass('customRange', 'custom-range-col yield-col')} data-sortfield="customRange" ${ariaSort('customRange')} scope="col"><span class="custom-range-th">טווח מותאם</span> ${arrow('customRange')}<small class="custom-range-th-dates">${formatRangePeriodOnly(state.customRange.startPeriod, state.customRange.endPeriod)}</small></th>` : ''}
-            ${yearlyActive ? yearlyHeaderCells : `<th${sortedThClass('monthly', 'yield-col')} data-sortfield="monthly" ${ariaSort('monthly')} scope="col">${monthCol} ${arrow('monthly')}</th>
+            ${!state.showExposure && !yearlyActive && customRangeActive ? `<th${sortedThClass('customRange', 'custom-range-col yield-col')} data-sortfield="customRange" ${ariaSort('customRange')} scope="col"><span class="custom-range-th">טווח מותאם</span> ${arrow('customRange')}<small class="custom-range-th-dates">${formatRangePeriodOnly(state.customRange.startPeriod, state.customRange.endPeriod)}</small></th>` : ''}
+            ${!state.showExposure ? (yearlyActive ? yearlyHeaderCells : `<th${sortedThClass('monthly', 'yield-col')} data-sortfield="monthly" ${ariaSort('monthly')} scope="col">${monthCol} ${arrow('monthly')}</th>
             <th${sortedThClass('ytd', 'yield-col')} data-sortfield="ytd" ${ariaSort('ytd')} scope="col">YTD ${arrow('ytd')}</th>
             <th${sortedThClass('1yr', 'yield-col')} data-sortfield="1yr" ${ariaSort('1yr')} scope="col">12 חוד׳ ${arrow('1yr')}</th>
             <th${sortedThClass('3yr', 'yield-col')} data-sortfield="3yr" ${ariaSort('3yr')} scope="col">${_yr3Lbl} ${arrow('3yr')}${_yieldSubLabel}</th>
             <th${sortedThClass('5yr', 'yield-col')} data-sortfield="5yr" ${ariaSort('5yr')} scope="col">${_yr5Lbl} ${arrow('5yr')}${_yieldSubLabel}</th>
-            <th${sortedThClass('7yr', 'yield-col')} data-sortfield="7yr" ${ariaSort('7yr')} scope="col">7 שנים ${arrow('7yr')}${_yieldSubLabel}</th>`}
+            <th${sortedThClass('7yr', 'yield-col')} data-sortfield="7yr" ${ariaSort('7yr')} scope="col">7 שנים ${arrow('7yr')}${_yieldSubLabel}</th>`) : ''}
             ${state.showExposure ? `<th${sortedThClass('stock', 'exp-col')} data-sortfield="stock" ${ariaSort('stock')} scope="col">% מניות ${arrow('stock')}</th>
             <th${sortedThClass('abroad', 'exp-col')} data-sortfield="abroad" ${ariaSort('abroad')} scope="col">% חו"ל ${arrow('abroad')}</th>
             <th${sortedThClass('fx', 'exp-col')} data-sortfield="fx" ${ariaSort('fx')} scope="col">% מט"ח ${arrow('fx')}</th>` : ''}
