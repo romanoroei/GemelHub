@@ -1534,9 +1534,10 @@ const App = (() => {
         (target === 'sandbox' && current === 'sandbox');
       item.classList.toggle('is-active', active);
       item.setAttribute('aria-current', active ? 'page' : 'false');
-      if (target === 'filter') {
+      if (target === 'filter' || target === 'sidebar-filter') {
         const disabled = state.isHomePage || current === 'h2h' || current === 'sandbox';
         item.disabled = disabled;
+        item.setAttribute('aria-disabled', disabled ? 'true' : 'false');
         item.classList.toggle('is-disabled', disabled);
       }
     });
