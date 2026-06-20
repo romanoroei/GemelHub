@@ -16853,6 +16853,8 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   }
 
   html body .sandbox-bar-title {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
     display: block !important;
     width: 100% !important;
     height: 14px !important;
@@ -16864,6 +16866,8 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   }
 
   html body .sandbox-bar-chips {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
     width: 100% !important;
     min-width: 0 !important;
     min-height: 0 !important;
@@ -16900,7 +16904,8 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
 
   html body .sandbox-bar-chip-text {
     min-width: 0 !important;
-    display: block !important;
+    display: flex !important;
+    align-items: center !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
@@ -16923,6 +16928,9 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   }
 
   html body .sandbox-bar-chip-remove {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     width: 18px !important;
     height: 18px !important;
     min-width: 18px !important;
@@ -16950,6 +16958,8 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   }
 
   html body .sandbox-bar-actions {
+    grid-column: 1 / -1 !important;
+    grid-row: 3 !important;
     width: 100% !important;
     min-height: 32px !important;
     display: grid !important;
