@@ -7858,6 +7858,8 @@ const App = (() => {
       return;
     }
 
+    saveAdvancedSearchToHistory(selectedParams);
+
     const candidates = getAdvancedSearchCandidates();
     if (!candidates.length) {
       state.advancedSearch.results = [];
@@ -7936,7 +7938,6 @@ const App = (() => {
     state.advancedSearch.loading = false;
     state.advancedSearch.results = ranked;
     setAdvancedSearchStatus(ranked.length ? `נמצאו ${ranked.length} תוצאות מובילות לפי הקריטריונים שבחרת.` : 'לא נמצאו תוצאות.');
-    if (ranked.length) saveAdvancedSearchToHistory(selectedParams);
     renderAdvancedSearchResults();
   }
 

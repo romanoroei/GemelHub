@@ -14971,10 +14971,10 @@ body.h2h-active,
   .advanced-search-compare-company small,
   .adv-track-label,
   .advanced-search-track-name {
-    font-size: .5rem !important;
+    font-size: .54rem !important;
     display: block !important;
     margin-top: 1px !important;
-    line-height: 1.08 !important;
+    line-height: 1.1 !important;
   }
 
   /* #id badge stays inline inside strong */
