@@ -2870,11 +2870,10 @@ function renderGemelHubScoreBadge(container, data, fundId, catId) {
   container.innerHTML = `
     <button class="gh-stamp-btn" id="gh-score-badge-btn"
             aria-label="ציון גמל האב ${scoreStr} — ${grade} — לחץ לפרטים">
-      <svg class="gh-stamp-svg" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+      <svg class="gh-stamp-svg" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" style="direction:ltr;">
         <defs>
           <path id="ghTop${uid}" d="M 43,72 A 94,94 0 0,1 197,72"/>
-          <!-- path הפוך (מימין לשמאל) לטקסט עברי — מונע היפוך ב-iOS Safari -->
-          <path id="ghMid${uid}" d="M 183,78 A 76,76 0 0,0 57,78"/>
+          <path id="ghMid${uid}" d="M 57,78 A 76,76 0 0,1 183,78"/>
         </defs>
 
         <!-- רקע לבן -->
@@ -2893,7 +2892,7 @@ function renderGemelHubScoreBadge(container, data, fundId, catId) {
           <textPath href="#ghTop${uid}" startOffset="50%" text-anchor="middle">GEMELHUB</textPath>
         </text>
 
-        <!-- עקביות ביצועים — startOffset מחושב מהצד הימני (כיוון הpath) -->
+        <!-- עקביות ביצועים -->
         <text font-size="11" font-weight="700" fill="#1a3560"
               font-family="'Segoe UI',Arial,sans-serif">
           <textPath href="#ghMid${uid}" startOffset="50%" text-anchor="middle">עקביות ביצועים ל-5 שנים</textPath>
