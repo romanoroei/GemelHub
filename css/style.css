@@ -16910,6 +16910,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     min-width: 0 !important;
     display: flex !important;
     align-items: center !important;
+    gap: 3px !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
@@ -16917,7 +16918,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     word-break: keep-all !important;
     line-height: 1 !important;
     align-self: center !important;
-    transform: translateY(-.5px) !important;
+    transform: none !important;
   }
 
   html body .sandbox-bar-chip-provider,
@@ -16943,7 +16944,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     font-size: .72rem !important;
     line-height: 1 !important;
     padding: 0 !important;
-    transform: translateY(-.5px) !important;
+    transform: none !important;
   }
 
   html body .sandbox-bar-chip-provider {
