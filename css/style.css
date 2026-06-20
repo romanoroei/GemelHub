@@ -16836,13 +16836,13 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     width: auto !important;
     max-width: none !important;
     box-sizing: border-box !important;
-    max-height: min(54dvh, 238px) !important;
-    padding: 7px !important;
+    max-height: none !important;
+    padding: 8px !important;
     display: grid !important;
     grid-template-columns: 1fr !important;
-    grid-template-rows: 14px minmax(0, 1fr) auto !important;
+    grid-template-rows: auto auto auto !important;
     align-items: stretch !important;
-    gap: 5px !important;
+    gap: 6px !important;
     overflow: hidden !important;
     border-radius: 14px !important;
     transform: translate3d(0, calc(100% + 18px), 0) !important;
@@ -16873,7 +16873,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     align-items: stretch !important;
     direction: rtl !important;
     gap: 4px !important;
-    overflow-y: auto !important;
+    overflow-y: visible !important;
     overflow-x: hidden !important;
     padding-inline-end: 1px !important;
     scrollbar-width: thin !important;
@@ -16883,8 +16883,8 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     width: 100% !important;
     max-width: none !important;
     box-sizing: border-box !important;
-    min-height: 28px !important;
-    height: 28px !important;
+    min-height: 29px !important;
+    height: 29px !important;
     display: grid !important;
     grid-template-columns: 7px minmax(0, 1fr) 18px !important;
     align-items: center !important;
