@@ -690,6 +690,9 @@ const App = (() => {
       switchCategory('hashtalamot');
     }
     if (urlParams.get('openAdvanced') === '1') {
+      const cleanUrl = new URL(window.location.href);
+      cleanUrl.searchParams.delete('openAdvanced');
+      history.replaceState(history.state, '', cleanUrl.toString());
       setTimeout(() => openAdvancedSearch(), 700);
     }
   }
