@@ -14647,8 +14647,9 @@ body.h2h-active,
     border-radius: 22px 22px 0 0 !important;
     padding: 0 !important;
     padding-bottom: env(safe-area-inset-bottom, 0px) !important;
-    display: flex;
-    flex-direction: column;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
   }
 
   /* Pull-bar indicator */
@@ -14659,124 +14660,171 @@ body.h2h-active,
     height: 4px;
     background: #cbd5e1;
     border-radius: 2px;
-    margin: 10px auto 0;
+    margin: 10px auto 6px;
     flex-shrink: 0;
   }
 
-  /* Sticky header stays visible while scrolling */
+  /* Sticky header — X on the RIGHT (inline-start in RTL = visual right) */
   .advanced-search-head {
     position: sticky !important;
     top: 0 !important;
     background: #fff !important;
     z-index: 10 !important;
-    border-radius: 22px 22px 0 0 !important;
-    padding: 10px 14px 10px !important;
+    border-radius: 0 !important;
+    padding: 6px 14px 10px !important;
     margin-bottom: 0 !important;
     flex-direction: row !important;
     align-items: center !important;
-    flex-shrink: 0;
+    flex-shrink: 0 !important;
+    direction: rtl !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+  }
+
+  /* X button first in DOM but pushed to visual right via order */
+  .advanced-search-close {
+    order: -1 !important;
+    flex-shrink: 0 !important;
   }
 
   .advanced-search-head h3 {
-    font-size: .85rem !important;
+    font-size: .82rem !important;
+    flex: 1 !important;
+    text-align: right !important;
   }
 
   #advanced-search-head-category {
-    font-size: .95rem !important;
-    margin-inline-start: 6px !important;
+    font-size: .9rem !important;
   }
 
-  /* Scrollable body */
-  .advanced-search-builder,
+  /* Scrollable content area */
+  .advanced-search-builder {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    padding: 10px 12px !important;
+    border-radius: 0 !important;
+  }
+
   .advanced-search-history,
   .advanced-search-results {
     padding-inline: 12px;
   }
 
-  .advanced-search-builder {
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    flex: 1;
-    min-height: 0;
-    padding-block: 10px;
-    border-radius: 0 !important;
-  }
-
   .advanced-search-results {
     padding-bottom: 12px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
-  /* Row: hide drag handle, show metric full-width, direction + remove on same row */
+  /* ── Parameter row layout: [trash] [metric] [direction] on one line ── */
   .advanced-search-drag {
     display: none !important;
   }
 
   .advanced-search-row {
     display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
+    /* col 1 = trash(38px), col 2 = metric(flex), col 3 = direction(min 90px) */
+    grid-template-columns: 38px 1fr minmax(90px, .7fr) !important;
     grid-template-rows: auto auto !important;
     gap: 6px !important;
+    align-items: end !important;
+    direction: rtl !important;
+    background: rgba(255,255,255,.9) !important;
+    border: 1px solid rgba(201,183,114,.22) !important;
+    border-radius: 14px !important;
+    padding: 10px !important;
   }
 
-  /* Metric spans full width */
-  .advanced-search-row .advanced-search-field:first-of-type {
-    grid-column: 1 / -1;
-  }
-
-  /* Range fields span full width */
-  .advanced-search-field-range {
-    grid-column: 1 / -1 !important;
-  }
-
-  /* Remove button aligned with direction */
+  /* Trash: column 1 (visual right in RTL), vertically centered */
   .advanced-search-remove {
-    align-self: end !important;
-    width: 38px !important;
-    justify-self: start;
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    align-self: center !important;
+    justify-self: center !important;
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  /* Metric: column 2 */
+  .advanced-search-row .advanced-search-field:not(.advanced-search-field-range):first-of-type {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+  }
+
+  /* Direction: column 3 */
+  .advanced-search-row .advanced-search-field:not(.advanced-search-field-range):last-of-type {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+  }
+
+  /* Range fields: row 2, spans columns 2+3 */
+  .advanced-search-field-range {
+    grid-column: 2 / 4 !important;
+    grid-row: 2 !important;
   }
 
   .advanced-search-range-fields {
     grid-template-columns: 1fr 1fr !important;
   }
 
-  /* Compact action buttons — icon only for add/reset, full text for run */
+  /* ── Action buttons: add+reset side by side, run below ── */
   .advanced-search-actions {
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    align-items: center !important;
-    gap: 6px !important;
-    padding-top: 10px;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: auto auto !important;
+    gap: 8px !important;
+    margin-top: 10px !important;
   }
 
-  .advanced-search-add span,
-  .advanced-search-reset span {
-    display: none !important;
+  .advanced-search-add {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    justify-content: center !important;
+    padding: 9px 10px !important;
   }
 
-  .advanced-search-add,
   .advanced-search-reset {
-    padding: 9px 11px !important;
-    flex-shrink: 0;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-content: center !important;
+    padding: 9px 10px !important;
   }
 
   .advanced-search-run {
-    flex: 1;
-    justify-content: center;
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    justify-content: center !important;
+    padding: 11px 14px !important;
   }
 
-  /* History as horizontal chips */
-  .advanced-search-history {
+  /* Show text on add/reset */
+  .advanced-search-add span,
+  .advanced-search-reset span {
+    display: inline !important;
+    font-size: .76rem !important;
+  }
+
+  /* ── History chips ── */
+  .advanced-search-history[hidden] {
+    display: none !important;
+  }
+
+  .advanced-search-history:not([hidden]) {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: wrap !important;
     gap: 6px !important;
-    padding-block: 8px !important;
+    padding: 8px 12px !important;
     margin-bottom: 0 !important;
+    border-bottom: 1px solid rgba(201,183,114,.2) !important;
   }
 
   .adv-hist-title {
-    width: 100%;
+    width: 100% !important;
     margin-bottom: 2px !important;
+    font-size: .68rem !important;
   }
 
   .adv-hist-item {
@@ -14785,12 +14833,14 @@ body.h2h-active,
     margin-bottom: 0 !important;
     flex-direction: column !important;
     gap: 1px !important;
+    flex: 1 1 calc(50% - 3px);
     max-width: calc(50% - 3px);
     text-align: right !important;
+    align-items: flex-start !important;
   }
 
   .adv-hist-cat {
-    font-size: .65rem !important;
+    font-size: .62rem !important;
     border-left: none !important;
     padding-left: 0 !important;
     color: #94a3b8 !important;
@@ -14802,7 +14852,7 @@ body.h2h-active,
     color: #1a3560 !important;
     font-weight: 700 !important;
     white-space: normal !important;
-    line-height: 1.3;
+    line-height: 1.3 !important;
   }
 
   /* ── Mobile fund-search overlay ── */
