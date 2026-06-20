@@ -7974,12 +7974,12 @@ const App = (() => {
       const parsed = raw ? JSON.parse(raw) : [];
       const hist = Array.isArray(parsed) ? parsed : [];
       const snapshotKey = getHistoryKey(snapshot);
-      nextHistory = [snapshot, ...hist.filter(h => getHistoryKey(h) !== snapshotKey)].slice(0, 3);
+      nextHistory = [snapshot, ...hist.filter(h => getHistoryKey(h) !== snapshotKey)].slice(0, 4);
       localStorage.setItem(ADVANCED_SEARCH_HISTORY_KEY, JSON.stringify(nextHistory));
     } catch(e) {
       const hist = Array.isArray(state.advancedSearch.history) ? state.advancedSearch.history : [];
       const snapshotKey = getHistoryKey(snapshot);
-      nextHistory = [snapshot, ...hist.filter(h => getHistoryKey(h) !== snapshotKey)].slice(0, 3);
+      nextHistory = [snapshot, ...hist.filter(h => getHistoryKey(h) !== snapshotKey)].slice(0, 4);
     }
     state.advancedSearch.history = nextHistory;
     renderAdvancedSearchHistory();
@@ -8006,13 +8006,13 @@ const App = (() => {
     container.hidden = false;
     if (!hist.length) {
       container.innerHTML = `
-        <div class="adv-hist-title">חיפושים אחרונים</div>
+        <div class="adv-hist-title">4 חיפושים אחרונים</div>
         <p class="adv-hist-empty">לאחר הרצת חיפוש, הוא יופיע כאן לשימוש חוזר מהיר.</p>
       `;
       return;
     }
     container.innerHTML = `
-      <div class="adv-hist-title">חיפושים אחרונים</div>
+      <div class="adv-hist-title">4 חיפושים אחרונים</div>
       ${hist.map((h, i) => `
         <button type="button" class="adv-hist-item" data-hist-idx="${i}">
           <span class="adv-hist-cat">${h.catLabel || h.catId}</span>
