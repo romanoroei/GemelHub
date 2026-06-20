@@ -14635,6 +14635,176 @@ body.h2h-active,
     display: none !important;
   }
 
+  /* ── Advanced search — mobile bottom sheet ── */
+  .advanced-search-overlay {
+    padding: 0 !important;
+    align-items: flex-end !important;
+  }
+
+  .advanced-search-modal {
+    width: 100% !important;
+    max-height: 92dvh !important;
+    border-radius: 22px 22px 0 0 !important;
+    padding: 0 !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Pull-bar indicator */
+  .advanced-search-modal::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: #cbd5e1;
+    border-radius: 2px;
+    margin: 10px auto 0;
+    flex-shrink: 0;
+  }
+
+  /* Sticky header stays visible while scrolling */
+  .advanced-search-head {
+    position: sticky !important;
+    top: 0 !important;
+    background: #fff !important;
+    z-index: 10 !important;
+    border-radius: 22px 22px 0 0 !important;
+    padding: 10px 14px 10px !important;
+    margin-bottom: 0 !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-shrink: 0;
+  }
+
+  .advanced-search-head h3 {
+    font-size: .85rem !important;
+  }
+
+  #advanced-search-head-category {
+    font-size: .95rem !important;
+    margin-inline-start: 6px !important;
+  }
+
+  /* Scrollable body */
+  .advanced-search-builder,
+  .advanced-search-history,
+  .advanced-search-results {
+    padding-inline: 12px;
+  }
+
+  .advanced-search-builder {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+    min-height: 0;
+    padding-block: 10px;
+    border-radius: 0 !important;
+  }
+
+  .advanced-search-results {
+    padding-bottom: 12px;
+  }
+
+  /* Row: hide drag handle, show metric full-width, direction + remove on same row */
+  .advanced-search-drag {
+    display: none !important;
+  }
+
+  .advanced-search-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: auto auto !important;
+    gap: 6px !important;
+  }
+
+  /* Metric spans full width */
+  .advanced-search-row .advanced-search-field:first-of-type {
+    grid-column: 1 / -1;
+  }
+
+  /* Range fields span full width */
+  .advanced-search-field-range {
+    grid-column: 1 / -1 !important;
+  }
+
+  /* Remove button aligned with direction */
+  .advanced-search-remove {
+    align-self: end !important;
+    width: 38px !important;
+    justify-self: start;
+  }
+
+  .advanced-search-range-fields {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* Compact action buttons — icon only for add/reset, full text for run */
+  .advanced-search-actions {
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding-top: 10px;
+  }
+
+  .advanced-search-add span,
+  .advanced-search-reset span {
+    display: none !important;
+  }
+
+  .advanced-search-add,
+  .advanced-search-reset {
+    padding: 9px 11px !important;
+    flex-shrink: 0;
+  }
+
+  .advanced-search-run {
+    flex: 1;
+    justify-content: center;
+  }
+
+  /* History as horizontal chips */
+  .advanced-search-history {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    padding-block: 8px !important;
+    margin-bottom: 0 !important;
+  }
+
+  .adv-hist-title {
+    width: 100%;
+    margin-bottom: 2px !important;
+  }
+
+  .adv-hist-item {
+    padding: 6px 12px !important;
+    border-radius: 20px !important;
+    margin-bottom: 0 !important;
+    flex-direction: column !important;
+    gap: 1px !important;
+    max-width: calc(50% - 3px);
+    text-align: right !important;
+  }
+
+  .adv-hist-cat {
+    font-size: .65rem !important;
+    border-left: none !important;
+    padding-left: 0 !important;
+    color: #94a3b8 !important;
+    font-weight: 600 !important;
+  }
+
+  .adv-hist-params {
+    font-size: .72rem !important;
+    color: #1a3560 !important;
+    font-weight: 700 !important;
+    white-space: normal !important;
+    line-height: 1.3;
+  }
+
   /* ── Mobile fund-search overlay ── */
   #mob-fund-search-panel {
     position: fixed;

@@ -7362,18 +7362,6 @@ const App = (() => {
           <button type="button" class="advanced-search-drag" data-adv-drag="${param.id}" draggable="true" aria-label="גרור לשינוי סדר הפרמטר">
             <i class="fas fa-grip-vertical" aria-hidden="true"></i>
           </button>
-          <button type="button" class="advanced-search-drag" data-adv-drag="${param.id}" draggable="true" aria-label="גרור לשינוי סדר הפרמטר">
-            <i class="fas fa-grip-vertical" aria-hidden="true"></i>
-          </button>
-          <button type="button" class="advanced-search-drag" data-adv-drag="${param.id}" draggable="true" aria-label="גרור לשינוי סדר הפרמטר">
-            <i class="fas fa-grip-vertical" aria-hidden="true"></i>
-          </button>
-          <button type="button" class="advanced-search-drag" data-adv-drag="${param.id}" draggable="true" aria-label="גרור לשינוי סדר הפרמטר">
-            <i class="fas fa-grip-vertical" aria-hidden="true"></i>
-          </button>
-          <button type="button" class="advanced-search-drag" data-adv-drag="${param.id}" draggable="true" aria-label="גרור לשינוי סדר הפרמטר">
-            <i class="fas fa-grip-vertical" aria-hidden="true"></i>
-          </button>
           <div class="advanced-search-field">
             <label for="adv-metric-${param.id}">פרמטר ${index + 1}</label>
             <select id="adv-metric-${param.id}" data-adv-input="metric">
