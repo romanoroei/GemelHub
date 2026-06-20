@@ -14666,6 +14666,22 @@ body.h2h-active,
     display: flex !important;
   }
 
+  body.mobile-search-active .title-search-bar .hero-search input {
+    width: 100% !important;
+    min-width: 0 !important;
+    opacity: 1 !important;
+    padding: 9px 42px 9px 14px !important;
+    color: #1a3560 !important;
+    -webkit-text-fill-color: #1a3560 !important;
+    background: transparent !important;
+  }
+
+  body.mobile-search-active .title-search-bar .hero-search i {
+    right: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+  }
+
   body.advanced-options-open .title-search-bar .hero-search,
   body.advanced-options-open #custom-range-entry,
   body.advanced-options-open #display-options-toggle,

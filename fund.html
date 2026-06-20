@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="css/style.css?v=mobile-fixes33-20260620" />
-  <link rel="stylesheet" href="css/fund.css?v=mobile-fixes15-20260620" />
+  <link rel="stylesheet" href="css/fund.css?v=mobile-fixes16-20260620" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="fund-page">
@@ -2873,7 +2873,6 @@ function renderGemelHubScoreBadge(container, data, fundId, catId) {
       <svg class="gh-stamp-svg" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" style="direction:ltr;">
         <defs>
           <path id="ghTop${uid}" d="M 43,72 A 94,94 0 0,1 197,72"/>
-          <path id="ghMid${uid}" d="M 57,78 A 76,76 0 0,1 183,78"/>
         </defs>
 
         <!-- רקע לבן -->
@@ -2886,25 +2885,23 @@ function renderGemelHubScoreBadge(container, data, fundId, catId) {
         <!-- טבעת זהב דקורטיבית -->
         <circle cx="120" cy="120" r="99"  fill="none" stroke="#c9a227" stroke-width="1.5"/>
 
-        <!-- GEMELHUB מעוגל למעלה -->
+        <!-- GEMELHUB מעוגל למעלה (לטינית — textPath תקין) -->
         <text font-family="'Arial Black',Arial,sans-serif" font-weight="900"
               font-size="14" fill="#1a3560" letter-spacing="5">
           <textPath href="#ghTop${uid}" startOffset="50%" text-anchor="middle">GEMELHUB</textPath>
         </text>
 
-        <!-- עקביות ביצועים -->
-        <text font-size="11" font-weight="700" fill="#1a3560"
-              font-family="'Segoe UI',Arial,sans-serif">
-          <textPath href="#ghMid${uid}" startOffset="50%" text-anchor="middle">עקביות ביצועים ל-5 שנים</textPath>
-        </text>
+        <!-- עקביות ביצועים — טקסט ישר במקום textPath (מונע היפוך ב-iOS) -->
+        <text x="120" y="68" text-anchor="middle" font-size="10" font-weight="700"
+              fill="#1a3560" font-family="'Segoe UI',Arial,sans-serif">עקביות ביצועים ל-5 שנים</text>
 
         <!-- כוכבים -->
         <text x="21"  y="124" fill="#c9a227" font-size="18" text-anchor="middle">★</text>
         <text x="219" y="124" fill="#c9a227" font-size="18" text-anchor="middle">★</text>
 
-        <!-- ציון גמל האב -->
+        <!-- ציון גמל האב — ללא letter-spacing (מונע היפוך ב-iOS) -->
         <text x="120" y="97" text-anchor="middle" fill="#1a3560" font-size="19"
-              font-weight="700" font-family="'Segoe UI',Arial,sans-serif" letter-spacing="0.5">ציון גמל האב*</text>
+              font-weight="700" font-family="'Segoe UI',Arial,sans-serif">ציון גמל האב*</text>
 
         <!-- קו מפריד עליון -->
         <line x1="46" y1="100" x2="194" y2="100" stroke="#1a3560" stroke-width="1.5"/>
