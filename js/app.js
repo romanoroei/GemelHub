@@ -558,7 +558,14 @@ const App = (() => {
   }
 
   function updateStickyGapMask() {
-    if (document.body.classList.contains('fund-page')) return;
+    if (
+      document.body.classList.contains('fund-page') ||
+      document.body.classList.contains('h2h-active') ||
+      document.body.classList.contains('sandbox-active')
+    ) {
+      document.body.classList.remove('sticky-gap-mask-active');
+      return;
+    }
     const stickyHeader = document.querySelector('.sticky-header');
     if (!stickyHeader) return;
     const rootStyle = getComputedStyle(document.documentElement);
@@ -571,7 +578,13 @@ const App = (() => {
     const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
     const header = document.querySelector('.sticky-header');
     const hero = document.getElementById('hero-banner');
-    if (!header || !hero || !isMobile) {
+    if (
+      !header ||
+      !hero ||
+      !isMobile ||
+      document.body.classList.contains('h2h-active') ||
+      document.body.classList.contains('sandbox-active')
+    ) {
       document.body.classList.remove('mobile-sticky-header-fixed');
       document.documentElement.style.removeProperty('--mobile-sticky-header-h');
       return;

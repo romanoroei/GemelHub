@@ -16713,3 +16713,91 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     height: 7px !important;
   }
 }
+
+/* Mobile follow-up fixes: denser filter rows, no sticky strip on tools, readable nav badges. */
+@media (max-width: 760px) {
+  html body.mobile-filter-open #sidebar .filter-checkbox {
+    min-height: 24px !important;
+    padding: 1px 4px !important;
+    gap: 4px !important;
+    font-size: .84rem !important;
+    line-height: 1.05 !important;
+  }
+
+  html body.mobile-filter-open #sidebar .filter-checkbox-sub {
+    padding-right: 11px !important;
+    font-size: .8rem !important;
+  }
+
+  html body.mobile-filter-open #sidebar .filter-checkbox input {
+    width: 11px !important;
+    height: 11px !important;
+    flex-basis: 11px !important;
+  }
+
+  html body.mobile-filter-open #sidebar .fc-dot {
+    width: 6px !important;
+    height: 6px !important;
+  }
+
+  html body.h2h-active .sticky-header,
+  html body.sandbox-active .sticky-header {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  html body.h2h-active.mobile-sticky-header-fixed .page-body,
+  html body.sandbox-active.mobile-sticky-header-fixed .page-body,
+  html body.h2h-active .page-body,
+  html body.sandbox-active .page-body {
+    padding-top: 0 !important;
+  }
+
+  html body.h2h-active::before,
+  html body.sandbox-active::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  html body .mobile-app-nav-item,
+  html body .mobile-app-nav-item .mob-nav-icon-wrap {
+    overflow: visible !important;
+  }
+
+  html body .mobile-app-nav-item .mob-nav-icon-wrap {
+    max-width: none !important;
+    position: relative !important;
+  }
+
+  html body .mobile-app-nav-item .mob-nav-badge {
+    top: -8px !important;
+    inset-inline-end: -10px !important;
+    left: auto !important;
+    transform: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 18px !important;
+    min-width: 18px !important;
+    height: 18px !important;
+    padding: 0 !important;
+    border-radius: 999px !important;
+    background: #dc2626 !important;
+    color: #fff !important;
+    border: 2px solid #fff7d6 !important;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, .28) !important;
+    font-size: .64rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    max-width: none !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+  }
+
+  html body .mobile-app-nav-item .mob-nav-badge[hidden] {
+    display: none !important;
+  }
+}
