@@ -16765,17 +16765,44 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     overflow: visible !important;
   }
 
+  html body .mobile-app-nav-item {
+    position: relative !important;
+  }
+
   html body .mobile-app-nav-item .mob-nav-icon-wrap {
+    width: 24px !important;
+    height: 20px !important;
     max-width: none !important;
     position: static !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 20px !important;
+    line-height: 1 !important;
+  }
+
+  html body .mobile-app-nav-item > i,
+  html body .mobile-app-nav-item .mob-nav-icon-wrap > i {
+    width: 24px !important;
+    height: 20px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 20px !important;
+    font-size: 1.12rem !important;
+    line-height: 1 !important;
+  }
+
+  html body .mobile-app-nav-item .nav-filter-dot,
+  html body .mobile-app-nav-item .mob-nav-badge {
+    position: absolute !important;
+    top: 7px !important;
+    left: calc(50% + 12px) !important;
+    inset-inline-end: auto !important;
+    transform: none !important;
   }
 
   html body .mobile-app-nav-item .mob-nav-badge {
-    position: absolute !important;
-    top: 4px !important;
-    left: 50% !important;
-    inset-inline-end: auto !important;
-    transform: translateX(6px) !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
