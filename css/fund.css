@@ -3696,6 +3696,8 @@ body.fund-page #peers-table-wrap table.track-table tr.average-row .peer-yield-nu
   transform: rotate(-8deg);
   transition: transform .18s ease;
   animation: gh-stamp-drop 0.65s ease-out;
+  direction: ltr;
+  unicode-bidi: isolate;
 }
 
 .gh-score-badge-wrap {

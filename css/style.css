@@ -14059,25 +14059,26 @@ body.h2h-active,
 
 @media (max-width: 760px) {
   body {
-    padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px));
     overflow-x: hidden;
   }
 
   .mobile-app-nav {
     position: fixed;
-    inset-inline: 8px;
-    bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    inset-inline: 0;
+    bottom: 0;
     z-index: 2700;
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     align-items: stretch;
     min-height: 58px;
-    padding: 6px;
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
     gap: 4px;
-    border: 1px solid rgba(201, 183, 114, .34);
-    border-radius: 18px;
-    background: rgba(255, 255, 255, .96);
-    box-shadow: 0 16px 38px rgba(15, 23, 42, .18);
+    border: none;
+    border-top: 1px solid rgba(201, 183, 114, .34);
+    border-radius: 0;
+    background: rgba(255, 255, 255, .97);
+    box-shadow: 0 -4px 20px rgba(15, 23, 42, .10);
     backdrop-filter: blur(14px);
   }
 
@@ -14643,6 +14644,22 @@ body.h2h-active,
     width: 100% !important;
     z-index: 2400 !important;
     overflow: visible !important;
+  }
+
+  /* עקוף את ה-max-height:0 / opacity:0 שמסתיר את title-search-bar כשאין advanced-options-open */
+  body.mobile-search-active .title-search-bar {
+    min-height: 0 !important;
+    max-height: 200px !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+    transform: none !important;
+    pointer-events: auto !important;
+    border-bottom-color: rgba(201,183,114,.3) !important;
+  }
+
+  body.mobile-search-active .title-search-bar .tsb-inner {
+    opacity: 1 !important;
+    transform: none !important;
   }
 
   body.mobile-search-active .title-search-bar .hero-search {
