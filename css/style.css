@@ -16809,13 +16809,6 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     left: auto !important;
     inset-inline-end: auto !important;
     transform: none !important;
-  }
-
-  html body .mobile-app-nav-item .mob-nav-badge {
-    top: -10px !important;
-    right: -12px !important;
-    left: auto !important;
-    inset-inline-end: auto !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -16832,6 +16825,14 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     font-weight: 900 !important;
     line-height: 1 !important;
     text-align: center !important;
+    max-width: none !important;
+  }
+
+  html body .mobile-app-nav-item .mob-nav-badge {
+    top: -10px !important;
+    right: -12px !important;
+    left: auto !important;
+    inset-inline-end: auto !important;
     max-width: none !important;
     overflow: visible !important;
     text-overflow: clip !important;
