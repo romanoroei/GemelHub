@@ -16773,7 +16773,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     width: 24px !important;
     height: 20px !important;
     max-width: none !important;
-    position: static !important;
+    position: relative !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -16803,6 +16803,10 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   }
 
   html body .mobile-app-nav-item .mob-nav-badge {
+    top: -8px !important;
+    right: -8px !important;
+    left: auto !important;
+    inset-inline-end: auto !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
