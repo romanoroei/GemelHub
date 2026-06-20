@@ -16796,8 +16796,8 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   html body .mobile-app-nav-item .nav-filter-dot,
   html body .mobile-app-nav-item .mob-nav-badge {
     position: absolute !important;
-    top: 13px !important;
-    left: calc(50% + 18px) !important;
+    top: 4px !important;
+    left: calc(50% + 7px) !important;
     inset-inline-end: auto !important;
     transform: none !important;
   }
