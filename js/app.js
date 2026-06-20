@@ -8375,8 +8375,8 @@ const App = (() => {
           <td class="advanced-search-compare-company">
             <span class="advanced-search-rank">${index + 1}</span>
             <div>
-              <strong>${item.providerName}</strong>
-              <small>${item.trackLabel} · #${item.fundId}</small>
+              <strong>${item.providerName} <span class="adv-fund-id">#${item.fundId}</span></strong>
+              <small class="adv-track-label">${item.trackLabel}</small>
             </div>
           </td>
           ${metricCols}
@@ -9275,8 +9275,8 @@ const App = (() => {
           <td class="advanced-search-compare-company">
             <span class="advanced-search-rank">${index + 1}</span>
             <div>
-              <strong>${item.providerName}</strong>
-              <small>${item.trackLabel} · #${item.fundId}</small>
+              <strong>${item.providerName} <span class="adv-fund-id">#${item.fundId}</span></strong>
+              <small class="adv-track-label">${item.trackLabel}</small>
             </div>
           </td>
           ${metricCols}

@@ -737,6 +737,12 @@ body.sticky-gap-mask-active:not(.fund-page)::before {
 /* ── Advanced search history ── */
 .advanced-search-history {
   margin-bottom: 10px;
+  padding: 10px 2px;
+  border-top: 1px solid rgba(201,183,114,.25);
+  border-bottom: 1px solid rgba(201,183,114,.25);
+}
+.advanced-search-history[hidden] {
+  display: none;
 }
 .adv-hist-title {
   font-size: .7rem;
@@ -1044,6 +1050,19 @@ body.sticky-gap-mask-active:not(.fund-page)::before {
 .advanced-search-compare-company small {
   color: var(--gray-500);
   font-size: .7rem;
+}
+.adv-fund-id {
+  font-size: .65rem;
+  color: #c9b772;
+  font-weight: 700;
+  margin-inline-start: 3px;
+  vertical-align: middle;
+}
+.adv-track-label {
+  color: var(--gray-500);
+  font-size: .68rem;
+  display: block;
+  margin-top: 1px;
 }
 .advanced-search-compare-value {
   min-width: 110px;
@@ -14636,20 +14655,24 @@ body.h2h-active,
   }
 
   /* ── Advanced search — mobile bottom sheet ── */
+
+  /* Overlay ends ABOVE the mobile nav bar so it's never covered */
   .advanced-search-overlay {
     padding: 0 !important;
     align-items: flex-end !important;
+    bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
+  /* Modal: single scroll container, head stays sticky inside it */
   .advanced-search-modal {
     width: 100% !important;
-    max-height: 92dvh !important;
+    max-height: 100% !important;
     border-radius: 22px 22px 0 0 !important;
     padding: 0 !important;
-    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
-    display: flex !important;
-    flex-direction: column !important;
-    overflow: hidden !important;
+    display: block !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
   /* Pull-bar indicator */
@@ -14661,10 +14684,9 @@ body.h2h-active,
     background: #cbd5e1;
     border-radius: 2px;
     margin: 10px auto 6px;
-    flex-shrink: 0;
   }
 
-  /* Sticky header — X on the RIGHT (inline-start in RTL = visual right) */
+  /* Sticky header — X on the RIGHT (order:-1 in RTL flex = visual right) */
   .advanced-search-head {
     position: sticky !important;
     top: 0 !important;
@@ -14675,13 +14697,13 @@ body.h2h-active,
     margin-bottom: 0 !important;
     flex-direction: row !important;
     align-items: center !important;
-    flex-shrink: 0 !important;
     direction: rtl !important;
     justify-content: flex-start !important;
     gap: 10px !important;
+    border-bottom: 1px solid rgba(201,183,114,.22) !important;
   }
 
-  /* X button first in DOM but pushed to visual right via order */
+  /* X visually on the right */
   .advanced-search-close {
     order: -1 !important;
     flex-shrink: 0 !important;
@@ -14697,69 +14719,59 @@ body.h2h-active,
     font-size: .9rem !important;
   }
 
-  /* Scrollable content area */
+  /* Inner sections padding */
+  .advanced-search-builder,
+  .advanced-search-history,
+  .advanced-search-results {
+    padding-inline: 12px !important;
+  }
+
   .advanced-search-builder {
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    flex: 1 !important;
-    min-height: 0 !important;
-    padding: 10px 12px !important;
+    padding-block: 10px !important;
     border-radius: 0 !important;
   }
 
-  .advanced-search-history,
   .advanced-search-results {
-    padding-inline: 12px;
+    padding-bottom: 14px !important;
   }
 
-  .advanced-search-results {
-    padding-bottom: 12px;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* ── Parameter row layout: [trash] [metric] [direction] on one line ── */
+  /* ── Parameter row: [trash right] [metric] [direction] on one line ── */
   .advanced-search-drag {
     display: none !important;
   }
 
   .advanced-search-row {
     display: grid !important;
-    /* col 1 = trash(38px), col 2 = metric(flex), col 3 = direction(min 90px) */
-    grid-template-columns: 38px 1fr minmax(90px, .7fr) !important;
+    grid-template-columns: 34px 1fr minmax(88px, .65fr) !important;
     grid-template-rows: auto auto !important;
-    gap: 6px !important;
-    align-items: end !important;
+    gap: 6px 8px !important;
+    align-items: center !important;
     direction: rtl !important;
     background: rgba(255,255,255,.9) !important;
     border: 1px solid rgba(201,183,114,.22) !important;
     border-radius: 14px !important;
-    padding: 10px !important;
+    padding: 10px 10px 10px !important;
   }
 
-  /* Trash: column 1 (visual right in RTL), vertically centered */
   .advanced-search-remove {
     grid-column: 1 !important;
     grid-row: 1 !important;
     align-self: center !important;
     justify-self: center !important;
-    width: 34px !important;
-    height: 34px !important;
+    width: 32px !important;
+    height: 32px !important;
   }
 
-  /* Metric: column 2 */
   .advanced-search-row .advanced-search-field:not(.advanced-search-field-range):first-of-type {
     grid-column: 2 !important;
     grid-row: 1 !important;
   }
 
-  /* Direction: column 3 */
   .advanced-search-row .advanced-search-field:not(.advanced-search-field-range):last-of-type {
     grid-column: 3 !important;
     grid-row: 1 !important;
   }
 
-  /* Range fields: row 2, spans columns 2+3 */
   .advanced-search-field-range {
     grid-column: 2 / 4 !important;
     grid-row: 2 !important;
@@ -14769,11 +14781,10 @@ body.h2h-active,
     grid-template-columns: 1fr 1fr !important;
   }
 
-  /* ── Action buttons: add+reset side by side, run below ── */
+  /* ── Action buttons: add+reset side by side WITH text, run full-width below ── */
   .advanced-search-actions {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
-    grid-template-rows: auto auto !important;
     gap: 8px !important;
     margin-top: 10px !important;
   }
@@ -14782,14 +14793,14 @@ body.h2h-active,
     grid-column: 1 !important;
     grid-row: 1 !important;
     justify-content: center !important;
-    padding: 9px 10px !important;
+    padding: 9px 8px !important;
   }
 
   .advanced-search-reset {
     grid-column: 2 !important;
     grid-row: 1 !important;
     justify-content: center !important;
-    padding: 9px 10px !important;
+    padding: 9px 8px !important;
   }
 
   .advanced-search-run {
@@ -14799,14 +14810,13 @@ body.h2h-active,
     padding: 11px 14px !important;
   }
 
-  /* Show text on add/reset */
   .advanced-search-add span,
   .advanced-search-reset span {
     display: inline !important;
-    font-size: .76rem !important;
+    font-size: .75rem !important;
   }
 
-  /* ── History chips ── */
+  /* ── History chips (only when not hidden) ── */
   .advanced-search-history[hidden] {
     display: none !important;
   }
@@ -14816,15 +14826,14 @@ body.h2h-active,
     flex-direction: row !important;
     flex-wrap: wrap !important;
     gap: 6px !important;
-    padding: 8px 12px !important;
+    padding: 10px 12px !important;
     margin-bottom: 0 !important;
-    border-bottom: 1px solid rgba(201,183,114,.2) !important;
+    border-bottom: 1px solid rgba(201,183,114,.18) !important;
   }
 
   .adv-hist-title {
     width: 100% !important;
     margin-bottom: 2px !important;
-    font-size: .68rem !important;
   }
 
   .adv-hist-item {
@@ -14832,7 +14841,7 @@ body.h2h-active,
     border-radius: 20px !important;
     margin-bottom: 0 !important;
     flex-direction: column !important;
-    gap: 1px !important;
+    gap: 2px !important;
     flex: 1 1 calc(50% - 3px);
     max-width: calc(50% - 3px);
     text-align: right !important;
@@ -14853,6 +14862,99 @@ body.h2h-active,
     font-weight: 700 !important;
     white-space: normal !important;
     line-height: 1.3 !important;
+  }
+
+  /* ── Compare results table: compact + actions layout ── */
+  .advanced-search-compare-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    margin-bottom: 8px !important;
+    justify-content: unset !important;
+    align-items: unset !important;
+  }
+
+  .advanced-search-select-all {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+    font-size: .8rem !important;
+  }
+
+  .advanced-search-h2h-btn {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    justify-content: center !important;
+    font-size: .75rem !important;
+    padding: 8px 6px !important;
+  }
+
+  .advanced-search-sandbox-btn {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    justify-content: center !important;
+    font-size: .75rem !important;
+    padding: 8px 6px !important;
+  }
+
+  .advanced-search-selection-status {
+    grid-column: 1 / -1 !important;
+  }
+
+  /* Compact table */
+  .advanced-search-compare-table {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .advanced-search-compare-table th,
+  .advanced-search-compare-table td {
+    padding: 7px 5px !important;
+    font-size: .72rem !important;
+  }
+
+  .advanced-search-compare-company {
+    min-width: 90px !important;
+    max-width: 120px !important;
+  }
+
+  .advanced-search-compare-company strong {
+    font-size: .78rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .advanced-search-compare-company small,
+  .adv-track-label {
+    font-size: .62rem !important;
+  }
+
+  .advanced-search-rank {
+    min-width: 20px !important;
+    height: 20px !important;
+    font-size: .68rem !important;
+  }
+
+  .advanced-search-compare-value {
+    min-width: 60px !important;
+  }
+
+  .advanced-search-compare-value strong {
+    font-size: .8rem !important;
+  }
+
+  .advanced-search-compare-score span {
+    font-size: .58rem !important;
+  }
+
+  .advanced-search-compare-score strong {
+    font-size: .8rem !important;
+  }
+
+  .advanced-search-compare-table th {
+    font-size: .68rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 80px !important;
   }
 
   /* ── Mobile fund-search overlay ── */
