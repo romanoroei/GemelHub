@@ -740,6 +740,9 @@ body.sticky-gap-mask-active:not(.fund-page)::before {
   padding: 10px 2px;
   border-top: 1px solid rgba(201,183,114,.25);
   border-bottom: 1px solid rgba(201,183,114,.25);
+  direction: rtl;
+  text-align: right;
+  font-family: var(--font);
 }
 .advanced-search-history[hidden] {
   display: none;
@@ -752,14 +755,41 @@ body.sticky-gap-mask-active:not(.fund-page)::before {
   text-align: right;
   direction: rtl;
 }
-.adv-hist-title {
-  font-size: .7rem;
-  font-weight: 800;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: .4px;
+.adv-hist-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   margin-bottom: 6px;
   padding: 0 2px;
+  direction: rtl;
+}
+.adv-hist-title {
+  color: #64748b;
+  direction: rtl;
+  font-family: var(--font);
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-align: right;
+  unicode-bidi: plaintext;
+}
+.adv-hist-clear {
+  border: 1px solid rgba(201,183,114,.45);
+  border-radius: 999px;
+  background: #fffdf7;
+  color: #8a6f18;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: .72rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 6px 10px;
+  transition: var(--tr);
+}
+.adv-hist-clear:hover {
+  background: #f4f1e4;
+  border-color: #c9b772;
 }
 .adv-hist-item {
   display: flex;
@@ -772,6 +802,8 @@ body.sticky-gap-mask-active:not(.fund-page)::before {
   border-radius: 9px;
   background: rgba(255,255,255,.8);
   cursor: pointer;
+  direction: rtl;
+  font-family: var(--font);
   text-align: right;
   transition: background .14s;
 }
@@ -14848,10 +14880,21 @@ body.h2h-active,
     text-align: right !important;
   }
 
+  .adv-hist-head {
+    width: 100% !important;
+    direction: rtl !important;
+  }
+
   .adv-hist-title {
     width: 100% !important;
     margin-bottom: 2px !important;
     text-align: right !important;
+  }
+
+  .adv-hist-clear {
+    flex-shrink: 0 !important;
+    font-size: .68rem !important;
+    padding: 6px 9px !important;
   }
 
   .adv-hist-item {

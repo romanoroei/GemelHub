@@ -8006,13 +8006,18 @@ const App = (() => {
     container.hidden = false;
     if (!hist.length) {
       container.innerHTML = `
-        <div class="adv-hist-title">4 חיפושים אחרונים</div>
+        <div class="adv-hist-head">
+          <div class="adv-hist-title">&#x200F;4 חיפושים אחרונים</div>
+        </div>
         <p class="adv-hist-empty">לאחר הרצת חיפוש, הוא יופיע כאן לשימוש חוזר מהיר.</p>
       `;
       return;
     }
     container.innerHTML = `
-      <div class="adv-hist-title">4 חיפושים אחרונים</div>
+      <div class="adv-hist-head">
+        <div class="adv-hist-title">&#x200F;4 חיפושים אחרונים</div>
+        <button type="button" class="adv-hist-clear" id="adv-hist-clear">ניקוי חיפושים</button>
+      </div>
       ${hist.map((h, i) => `
         <button type="button" class="adv-hist-item" data-hist-idx="${i}">
           <span class="adv-hist-cat">${h.catLabel || h.catId}</span>
@@ -8020,6 +8025,11 @@ const App = (() => {
         </button>
       `).join('')}
     `;
+    container.querySelector('#adv-hist-clear')?.addEventListener('click', () => {
+      state.advancedSearch.history = [];
+      try { localStorage.removeItem(ADVANCED_SEARCH_HISTORY_KEY); } catch(e) {}
+      renderAdvancedSearchHistory();
+    });
     container.querySelectorAll('.adv-hist-item').forEach(btn => {
       btn.addEventListener('click', () => {
         const h = hist[+btn.dataset.histIdx];
