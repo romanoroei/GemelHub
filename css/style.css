@@ -16635,3 +16635,81 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     color: #0c2134 !important;
   }
 }
+
+/* Mobile filter drawer polish: compact lists and standalone rounded panel. */
+@media (max-width: 760px) {
+  html body.mobile-filter-open::before {
+    content: none !important;
+    display: none !important;
+    background: transparent !important;
+    pointer-events: none !important;
+  }
+
+  html body.mobile-filter-open #sidebar,
+  html body.mobile-filter-open #sidebar.sidebar-collapsed {
+    top: 82px !important;
+    right: 8px !important;
+    left: auto !important;
+    bottom: calc(var(--mobile-app-nav-clearance, 72px) - 10px) !important;
+    width: min(268px, calc(100vw - 18px)) !important;
+    max-width: min(268px, calc(100vw - 18px)) !important;
+    padding: 12px 12px !important;
+    border: 1px solid rgba(201, 183, 114, .45) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 12px 28px rgba(15, 39, 68, .18) !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin !important;
+  }
+
+  html body.mobile-filter-open #sidebar .sidebar-sticky,
+  html body.mobile-filter-open #sidebar.sidebar-collapsed .sidebar-sticky {
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  html body.mobile-filter-open #sidebar .sidebar-section {
+    padding: 7px 6px !important;
+    border-bottom-color: rgba(226, 232, 240, .72) !important;
+  }
+
+  html body.mobile-filter-open #sidebar .sidebar-section-title {
+    margin-bottom: 5px !important;
+    gap: 5px !important;
+    font-size: .82rem !important;
+    line-height: 1.15 !important;
+  }
+
+  html body.mobile-filter-open #sidebar .btn-clear-filter {
+    font-size: .66rem !important;
+    padding: 1px 4px !important;
+  }
+
+  html body.mobile-filter-open #sidebar .filter-checkboxes {
+    gap: 0 !important;
+  }
+
+  html body.mobile-filter-open #sidebar .filter-checkbox {
+    min-height: 28px !important;
+    padding: 3px 5px !important;
+    gap: 5px !important;
+    border-radius: 5px !important;
+    font-size: .86rem !important;
+    line-height: 1.1 !important;
+  }
+
+  html body.mobile-filter-open #sidebar .filter-checkbox-sub {
+    padding-right: 13px !important;
+    font-size: .82rem !important;
+  }
+
+  html body.mobile-filter-open #sidebar .filter-checkbox input {
+    width: 12px !important;
+    height: 12px !important;
+    flex: 0 0 12px !important;
+  }
+
+  html body.mobile-filter-open #sidebar .fc-dot {
+    width: 7px !important;
+    height: 7px !important;
+  }
+}
