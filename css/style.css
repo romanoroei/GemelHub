@@ -16839,7 +16839,8 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     white-space: nowrap !important;
   }
 
-  html body .mobile-app-nav-item .mob-nav-badge[hidden] {
+  html body .mobile-app-nav-item .mob-nav-badge[hidden],
+  html body .mobile-app-nav-item .mob-nav-icon-wrap .nav-filter-dot[hidden] {
     display: none !important;
   }
 

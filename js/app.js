@@ -2404,8 +2404,8 @@ const App = (() => {
     // indicator on mobile nav "סינון" button — only show when the current category supports filtering
     const navFilterBtn = document.querySelector('[data-mobile-app-action="sidebar-filter"]');
     if (navFilterBtn) {
-      const sidebarBtn = document.getElementById('sidebar-toggle-btn');
-      const categoryHasFilter = !sidebarBtn || sidebarBtn.style.display !== 'none';
+      const NO_FILTER_CATS = new Set(['h2h', 'sandbox']);
+      const categoryHasFilter = !state.isHomePage && !NO_FILTER_CATS.has(state.activeCategoryId);
       const hasFilters = count > 0 && categoryHasFilter;
       let dot = navFilterBtn.querySelector('.nav-filter-dot');
       if (!dot) {
@@ -2414,8 +2414,8 @@ const App = (() => {
         const iconWrap = navFilterBtn.querySelector('.mob-nav-icon-wrap');
         (iconWrap || navFilterBtn).appendChild(dot);
       }
+      dot.textContent = hasFilters ? String(count) : '';
       dot.hidden = !hasFilters;
-      if (hasFilters) dot.textContent = String(count);
     }
     syncMobileCategorySheet();
   }
@@ -2602,6 +2602,7 @@ const App = (() => {
     document.getElementById('page-main-title').textContent = '';
     const filterBtn = document.getElementById('sidebar-toggle-btn');
     if (filterBtn) filterBtn.style.display = 'none';
+    updateFilterBadge();
     // task 1: hero — תמיד מוצג (לא מסתירים)
     // count bar — מוסתר בדף הבית
     const countBar = document.getElementById('tracks-count-bar');
@@ -5445,6 +5446,7 @@ const App = (() => {
     state.isHomePage = false;
     state.activeCategoryId = 'sandbox';
     setActiveTab('sandbox');
+    updateFilterBadge();
     showSection('sandbox');
     // update sticky header title manually (sandbox is not in PRODUCT_CATEGORIES)
     const pageTitle = document.getElementById('page-main-title');
@@ -8214,6 +8216,7 @@ const App = (() => {
     setActiveTab('h2h');
     const filterBtn = document.getElementById('sidebar-toggle-btn');
     if (filterBtn) filterBtn.style.display = 'none';
+    updateFilterBadge();
     showSection('h2h');
     await restoreH2HState();
     renderH2H();
