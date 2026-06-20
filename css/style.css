@@ -4290,24 +4290,54 @@ table.track-table tr.average-row td.exp-col:nth-last-child(3) {
   -webkit-overflow-scrolling: touch;
 }
 @media (max-width: 760px) {
+  .actuarial-heatmap-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+    padding-bottom: 8px;
+  }
+  .actuarial-heatmap-scroll::-webkit-scrollbar {
+    height: 6px;
+  }
+  .actuarial-heatmap-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+  .actuarial-heatmap-card {
+    padding: 10px 8px;
+    overflow: visible;
+  }
   .actuarial-heatmap-table {
-    min-width: auto !important;
-    font-size: .62rem !important;
-    border-spacing: 3px !important;
+    /* let the table be as wide as its content; scroll container handles overflow */
+    width: max-content;
+    min-width: 100%;
+    table-layout: auto !important;
+    font-size: .68rem !important;
+    border-spacing: 4px !important;
   }
   .actuarial-heatmap-table th:first-child,
   .actuarial-heatmap-table td:first-child {
-    min-width: 72px !important;
-    width: 72px !important;
-    font-size: .62rem !important;
+    min-width: 82px !important;
+    max-width: 82px !important;
+    width: 82px !important;
+    font-size: .65rem !important;
+    position: sticky;
+    right: 0;
+    background: #fff;
+    z-index: 2;
   }
   .actuarial-heatmap-table th {
-    font-size: .62rem !important;
+    font-size: .65rem !important;
+    min-width: 46px;
+    white-space: nowrap;
   }
   .actuarial-heatmap-table td {
-    padding: 5px 3px !important;
-    font-size: .62rem !important;
-    border-radius: 7px !important;
+    padding: 6px 4px !important;
+    font-size: .65rem !important;
+    border-radius: 8px !important;
+    min-width: 46px;
+    white-space: nowrap;
   }
 }
 .actuarial-heatmap-table {
