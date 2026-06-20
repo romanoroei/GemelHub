@@ -1521,17 +1521,24 @@ body.fund-page .fund-sticky-bar .fsb-id {
   }
 
   body.fund-page .yield-scroll-wrap {
-    overflow-x: hidden;
+    overflow-x: auto;
     margin-inline: 0;
   }
 
-  body.fund-page .yield-chart-inner {
+  /* גרף סטטי (נכסים/מניות) — מלא רוחב גם ב-RTL/iOS */
+  body.fund-page #static-chart-wrap {
     width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    direction: ltr;
+  }
+
+  body.fund-page .yield-chart-inner {
     padding-inline: 0;
   }
 
   body.fund-page #history-chart {
-    max-width: 100% !important;
+    display: block;
   }
 
   body.fund-page .peers-table-scroll {
