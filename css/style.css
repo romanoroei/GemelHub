@@ -16767,14 +16767,15 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
 
   html body .mobile-app-nav-item .mob-nav-icon-wrap {
     max-width: none !important;
-    position: relative !important;
+    position: static !important;
   }
 
   html body .mobile-app-nav-item .mob-nav-badge {
-    top: -4px !important;
-    inset-inline-end: -18px !important;
-    left: auto !important;
-    transform: none !important;
+    position: absolute !important;
+    top: 4px !important;
+    left: 50% !important;
+    inset-inline-end: auto !important;
+    transform: translateX(6px) !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
