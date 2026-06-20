@@ -8477,6 +8477,8 @@ const App = (() => {
       return;
     }
 
+    saveAdvancedSearchToHistory(selectedParams);
+
     const candidates = getAdvancedSearchCandidates();
     if (!candidates.length) {
       state.advancedSearch.results = [];
@@ -9901,6 +9903,8 @@ const App = (() => {
       setAdvancedSearchStatus('כל פרמטר יכול להיבחר פעם אחת בלבד.');
       return;
     }
+
+    saveAdvancedSearchToHistory(selectedParams);
 
     const candidates = getAdvancedSearchCandidates();
     if (!candidates.length) {
@@ -12998,6 +13002,8 @@ const App = (() => {
       return;
     }
 
+    saveAdvancedSearchToHistory(selectedParams);
+
     const candidates = getAdvancedSearchCandidates();
     if (!candidates.length) {
       state.advancedSearch.results = [];
@@ -13585,7 +13591,14 @@ const App = (() => {
       return 'is-low';
     };
 
-    const headerCols = selectedParams.map(param => `<th>${getAdvancedMetricLabel(param.metricId)}</th>`).join('');
+    const formatHeaderLabel = label => {
+      const words = String(label || '').trim().split(/\s+/).filter(Boolean);
+      if (words.length <= 2) return label;
+      return `${words.slice(0, 2).join(' ')}<br><span>${words.slice(2).join(' ')}</span>`;
+    };
+    const headerCols = selectedParams.map(param => `
+      <th class="advanced-search-compare-value-head">${formatHeaderLabel(getAdvancedMetricLabel(param.metricId))}</th>
+    `).join('');
     const bodyRows = state.advancedSearch.results.map((item, index) => {
       const metricCols = selectedParams.map(param => {
         const raw = getAdvancedMetricRaw(item, param.metricId);
@@ -13632,6 +13645,12 @@ const App = (() => {
       </div>
       <div class="advanced-search-compare-wrap">
         <table class="advanced-search-compare-table">
+          <colgroup>
+            <col class="advanced-search-rank-col">
+            <col class="advanced-search-select-col">
+            <col class="advanced-search-company-col">
+            ${selectedParams.map(() => '<col class="advanced-search-value-col">').join('')}
+          </colgroup>
           <thead>
             <tr>
               <th class="advanced-search-compare-rank">#</th>

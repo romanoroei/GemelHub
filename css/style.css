@@ -14925,6 +14925,18 @@ body.h2h-active,
     table-layout: fixed !important;
   }
 
+  .advanced-search-rank-col {
+    width: 26px !important;
+  }
+
+  .advanced-search-select-col {
+    width: 30px !important;
+  }
+
+  .advanced-search-company-col {
+    width: 44% !important;
+  }
+
   .advanced-search-compare-table th,
   .advanced-search-compare-table td {
     padding: 6px 4px !important;
@@ -14950,7 +14962,7 @@ body.h2h-active,
   /* Company column */
   .advanced-search-compare-company {
     min-width: 0 !important;
-    width: 36% !important;
+    width: 44% !important;
     vertical-align: middle !important;
   }
 
@@ -14971,10 +14983,15 @@ body.h2h-active,
   .advanced-search-compare-company small,
   .adv-track-label,
   .advanced-search-track-name {
-    font-size: .54rem !important;
-    display: block !important;
+    font-size: .62rem !important;
+    display: inline !important;
     margin-top: 1px !important;
-    line-height: 1.1 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    line-height: 1.15 !important;
   }
 
   /* #id badge stays inline inside strong */
@@ -15036,6 +15053,18 @@ body.h2h-active,
     word-break: normal !important;
     vertical-align: middle !important;
     padding: 5px 4px !important;
+  }
+
+  .advanced-search-compare-table thead th:not(.advanced-search-compare-company) {
+    text-align: center !important;
+  }
+
+  .advanced-search-compare-table thead th:nth-child(3) {
+    text-align: right !important;
+  }
+
+  .advanced-search-compare-value-head span {
+    display: inline-block !important;
   }
 
   /* History empty state */
