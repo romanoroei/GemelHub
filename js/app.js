@@ -1481,11 +1481,22 @@ const App = (() => {
 
     sheet.querySelector('.mob-extra-fund-search')?.addEventListener('click', () => {
       closeMobileCategorySheet();
-      const searchWrap = document.querySelector('.title-search-bar .hero-search');
-      if (searchWrap) searchWrap.style.display = '';
       const inp = document.getElementById('global-search');
-      if (inp) { inp.focus(); inp.select(); }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (!inp) return;
+      // Show the search bar via class (overrides display:none!important from CSS)
+      document.body.classList.add('mobile-search-active');
+      // Scroll past hero so sticky header is visible, then focus
+      const hero = document.getElementById('hero-banner');
+      const heroBottom = hero ? hero.offsetTop + hero.offsetHeight : 0;
+      const doFocus = () => { inp.focus(); inp.select(); };
+      if (window.scrollY < heroBottom - 1) {
+        window.scrollTo({ top: heroBottom, behavior: 'smooth' });
+        setTimeout(doFocus, 350);
+      } else {
+        doFocus();
+      }
+      // Remove class when user leaves the search field
+      inp.addEventListener('blur', () => document.body.classList.remove('mobile-search-active'), { once: true });
     });
 
     return sheet;

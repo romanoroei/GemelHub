@@ -14634,6 +14634,10 @@ body.h2h-active,
     display: none !important;
   }
 
+  body.mobile-search-active .title-search-bar .hero-search {
+    display: flex !important;
+  }
+
   body.advanced-options-open .title-search-bar .hero-search,
   body.advanced-options-open #custom-range-entry,
   body.advanced-options-open #display-options-toggle,
