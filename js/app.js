@@ -2401,10 +2401,12 @@ const App = (() => {
       btn.setAttribute('aria-label', hasFilters ? `${base}, ${count} סינונים פעילים` : base);
       btn.title = hasFilters ? `${base} (${count} סינונים פעילים)` : base;
     });
-    // indicator on mobile nav "סינון" button
+    // indicator on mobile nav "סינון" button — only show when the current category supports filtering
     const navFilterBtn = document.querySelector('[data-mobile-app-action="sidebar-filter"]');
     if (navFilterBtn) {
-      const hasFilters = count > 0;
+      const sidebarBtn = document.getElementById('sidebar-toggle-btn');
+      const categoryHasFilter = !sidebarBtn || sidebarBtn.style.display !== 'none';
+      const hasFilters = count > 0 && categoryHasFilter;
       let dot = navFilterBtn.querySelector('.nav-filter-dot');
       if (!dot) {
         dot = document.createElement('span');
