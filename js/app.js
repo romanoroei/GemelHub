@@ -13765,7 +13765,7 @@ const App = (() => {
       panel.hidden = false;
       input.value = '';
       results.innerHTML = '';
-      setTimeout(() => input.focus(), 80);
+      input.focus();
     };
   }
 
