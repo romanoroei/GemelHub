@@ -2409,7 +2409,8 @@ const App = (() => {
       if (!dot) {
         dot = document.createElement('span');
         dot.className = 'nav-filter-dot';
-        navFilterBtn.appendChild(dot);
+        const iconWrap = navFilterBtn.querySelector('.mob-nav-icon-wrap');
+        (iconWrap || navFilterBtn).appendChild(dot);
       }
       dot.hidden = !hasFilters;
       if (hasFilters) dot.textContent = String(count);

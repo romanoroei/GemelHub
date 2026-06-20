@@ -16793,18 +16793,19 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     line-height: 1 !important;
   }
 
-  html body .mobile-app-nav-item .nav-filter-dot,
+  html body .mobile-app-nav-item .mob-nav-icon-wrap .nav-filter-dot,
   html body .mobile-app-nav-item .mob-nav-badge {
     position: absolute !important;
-    top: 4px !important;
-    left: calc(50% + 7px) !important;
+    top: -10px !important;
+    right: -12px !important;
+    left: auto !important;
     inset-inline-end: auto !important;
     transform: none !important;
   }
 
   html body .mobile-app-nav-item .mob-nav-badge {
-    top: -8px !important;
-    right: -8px !important;
+    top: -10px !important;
+    right: -12px !important;
     left: auto !important;
     inset-inline-end: auto !important;
     display: inline-flex !important;
