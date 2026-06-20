@@ -15333,9 +15333,17 @@ body.h2h-active,
     display: none !important;
   }
 
-  html body .page-body,
-  html body.mobile-sticky-header-fixed .page-body {
+  html body.mobile-sticky-header-fixed .sticky-header {
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  html body .page-body {
     padding-top: 0 !important;
+  }
+
+  html body.mobile-sticky-header-fixed .page-body {
+    padding-top: calc(var(--mobile-sticky-header-h, 0px) + 8px) !important;
   }
 
   html,
