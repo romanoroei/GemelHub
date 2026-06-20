@@ -7952,16 +7952,35 @@ const App = (() => {
         metricId: p.metricId,
         metricLabel: metrics.find(m => m.id === p.metricId)?.label || p.metricId,
         direction: p.direction,
-        weight: p.weight
+        weight: p.weight,
+        minValue: p.minValue ?? '',
+        maxValue: p.maxValue ?? ''
       }))
     };
+    const getHistoryKey = item => JSON.stringify([
+      item?.catId || '',
+      ...(item?.params || []).map(p => [
+        p.metricId,
+        p.direction || 'high',
+        p.weight || 'medium',
+        p.minValue || '',
+        p.maxValue || ''
+      ])
+    ]);
+    let nextHistory = [snapshot];
     try {
       const raw = localStorage.getItem(ADVANCED_SEARCH_HISTORY_KEY);
-      const hist = raw ? JSON.parse(raw) : [];
-      const filtered = hist.filter(h => JSON.stringify(h.params.map(p=>p.metricId)) !== JSON.stringify(snapshot.params.map(p=>p.metricId)));
-      filtered.unshift(snapshot);
-      localStorage.setItem(ADVANCED_SEARCH_HISTORY_KEY, JSON.stringify(filtered.slice(0, 3)));
-    } catch(e) {}
+      const parsed = raw ? JSON.parse(raw) : [];
+      const hist = Array.isArray(parsed) ? parsed : [];
+      const snapshotKey = getHistoryKey(snapshot);
+      nextHistory = [snapshot, ...hist.filter(h => getHistoryKey(h) !== snapshotKey)].slice(0, 3);
+      localStorage.setItem(ADVANCED_SEARCH_HISTORY_KEY, JSON.stringify(nextHistory));
+    } catch(e) {
+      const hist = Array.isArray(state.advancedSearch.history) ? state.advancedSearch.history : [];
+      const snapshotKey = getHistoryKey(snapshot);
+      nextHistory = [snapshot, ...hist.filter(h => getHistoryKey(h) !== snapshotKey)].slice(0, 3);
+    }
+    state.advancedSearch.history = nextHistory;
     renderAdvancedSearchHistory();
     const historyEl = document.getElementById('advanced-search-history');
     if (historyEl) historyEl.hidden = false;
@@ -7970,8 +7989,13 @@ const App = (() => {
   function loadAdvancedSearchHistory() {
     try {
       const raw = localStorage.getItem(ADVANCED_SEARCH_HISTORY_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch(e) { return []; }
+      const parsed = raw ? JSON.parse(raw) : [];
+      if (Array.isArray(parsed) && parsed.length) {
+        state.advancedSearch.history = parsed;
+        return parsed;
+      }
+    } catch(e) {}
+    return Array.isArray(state.advancedSearch.history) ? state.advancedSearch.history : [];
   }
 
   function renderAdvancedSearchHistory() {
@@ -8003,7 +8027,9 @@ const App = (() => {
           id: Date.now() + Math.random(),
           metricId: p.metricId,
           direction: p.direction || 'high',
-          weight: p.weight || 'medium'
+          weight: p.weight || 'medium',
+          minValue: p.minValue || '',
+          maxValue: p.maxValue || ''
         }));
         renderAdvancedSearchRows();
         runAdvancedSearch();
@@ -13583,10 +13609,6 @@ const App = (() => {
             </div>
           </td>
           ${metricCols}
-          <td class="advanced-search-compare-score">
-            <span>ציון</span>
-            <strong>${item.score.toFixed(0)}</strong>
-          </td>
         </tr>
       `;
     }).join('');
@@ -13615,7 +13637,6 @@ const App = (() => {
               <th class="advanced-search-compare-select">בחר</th>
               <th>קופה</th>
               ${headerCols}
-              <th>התאמה</th>
             </tr>
           </thead>
           <tbody>${bodyRows}</tbody>
