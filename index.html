@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=mobile-fixes36-20260620" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-fixes37-20260620" />
   <style>
     @media (max-width: 760px) {
       .advanced-search-overlay { z-index: 9500 !important; }
@@ -502,8 +502,24 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="js/config.js?v=fund-mobile-pies-agach25-20260614"></script>
 <script src="js/api.js?v=fund-mobile-pies-agach25-20260614"></script>
+<!-- Mobile fund search overlay -->
+<div id="mob-fund-search-panel" hidden aria-modal="true" role="dialog" aria-label="חיפוש קופה">
+  <div id="mob-fund-search-backdrop"></div>
+  <div id="mob-fund-search-box">
+    <div id="mob-fund-search-row">
+      <i class="fas fa-search" aria-hidden="true"></i>
+      <input type="text" id="mob-fund-search-input"
+             placeholder="חפש לפי מנהל, מספר קופה או מסלול..."
+             autocomplete="off" autocorrect="off" autocapitalize="off"
+             aria-label="חיפוש קופות" dir="rtl" />
+      <button type="button" id="mob-fund-search-close" aria-label="סגור חיפוש">✕</button>
+    </div>
+    <div id="mob-fund-search-results"></div>
+  </div>
+</div>
+
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
-<script src="js/app.js?v=mobile-fixes34-20260620"></script>
+<script src="js/app.js?v=mobile-fixes38-20260620"></script>
 </body>
 </html>

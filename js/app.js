@@ -607,6 +607,7 @@ const App = (() => {
     buildCategoryTabs();
     syncAdvancedOptionsUi();
     setupSearch();
+    setupMobileFundSearch();
     setupAdvancedSearch();
     setupCustomRange();
     setupModal();
@@ -1484,22 +1485,7 @@ const App = (() => {
 
     sheet.querySelector('.mob-extra-fund-search')?.addEventListener('click', () => {
       closeMobileCategorySheet();
-      const inp = document.getElementById('global-search');
-      if (!inp) return;
-      // Show the search bar via class (overrides display:none!important from CSS)
-      document.body.classList.add('mobile-search-active');
-      // Scroll past hero so sticky header is visible, then focus
-      const hero = document.getElementById('hero-banner');
-      const heroBottom = hero ? hero.offsetTop + hero.offsetHeight : 0;
-      const doFocus = () => { inp.focus(); inp.select(); };
-      if (window.scrollY < heroBottom - 1) {
-        window.scrollTo({ top: heroBottom, behavior: 'smooth' });
-        setTimeout(doFocus, 350);
-      } else {
-        doFocus();
-      }
-      // Remove class when user leaves the search field
-      inp.addEventListener('blur', () => document.body.classList.remove('mobile-search-active'), { once: true });
+      if (window.openMobileFundSearch) window.openMobileFundSearch();
     });
 
     return sheet;
@@ -13697,6 +13683,92 @@ const App = (() => {
 
   window.startRotatingCtaPopup = startRotatingCtaPopup;
   window.stopRotatingCtaPopup = stopRotatingCtaPopup;
+
+  function setupMobileFundSearch() {
+    const panel   = document.getElementById('mob-fund-search-panel');
+    const input   = document.getElementById('mob-fund-search-input');
+    const results = document.getElementById('mob-fund-search-results');
+    const closeBtn= document.getElementById('mob-fund-search-close');
+    const backdrop= document.getElementById('mob-fund-search-backdrop');
+    if (!panel || !input) return;
+
+    function highlight(text, q) {
+      if (!q || !text) return String(text || '');
+      const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+      return String(text).replace(re, '<mark style="background:#fef08a;border-radius:2px;">$1</mark>');
+    }
+
+    function doMobileSearch(q) {
+      if (!q || q.length < 1) { results.innerHTML = ''; return; }
+      const ql = q.toLowerCase();
+      const recs = state.searchableRecords || [];
+      if (!recs.length) { results.innerHTML = '<div class="mob-search-no-results">הנתונים טוענים, נסה שוב עוד רגע</div>'; return; }
+
+      const seen = new Set();
+      const hits = [];
+      recs.forEach(r => {
+        const name  = getProviderDisplayName(r.CONTROLLING_CORPORATION, r.MANAGING_CORPORATION);
+        const id    = String(r.FUND_ID || '');
+        const sub   = r.SUB_SPECIALIZATION || '';
+        const cls   = r.FUND_CLASSIFICATION || '';
+        const fname = r.FUND_NAME || '';
+        if (name.toLowerCase().includes(ql) || id.includes(ql) ||
+            sub.toLowerCase().includes(ql) || fname.toLowerCase().includes(ql)) {
+          const key = `${id}`;
+          if (!seen.has(key) && hits.length < 15) {
+            seen.add(key);
+            const catId = getCatIdByClassification(cls);
+            if (catId) hits.push({ name, sub, cls, fundId: id, catId });
+          }
+        }
+      });
+
+      if (!hits.length) {
+        results.innerHTML = '<div class="mob-search-no-results">לא נמצאו תוצאות</div>';
+        return;
+      }
+
+      results.innerHTML = hits.map(h => `
+        <div class="mob-search-item" data-fundid="${h.fundId}" data-catid="${h.catId}">
+          <div class="mob-search-item-name">${highlight(h.name, q)}</div>
+          <div class="mob-search-item-sub">${highlight(h.sub || h.cls, q)} · <span class="mob-search-id">#${highlight(h.fundId, q)}</span></div>
+        </div>
+      `).join('');
+
+      results.querySelectorAll('.mob-search-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const fundId = item.dataset.fundid;
+          const catId  = item.dataset.catid;
+          closePanel();
+          if (fundId && catId) window.location.href = `fund.html?id=${encodeURIComponent(fundId)}&cat=${encodeURIComponent(catId)}`;
+        });
+      });
+    }
+
+    let timer;
+    input.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => doMobileSearch(input.value.trim()), 180);
+    });
+
+    function closePanel() {
+      panel.hidden = true;
+      input.value = '';
+      results.innerHTML = '';
+    }
+
+    closeBtn.addEventListener('click', closePanel);
+    backdrop.addEventListener('click', closePanel);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !panel.hidden) closePanel(); });
+
+    window.openMobileFundSearch = function() {
+      panel.hidden = false;
+      input.value = '';
+      results.innerHTML = '';
+      setTimeout(() => input.focus(), 80);
+    };
+  }
+
   return { init };
 })();
 

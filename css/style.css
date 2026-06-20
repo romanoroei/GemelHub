@@ -14635,51 +14635,121 @@ body.h2h-active,
     display: none !important;
   }
 
-  body.mobile-search-active .sticky-header {
-    display: block !important;
-    position: fixed !important;
-    top: 0 !important;
-    right: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    z-index: 2400 !important;
-    overflow: visible !important;
+  /* ── Mobile fund-search overlay ── */
+  #mob-fund-search-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 9100;
+    display: flex;
+    flex-direction: column;
   }
 
-  /* עקוף את ה-max-height:0 / opacity:0 שמסתיר את title-search-bar כשאין advanced-options-open */
-  body.mobile-search-active .title-search-bar {
-    min-height: 0 !important;
-    max-height: 200px !important;
-    opacity: 1 !important;
-    overflow: visible !important;
-    transform: none !important;
-    pointer-events: auto !important;
-    border-bottom-color: rgba(201,183,114,.3) !important;
+  #mob-fund-search-panel[hidden] { display: none !important; }
+
+  #mob-fund-search-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, .45);
   }
 
-  body.mobile-search-active .title-search-bar .tsb-inner {
-    opacity: 1 !important;
-    transform: none !important;
+  #mob-fund-search-box {
+    position: relative;
+    background: #fff;
+    width: 100%;
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 8px 32px rgba(15,23,42,.22);
+    overflow: hidden;
   }
 
-  body.mobile-search-active .title-search-bar .hero-search {
-    display: flex !important;
+  #mob-fund-search-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 14px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    flex-shrink: 0;
   }
 
-  body.mobile-search-active .title-search-bar .hero-search input {
-    width: 100% !important;
-    min-width: 0 !important;
-    opacity: 1 !important;
-    padding: 9px 42px 9px 14px !important;
-    color: #1a3560 !important;
-    -webkit-text-fill-color: #1a3560 !important;
-    background: transparent !important;
+  #mob-fund-search-row i {
+    color: #64748b;
+    font-size: 1rem;
+    flex-shrink: 0;
   }
 
-  body.mobile-search-active .title-search-bar .hero-search i {
-    right: 12px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
+  #mob-fund-search-input {
+    flex: 1;
+    border: 2px solid #e2e8f0;
+    border-radius: 50px;
+    padding: 11px 16px;
+    font-size: 1rem;
+    font-family: var(--font);
+    outline: none;
+    color: #1a3560;
+    background: #f8fafc;
+    min-width: 0;
+  }
+
+  #mob-fund-search-input:focus {
+    border-color: #c9b772;
+    background: #fff;
+  }
+
+  #mob-fund-search-close {
+    background: #f1f5f9;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+    cursor: pointer;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  #mob-fund-search-results {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+  }
+
+  .mob-search-item {
+    padding: 13px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    direction: rtl;
+    text-align: right;
+  }
+
+  .mob-search-item:active { background: #f8fafc; }
+
+  .mob-search-item-name {
+    font-size: .95rem;
+    font-weight: 700;
+    color: #1a3560;
+    margin-bottom: 2px;
+  }
+
+  .mob-search-item-sub {
+    font-size: .78rem;
+    color: #64748b;
+  }
+
+  .mob-search-item-sub .mob-search-id {
+    color: #c9b772;
+    font-weight: 700;
+  }
+
+  .mob-search-no-results {
+    padding: 24px 16px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: .9rem;
   }
 
   body.advanced-options-open .title-search-bar .hero-search,
