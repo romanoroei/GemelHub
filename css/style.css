@@ -16840,7 +16840,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     padding: 7px !important;
     display: grid !important;
     grid-template-columns: 1fr !important;
-    grid-template-rows: auto minmax(0, 1fr) auto !important;
+    grid-template-rows: 14px minmax(0, 1fr) auto !important;
     align-items: stretch !important;
     gap: 5px !important;
     overflow: hidden !important;
@@ -16855,10 +16855,12 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   html body .sandbox-bar-title {
     display: block !important;
     width: 100% !important;
-    font-size: .66rem !important;
-    line-height: 1.1 !important;
+    height: 14px !important;
+    font-size: .62rem !important;
+    line-height: 14px !important;
     white-space: nowrap !important;
     text-align: right !important;
+    align-self: center !important;
   }
 
   html body .sandbox-bar-chips {
@@ -16886,12 +16888,13 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     display: grid !important;
     grid-template-columns: 7px minmax(0, 1fr) 18px !important;
     align-items: center !important;
+    justify-items: stretch !important;
     gap: 5px !important;
-    padding: 3px 5px !important;
+    padding: 0 5px !important;
     border-radius: 8px !important;
     white-space: nowrap !important;
     overflow: hidden !important;
-    line-height: 1.15 !important;
+    line-height: 1 !important;
     font-size: .58rem !important;
   }
 
@@ -16903,8 +16906,9 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     white-space: nowrap !important;
     overflow-wrap: normal !important;
     word-break: keep-all !important;
-    line-height: 1.15 !important;
+    line-height: 1 !important;
     align-self: center !important;
+    transform: translateY(-.5px) !important;
   }
 
   html body .sandbox-bar-chip-provider,
@@ -16915,7 +16919,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     white-space: nowrap !important;
     overflow-wrap: normal !important;
     word-break: keep-all !important;
-    line-height: 1.15 !important;
+    line-height: 1 !important;
   }
 
   html body .sandbox-bar-chip-remove {
@@ -16923,8 +16927,11 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     height: 18px !important;
     min-width: 18px !important;
     align-self: center !important;
+    justify-self: center !important;
     font-size: .72rem !important;
     line-height: 1 !important;
+    padding: 0 !important;
+    transform: translateY(-.5px) !important;
   }
 
   html body .sandbox-bar-chip-provider {
