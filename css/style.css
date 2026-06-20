@@ -744,6 +744,14 @@ body.sticky-gap-mask-active:not(.fund-page)::before {
 .advanced-search-history[hidden] {
   display: none;
 }
+.adv-hist-empty {
+  font-size: .78rem;
+  color: #94a3b8;
+  margin: 2px 0 0;
+  padding: 0;
+  text-align: right;
+  direction: rtl;
+}
 .adv-hist-title {
   font-size: .7rem;
   font-weight: 800;
@@ -14745,21 +14753,22 @@ body.h2h-active,
     grid-template-columns: 34px 1fr minmax(88px, .65fr) !important;
     grid-template-rows: auto auto !important;
     gap: 6px 8px !important;
-    align-items: center !important;
+    align-items: end !important;
     direction: rtl !important;
     background: rgba(255,255,255,.9) !important;
     border: 1px solid rgba(201,183,114,.22) !important;
     border-radius: 14px !important;
-    padding: 10px 10px 10px !important;
+    padding: 10px !important;
   }
 
   .advanced-search-remove {
     grid-column: 1 !important;
     grid-row: 1 !important;
-    align-self: center !important;
+    align-self: end !important;
     justify-self: center !important;
     width: 32px !important;
     height: 32px !important;
+    margin-bottom: 1px !important;
   }
 
   .advanced-search-row .advanced-search-field:not(.advanced-search-field-range):first-of-type {
@@ -14900,61 +14909,105 @@ body.h2h-active,
     grid-column: 1 / -1 !important;
   }
 
-  /* Compact table */
+  /* Compact table — minimize horizontal scroll */
+  .advanced-search-compare-wrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
   .advanced-search-compare-table {
     min-width: 0 !important;
     width: 100% !important;
+    table-layout: fixed !important;
   }
 
   .advanced-search-compare-table th,
   .advanced-search-compare-table td {
-    padding: 7px 5px !important;
-    font-size: .72rem !important;
+    padding: 6px 4px !important;
+    font-size: .7rem !important;
   }
 
+  /* Select checkbox column — narrow */
+  .advanced-search-compare-select {
+    width: 32px !important;
+    min-width: 32px !important;
+  }
+
+  /* Company column */
   .advanced-search-compare-company {
-    min-width: 90px !important;
-    max-width: 120px !important;
+    min-width: 0 !important;
+    width: 35% !important;
   }
 
   .advanced-search-compare-company strong {
-    font-size: .78rem !important;
+    font-size: .75rem !important;
     line-height: 1.2 !important;
+    display: block !important;
   }
 
   .advanced-search-compare-company small,
   .adv-track-label {
+    font-size: .6rem !important;
+    display: block !important;
+    margin-top: 1px !important;
+  }
+
+  /* #id badge stays inline inside strong */
+  .adv-fund-id {
     font-size: .62rem !important;
+    display: inline !important;
+    vertical-align: baseline !important;
   }
 
+  /* Rank badge — smaller */
   .advanced-search-rank {
-    min-width: 20px !important;
-    height: 20px !important;
-    font-size: .68rem !important;
+    min-width: 18px !important;
+    height: 18px !important;
+    font-size: .62rem !important;
+    margin-inline-end: 3px !important;
+    flex-shrink: 0 !important;
   }
 
+  /* Metric value columns */
   .advanced-search-compare-value {
-    min-width: 60px !important;
+    min-width: 0 !important;
+    width: auto !important;
   }
 
   .advanced-search-compare-value strong {
-    font-size: .8rem !important;
+    font-size: .76rem !important;
+    display: block !important;
+  }
+
+  /* Score column */
+  .advanced-search-compare-score {
+    width: 36px !important;
+    min-width: 36px !important;
   }
 
   .advanced-search-compare-score span {
-    font-size: .58rem !important;
+    font-size: .55rem !important;
   }
 
   .advanced-search-compare-score strong {
-    font-size: .8rem !important;
+    font-size: .76rem !important;
   }
 
-  .advanced-search-compare-table th {
-    font-size: .68rem !important;
+  /* Column headers */
+  .advanced-search-compare-table thead th {
+    font-size: .64rem !important;
     white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    max-width: 80px !important;
+    padding: 5px 4px !important;
+  }
+
+  /* History empty state */
+  .adv-hist-empty {
+    font-size: .75rem !important;
+    color: #94a3b8 !important;
+    text-align: right !important;
+    padding: 4px 2px !important;
+    margin: 0 !important;
+    width: 100% !important;
   }
 
   /* ── Mobile fund-search overlay ── */

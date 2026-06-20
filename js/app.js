@@ -7976,8 +7976,14 @@ const App = (() => {
     const container = document.getElementById('advanced-search-history');
     if (!container) return;
     const hist = loadAdvancedSearchHistory();
-    if (!hist.length) { container.hidden = true; return; }
     container.hidden = false;
+    if (!hist.length) {
+      container.innerHTML = `
+        <div class="adv-hist-title">חיפושים אחרונים</div>
+        <p class="adv-hist-empty">לאחר הרצת חיפוש, הוא יופיע כאן לשימוש חוזר מהיר.</p>
+      `;
+      return;
+    }
     container.innerHTML = `
       <div class="adv-hist-title">חיפושים אחרונים</div>
       ${hist.map((h, i) => `
@@ -9703,8 +9709,8 @@ const App = (() => {
           <td class="advanced-search-compare-company">
             <span class="advanced-search-rank">${index + 1}</span>
             <div>
-              <strong>${item.providerName}</strong>
-              <small><span class="advanced-search-track-name">${item.trackLabel}</span> · #${item.fundId}</small>
+              <strong>${item.providerName} <span class="adv-fund-id">#${item.fundId}</span></strong>
+              <small class="adv-track-label"><span class="advanced-search-track-name">${item.trackLabel}</span></small>
             </div>
           </td>
           ${metricCols}
@@ -13568,8 +13574,8 @@ const App = (() => {
           <td class="advanced-search-compare-company">
             <span class="advanced-search-rank">${index + 1}</span>
             <div>
-              <strong>${item.providerName}</strong>
-              <small><span class="advanced-search-track-name">${item.trackLabel}</span> · #${item.fundId}</small>
+              <strong>${item.providerName} <span class="adv-fund-id">#${item.fundId}</span></strong>
+              <small class="adv-track-label"><span class="advanced-search-track-name">${item.trackLabel}</span></small>
             </div>
           </td>
           ${metricCols}
