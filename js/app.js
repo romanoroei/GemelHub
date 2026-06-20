@@ -5274,7 +5274,13 @@ const App = (() => {
     const chipsHtml = sels.map(s => `
       <span class="sandbox-bar-chip">
         <span class="sandbox-bar-chip-dot" style="background:${s.color}"></span>
-        <span><span style="color:${s.color};font-weight:700">${s.provider}</span><span style="color:rgba(255,255,255,0.6)"> — ${s.trackLabel}</span></span>
+        <span class="sandbox-bar-chip-text">
+          <span class="sandbox-bar-chip-provider" style="color:${s.color}">${s.provider}</span>
+          <span class="sandbox-bar-chip-sep"> · </span>
+          <span class="sandbox-bar-chip-track">${s.trackLabel}</span>
+          <span class="sandbox-bar-chip-sep"> · </span>
+          <span class="sandbox-bar-chip-category">${_sbGetCategoryLabel(s.categoryId)}</span>
+        </span>
         <button type="button" class="sandbox-bar-chip-remove"
           data-remove-fundid="${s.fundId}" data-remove-trackid="${s.trackId}" data-remove-catid="${s.categoryId}"
           aria-label="הסר ${s.provider}">×</button>

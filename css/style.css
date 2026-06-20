@@ -16800,4 +16800,121 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   html body .mobile-app-nav-item .mob-nav-badge[hidden] {
     display: none !important;
   }
+
+  html body .sandbox-bar {
+    right: 8px !important;
+    left: 8px !important;
+    bottom: calc(var(--mobile-app-nav-clearance, 78px) + 8px) !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: min(46dvh, 260px) !important;
+    padding: 9px !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto minmax(0, 1fr) auto !important;
+    align-items: stretch !important;
+    gap: 7px !important;
+    overflow: hidden !important;
+    border-radius: 14px !important;
+    transform: translate3d(0, calc(100% + 18px), 0) !important;
+  }
+
+  html body .sandbox-bar.is-visible {
+    transform: translate3d(0, 0, 0) !important;
+  }
+
+  html body .sandbox-bar-title {
+    display: block !important;
+    font-size: .72rem !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+  }
+
+  html body .sandbox-bar-chips {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    gap: 5px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-inline-end: 1px !important;
+    scrollbar-width: thin !important;
+  }
+
+  html body .sandbox-bar-chip {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 30px !important;
+    display: grid !important;
+    grid-template-columns: 8px minmax(0, 1fr) 24px !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 4px 6px !important;
+    border-radius: 10px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    line-height: 1 !important;
+    font-size: .73rem !important;
+  }
+
+  html body .sandbox-bar-chip-text {
+    min-width: 0 !important;
+    display: block !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    overflow-wrap: normal !important;
+    word-break: keep-all !important;
+  }
+
+  html body .sandbox-bar-chip-provider,
+  html body .sandbox-bar-chip-track,
+  html body .sandbox-bar-chip-category,
+  html body .sandbox-bar-chip-sep {
+    display: inline !important;
+    white-space: nowrap !important;
+    overflow-wrap: normal !important;
+    word-break: keep-all !important;
+  }
+
+  html body .sandbox-bar-chip-provider {
+    font-weight: 900 !important;
+  }
+
+  html body .sandbox-bar-chip-track,
+  html body .sandbox-bar-chip-category,
+  html body .sandbox-bar-chip-sep {
+    color: rgba(255, 255, 255, .72) !important;
+    font-weight: 800 !important;
+  }
+
+  html body .sandbox-bar-chip-category {
+    color: rgba(255, 255, 255, .58) !important;
+  }
+
+  html body .sandbox-bar-actions {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+  }
+
+  html body .sandbox-bar-go {
+    min-height: 34px !important;
+    height: 34px !important;
+    padding: 0 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    border-radius: 9px !important;
+    font-size: .76rem !important;
+    white-space: nowrap !important;
+  }
+
+  html body .sandbox-bar-go i {
+    display: inline-block !important;
+  }
 }
