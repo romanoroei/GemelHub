@@ -14664,16 +14664,19 @@ body.h2h-active,
 
   /* ── Advanced search — mobile bottom sheet ── */
 
-  /* Overlay ends ABOVE the mobile nav bar so it's never covered */
+  /* Overlay covers full screen including nav bar */
   .advanced-search-overlay {
     padding: 0 !important;
     align-items: flex-end !important;
-    bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
+    bottom: 0 !important;
+    inset: 0 !important;
+    z-index: 9500 !important;
   }
 
   /* Modal: single scroll container, head stays sticky inside it */
   .advanced-search-modal {
     width: 100% !important;
+    height: 100dvh !important;
     max-height: 100% !important;
     border-radius: 22px 22px 0 0 !important;
     padding: 0 !important;
@@ -14718,13 +14721,14 @@ body.h2h-active,
   }
 
   .advanced-search-head h3 {
-    font-size: .82rem !important;
+    font-size: .98rem !important;
+    line-height: 1.25 !important;
     flex: 1 !important;
     text-align: right !important;
   }
 
   #advanced-search-head-category {
-    font-size: .9rem !important;
+    font-size: 1rem !important;
   }
 
   /* Inner sections padding */
@@ -14925,18 +14929,37 @@ body.h2h-active,
   .advanced-search-compare-table td {
     padding: 6px 4px !important;
     font-size: .7rem !important;
+    vertical-align: middle !important;
   }
 
   /* Select checkbox column — narrow */
   .advanced-search-compare-select {
-    width: 32px !important;
-    min-width: 32px !important;
+    width: 28px !important;
+    min-width: 28px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+  }
+
+  .advanced-search-compare-rank {
+    width: 26px !important;
+    min-width: 26px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
   }
 
   /* Company column */
   .advanced-search-compare-company {
     min-width: 0 !important;
-    width: 35% !important;
+    width: 32% !important;
+    vertical-align: middle !important;
+  }
+
+  .advanced-search-compare-company > div {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    gap: 1px !important;
+    min-height: 32px !important;
   }
 
   .advanced-search-compare-company strong {
@@ -14947,9 +14970,10 @@ body.h2h-active,
 
   .advanced-search-compare-company small,
   .adv-track-label {
-    font-size: .6rem !important;
+    font-size: .54rem !important;
     display: block !important;
     margin-top: 1px !important;
+    line-height: 1.1 !important;
   }
 
   /* #id badge stays inline inside strong */
@@ -14964,7 +14988,7 @@ body.h2h-active,
     min-width: 18px !important;
     height: 18px !important;
     font-size: .62rem !important;
-    margin-inline-end: 3px !important;
+    margin-inline-end: 0 !important;
     flex-shrink: 0 !important;
   }
 
@@ -14972,6 +14996,8 @@ body.h2h-active,
   .advanced-search-compare-value {
     min-width: 0 !important;
     width: auto !important;
+    text-align: center !important;
+    vertical-align: middle !important;
   }
 
   .advanced-search-compare-value strong {
@@ -14983,6 +15009,8 @@ body.h2h-active,
   .advanced-search-compare-score {
     width: 36px !important;
     min-width: 36px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
   }
 
   .advanced-search-compare-score span {

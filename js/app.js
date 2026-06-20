@@ -7963,6 +7963,8 @@ const App = (() => {
       localStorage.setItem(ADVANCED_SEARCH_HISTORY_KEY, JSON.stringify(filtered.slice(0, 3)));
     } catch(e) {}
     renderAdvancedSearchHistory();
+    const historyEl = document.getElementById('advanced-search-history');
+    if (historyEl) historyEl.hidden = false;
   }
 
   function loadAdvancedSearchHistory() {
@@ -13568,11 +13570,13 @@ const App = (() => {
 
       return `
         <tr class="advanced-search-compare-row" data-fundid="${item.fundId}">
+          <td class="advanced-search-compare-rank">
+            <span class="advanced-search-rank">${index + 1}</span>
+          </td>
           <td class="advanced-search-compare-select">
             <input type="checkbox" class="advanced-search-select-fund" data-adv-compare-fund="${item.fundId}" aria-label="בחר את ${item.providerName} להשוואה">
           </td>
           <td class="advanced-search-compare-company">
-            <span class="advanced-search-rank">${index + 1}</span>
             <div>
               <strong>${item.providerName} <span class="adv-fund-id">#${item.fundId}</span></strong>
               <small class="adv-track-label"><span class="advanced-search-track-name">${item.trackLabel}</span></small>
@@ -13607,6 +13611,7 @@ const App = (() => {
         <table class="advanced-search-compare-table">
           <thead>
             <tr>
+              <th class="advanced-search-compare-rank">#</th>
               <th class="advanced-search-compare-select">בחר</th>
               <th>קופה</th>
               ${headerCols}
