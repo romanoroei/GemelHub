@@ -16668,12 +16668,12 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   }
 
   html body.mobile-filter-open #sidebar .sidebar-section {
-    padding: 7px 6px !important;
+    padding: 4px 6px !important;
     border-bottom-color: rgba(226, 232, 240, .72) !important;
   }
 
   html body.mobile-filter-open #sidebar .sidebar-section-title {
-    margin-bottom: 5px !important;
+    margin-bottom: 3px !important;
     gap: 5px !important;
     font-size: .82rem !important;
     line-height: 1.15 !important;
@@ -16689,17 +16689,17 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   }
 
   html body.mobile-filter-open #sidebar .filter-checkbox {
-    min-height: 28px !important;
-    padding: 3px 5px !important;
+    min-height: 22px !important;
+    padding: 1px 5px !important;
     gap: 5px !important;
     border-radius: 5px !important;
-    font-size: .86rem !important;
-    line-height: 1.1 !important;
+    font-size: .84rem !important;
+    line-height: 1.05 !important;
   }
 
   html body.mobile-filter-open #sidebar .filter-checkbox-sub {
     padding-right: 13px !important;
-    font-size: .82rem !important;
+    font-size: .8rem !important;
   }
 
   html body.mobile-filter-open #sidebar .filter-checkbox input {
