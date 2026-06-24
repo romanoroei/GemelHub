@@ -595,6 +595,21 @@ const App = (() => {
     document.body.classList.toggle('mobile-sticky-header-fixed', shouldFix);
   }
 
+  function scrollMainPageToTop() {
+    document.body.classList.remove('sticky-gap-mask-active', 'mobile-sticky-header-fixed');
+    document.documentElement.style.removeProperty('--mobile-sticky-header-h');
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    [120, 360, 720].forEach(delay => {
+      setTimeout(() => {
+        if (window.scrollY <= 4) {
+          document.body.classList.remove('sticky-gap-mask-active', 'mobile-sticky-header-fixed');
+          document.documentElement.style.removeProperty('--mobile-sticky-header-h');
+          window.scrollTo(0, 0);
+        }
+      }, delay);
+    });
+  }
+
 
   // ─── INIT ─────────────────────────────────────────────────────
   async function init() {
@@ -631,6 +646,7 @@ const App = (() => {
     window.addEventListener('scroll', updateStickyGapMask, { passive: true });
     window.addEventListener('scroll', updateMobileStickyHeader, { passive: true });
     updateStickyGapMask();
+    window.gemelhubScrollToTop = scrollMainPageToTop;
     window.addEventListener('beforeunload', () => {
       // Force-read all visible sandbox inputs into state before saving,
       // in case a field was edited but blur/change hadn't fired yet.

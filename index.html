@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=mobile-fixes49-20260624" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-fixes50-20260624" />
   <style>
     @media (max-width: 760px) {
       .advanced-search-overlay { z-index: 9500 !important; }
@@ -497,7 +497,10 @@
 (function(){
   const btn = document.getElementById('scroll-top-btn');
   window.addEventListener('scroll', () => btn.classList.toggle('visible', window.scrollY > 300), {passive:true});
-  btn.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
+  btn.addEventListener('click', () => {
+    if (typeof window.gemelhubScrollToTop === 'function') window.gemelhubScrollToTop();
+    else window.scrollTo({top:0,left:0,behavior:'smooth'});
+  });
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -521,6 +524,6 @@
 
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
-<script src="js/app.js?v=mobile-fixes49-20260624"></script>
+<script src="js/app.js?v=mobile-fixes50-20260624"></script>
 </body>
 </html>
