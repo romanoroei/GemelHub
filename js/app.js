@@ -2774,20 +2774,27 @@ const App = (() => {
       return (sameRowBlocks.length ? sameRowBlocks : [target])
         .reduce((min, block) => Math.min(min, block.getBoundingClientRect().top), targetTop);
     })();
+    const offset = getTrackScrollOffset();
+    const y = rowTop + window.scrollY - offset - 8;
+    window.scrollTo({ top: Math.max(0, y), behavior: 'auto' });
+  }
+
+  function getTrackScrollOffset() {
     const rootStyle = getComputedStyle(document.documentElement);
     const heroH = parseFloat(rootStyle.getPropertyValue('--hero-h')) || 0;
-    const stickyH = document.querySelector('.sticky-header')?.offsetHeight || 96;
-    const y = rowTop + window.scrollY - heroH - stickyH - 24;
-    window.scrollTo({ top: Math.max(0, y), behavior: 'auto' });
+    const stickyGap = parseFloat(rootStyle.getPropertyValue('--sticky-table-gap')) || 0;
+    const mobileHeaderH = parseFloat(rootStyle.getPropertyValue('--mobile-sticky-header-h')) || 0;
+    const stickyHeader = document.querySelector('.sticky-header');
+    const stickyH = stickyHeader && getComputedStyle(stickyHeader).display !== 'none'
+      ? stickyHeader.getBoundingClientRect().height
+      : 0;
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+    return heroH + stickyGap + (isMobile ? mobileHeaderH : stickyH);
   }
 
   function scrollToTrackBlockTop(block, behavior = 'smooth') {
     if (!block) return;
-    const rootStyle = getComputedStyle(document.documentElement);
-    const heroH = parseFloat(rootStyle.getPropertyValue('--hero-h')) || 0;
-    const stickyGap = parseFloat(rootStyle.getPropertyValue('--sticky-table-gap')) || 0;
-    const stickyH = document.querySelector('.sticky-header')?.offsetHeight || 96;
-    const y = block.getBoundingClientRect().top + window.scrollY - heroH - stickyH - stickyGap + 4;
+    const y = block.getBoundingClientRect().top + window.scrollY - getTrackScrollOffset() + 4;
     window.scrollTo({ top: Math.max(0, y), behavior });
   }
 
@@ -3146,8 +3153,7 @@ const App = (() => {
         setTimeout(() => {
           const tableTop = document.getElementById('tracks-area') || document.getElementById('tracks-container');
           if (tableTop) {
-            const stickyH = document.querySelector('.sticky-header')?.offsetHeight || 96;
-            const y = tableTop.getBoundingClientRect().top + window.scrollY - stickyH - 16;
+            const y = tableTop.getBoundingClientRect().top + window.scrollY - getTrackScrollOffset() - 8;
             window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
           }
         }, 150);
