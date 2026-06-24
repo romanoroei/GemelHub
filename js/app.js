@@ -20,6 +20,7 @@ const App = (() => {
     trailing7Y: { loading: false, categoryId: null, targetPopulation: null, map: null, requestId: 0, error: null },
     pendingTrackId: null,    // task 8: ניווט ישיר למסלול מדף הבית
     pendingCompareTopScroll: false,
+    pendingInitialTableTopScroll: false,
     pendingActuarialFundId: null,
     pendingActuarialCompanyName: null,
     pendingActuarialHighlightDone: false,
@@ -589,6 +590,12 @@ const App = (() => {
       document.documentElement.style.removeProperty('--mobile-sticky-header-h');
       return;
     }
+    const heroVisible = hero.offsetHeight > 1 && getComputedStyle(hero).display !== 'none';
+    if (!heroVisible) {
+      document.body.classList.remove('mobile-sticky-header-fixed');
+      document.documentElement.style.removeProperty('--mobile-sticky-header-h');
+      return;
+    }
     const headerH = Math.ceil(header.getBoundingClientRect().height || 0);
     document.documentElement.style.setProperty('--mobile-sticky-header-h', `${headerH}px`);
     const shouldFix = window.scrollY >= Math.max(0, hero.offsetTop + hero.offsetHeight - 1);
@@ -689,10 +696,13 @@ const App = (() => {
     const urlView = urlParams.get('view');
     const urlFund = urlParams.get('fund');
     const urlProvider = urlParams.get('provider');
+    const isMobileViewport = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+    const shouldStartAtFirstTable = isMobileViewport && !urlTrack && !urlApp && !urlView && !urlParams.get('openAdvanced');
     state.pendingCompareMode = urlView === 'actuarial' ? 'actuarial' : null;
     state.pendingActuarialFundId = urlView === 'actuarial' ? (urlFund || null) : null;
     state.pendingActuarialCompanyName = urlView === 'actuarial' ? (urlProvider || null) : null;
     state.pendingActuarialHighlightDone = false;
+    state.pendingInitialTableTopScroll = !!shouldStartAtFirstTable;
     if (urlApp === 'h2h') {
       switchToH2H();
     } else if (urlApp === 'sandbox') {
@@ -2791,7 +2801,7 @@ const App = (() => {
         .reduce((min, block) => Math.min(min, block.getBoundingClientRect().top), targetTop);
     })();
     const offset = getTrackScrollOffset();
-    const y = rowTop + window.scrollY - offset - 8;
+    const y = rowTop + window.scrollY - offset;
     window.scrollTo({ top: Math.max(0, y), behavior: 'auto' });
   }
 
@@ -2805,12 +2815,15 @@ const App = (() => {
       ? stickyHeader.getBoundingClientRect().height
       : 0;
     const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
-    return heroH + stickyGap + (isMobile ? mobileHeaderH : stickyH);
+    if (isMobile) {
+      return document.body.classList.contains('mobile-sticky-header-fixed') ? mobileHeaderH : 0;
+    }
+    return heroH + stickyGap + stickyH;
   }
 
   function scrollToTrackBlockTop(block, behavior = 'smooth') {
     if (!block) return;
-    const y = block.getBoundingClientRect().top + window.scrollY - getTrackScrollOffset() + 4;
+    const y = block.getBoundingClientRect().top + window.scrollY - getTrackScrollOffset();
     window.scrollTo({ top: Math.max(0, y), behavior });
   }
 
@@ -3148,7 +3161,7 @@ const App = (() => {
       refreshCustomRangeAvailability()
         .then(() => {
           if (state.activeCategoryId === requestedCategoryId) renderComparisonView();
-          if (state.activeCategoryId === requestedCategoryId && state.pendingCompareTopScroll) {
+          if (state.activeCategoryId === requestedCategoryId && (state.pendingCompareTopScroll || state.pendingInitialTableTopScroll)) {
             setTimeout(scrollToComparisonTableTop, 0);
           }
         })
@@ -3164,12 +3177,19 @@ const App = (() => {
           state.pendingTrackId = null;
           state.pendingCompareTopScroll = false;
         }, 2800);
+      } else if (state.pendingInitialTableTopScroll) {
+        setTimeout(scrollToComparisonTableTop, 80);
+        setTimeout(scrollToComparisonTableTop, 420);
+        setTimeout(() => {
+          scrollToComparisonTableTop();
+          state.pendingInitialTableTopScroll = false;
+        }, 900);
       } else if (state.pendingTrackId && getCurrentCompareMode() === 'tracks') {
         state.pendingTrackId = null;
         setTimeout(() => {
           const tableTop = document.getElementById('tracks-area') || document.getElementById('tracks-container');
           if (tableTop) {
-            const y = tableTop.getBoundingClientRect().top + window.scrollY - getTrackScrollOffset() - 8;
+            const y = tableTop.getBoundingClientRect().top + window.scrollY - getTrackScrollOffset();
             window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
           }
         }, 150);
@@ -3517,7 +3537,7 @@ const App = (() => {
       }
     }
 
-    if (state.pendingCompareTopScroll) {
+    if (state.pendingCompareTopScroll || state.pendingInitialTableTopScroll) {
       requestAnimationFrame(() => {
         scrollToComparisonTableTop();
         requestAnimationFrame(scrollToComparisonTableTop);
