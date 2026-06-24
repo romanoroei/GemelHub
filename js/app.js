@@ -700,7 +700,8 @@ const App = (() => {
     const urlProvider = urlParams.get('provider');
     const isMobileViewport = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
     const shouldStartAtFirstTable = !!window.__GEMELHUB_FORCE_TABLE_TOP__ ||
-      (isMobileViewport && !urlTrack && !urlApp && !urlView && !urlParams.get('openAdvanced'));
+      (isMobileViewport && !!window.__GEMELHUB_IS_RELOAD__ && !urlApp && !urlView && !urlParams.get('openAdvanced'));
+    const effectiveUrlTrack = shouldStartAtFirstTable ? null : urlTrack;
     state.pendingCompareMode = urlView === 'actuarial' ? 'actuarial' : null;
     state.pendingActuarialFundId = urlView === 'actuarial' ? (urlFund || null) : null;
     state.pendingActuarialCompanyName = urlView === 'actuarial' ? (urlProvider || null) : null;
@@ -712,8 +713,8 @@ const App = (() => {
     } else if (urlApp === 'sandbox') {
       switchToSandbox();
     } else if (urlCat && CONFIG.PRODUCT_CATEGORIES.find(c => c.id === urlCat && !REMOVED_CATEGORY_IDS.has(c.id))) {
-      state.pendingTrackId = urlTrack || null;
-      state.pendingCompareTopScroll = !!urlTrack;
+      state.pendingTrackId = effectiveUrlTrack || null;
+      state.pendingCompareTopScroll = !!effectiveUrlTrack;
       switchCategory(urlCat);
     } else {
       state.pendingTrackId = null;
