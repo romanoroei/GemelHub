@@ -6,8 +6,13 @@
   <script>
     (function () {
       try {
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        var params = new URLSearchParams(window.location.search);
+        var isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+        window.__GEMELHUB_FORCE_TABLE_TOP__ = !!(isMobile && !params.get('track') && !params.get('app') && !params.get('view') && !params.get('openAdvanced'));
+        if (window.__GEMELHUB_FORCE_TABLE_TOP__) window.scrollTo(0, 0);
         var consentKey = 'gemelhub_cookie_notice_closed_v2';
-        var forceShow = new URLSearchParams(window.location.search).get('showCookieBanner') === '1';
+        var forceShow = params.get('showCookieBanner') === '1';
         if (forceShow || localStorage.getItem(consentKey) !== '1') {
           document.documentElement.classList.add('show-cookie-banner');
         }
@@ -21,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=mobile-fixes52-20260624" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-fixes53-20260624" />
   <style>
     @media (max-width: 760px) {
       .advanced-search-overlay { z-index: 9500 !important; }
@@ -524,6 +529,6 @@
 
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
-<script src="js/app.js?v=mobile-fixes52-20260624"></script>
+<script src="js/app.js?v=mobile-fixes53-20260624"></script>
 </body>
 </html>

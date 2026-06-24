@@ -655,6 +655,7 @@ const App = (() => {
     updateStickyGapMask();
     window.gemelhubScrollToTop = scrollMainPageToTop;
     window.gemelhubScrollToComparisonTableTop = scrollToComparisonTableTop;
+    window.gemelhubStartFirstTableScrollGuard = startMobileFirstTableScrollGuard;
     window.addEventListener('beforeunload', () => {
       // Force-read all visible sandbox inputs into state before saving,
       // in case a field was edited but blur/change hadn't fired yet.
@@ -698,12 +699,14 @@ const App = (() => {
     const urlFund = urlParams.get('fund');
     const urlProvider = urlParams.get('provider');
     const isMobileViewport = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
-    const shouldStartAtFirstTable = isMobileViewport && !urlTrack && !urlApp && !urlView && !urlParams.get('openAdvanced');
+    const shouldStartAtFirstTable = !!window.__GEMELHUB_FORCE_TABLE_TOP__ ||
+      (isMobileViewport && !urlTrack && !urlApp && !urlView && !urlParams.get('openAdvanced'));
     state.pendingCompareMode = urlView === 'actuarial' ? 'actuarial' : null;
     state.pendingActuarialFundId = urlView === 'actuarial' ? (urlFund || null) : null;
     state.pendingActuarialCompanyName = urlView === 'actuarial' ? (urlProvider || null) : null;
     state.pendingActuarialHighlightDone = false;
     state.pendingInitialTableTopScroll = !!shouldStartAtFirstTable;
+    if (state.pendingInitialTableTopScroll) startMobileFirstTableScrollGuard();
     if (urlApp === 'h2h') {
       switchToH2H();
     } else if (urlApp === 'sandbox') {
@@ -2806,6 +2809,30 @@ const App = (() => {
     window.scrollTo({ top: Math.max(0, y), behavior: 'auto' });
   }
 
+  function startMobileFirstTableScrollGuard(duration = 9000) {
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+    if (!isMobile) return;
+    const startedAt = Date.now();
+    let stableHits = 0;
+    const tick = () => {
+      const target = document.querySelector('#tracks-container .track-block') ||
+        document.getElementById('tracks-container') ||
+        document.getElementById('tracks-area');
+      if (target) {
+        scrollToComparisonTableTop();
+        const top = target.getBoundingClientRect().top - getTrackScrollOffset();
+        stableHits = Math.abs(top) <= 4 ? stableHits + 1 : 0;
+      }
+      const elapsed = Date.now() - startedAt;
+      if (elapsed < duration && (stableHits < 8 || elapsed < 3200)) {
+        setTimeout(tick, 180);
+      } else {
+        state.pendingInitialTableTopScroll = false;
+      }
+    };
+    tick();
+  }
+
   function getTrackScrollOffset() {
     const rootStyle = getComputedStyle(document.documentElement);
     const heroH = parseFloat(rootStyle.getPropertyValue('--hero-h')) || 0;
@@ -3179,15 +3206,7 @@ const App = (() => {
           state.pendingCompareTopScroll = false;
         }, 2800);
       } else if (state.pendingInitialTableTopScroll) {
-        setTimeout(scrollToComparisonTableTop, 80);
-        setTimeout(scrollToComparisonTableTop, 420);
-        setTimeout(scrollToComparisonTableTop, 900);
-        setTimeout(scrollToComparisonTableTop, 1600);
-        setTimeout(scrollToComparisonTableTop, 2600);
-        setTimeout(() => {
-          scrollToComparisonTableTop();
-          state.pendingInitialTableTopScroll = false;
-        }, 4200);
+        startMobileFirstTableScrollGuard();
       } else if (state.pendingTrackId && getCurrentCompareMode() === 'tracks') {
         state.pendingTrackId = null;
         setTimeout(() => {
@@ -13886,9 +13905,10 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('pageshow', () => {
     const params = new URLSearchParams(window.location.search);
     const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
-    const shouldStartAtFirstTable = isMobile && !params.get('track') && !params.get('app') && !params.get('view') && !params.get('openAdvanced');
-    if (shouldStartAtFirstTable && typeof window.gemelhubScrollToComparisonTableTop === 'function') {
-      [0, 300, 900, 1800].forEach(delay => setTimeout(window.gemelhubScrollToComparisonTableTop, delay));
+    const shouldStartAtFirstTable = !!window.__GEMELHUB_FORCE_TABLE_TOP__ ||
+      (isMobile && !params.get('track') && !params.get('app') && !params.get('view') && !params.get('openAdvanced'));
+    if (shouldStartAtFirstTable && typeof window.gemelhubStartFirstTableScrollGuard === 'function') {
+      window.gemelhubStartFirstTableScrollGuard();
     } else if (!location.hash) {
       window.scrollTo(0, 0);
     }
