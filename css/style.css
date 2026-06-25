@@ -16170,6 +16170,27 @@ body.h2h-active,
     font-weight: 900;
     line-height: 1.12;
     white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .mobile-sticky-head-cell[data-sortfield] {
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  .mobile-sticky-head-cell .sort-arrow.inactive {
+    display: none !important;
+  }
+
+  .mobile-sticky-head-cell .sort-arrow.active {
+    display: inline-block !important;
+    margin-right: 2px !important;
+    color: #92400e !important;
+    font-size: .95rem !important;
+    font-weight: 950 !important;
+    line-height: 1 !important;
+    transform: translateY(1px) scale(1.06);
+    transform-origin: center;
   }
 
   .mobile-sticky-head-cell.is-rank {

@@ -3638,6 +3638,17 @@ const App = (() => {
     mobileStickyThead = document.createElement('div');
     mobileStickyThead.className = 'mobile-sticky-thead-clone';
     mobileStickyThead.hidden = true;
+    mobileStickyThead.addEventListener('click', event => {
+      const cell = event.target.closest('.mobile-sticky-head-cell[data-sortfield]');
+      if (!cell || !mobileStickyTheadBlock) return;
+      const field = cell.dataset.sortfield;
+      const sourceTh = Array.from(mobileStickyTheadBlock.querySelectorAll('thead th[data-sortfield]'))
+        .find(th => th.dataset.sortfield === field);
+      if (!sourceTh) return;
+      event.preventDefault();
+      event.stopPropagation();
+      sourceTh.click();
+    });
     document.body.appendChild(mobileStickyThead);
     return mobileStickyThead;
   }
@@ -3690,18 +3701,40 @@ const App = (() => {
       .trim();
   }
 
+  function getMobileStickyHeadHtml(th) {
+    if (!th) return '';
+    const clone = th.cloneNode(true);
+    clone.querySelectorAll('.sort-arrow.inactive').forEach(el => el.remove());
+    return clone.innerHTML
+      .replace(/[⇅↕]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
   function renderMobileStickyHeadCell(cell, th) {
+    cell.classList.toggle('is-sorted', !!th?.classList.contains('col-sorted-head'));
+    if (th?.dataset?.sortfield) {
+      cell.dataset.sortfield = th.dataset.sortfield;
+      cell.setAttribute('role', 'button');
+      cell.setAttribute('aria-sort', th.getAttribute('aria-sort') || 'none');
+      cell.tabIndex = 0;
+    } else {
+      delete cell.dataset.sortfield;
+      cell.removeAttribute('role');
+      cell.removeAttribute('aria-sort');
+      cell.removeAttribute('tabindex');
+    }
+
     const datesEl = th?.querySelector('.custom-range-th-dates');
     if (datesEl) {
-      const labelEl = th.querySelector('.custom-range-th');
       cell.classList.add('is-custom-range');
-      cell.innerHTML = `<span>${labelEl ? labelEl.textContent.trim() : 'טווח מותאם'}</span><small>${datesEl.textContent.trim()}</small>`;
+      cell.innerHTML = getMobileStickyHeadHtml(th);
       cell.style.setProperty('white-space', 'normal', 'important');
       cell.style.setProperty('line-height', '1.08', 'important');
       return;
     }
     cell.classList.remove('is-custom-range');
-    cell.textContent = getMobileStickyHeadText(th);
+    cell.innerHTML = getMobileStickyHeadHtml(th) || getMobileStickyHeadText(th);
     cell.style.removeProperty('white-space');
     cell.style.removeProperty('line-height');
   }
@@ -4166,6 +4199,7 @@ const App = (() => {
       bindTableControls(block);
       requestAnimationFrame(() => syncAllocationIconOverflow(block));
       applyMobileTheadSticky();
+      scheduleMobileStickyTheadUpdate();
     };
 
     // רישום ה-renderer לטעינה גורפת בעת toggle

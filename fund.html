@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=mobile-fixes57-20260626" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-fixes58-20260626" />
   <link rel="stylesheet" href="css/fund.css?v=mobile-fixes18-20260626" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -1679,11 +1679,12 @@ function renderPeersTable(myFundId, myName) {
   const monthCol = latestPeriod ? formatReportPeriod(latestPeriod) : 'חודשי';
 
   const arrow = (f) => {
-    if (window.matchMedia && window.matchMedia('(max-width: 760px)').matches) return '';
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+    if (isMobile && peerSort.field !== f) return '';
     if (peerSort.field !== f) return '<span style="color:#1a1a1a;font-size:.7rem;">⇅</span>';
     return peerSort.dir === 'desc'
-      ? '<span style="color:var(--blue);font-size:.7rem;">↓</span>'
-      : '<span style="color:var(--blue);font-size:.7rem;">↑</span>';
+      ? '<span class="sort-arrow active" style="color:var(--blue);font-size:.7rem;">↓</span>'
+      : '<span class="sort-arrow active" style="color:var(--blue);font-size:.7rem;">↑</span>';
   };
 
   // ממוצע קבוצה
