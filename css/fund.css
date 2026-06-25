@@ -3005,7 +3005,6 @@ body.fund-page .fund-sticky-bar .fsb-id {
     top: auto !important;
   }
 
-  html body.fund-page #peers-table-wrap table.track-table thead th .sort-arrow,
   html body.fund-page #peers-table-wrap table.track-table thead th .th-yield-sub,
   html body.fund-page #peers-table-wrap table.track-table thead th small {
     display: none !important;
