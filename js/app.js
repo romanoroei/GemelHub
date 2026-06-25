@@ -4444,7 +4444,6 @@ const App = (() => {
 
   function removeMobileTableScrollbar(wrapper) {
     if (!wrapper) return;
-    wrapper.classList.remove('has-left-overflow');
     wrapper.nextElementSibling?.classList?.contains('mobile-table-scrollbar') && wrapper.nextElementSibling.remove();
   }
 
@@ -4484,7 +4483,6 @@ const App = (() => {
     const update = () => {
       const max = maxScroll();
       rail.hidden = max <= 2;
-      wrapper.classList.toggle('has-left-overflow', max > 2 && getProgress() < 0.98);
       if (rail.hidden) return;
       const trackWidth = track.clientWidth || rail.clientWidth;
       const thumbWidth = Math.max(36, Math.round((wrapper.clientWidth / wrapper.scrollWidth) * trackWidth));
@@ -6625,8 +6623,7 @@ const App = (() => {
       return sortDir === 'desc' ? 'aria-sort="descending"' : 'aria-sort="ascending"';
     };
     const sortedThClass = (f, extraClass = '') => {
-      const sortClass = sortField === f ? `col-sorted-head sort-${sortDir === 'asc' ? 'asc' : 'desc'}` : '';
-      const classes = [extraClass, sortClass].filter(Boolean);
+      const classes = [extraClass, sortField === f ? 'col-sorted-head' : ''].filter(Boolean);
       return classes.length ? ` class="${classes.join(' ')}"` : '';
     };
 

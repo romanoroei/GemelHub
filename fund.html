@@ -1697,7 +1697,7 @@ function renderPeersTable(myFundId, myName) {
   const avg12m = y12mAvgVals.length ? y12mAvgVals.reduce((a,b) => a+b, 0) / y12mAvgVals.length : null;
 
   const sc = (f) => peerSort.field === f ? ' col-sorted' : '';
-  const sch = (f) => peerSort.field === f ? ` col-sorted-head sort-${peerSort.dir === 'asc' ? 'asc' : 'desc'}` : '';
+  const sch = (f) => peerSort.field === f ? ' col-sorted-head' : '';
 
   // מדליית זהב / עגבנייה — מקסימום ומינימום לכל עמודת תשואה
   const _pSafeMax = (arr) => { const v = arr.filter(x => x != null && isFinite(x)); return v.length ? Math.max(...v) : null; };
@@ -1976,7 +1976,6 @@ function setupFundMobileTableScrollbar(wrapper) {
   const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
   let rail = wrapper.nextElementSibling;
   if (!isMobile) {
-    wrapper.classList.remove('has-left-overflow');
     if (rail && rail.classList.contains('mobile-table-scrollbar')) rail.remove();
     return;
   }
@@ -1999,12 +1998,11 @@ function setupFundMobileTableScrollbar(wrapper) {
   const update = () => {
     const max = maxScroll();
     rail.hidden = max <= 2;
-    const progress = max ? Math.max(0, Math.min(1, Math.abs(wrapper.scrollLeft) / max)) : 0;
-    wrapper.classList.toggle('has-left-overflow', max > 2 && progress < 0.98);
     if (rail.hidden) return;
     const trackWidth = track.clientWidth || rail.clientWidth;
     const thumbWidth = Math.max(36, Math.round((wrapper.clientWidth / wrapper.scrollWidth) * trackWidth));
     const travel = Math.max(0, trackWidth - thumbWidth);
+    const progress = max ? Math.max(0, Math.min(1, Math.abs(wrapper.scrollLeft) / max)) : 0;
     const visualProgress = isRtl() ? 1 - progress : progress;
     thumb.style.width = `${thumbWidth}px`;
     thumb.style.transform = `translateX(${Math.round(travel * visualProgress)}px)`;
