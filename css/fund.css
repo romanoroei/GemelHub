@@ -2768,8 +2768,8 @@ body.fund-page .fund-sticky-bar .fsb-id {
   }
 
   body.fund-page #peers-table-wrap .track-table th.col-sorted-head {
-    background: #fefce8 !important;
-    color: #92400e !important;
+    position: relative !important;
+    padding-left: 22px !important;
   }
 }
 
@@ -3362,24 +3362,45 @@ body.fund-page #peers-table-wrap table.track-table th {
 
 body.fund-page #peers-table-wrap table.track-table th.col-sorted-head {
   position: relative !important;
+  padding-left: 22px !important;
   border-bottom-color: rgba(226, 232, 240, .9) !important;
   box-shadow: none !important;
 }
 
 body.fund-page #peers-table-wrap table.track-table th.col-sorted-head::after {
-  content: "" !important;
+  content: "↓" !important;
   position: absolute !important;
-  right: 50% !important;
-  left: auto !important;
-  bottom: 0 !important;
-  width: 42px !important;
-  max-width: calc(100% - 10px) !important;
-  height: 2px !important;
-  background: #c9a621 !important;
+  left: 5px !important;
+  right: auto !important;
+  top: 50% !important;
+  bottom: auto !important;
+  width: 16px !important;
+  max-width: none !important;
+  height: 16px !important;
   border-radius: 999px !important;
-  transform: translateX(50%) !important;
+  background: #0c2134 !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  line-height: 16px !important;
+  text-align: center !important;
+  transform: translateY(-50%) !important;
   animation: none !important;
   pointer-events: none !important;
+}
+
+body.fund-page #peers-table-wrap table.track-table th.col-sorted-head.sort-asc::after {
+  content: "↑" !important;
+}
+
+body.fund-page #peers-table-wrap table.track-table th.col-sorted-head .sort-arrow.active {
+  display: none !important;
+}
+
+@media (max-width: 760px) {
+  body.fund-page #peers-table-wrap .peers-table-scroll.has-left-overflow {
+    box-shadow: inset 22px 0 18px -18px rgba(15, 23, 42, .52) !important;
+  }
 }
 
 body.fund-page .fund-peers-card #assets-chart-legend span:nth-child(2) {
