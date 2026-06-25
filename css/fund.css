@@ -2832,6 +2832,13 @@ body.fund-page .fund-sticky-bar .fsb-id {
     max-width: 64px !important;
   }
 
+  html body.fund-page #peers-table-wrap table.track-table:not(.fund-peer-yearly-table) th:nth-child(3),
+  html body.fund-page #peers-table-wrap table.track-table:not(.fund-peer-yearly-table) td:nth-child(3) {
+    width: 72px !important;
+    min-width: 72px !important;
+    max-width: 72px !important;
+  }
+
   html body.fund-page #peers-table-wrap table.track-table .peer-yield-value,
   html body.fund-page #peers-table-wrap table.track-table .peer-yield-number,
   html body.fund-page #peers-table-wrap table.track-table td {

@@ -14606,6 +14606,15 @@ body.h2h-active,
     max-width: 62px !important;
   }
 
+  #tracks-container table.track-table:not(.has-yearly-returns) th:nth-child(3),
+  #tracks-container table.track-table:not(.has-yearly-returns) td:nth-child(3),
+  table.track-table:not(.has-yearly-returns) th:nth-child(3),
+  table.track-table:not(.has-yearly-returns) td:nth-child(3) {
+    width: 72px !important;
+    min-width: 72px !important;
+    max-width: 72px !important;
+  }
+
   #tracks-container table.track-table .provider-cell,
   #tracks-container:not(.tracks-two-col-blocked) table.track-table .provider-cell,
   .provider-cell {
@@ -16204,10 +16213,9 @@ body.h2h-active,
     width: 150px;
     z-index: 3002;
     direction: rtl;
-    justify-content: flex-start;
-    text-align: right;
-    padding-inline-start: 8px;
-    padding-inline-end: 4px;
+    justify-content: center;
+    text-align: center;
+    padding-inline: 5px;
   }
 
   .sandbox-bar {
@@ -16269,10 +16277,9 @@ body.h2h-active,
 
   html body .mobile-sticky-head-cell.is-manager {
     direction: rtl !important;
-    justify-content: flex-start !important;
-    text-align: right !important;
-    padding-inline-start: 8px !important;
-    padding-inline-end: 4px !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding-inline: 5px !important;
   }
 
   html body .mobile-category-sheet {
