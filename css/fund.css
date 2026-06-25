@@ -3381,6 +3381,23 @@ body.fund-page #peers-table-wrap table.track-table th.col-sorted-head::after {
   pointer-events: none !important;
 }
 
+@media (max-width: 760px) {
+  html body.fund-page #peers-table-wrap,
+  html body.fund-page #peers-table-wrap .peers-table-scroll {
+    -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, .58) 0, #000 24px, #000 100%);
+    mask-image: linear-gradient(to right, rgba(0, 0, 0, .58) 0, #000 24px, #000 100%);
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table .sort-arrow.active {
+    display: inline-block !important;
+    font-size: .95rem !important;
+    font-weight: 950 !important;
+    line-height: 1 !important;
+    transform: translateY(1px) scale(1.06);
+    transform-origin: center;
+  }
+}
+
 body.fund-page .fund-peers-card #assets-chart-legend span:nth-child(2) {
   display: inline-flex !important;
   align-items: center !important;

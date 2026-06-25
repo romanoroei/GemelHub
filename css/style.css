@@ -13505,7 +13505,17 @@ body.h2h-active,
   }
 
   table.track-table .sort-arrow.active {
-    display: inline !important;
+    display: inline-block !important;
+    font-size: .95rem !important;
+    font-weight: 950 !important;
+    line-height: 1 !important;
+    transform: translateY(1px) scale(1.06);
+    transform-origin: center;
+  }
+
+  html body #tracks-container .track-table-wrapper {
+    -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, .58) 0, #000 24px, #000 100%);
+    mask-image: linear-gradient(to right, rgba(0, 0, 0, .58) 0, #000 24px, #000 100%);
   }
 
   .provider-cell,
