@@ -13500,6 +13500,14 @@ body.h2h-active,
     line-height: 1.05 !important;
   }
 
+  table.track-table .sort-arrow.inactive {
+    display: none !important;
+  }
+
+  table.track-table .sort-arrow.active {
+    display: inline !important;
+  }
+
   .provider-cell,
   #tracks-container table.track-table .provider-cell,
   #tracks-container:not(.tracks-two-col-blocked) table.track-table .provider-cell {
