@@ -3839,6 +3839,7 @@ const App = (() => {
       if (!cell) return;
       const thRect = th.getBoundingClientRect();
       const rawLeft = Math.round(thRect.left - wrapperRect.left);
+      const rawRight = Math.round(wrapperRect.right - thRect.right);
       const width = Math.round(thRect.width);
       const isCustomRangeHead = th.classList.contains('custom-range-col');
       const keepFullWidth = index < 2 || isCustomRangeHead;
@@ -3848,8 +3849,13 @@ const App = (() => {
       const leftClip = keepFullWidth ? 0 : Math.max(0, -rawLeft);
       const rightClip = keepFullWidth ? 0 : Math.max(0, rawLeft + width - visibleRight);
       const isOutsideWrapper = index >= 2 && visibleWidth <= 0;
-      cell.style.setProperty('left', `${toZoomSpace(rawLeft)}px`, 'important');
-      cell.style.setProperty('right', 'auto', 'important');
+      if (index < 2) {
+        cell.style.setProperty('left', 'auto', 'important');
+        cell.style.setProperty('right', `${toZoomSpace(rawRight)}px`, 'important');
+      } else {
+        cell.style.setProperty('left', `${toZoomSpace(rawLeft)}px`, 'important');
+        cell.style.setProperty('right', 'auto', 'important');
+      }
       cell.style.setProperty('width', `${toZoomSpace(width)}px`, 'important');
       cell.style.setProperty('min-width', `${toZoomSpace(width)}px`, 'important');
       cell.style.setProperty('max-width', `${toZoomSpace(width)}px`, 'important');
