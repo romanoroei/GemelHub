@@ -5771,7 +5771,7 @@ const App = (() => {
             <td>
               <div class="sandbox-track-cell">
                 <button type="button" class="sandbox-track-link" data-sandbox-track-cat="${item.categoryId}" data-sandbox-track-id="${item.trackId}">${item.trackLabel}</button>
-                <div class="sandbox-track-id"><span>#${item.fundId || ''}</span><span class="sandbox-track-id-icons">${allocationIcon}</span></div>
+                <div class="sandbox-track-id"><span class="sandbox-track-hash">#</span><span class="sandbox-track-id-icons">${allocationIcon}</span><span class="sandbox-track-number">${item.fundId || ''}</span></div>
               </div>
             </td>
             <td><input type="number" step="0.01" min="0" max="5" class="sandbox-fee-input"

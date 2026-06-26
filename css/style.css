@@ -10499,7 +10499,7 @@ body.h2h-active,
 .sandbox-cat-table td:nth-child(3),
 .sandbox-cat-table.is-pension-table th:nth-child(4),
 .sandbox-cat-table.is-pension-table td:nth-child(4) {
-  text-align: center;
+  text-align: right;
 }
 .sandbox-cat-table th:nth-child(3),
 .sandbox-cat-table.is-pension-table th:nth-child(4) {
@@ -10527,6 +10527,8 @@ body.h2h-active,
   flex-direction: column;
   gap: 2px;
   min-width: 0;
+  align-items: flex-start;
+  text-align: right;
 }
 .sandbox-provider-link,
 .sandbox-track-link {
@@ -10560,12 +10562,34 @@ body.h2h-active,
   max-width: 100%;
 }
 .sandbox-track-id {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
   color: var(--gray-400);
   direction: ltr;
   font-size: .66rem;
   font-weight: 800;
   line-height: 1;
   text-align: right;
+}
+.sandbox-track-id > span {
+  display: inline-flex;
+  align-items: center;
+}
+.sandbox-track-hash {
+  order: 1;
+}
+.sandbox-track-id-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-inline-start: 1px;
+  order: 2;
+}
+.sandbox-track-number {
+  direction: ltr;
+  order: 3;
 }
 .sandbox-cat-table th.sb-yield-col,
 .sandbox-cat-table td.sb-yield-col {
@@ -10655,14 +10679,22 @@ body.h2h-active,
   text-align: center !important;
 }
 .sb-invest-head > span:first-child {
-  display: inline-flex;
-  vertical-align: middle;
-  margin-bottom: 0;
-  margin-inline-end: 6px;
+  display: block;
+  margin: 0 0 3px;
+  line-height: 1.05;
 }
 .sandbox-cat-mode-toggle {
   display: inline-flex;
   vertical-align: middle;
+}
+.sandbox-cat-table .sb-fee-head {
+  text-align: center;
+  white-space: normal;
+  line-height: 1.08;
+}
+.sandbox-cat-table .sb-fee-head span {
+  display: block;
+  white-space: nowrap;
 }
 .sandbox-cat-table.is-pension-table .sandbox-invest-control {
   justify-content: center;
