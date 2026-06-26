@@ -707,7 +707,6 @@ const App = (() => {
     state.pendingActuarialCompanyName = urlView === 'actuarial' ? (urlProvider || null) : null;
     state.pendingActuarialHighlightDone = false;
     state.pendingInitialTableTopScroll = !!shouldStartAtFirstTable;
-    if (state.pendingInitialTableTopScroll) startMobileFirstTableScrollGuard();
     if (urlApp === 'h2h') {
       switchToH2H();
     } else if (urlApp === 'sandbox') {
@@ -2810,28 +2809,13 @@ const App = (() => {
     window.scrollTo({ top: Math.max(0, y), behavior: 'auto' });
   }
 
-  function startMobileFirstTableScrollGuard(duration = 9000) {
+  function startMobileFirstTableScrollGuard() {
     const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
     if (!isMobile) return;
-    const startedAt = Date.now();
-    let stableHits = 0;
-    const tick = () => {
-      const target = document.querySelector('#tracks-container .track-block') ||
-        document.getElementById('tracks-container') ||
-        document.getElementById('tracks-area');
-      if (target) {
-        scrollToComparisonTableTop();
-        const top = target.getBoundingClientRect().top - getTrackScrollOffset();
-        stableHits = Math.abs(top) <= 4 ? stableHits + 1 : 0;
-      }
-      const elapsed = Date.now() - startedAt;
-      if (elapsed < duration && (stableHits < 8 || elapsed < 3200)) {
-        setTimeout(tick, 180);
-      } else {
-        state.pendingInitialTableTopScroll = false;
-      }
-    };
-    tick();
+    requestAnimationFrame(() => {
+      scrollToComparisonTableTop();
+      state.pendingInitialTableTopScroll = false;
+    });
   }
 
   function getTrackScrollOffset() {
@@ -3833,6 +3817,26 @@ const App = (() => {
       const rawLeft = Math.round(thRect.left - wrapperRect.left);
       const rawRight = Math.round(wrapperRect.right - thRect.right);
       const width = Math.round(thRect.width);
+      if (index === 0) {
+        cell.style.setProperty('left', 'auto', 'important');
+        cell.style.setProperty('right', '0px', 'important');
+        cell.style.setProperty('width', `${toZoomSpace(28)}px`, 'important');
+        cell.style.setProperty('min-width', `${toZoomSpace(28)}px`, 'important');
+        cell.style.setProperty('max-width', `${toZoomSpace(28)}px`, 'important');
+        cell.style.setProperty('visibility', 'visible', 'important');
+        cell.style.setProperty('clip-path', 'none', 'important');
+        return;
+      }
+      if (index === 1) {
+        cell.style.setProperty('left', 'auto', 'important');
+        cell.style.setProperty('right', `${toZoomSpace(28)}px`, 'important');
+        cell.style.setProperty('width', `${toZoomSpace(104)}px`, 'important');
+        cell.style.setProperty('min-width', `${toZoomSpace(104)}px`, 'important');
+        cell.style.setProperty('max-width', `${toZoomSpace(104)}px`, 'important');
+        cell.style.setProperty('visibility', 'visible', 'important');
+        cell.style.setProperty('clip-path', 'none', 'important');
+        return;
+      }
       const isCustomRangeHead = th.classList.contains('custom-range-col');
       const keepFullWidth = index < 2 || isCustomRangeHead;
       const visibleLeft = keepFullWidth ? rawLeft : Math.max(rawLeft, 0);
@@ -13953,13 +13957,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateHeroH();
   window.addEventListener('resize', updateHeroH);
   window.addEventListener('pageshow', () => {
-    const params = new URLSearchParams(window.location.search);
-    const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
-    const shouldStartAtFirstTable = !!window.__GEMELHUB_FORCE_TABLE_TOP__ ||
-      (isMobile && !params.get('track') && !params.get('app') && !params.get('view') && !params.get('openAdvanced'));
-    if (shouldStartAtFirstTable && typeof window.gemelhubStartFirstTableScrollGuard === 'function') {
-      window.gemelhubStartFirstTableScrollGuard();
-    } else if (!location.hash) {
+    if (!location.hash) {
       window.scrollTo(0, 0);
     }
   });

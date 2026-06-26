@@ -17668,6 +17668,20 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     pointer-events: none !important;
   }
 
+  html body .mobile-sticky-head-cell.is-rank {
+    right: 0 !important;
+    width: 28px !important;
+    min-width: 28px !important;
+    max-width: 28px !important;
+  }
+
+  html body .mobile-sticky-head-cell.is-manager {
+    right: 28px !important;
+    width: 104px !important;
+    min-width: 104px !important;
+    max-width: 104px !important;
+  }
+
   html body #tracks-container .track-table-wrapper table.track-table thead,
   html body #tracks-container .track-table-wrapper table.track-table thead tr,
   html body #tracks-container .track-table-wrapper table.track-table thead th {
