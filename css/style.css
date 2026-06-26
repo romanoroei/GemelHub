@@ -17760,13 +17760,13 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
 
   html body .sandbox-page-header {
     position: sticky !important;
-    top: var(--mobile-sticky-header-h, 46px) !important;
+    top: 0 !important;
     z-index: 880 !important;
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) !important;
     align-items: stretch !important;
     gap: 8px !important;
-    margin: 0 -10px calc(var(--mobile-sticky-header-h, 46px) + 12px) !important;
+    margin: 0 -10px 12px !important;
     padding: 8px 10px 10px !important;
     background: rgba(255, 255, 255, .96) !important;
     border-bottom: 1px solid rgba(226, 232, 240, .9) !important;
@@ -17782,7 +17782,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     display: grid !important;
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 6px !important;
-    margin-top: 62px !important;
+    margin-top: 86px !important;
   }
 
   html body .sandbox-add-btn,
@@ -17813,7 +17813,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   }
 
   html body .sandbox-value-bar {
-    top: calc(var(--mobile-sticky-header-h, 46px) + 40px) !important;
+    top: 40px !important;
     right: 10px !important;
     left: 10px !important;
     bottom: auto !important;
@@ -17821,7 +17821,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     max-width: none !important;
     transform: none !important;
     z-index: 890 !important;
-    padding: 8px 10px !important;
+    padding: 9px 10px !important;
     border-radius: 12px !important;
     justify-content: center !important;
     cursor: default !important;
@@ -17835,7 +17835,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   }
 
   html body .sandbox-cat-block-title {
-    flex: 1 1 auto !important;
+    flex: 0 1 auto !important;
   }
 
   html body .sandbox-cat-add-btn {
@@ -17848,17 +17848,24 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     white-space: nowrap !important;
   }
 
+  html body .sandbox-cat-table .sb-col-remove { width: 28px !important; }
   html body .sandbox-cat-table .sb-col-provider { width: 72px !important; }
-  html body .sandbox-cat-table .sb-col-track { width: 88px !important; }
+  html body .sandbox-cat-table .sb-col-track { width: 94px !important; }
   html body .sandbox-cat-table.is-pension-table .sb-col-provider { width: 66px !important; }
-  html body .sandbox-cat-table.is-pension-table .sb-col-track { width: 80px !important; }
+  html body .sandbox-cat-table.is-pension-table .sb-col-track { width: 88px !important; }
 
   html body .sandbox-provider-cell {
     gap: 5px !important;
   }
 
   html body .sandbox-track-id {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
     gap: 2px !important;
+    padding-top: 2px !important;
+    font-size: .66rem !important;
+    line-height: 1.1 !important;
     white-space: nowrap !important;
   }
 
@@ -17881,8 +17888,11 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   }
 
   html body .sandbox-invest-toggle button {
-    min-width: 18px !important;
-    padding: 2px 3px !important;
+    width: 20px !important;
+    min-width: 20px !important;
+    height: 20px !important;
+    min-height: 20px !important;
+    padding: 0 !important;
     font-size: .64rem !important;
     line-height: 1 !important;
   }
@@ -17894,14 +17904,48 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   }
 
   html body .sb-invest-head .sandbox-invest-toggle {
-    width: fit-content !important;
+    width: 42px !important;
+    height: 22px !important;
     max-width: 42px !important;
     margin-inline: auto !important;
+    border-radius: 5px !important;
+  }
+
+  html body .sandbox-cat-table .sb-td-return {
+    font-size: .74rem !important;
   }
 
   html body .sandbox-cat-table .exp-val {
     min-width: 0 !important;
-    font-size: .64rem !important;
+    font-size: .74rem !important;
     font-weight: 700 !important;
+  }
+
+  html body .sandbox-remove-btn {
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+  }
+
+  html body .svb-category-list {
+    gap: 3px !important;
+  }
+
+  html body .svb-total-row {
+    justify-content: center !important;
+    gap: 6px !important;
+  }
+
+  html body .svb-category-row {
+    gap: 5px !important;
+    line-height: 1.25 !important;
+  }
+
+  html body .svb-cat-value {
+    font-size: .86rem !important;
+  }
+
+  html body .svb-meta {
+    font-size: .62rem !important;
   }
 }

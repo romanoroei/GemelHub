@@ -5479,6 +5479,8 @@ const App = (() => {
           const fundUrl = `fund.html?id=${encodeURIComponent(item.fundId || '')}&cat=${encodeURIComponent(item.categoryId || '')}`;
           const returnCells = returnFields.map(field => _sbReturnCell(item, field)).join('');
           return `<tr data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}">
+            <td><button type="button" class="sandbox-remove-btn" data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" aria-label="הסר מסלול">
+              <i class="fas fa-times" aria-hidden="true"></i></button></td>
             <td><div class="sandbox-provider-cell">
               <span class="prov-dot" style="background:${item.color}"></span>
               <a class="sandbox-provider-link" href="${fundUrl}" style="color:${item.color};">${item.provider}</a>
@@ -5507,8 +5509,6 @@ const App = (() => {
             <td class="sb-td-stock sb-allocation-start">${expCell(item.stock !== '' ? _sbFmtPct(item.stock, 0) : '-', 'stock')}</td>
             <td class="sb-td-abroad">${expCell(item.abroad !== '' ? _sbFmtPct(item.abroad, 0) : '-', 'abroad')}</td>
             <td class="sb-td-fx">${expCell(item.fx !== '' ? _sbFmtPct(item.fx, 0) : '-', 'fx')}</td>
-            <td><button type="button" class="sandbox-remove-btn" data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" aria-label="הסר מסלול">
-              <i class="fas fa-times" aria-hidden="true"></i></button></td>
           </tr>`;
         }).join('');
 
@@ -5525,6 +5525,7 @@ const App = (() => {
           <div class="sandbox-cat-table-wrap">
             <table class="sandbox-cat-table${isPension ? ' is-pension-table' : ''}">
               <colgroup>
+                <col class="sb-col-remove">
                 <col class="sb-col-provider">
                 <col class="sb-col-track">
                 <col class="sb-col-fee">
@@ -5534,10 +5535,9 @@ const App = (() => {
                 <col class="sb-col-exp">
                 <col class="sb-col-exp">
                 <col class="sb-col-exp">
-                <col class="sb-col-remove">
               </colgroup>
               <thead><tr>
-                <th>מנהל</th><th>מסלול</th>
+                <th></th><th>מנהל</th><th>מסלול</th>
                 <th>% ד"נ מצבירה</th>
                 ${isPension ? '<th>% ד"נ מהפקדה</th>' : ''}
                 <th class="sb-invest-head">
@@ -5549,7 +5549,6 @@ const App = (() => {
                 </th>
                 ${returnHeaders}
                 <th class="sb-allocation-start">% מניות</th><th>% חו"ל</th><th>% מט"ח</th>
-                <th></th>
               </tr></thead>
               <tbody>${tableRows}</tbody>
             </table>
@@ -5709,10 +5708,11 @@ const App = (() => {
         const pctTotal = items
           .filter(it => it.investMode === 'percent' && it.investPct !== '')
           .reduce((sum, it) => sum + (parseFloat(String(it.investPct).replace(/,/g, '')) || 0), 0);
-        const amountText = amountTotal > 0 ? `שווי השקעה: ${Math.round(amountTotal).toLocaleString('he-IL')} ש"ח` : '';
+        const amountText = amountTotal > 0 ? `${Math.round(amountTotal).toLocaleString('he-IL')} ש"ח` : '';
         const pctText = pctTotal > 0 ? `${pctTotal.toFixed(pctTotal % 1 ? 1 : 0)}%` : '';
         const valueText = amountText && pctText ? `${amountText} · ${pctText}` : (amountText || pctText || 'ללא סכום');
-        const countLabel = items.length === 1 ? 'מסלול השקעה 1' : `${items.length} מסלולי השקעה`;
+        const managerCount = new Set(items.map(it => String(it.provider || '').trim()).filter(Boolean)).size;
+        const countLabel = managerCount === 1 ? 'מנהל השקעות 1' : `${managerCount} מנהלי השקעות`;
         return `<span class="svb-category-row">
           <span class="svb-cat-dot" style="background:${meta.color}"></span>
           <span class="svb-cat-name">${meta.label}</span>
