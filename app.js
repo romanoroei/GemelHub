@@ -5502,7 +5502,7 @@ const App = (() => {
                 <input type="text" inputmode="numeric" class="sandbox-invest-input"
                   data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" data-field="invest"
                   value="${displayInvest}"
-                  placeholder="${item.investMode==='percent'?'50':'100,000'}" />
+                  placeholder="${item.investMode==='percent'?'הכנס אחוז':'הכנס סכום'}" />
               </div>
             </td>
             ${returnCells}

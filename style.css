@@ -15603,7 +15603,7 @@ body.h2h-active,
     max-width: 100% !important;
     gap: 3px !important;
     padding-top: 0 !important;
-    margin-top: -3px !important;
+    margin-top: -5px !important;
     direction: rtl !important;
     text-align: right !important;
     font-size: .72rem !important;
@@ -15728,7 +15728,12 @@ body.h2h-active,
 
   html body .sandbox-cat-table td:nth-child(2) {
     vertical-align: top !important;
-    padding-top: 11px !important;
+    padding-top: 13px !important;
+  }
+
+  html body .sandbox-cat-table td:nth-child(3) {
+    vertical-align: top !important;
+    padding-top: 8px !important;
   }
 
   html body .svb-category-list {
