@@ -17651,3 +17651,11 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     display: inline-block !important;
   }
 }
+
+@media (max-width: 760px) {
+  html body .mobile-sticky-thead-clone,
+  html body .mobile-sticky-thead-clone * {
+    display: none !important;
+    pointer-events: none !important;
+  }
+}

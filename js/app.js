@@ -3740,6 +3740,10 @@ const App = (() => {
   }
 
   function updateMobileStickyThead() {
+    hideMobileStickyThead();
+    clearMobileStickyCompactBlock();
+    return;
+
     const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
     if (!isMobile || getCurrentCompareMode() !== 'tracks') {
       hideMobileStickyThead();
@@ -3869,9 +3873,8 @@ const App = (() => {
   }
 
   function setupMobileStickyThead() {
-    window.addEventListener('scroll', scheduleMobileStickyTheadUpdate, { passive: true });
-    window.addEventListener('resize', scheduleMobileStickyTheadUpdate);
-    document.addEventListener('scroll', scheduleMobileStickyTheadUpdate, true);
+    hideMobileStickyThead();
+    clearMobileStickyCompactBlock();
   }
 
   // Apply inline sticky to rank+manager thead cells.
