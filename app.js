@@ -5690,7 +5690,15 @@ const App = (() => {
   function _sbUpdateValueBar(portfolio, totalValue, catMap) {
     const bar = document.getElementById('sandbox-value-bar');
     if (!bar) return;
-    if (!portfolio || portfolio.length === 0) { bar.classList.remove('is-visible'); return; }
+    const setValueBarSpace = () => {
+      const reserve = bar.classList.contains('is-visible') ? Math.ceil(bar.offsetHeight + 12) : 0;
+      document.documentElement.style.setProperty('--sandbox-mobile-value-bar-space', `${reserve}px`);
+    };
+    if (!portfolio || portfolio.length === 0) {
+      bar.classList.remove('is-visible');
+      setValueBarSpace();
+      return;
+    }
     const grouped = {};
     portfolio.forEach(item => {
       if (!grouped[item.categoryId]) grouped[item.categoryId] = [];
@@ -5736,11 +5744,15 @@ const App = (() => {
       bar.style.bottom = '28px';
     }
     bar.classList.add('is-visible');
+    setValueBarSpace();
   }
 
   function _sbHideValueBar() {
     const bar = document.getElementById('sandbox-value-bar');
-    if (bar) bar.classList.remove('is-visible');
+    if (bar) {
+      bar.classList.remove('is-visible');
+      document.documentElement.style.setProperty('--sandbox-mobile-value-bar-space', '0px');
+    }
   }
 
   function _sbInitValueBarDrag() {

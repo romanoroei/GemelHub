@@ -17764,7 +17764,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     z-index: 880 !important;
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) !important;
-    grid-template-rows: auto 128px auto !important;
+    grid-template-rows: auto var(--sandbox-mobile-value-bar-space, 128px) auto !important;
     align-items: stretch !important;
     gap: 6px !important;
     margin: 0 -10px 12px !important;
@@ -17894,7 +17894,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     max-width: 100% !important;
     gap: 3px !important;
     padding-top: 0 !important;
-    margin-top: -5px !important;
+    margin-top: -7px !important;
     direction: rtl !important;
     text-align: right !important;
     font-size: .72rem !important;
@@ -18024,7 +18024,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
 
   html body .sandbox-cat-table td:nth-child(3) {
     vertical-align: top !important;
-    padding-top: 8px !important;
+    padding-top: 4px !important;
   }
 
   html body .svb-category-list {
