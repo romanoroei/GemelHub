@@ -5538,8 +5538,8 @@ const App = (() => {
               </colgroup>
               <thead><tr>
                 <th></th><th>מנהל</th><th>מסלול</th>
-                <th class="sb-fee-head"><span>% דמי ניהול</span><span>מצבירה</span></th>
-                ${isPension ? '<th class="sb-fee-head"><span>% דמי ניהול</span><span>מהפקדה</span></th>' : ''}
+                <th class="sb-fee-head"><span>דמי ניהול</span><span>מצבירה %</span></th>
+                ${isPension ? '<th class="sb-fee-head"><span>דמי ניהול</span><span>מהפקדה %</span></th>' : ''}
                 <th class="sb-invest-head">
                   <span>השקעה</span>
                   <span class="sandbox-invest-toggle sandbox-cat-mode-toggle" aria-label="בחירת אופן הזנת השקעה לקטגוריה">

@@ -17764,7 +17764,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     z-index: 880 !important;
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) !important;
-    grid-template-rows: auto 82px auto !important;
+    grid-template-rows: auto 128px auto !important;
     align-items: stretch !important;
     gap: 6px !important;
     margin: 0 -10px 12px !important;
@@ -17878,7 +17878,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   }
 
   html body .sandbox-track-link {
-    font-size: .88rem !important;
+    font-size: .93rem !important;
     line-height: 1.12 !important;
   }
 
@@ -17888,8 +17888,9 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     justify-content: flex-start !important;
     width: auto !important;
     max-width: 100% !important;
-    gap: 4px !important;
-    padding-top: 1px !important;
+    gap: 3px !important;
+    padding-top: 0 !important;
+    margin-top: -1px !important;
     direction: rtl !important;
     text-align: right !important;
     font-size: .72rem !important;
@@ -17937,16 +17938,36 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   html body .sb-invest-head > span:first-child {
     display: block !important;
     margin: 0 0 2px !important;
-    font-size: .62rem !important;
+    font-size: .66rem !important;
     line-height: 1.08 !important;
   }
 
   html body .sandbox-cat-table .sb-fee-head,
   html body .sandbox-cat-table .sb-fee-head span {
     display: block !important;
-    font-size: .62rem !important;
+    font-size: .66rem !important;
     line-height: 1.08 !important;
     white-space: normal !important;
+  }
+
+  html body .sandbox-cat-table th {
+    font-size: .68rem !important;
+    line-height: 1.1 !important;
+  }
+
+  html body .sandbox-provider-link {
+    font-size: .91rem !important;
+    line-height: 1.12 !important;
+  }
+
+  html body .sandbox-fee-input,
+  html body .sandbox-invest-input,
+  html body .sandbox-cat-table.is-pension-table .sandbox-invest-input {
+    height: 30px !important;
+    min-height: 30px !important;
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+    font-size: .72rem !important;
   }
 
   html body .sb-invest-head .sandbox-invest-toggle {
