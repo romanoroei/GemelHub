@@ -1089,6 +1089,7 @@ const App = (() => {
       icons.style.removeProperty('width');
       icons.style.removeProperty('max-width');
       icons.style.removeProperty('opacity');
+      if (icons.closest('.fund-id-tag-icons')) return;
       const textIsClipped = text.scrollWidth > text.clientWidth + 1;
       if (textIsClipped) {
         cell.classList.add('allocation-icons-hover-only');
@@ -6781,6 +6782,7 @@ const App = (() => {
         { stock, abroad, fx }
       );
       const allocationProfileIcon = allocationProfileIcons(allocationProfile, `${r.FUND_NAME || ''} ${r.SUB_SPECIALIZATION || ''}`);
+      const fundIdTagIcons = `${allocationProfileIcon}${allocationIcon}`;
 
       // דירוג (task 10) — rank לפי הסדר הממוין הנוכחי
       const rank = idx + 1;
@@ -6829,8 +6831,8 @@ const App = (() => {
                   aria-label="הוסף ${escapeAttr(name)} למעבדה שלי" />
               </span>
               <div>
-                <div class="prov-name" style="color:${color}"><span class="prov-name-text">${name}</span>${allocationProfileIcon}${allocationIcon}</div>
-                <div class="prov-id">#${fundId}</div>
+                <div class="prov-name" style="color:${color}"><span class="prov-name-text">${name}</span></div>
+                <div class="prov-id">#${fundId}<span class="fund-id-tag-icons">${fundIdTagIcons}</span></div>
               </div>
               <span class="fund-link-icon"><i class="fas fa-external-link-alt"></i></span>
             </div>

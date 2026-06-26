@@ -5693,6 +5693,18 @@ table.track-table.has-yearly-returns .exp-bar-bg {
   transition: opacity .14s ease, max-width .14s ease, width .14s ease;
 }
 
+.provider-cell.allocation-icons-hover-only .fund-id-tag-icons .table-allocation-icons {
+  display: inline-flex;
+  gap: 2px;
+  width: auto;
+  max-width: 50px;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .provider-cell.allocation-icons-hover-only:hover .table-allocation-icons,
 .provider-cell.allocation-icons-hover-only:focus-within .table-allocation-icons {
   gap: 1px;

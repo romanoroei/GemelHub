@@ -1152,6 +1152,7 @@ const App = (() => {
       icons.style.removeProperty('width');
       icons.style.removeProperty('max-width');
       icons.style.removeProperty('opacity');
+      if (icons.closest('.fund-id-tag-icons')) return;
       const textIsClipped = text.scrollWidth > text.clientWidth + 1;
       if (textIsClipped) {
         cell.classList.add('allocation-icons-hover-only');
