@@ -17653,34 +17653,39 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
 }
 
 @media (max-width: 760px) {
-  html body .mobile-sticky-thead-clone,
-  html body .mobile-sticky-thead-clone * {
+  html body .mobile-sticky-thead-clone {
+    display: block !important;
+    pointer-events: none !important;
+  }
+
+  html body .mobile-sticky-thead-clone[hidden] {
     display: none !important;
+  }
+
+  html body .mobile-sticky-thead-clone *,
+  html body .mobile-sticky-head-cell,
+  html body .mobile-sticky-head-cell[data-sortfield] {
     pointer-events: none !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table thead,
-  html body #tracks-container .track-table-wrapper table.track-table thead tr {
-    position: sticky !important;
-    top: var(--track-hdr-h, 52px) !important;
-    z-index: 690 !important;
-    transform: none !important;
-  }
-
+  html body #tracks-container .track-table-wrapper table.track-table thead tr,
   html body #tracks-container .track-table-wrapper table.track-table thead th {
-    position: sticky !important;
-    top: var(--track-hdr-h, 52px) !important;
-    z-index: 689 !important;
-    background: #fefce8 !important;
+    position: static !important;
+    top: auto !important;
     transform: none !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table thead th:nth-child(1) {
+    position: sticky !important;
+    top: auto !important;
     right: 0 !important;
     z-index: 704 !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table thead th:nth-child(2) {
+    position: sticky !important;
+    top: auto !important;
     right: 28px !important;
     z-index: 703 !important;
     box-shadow: -3px 0 8px -3px rgba(15, 23, 42, .2) !important;
