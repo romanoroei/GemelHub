@@ -17658,4 +17658,38 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     display: none !important;
     pointer-events: none !important;
   }
+
+  html body #tracks-container .track-table-wrapper table.track-table thead,
+  html body #tracks-container .track-table-wrapper table.track-table thead tr {
+    position: sticky !important;
+    top: var(--track-hdr-h, 52px) !important;
+    z-index: 690 !important;
+    transform: none !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table thead th {
+    position: sticky !important;
+    top: var(--track-hdr-h, 52px) !important;
+    z-index: 689 !important;
+    background: #fefce8 !important;
+    transform: none !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table thead th:nth-child(1) {
+    right: 0 !important;
+    z-index: 704 !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table thead th:nth-child(2) {
+    right: 28px !important;
+    z-index: 703 !important;
+    box-shadow: -3px 0 8px -3px rgba(15, 23, 42, .2) !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table:not(.has-yearly-returns) th:nth-child(3),
+  html body #tracks-container .track-table-wrapper table.track-table:not(.has-yearly-returns) td:nth-child(3) {
+    width: 56px !important;
+    min-width: 56px !important;
+    max-width: 56px !important;
+  }
 }

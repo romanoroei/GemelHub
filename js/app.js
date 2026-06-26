@@ -3889,14 +3889,16 @@ const App = (() => {
       const th2 = row.children[1]; // manager
       if (th1) {
         th1.style.setProperty('position', 'sticky', 'important');
+        th1.style.setProperty('top', 'var(--track-hdr-h, 52px)', 'important');
         th1.style.setProperty('right', '0px', 'important');
-        th1.style.setProperty('z-index', '702', 'important');
+        th1.style.setProperty('z-index', '704', 'important');
         th1.style.setProperty('background', '#fefce8', 'important');
       }
       if (th2) {
         th2.style.setProperty('position', 'sticky', 'important');
-        th2.style.setProperty('right', '30px', 'important');
-        th2.style.setProperty('z-index', '700', 'important');
+        th2.style.setProperty('top', 'var(--track-hdr-h, 52px)', 'important');
+        th2.style.setProperty('right', '28px', 'important');
+        th2.style.setProperty('z-index', '703', 'important');
         th2.style.setProperty('background', '#fefce8', 'important');
         th2.style.setProperty('box-shadow', '-3px 0 8px -3px rgba(15,23,42,.2)', 'important');
       }
@@ -4318,6 +4320,7 @@ const App = (() => {
         }
         const customRangeWidth = 68;
         const restWidth = mobileColumnCount > 8 ? 54 : 56;
+        const currentMonthWidth = 56;
         const compactReturnWidth = 48;
         let visibleIdx = 0;
         const getColWidth = (th) => {
@@ -4326,7 +4329,7 @@ const App = (() => {
             : visibleIdx === 1 ? managerWidth
             : th.classList.contains('custom-range-col') ? customRangeWidth
             : (isExposureOnly ? expColWidth
-              : (visibleIdx === 2 || visibleIdx === 3 ? compactReturnWidth : restWidth));
+              : (visibleIdx === 2 ? currentMonthWidth : (visibleIdx === 3 ? compactReturnWidth : restWidth)));
           visibleIdx++;
           return w;
         };
@@ -4363,11 +4366,20 @@ const App = (() => {
         el.style.setProperty('background', '#fefce8', 'important');
         el.style.setProperty('color', '#0c2134', 'important');
         el.style.setProperty('font-weight', '900', 'important');
-        el.style.setProperty('position', 'static', 'important');
-        el.style.setProperty('top', 'auto', 'important');
+        el.style.setProperty('position', 'sticky', 'important');
+        el.style.setProperty('top', 'var(--track-hdr-h, 52px)', 'important');
         el.style.setProperty('right', 'auto', 'important');
-        el.style.setProperty('z-index', '5', 'important');
+        el.style.setProperty('z-index', '689', 'important');
         el.style.setProperty('box-shadow', 'none', 'important');
+      });
+      table.querySelectorAll('thead th:nth-child(1)').forEach(el => {
+        el.style.setProperty('right', '0px', 'important');
+        el.style.setProperty('z-index', '704', 'important');
+      });
+      table.querySelectorAll('thead th:nth-child(2)').forEach(el => {
+        el.style.setProperty('right', '28px', 'important');
+        el.style.setProperty('z-index', '703', 'important');
+        el.style.setProperty('box-shadow', '-3px 0 8px -3px rgba(15,23,42,.2)', 'important');
       });
       table.querySelectorAll('td.yield-cell, td.exp-col, .yield-value-wrap, .yield-number-shell, .yield-number, .exp-val').forEach(el => {
         el.style.setProperty('font-size', '12px', 'important');
