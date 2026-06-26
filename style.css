@@ -15473,10 +15473,11 @@ body.h2h-active,
     z-index: 880 !important;
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto 82px auto !important;
     align-items: stretch !important;
-    gap: 8px !important;
+    gap: 6px !important;
     margin: 0 -10px 12px !important;
-    padding: 8px 10px 10px !important;
+    padding: 6px 10px 10px !important;
     background: rgba(255, 255, 255, .96) !important;
     border-bottom: 1px solid rgba(226, 232, 240, .9) !important;
     box-shadow: 0 8px 18px rgba(15, 23, 42, .05) !important;
@@ -15491,8 +15492,9 @@ body.h2h-active,
     display: grid !important;
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 6px !important;
-    margin-top: 96px !important;
-    padding-top: 2px !important;
+    grid-row: 3 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
   }
 
   html body .sandbox-add-btn,
@@ -15523,7 +15525,7 @@ body.h2h-active,
   }
 
   html body .sandbox-value-bar {
-    top: 40px !important;
+    top: 38px !important;
     right: 10px !important;
     left: 10px !important;
     bottom: auto !important;
@@ -15584,13 +15586,19 @@ body.h2h-active,
     align-items: stretch !important;
   }
 
+  html body .sandbox-track-link {
+    font-size: .88rem !important;
+    line-height: 1.12 !important;
+  }
+
   html body .sandbox-track-id {
-    display: flex !important;
+    display: inline-flex !important;
     align-items: center !important;
-    justify-content: space-between !important;
-    width: 100% !important;
-    gap: 6px !important;
-    padding-top: 2px !important;
+    justify-content: flex-start !important;
+    width: auto !important;
+    max-width: 100% !important;
+    gap: 4px !important;
+    padding-top: 1px !important;
     direction: rtl !important;
     text-align: right !important;
     font-size: .72rem !important;
@@ -15604,7 +15612,7 @@ body.h2h-active,
 
   html body .sandbox-track-id-icons {
     order: 2 !important;
-    margin-inline-start: auto !important;
+    margin-inline-start: 0 !important;
   }
 
   html body .sandbox-track-id-icons .table-allocation-icons {
@@ -15638,7 +15646,16 @@ body.h2h-active,
   html body .sb-invest-head > span:first-child {
     display: block !important;
     margin: 0 0 2px !important;
-    font-size: .58rem !important;
+    font-size: .62rem !important;
+    line-height: 1.08 !important;
+  }
+
+  html body .sandbox-cat-table .sb-fee-head,
+  html body .sandbox-cat-table .sb-fee-head span {
+    display: block !important;
+    font-size: .62rem !important;
+    line-height: 1.08 !important;
+    white-space: normal !important;
   }
 
   html body .sb-invest-head .sandbox-invest-toggle {
@@ -15675,7 +15692,7 @@ body.h2h-active,
 
   html body .sandbox-cat-table td:first-child {
     vertical-align: top !important;
-    padding-top: 7px !important;
+    padding-top: 13px !important;
     text-align: center !important;
   }
 
