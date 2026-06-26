@@ -17877,6 +17877,10 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     align-items: stretch !important;
   }
 
+  html body .sandbox-track-cell {
+    gap: 0 !important;
+  }
+
   html body .sandbox-track-link {
     font-size: .93rem !important;
     line-height: 1.12 !important;
@@ -17890,7 +17894,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     max-width: 100% !important;
     gap: 3px !important;
     padding-top: 0 !important;
-    margin-top: -1px !important;
+    margin-top: -3px !important;
     direction: rtl !important;
     text-align: right !important;
     font-size: .72rem !important;
@@ -17942,7 +17946,12 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     line-height: 1.08 !important;
   }
 
-  html body .sandbox-cat-table .sb-fee-head,
+  html body .sandbox-cat-table .sb-fee-head {
+    display: table-cell !important;
+    vertical-align: middle !important;
+    border-bottom: 2px solid var(--gray-200) !important;
+  }
+
   html body .sandbox-cat-table .sb-fee-head span {
     display: block !important;
     font-size: .66rem !important;
@@ -18004,8 +18013,13 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
 
   html body .sandbox-cat-table td:first-child {
     vertical-align: top !important;
-    padding-top: 13px !important;
+    padding-top: 11px !important;
     text-align: center !important;
+  }
+
+  html body .sandbox-cat-table td:nth-child(2) {
+    vertical-align: top !important;
+    padding-top: 11px !important;
   }
 
   html body .svb-category-list {
