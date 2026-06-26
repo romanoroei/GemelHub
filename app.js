@@ -5387,7 +5387,7 @@ const App = (() => {
     const selected = new Set(state.sandbox.selectedReturnFields);
     return `<div class="sandbox-return-fields-wrap">
       <button type="button" class="sandbox-fields-btn" id="sandbox-return-fields-btn" aria-expanded="${state.sandbox.returnsMenuOpen ? 'true' : 'false'}">
-        <i class="fas fa-table-columns" aria-hidden="true"></i> שדות תשואה
+        <i class="fas fa-table-columns" aria-hidden="true"></i> הוסף שדות
       </button>
       ${state.sandbox.returnsMenuOpen ? `<div class="sandbox-fields-panel" id="sandbox-return-fields-panel">
         ${SB_RETURN_FIELDS.map(field => {
@@ -5415,12 +5415,14 @@ const App = (() => {
 
     let html = `<div class="sandbox-page-header">
       <div class="sandbox-page-title">🧪 המעבדה שלי</div>
-      <button type="button" class="sandbox-add-btn" id="sandbox-add-more-btn">
-        <i class="fas fa-plus" aria-hidden="true"></i> הוסף מסלולים
-      </button>
-      ${_sbReturnFieldMenuHtml()}
-      ${portfolio.length > 0 ? `<button type="button" class="sandbox-clear-btn" id="sandbox-clear-portfolio-btn">
-        <i class="fas fa-trash-alt" aria-hidden="true"></i> מחק תיק</button>` : ''}
+      <div class="sandbox-page-actions">
+        <button type="button" class="sandbox-add-btn" id="sandbox-add-more-btn">
+          <i class="fas fa-plus" aria-hidden="true"></i> הוסף מסלולים
+        </button>
+        ${_sbReturnFieldMenuHtml()}
+        ${portfolio.length > 0 ? `<button type="button" class="sandbox-clear-btn" id="sandbox-clear-portfolio-btn">
+          <i class="fas fa-trash-alt" aria-hidden="true"></i> מחק תיק</button>` : ''}
+      </div>
     </div>`;
 
     if (portfolio.length === 0) {
@@ -5477,15 +5479,14 @@ const App = (() => {
           const fundUrl = `fund.html?id=${encodeURIComponent(item.fundId || '')}&cat=${encodeURIComponent(item.categoryId || '')}`;
           const returnCells = returnFields.map(field => _sbReturnCell(item, field)).join('');
           return `<tr data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}">
-            <td><div style="display:flex;align-items:center;gap:7px;">
+            <td><div class="sandbox-provider-cell">
               <span class="prov-dot" style="background:${item.color}"></span>
               <a class="sandbox-provider-link" href="${fundUrl}" style="color:${item.color};">${item.provider}</a>
-              ${allocationIcon}
             </div></td>
             <td>
               <div class="sandbox-track-cell">
                 <button type="button" class="sandbox-track-link" data-sandbox-track-cat="${item.categoryId}" data-sandbox-track-id="${item.trackId}">${item.trackLabel}</button>
-                <div class="sandbox-track-id">#${item.fundId || ''}</div>
+                <div class="sandbox-track-id"><span>#${item.fundId || ''}</span><span class="sandbox-track-id-icons">${allocationIcon}</span></div>
               </div>
             </td>
             <td><input type="number" step="0.01" min="0" max="5" class="sandbox-fee-input"

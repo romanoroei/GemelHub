@@ -10278,6 +10278,12 @@ body.h2h-active,
   padding: 0 4px 20px;
   flex-wrap: wrap;
 }
+.sandbox-page-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
 .sandbox-page-title {
   font-size: 1.4rem;
   font-weight: 800;
@@ -10420,6 +10426,11 @@ body.h2h-active,
   gap: 10px;
   min-width: 0;
   font-weight: 900;
+}
+.sandbox-provider-cell {
+  display: flex;
+  align-items: center;
+  gap: 7px;
 }
 .sandbox-cat-block-head-dot {
   width: 10px;
@@ -11349,9 +11360,19 @@ body.h2h-active,
     font-size: .72rem;
     line-height: 1.1;
   }
-  .sandbox-track-id {
-    font-size: .58rem;
-  }
+.sandbox-track-id {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
+  font-size: .58rem;
+}
+.sandbox-track-id-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  line-height: 1;
+}
   .sandbox-fee-input {
     width: 52px;
     max-width: 52px;
@@ -17728,5 +17749,159 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     width: 56px !important;
     min-width: 56px !important;
     max-width: 56px !important;
+  }
+}
+
+/* Mobile sandbox lab layout polish. */
+@media (max-width: 640px) {
+  html body #sandbox-section {
+    padding: 0 10px 88px !important;
+  }
+
+  html body .sandbox-page-header {
+    position: sticky !important;
+    top: var(--mobile-sticky-header-h, 46px) !important;
+    z-index: 880 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    margin: 0 -10px calc(var(--mobile-sticky-header-h, 46px) + 12px) !important;
+    padding: 8px 10px 10px !important;
+    background: rgba(255, 255, 255, .96) !important;
+    border-bottom: 1px solid rgba(226, 232, 240, .9) !important;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, .05) !important;
+  }
+
+  html body .sandbox-page-title {
+    font-size: 1.15rem !important;
+    line-height: 1.25 !important;
+  }
+
+  html body .sandbox-page-actions {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin-top: 62px !important;
+  }
+
+  html body .sandbox-add-btn,
+  html body .sandbox-clear-btn,
+  html body .sandbox-fields-btn {
+    width: 100% !important;
+    min-height: 32px !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    padding: 6px 5px !important;
+    font-size: .68rem !important;
+    line-height: 1.05 !important;
+    white-space: nowrap !important;
+    border-radius: 7px !important;
+  }
+
+  html body .sandbox-return-fields-wrap {
+    width: 100% !important;
+  }
+
+  html body .sandbox-fields-panel {
+    inset-inline-end: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    min-width: 0 !important;
+    width: min(100%, 220px) !important;
+    margin-inline: auto !important;
+  }
+
+  html body .sandbox-value-bar {
+    top: calc(var(--mobile-sticky-header-h, 46px) + 40px) !important;
+    right: 10px !important;
+    left: 10px !important;
+    bottom: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    transform: none !important;
+    z-index: 890 !important;
+    padding: 8px 10px !important;
+    border-radius: 12px !important;
+    justify-content: center !important;
+    cursor: default !important;
+  }
+
+  html body .sandbox-cat-block-head {
+    padding: 10px 12px !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+    font-size: .98rem !important;
+  }
+
+  html body .sandbox-cat-block-title {
+    flex: 1 1 auto !important;
+  }
+
+  html body .sandbox-cat-add-btn {
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 3px 7px !important;
+    font-size: .66rem !important;
+    line-height: 1 !important;
+    gap: 4px !important;
+    white-space: nowrap !important;
+  }
+
+  html body .sandbox-cat-table .sb-col-provider { width: 72px !important; }
+  html body .sandbox-cat-table .sb-col-track { width: 88px !important; }
+  html body .sandbox-cat-table.is-pension-table .sb-col-provider { width: 66px !important; }
+  html body .sandbox-cat-table.is-pension-table .sb-col-track { width: 80px !important; }
+
+  html body .sandbox-provider-cell {
+    gap: 5px !important;
+  }
+
+  html body .sandbox-track-id {
+    gap: 2px !important;
+    white-space: nowrap !important;
+  }
+
+  html body .sandbox-track-id-icons .table-allocation-icons {
+    display: inline-flex !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    transform: scale(.72) !important;
+    transform-origin: center !important;
+  }
+
+  html body .sandbox-track-id-icons .allocation-outlier-wrap,
+  html body .sandbox-track-id-icons .allocation-outlier-btn,
+  html body .sandbox-track-id-icons .table-allocation-icon,
+  html body .sandbox-track-id-icons .table-allocation-flag-il,
+  html body .sandbox-track-id-icons .table-allocation-warning {
+    margin: 0 !important;
+    transform: scale(.72) !important;
+    transform-origin: center !important;
+  }
+
+  html body .sandbox-invest-toggle button {
+    min-width: 18px !important;
+    padding: 2px 3px !important;
+    font-size: .64rem !important;
+    line-height: 1 !important;
+  }
+
+  html body .sb-invest-head > span:first-child {
+    display: block !important;
+    margin: 0 0 2px !important;
+    font-size: .58rem !important;
+  }
+
+  html body .sb-invest-head .sandbox-invest-toggle {
+    width: fit-content !important;
+    max-width: 42px !important;
+    margin-inline: auto !important;
+  }
+
+  html body .sandbox-cat-table .exp-val {
+    min-width: 0 !important;
+    font-size: .64rem !important;
+    font-weight: 700 !important;
   }
 }
