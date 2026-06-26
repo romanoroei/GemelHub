@@ -4725,7 +4725,7 @@ const App = (() => {
   // ─── כפתורי בקרה בשורת מסלול ההשקעה ────────────────────────
   function buildTrackHeaderControls(track) {
     const trackYearlyState = getYearlyTrackState(track.id);
-    const isTrackYearlyActive = !state.showExposure && !!trackYearlyState?.active;
+    const isTrackYearlyActive = !!trackYearlyState?.active;
     const additionalYearsVisible = isTrackYearlyActive && (
       trackYearlyState.loading ||
       trackYearlyState.canExpandTo10 ||
@@ -4735,11 +4735,11 @@ const App = (() => {
 
     return `
       <div class="yield-toggle-group">
-        <button class="tbl-ctrl-btn yield-mode-btn${!state.showExposure && !isTrackYearlyActive && state.yieldMode==='cumulative'?' is-active':''}" data-mode="cumulative"><strong>תשואה מצטברת</strong></button>
-        <button class="tbl-ctrl-btn yield-mode-btn${!state.showExposure && !isTrackYearlyActive && state.yieldMode==='annualized'?' is-active':''}" data-mode="annualized"><strong>ממוצע שנתי</strong></button>
+        <button class="tbl-ctrl-btn yield-mode-btn${!isTrackYearlyActive && state.yieldMode==='cumulative'?' is-active':''}" data-mode="cumulative"><strong>תשואה מצטברת</strong></button>
+        <button class="tbl-ctrl-btn yield-mode-btn${!isTrackYearlyActive && state.yieldMode==='annualized'?' is-active':''}" data-mode="annualized"><strong>ממוצע שנתי</strong></button>
       </div>
-      <button class="tbl-ctrl-btn yield-mode-btn yearly-mode-btn${!state.showExposure && isTrackYearlyActive?' is-active':''}" data-mode="yearly">תשואה לפי שנים</button>
-      ${additionalYearsVisible ? `<button class="tbl-ctrl-btn yearly-expand-btn${!state.showExposure && additionalYearsActive ? ' is-active' : ''}" ${trackYearlyState.loading ? 'disabled' : ''}>${trackYearlyState.loading ? 'טוען...' : (additionalYearsActive ? 'הסר שנים נוספות' : 'הצג שנים נוספות')}</button>` : ''}
+      <button class="tbl-ctrl-btn yield-mode-btn yearly-mode-btn${isTrackYearlyActive?' is-active':''}" data-mode="yearly">תשואה לפי שנים</button>
+      ${additionalYearsVisible ? `<button class="tbl-ctrl-btn yearly-expand-btn${additionalYearsActive ? ' is-active' : ''}" ${trackYearlyState.loading ? 'disabled' : ''}>${trackYearlyState.loading ? 'טוען...' : (additionalYearsActive ? 'הסר שנים נוספות' : 'הצג שנים נוספות')}</button>` : ''}
       <button class="tbl-ctrl-btn exp-toggle-btn${state.showExposure?' is-active':''}"><i class="fas fa-layer-group"></i> אלוקציית השקעות</button>
     `;
   }
@@ -5011,7 +5011,8 @@ const App = (() => {
         e.stopPropagation();
         const newMode = btn.dataset.mode;
         const wasExposure = state.showExposure;
-        if (state.showExposure) {
+        const isMobileExposureMode = state.showExposure && window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+        if (isMobileExposureMode) {
           state.showExposure = false;
           document.querySelectorAll('.exp-toggle-btn').forEach(b => b.classList.remove('is-active'));
           document.querySelectorAll('table.track-table').forEach(t => {
@@ -5086,7 +5087,8 @@ const App = (() => {
         e.stopPropagation();
         state.showExposure = !state.showExposure;
         const shouldReturnToCompactTrack = !state.showExposure && state.compactTracksView;
-        if (state.showExposure) {
+        const isMobileExposureMode = state.showExposure && window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+        if (isMobileExposureMode) {
           document.querySelectorAll('.yield-mode-btn, .yearly-expand-btn').forEach(b => b.classList.remove('is-active'));
         }
         // עדכון כל כפתורי האלוקציה

@@ -4751,7 +4751,8 @@ const App = (() => {
         e.stopPropagation();
         const newMode = btn.dataset.mode;
         const wasExposure = state.showExposure;
-        if (state.showExposure) {
+        const isMobileExposureMode = state.showExposure && window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+        if (isMobileExposureMode) {
           state.showExposure = false;
           document.querySelectorAll('.exp-toggle-btn').forEach(b => b.classList.remove('is-active'));
           document.querySelectorAll('table.track-table').forEach(t => {
