@@ -17764,7 +17764,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     z-index: 880 !important;
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) !important;
-    grid-template-rows: auto var(--sandbox-mobile-value-bar-space, 128px) auto !important;
+    grid-template-rows: auto auto var(--sandbox-mobile-value-bar-space, 128px) !important;
     align-items: stretch !important;
     gap: 6px !important;
     margin: 0 -10px 12px !important;
@@ -17783,7 +17783,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     display: grid !important;
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 6px !important;
-    grid-row: 3 !important;
+    grid-row: 2 !important;
     margin-top: 0 !important;
     padding-top: 0 !important;
   }
@@ -17816,7 +17816,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   }
 
   html body .sandbox-value-bar {
-    top: 38px !important;
+    top: var(--sandbox-mobile-value-bar-top, 82px) !important;
     right: 10px !important;
     left: 10px !important;
     bottom: auto !important;
@@ -17894,7 +17894,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     max-width: 100% !important;
     gap: 3px !important;
     padding-top: 0 !important;
-    margin-top: -7px !important;
+    margin-top: -8px !important;
     direction: rtl !important;
     text-align: right !important;
     font-size: .72rem !important;
@@ -18024,7 +18024,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
 
   html body .sandbox-cat-table td:nth-child(3) {
     vertical-align: top !important;
-    padding-top: 4px !important;
+    padding-top: 2px !important;
   }
 
   html body .svb-category-list {

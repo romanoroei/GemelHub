@@ -5468,10 +5468,14 @@ const App = (() => {
         const returnFields = _sbSelectedReturnFields();
         const returnCols = returnFields.map(field => `<col class="sb-col-yield sb-col-yield-${field.id}">`).join('');
         const returnHeaders = returnFields.map(field => `<th class="sb-yield-col">${_sbReturnFieldLabel(field, monthlyLabel)}</th>`).join('');
+        const catProviderColors = new Map();
 
         const tableRows = items.map(item => {
           const gi = portfolio.indexOf(item);
           const itemKey = _sbEscapeAttr(_sbItemKey(item));
+          const providerName = String(item.provider || '').trim();
+          if (!catProviderColors.has(providerName)) catProviderColors.set(providerName, providerColor(providerName));
+          const itemProviderColor = catProviderColors.get(providerName) || item.color;
           const rawInvestVal = item.investMode === 'percent' ? item.investPct : item.investAmount;
           const displayInvest = rawInvestVal !== '' ? Number(String(rawInvestVal).replace(/,/g, '')).toLocaleString('he-IL') : '';
           const allocationProfile = ghAllocationProfileFor({ stock: item.stock, abroad: item.abroad, fx: item.fx });
@@ -5482,8 +5486,8 @@ const App = (() => {
             <td><button type="button" class="sandbox-remove-btn" data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" aria-label="הסר מסלול">
               <i class="fas fa-times" aria-hidden="true"></i></button></td>
             <td><div class="sandbox-provider-cell">
-              <span class="prov-dot" style="background:${item.color}"></span>
-              <a class="sandbox-provider-link" href="${fundUrl}" style="color:${item.color};">${item.provider}</a>
+              <span class="prov-dot" style="background:${itemProviderColor}"></span>
+              <a class="sandbox-provider-link" href="${fundUrl}" style="color:${itemProviderColor};">${item.provider}</a>
             </div></td>
             <td>
               <div class="sandbox-track-cell">
@@ -5693,6 +5697,11 @@ const App = (() => {
     const setValueBarSpace = () => {
       const reserve = bar.classList.contains('is-visible') ? Math.ceil(bar.offsetHeight + 12) : 0;
       document.documentElement.style.setProperty('--sandbox-mobile-value-bar-space', `${reserve}px`);
+      const actions = document.querySelector('.sandbox-page-actions');
+      if (actions && bar.classList.contains('is-visible')) {
+        const top = Math.ceil(actions.getBoundingClientRect().bottom + 8);
+        document.documentElement.style.setProperty('--sandbox-mobile-value-bar-top', `${top}px`);
+      }
     };
     if (!portfolio || portfolio.length === 0) {
       bar.classList.remove('is-visible');
@@ -5752,6 +5761,7 @@ const App = (() => {
     if (bar) {
       bar.classList.remove('is-visible');
       document.documentElement.style.setProperty('--sandbox-mobile-value-bar-space', '0px');
+      document.documentElement.style.removeProperty('--sandbox-mobile-value-bar-top');
     }
   }
 
