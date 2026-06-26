@@ -9829,6 +9829,8 @@ body.h2h-active,
 /* Sandbox tab badge */
 .sandbox-tab-badge,
 .h2h-tab-badge {
+  position: relative;
+  top: 3px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
