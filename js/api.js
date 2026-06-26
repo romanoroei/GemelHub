@@ -428,6 +428,16 @@ const APIModule = (() => {
     return Array.from(map.values());
   }
 
+  function buildLatestSharpeMap(records) {
+    const map = new Map();
+    getLatestRecords(records).forEach(record => {
+      const id = String(record.FUND_ID || '').trim();
+      const value = parseFloat(record.SHARPE_RATIO);
+      if (id) map.set(id, Number.isFinite(value) ? value : null);
+    });
+    return map;
+  }
+
   // ─── סנן כך שיוצגו רק קרנות עם נתונים עד הדיווח האחרון ──────
   // מוצא את תאריך הדיווח המקסימלי ומסנן רק אותו
   function filterLatestPeriodOnly(records) {
@@ -1254,31 +1264,13 @@ const APIModule = (() => {
     return _cached6M;
   }
 
-  // ─── חשב Sharpe ratio לכל קרן ────────────────────────────
-  // Sharpe = (mean monthly return / std monthly return) * sqrt(12)
+  // ─── מדד שארפ רשמי לכל קרן מהרשומה העדכנית ─────────────────
   // מחזיר Map<FUND_ID_str, number|null>
   let _cachedSharpe = null;
   async function getAllSharpeRatios() {
     if (_cachedSharpe) return _cachedSharpe;
     const allRaw = await fetchCurrentGemelData();
-
-    const byFund = new Map();
-    for (const r of allRaw) {
-      const id = String(r.FUND_ID);
-      if (!byFund.has(id)) byFund.set(id, []);
-      byFund.get(id).push(r);
-    }
-
-    _cachedSharpe = new Map();
-    byFund.forEach((recs, id) => {
-      const vals = recs.map(r => parseFloat(r.MONTHLY_YIELD)).filter(v => !isNaN(v));
-      if (vals.length < 6) { _cachedSharpe.set(id, null); return; }
-      const mean = vals.reduce((s, v) => s + v, 0) / vals.length;
-      const variance = vals.reduce((s, v) => s + (v - mean) ** 2, 0) / vals.length;
-      const std = Math.sqrt(variance);
-      _cachedSharpe.set(id, std > 0 ? (mean / std) * Math.sqrt(12) : null);
-    });
-
+    _cachedSharpe = buildLatestSharpeMap(allRaw);
     return _cachedSharpe;
   }
 
@@ -1349,21 +1341,7 @@ const APIModule = (() => {
   async function getAllSharpeRatiosPolisa() {
     if (_cachedSharpe_polisa) return _cachedSharpe_polisa;
     const allRaw = await fetchPolisaData();
-    const byFund = new Map();
-    for (const r of allRaw) {
-      const id = String(r.FUND_ID);
-      if (!byFund.has(id)) byFund.set(id, []);
-      byFund.get(id).push(r);
-    }
-    _cachedSharpe_polisa = new Map();
-    byFund.forEach((recs, id) => {
-      const vals = recs.map(r => parseFloat(r.MONTHLY_YIELD)).filter(v => !isNaN(v));
-      if (vals.length < 6) { _cachedSharpe_polisa.set(id, null); return; }
-      const mean = vals.reduce((s, v) => s + v, 0) / vals.length;
-      const variance = vals.reduce((s, v) => s + (v - mean) ** 2, 0) / vals.length;
-      const std = Math.sqrt(variance);
-      _cachedSharpe_polisa.set(id, std > 0 ? (mean / std) * Math.sqrt(12) : null);
-    });
+    _cachedSharpe_polisa = buildLatestSharpeMap(allRaw);
     return _cachedSharpe_polisa;
   }
 
@@ -1682,21 +1660,7 @@ const APIModule = (() => {
   async function getAllSharpeRatiosPension() {
     if (_cachedSharpe_pension) return _cachedSharpe_pension;
     const allRaw = await fetchPensionData();
-    const byFund = new Map();
-    for (const r of allRaw) {
-      const id = String(r.FUND_ID);
-      if (!byFund.has(id)) byFund.set(id, []);
-      byFund.get(id).push(r);
-    }
-    _cachedSharpe_pension = new Map();
-    byFund.forEach((recs, id) => {
-      const vals = recs.map(r => parseFloat(r.MONTHLY_YIELD)).filter(v => !isNaN(v));
-      if (vals.length < 6) { _cachedSharpe_pension.set(id, null); return; }
-      const mean = vals.reduce((s, v) => s + v, 0) / vals.length;
-      const variance = vals.reduce((s, v) => s + (v - mean) ** 2, 0) / vals.length;
-      const std = Math.sqrt(variance);
-      _cachedSharpe_pension.set(id, std > 0 ? (mean / std) * Math.sqrt(12) : null);
-    });
+    _cachedSharpe_pension = buildLatestSharpeMap(allRaw);
     return _cachedSharpe_pension;
   }
 
