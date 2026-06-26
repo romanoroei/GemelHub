@@ -406,7 +406,7 @@ const App = (() => {
       sub: 'השווה קרנות פנסיה כללית ומסלולים שונים על בסיס נתונים רשמיים ובחן האם אפשר לשפר תנאים.'
     },
     sandbox: {
-      title: 'ארגז החול שלי — תיק השקעות אישי',
+      title: 'המעבדה שלי — תיק השקעות אישי',
       sub: 'בנה תיק השקעות מותאם אישית, השווה מסלולים ממגוון קטגוריות וקבל תמונה מלאה על הפיזור, התשואות ודמי הניהול שלך.'
     }
   };
@@ -2198,11 +2198,11 @@ const App = (() => {
       bar.appendChild(btn);
     });
 
-    // ── כפתור ארגז החול ──
+    // ── כפתור המעבדה ──
     const sandboxBtn = document.createElement('button');
     sandboxBtn.className = 'cat-tab sandbox-tab';
     sandboxBtn.dataset.cat = 'sandbox';
-    sandboxBtn.innerHTML = '<span class="tab-icon">🧪</span><span>ארגז החול שלי</span><span class="sandbox-tab-badge" style="display:none"></span>';
+    sandboxBtn.innerHTML = '<span class="tab-icon">🧪</span><span>המעבדה שלי</span><span class="sandbox-tab-badge" style="display:none"></span>';
     sandboxBtn.addEventListener('click', () => { window.scrollTo({top:0,behavior:'smooth'}); switchToSandbox(); });
     bar.appendChild(sandboxBtn);
 
@@ -4848,7 +4848,7 @@ const App = (() => {
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // SANDBOX — ארגז החול שלי
+  // SANDBOX — המעבדה שלי
   // ═══════════════════════════════════════════════════════════════
 
   function _sbGetTrackLabel(trackId) {
@@ -4942,10 +4942,10 @@ const App = (() => {
   }
 
   function getFundMembershipTitle({ sandboxSelected, inSandboxPortfolio, inSandbox, inH2H }) {
-    if (inSandboxPortfolio && inH2H) return 'נמצא בארגז החול ובראש בראש';
+    if (inSandboxPortfolio && inH2H) return 'נמצא במעבדה ובראש בראש';
     if (sandboxSelected && inH2H) return 'נבחר להוספה ליעד נוסף';
     if (sandboxSelected) return 'נבחר להוספה';
-    if (inSandboxPortfolio) return 'נמצא בארגז החול שלי';
+    if (inSandboxPortfolio) return 'נמצא במעבדה שלי';
     if (inH2H) return 'נמצא בראש בראש';
     return '';
   }
@@ -5141,7 +5141,7 @@ const App = (() => {
       <div class="sandbox-bar-chips">${chipsHtml}</div>
       <div class="sandbox-bar-actions">
         <button type="button" class="sandbox-bar-go" id="sandbox-go-btn">
-          <i class="fas fa-flask" aria-hidden="true"></i> ארגז
+          <i class="fas fa-flask" aria-hidden="true"></i> מעבדה
         </button>
         <button type="button" class="sandbox-bar-go sandbox-bar-h2h" id="sandbox-h2h-btn">
           <i class="fas fa-balance-scale" aria-hidden="true"></i> ראש בראש
@@ -5290,7 +5290,7 @@ const App = (() => {
     showSection('sandbox');
     // update sticky header title manually (sandbox is not in PRODUCT_CATEGORIES)
     const pageTitle = document.getElementById('page-main-title');
-    if (pageTitle) pageTitle.textContent = 'ארגז החול שלי';
+    if (pageTitle) pageTitle.textContent = 'המעבדה שלי';
     renderSandboxPage();
     _sbHydrateFromApi(); // refresh y1/y3/y5 from current API data (async, re-renders when done)
   }
@@ -5414,7 +5414,7 @@ const App = (() => {
     const portfolio = state.sandbox.portfolio;
 
     let html = `<div class="sandbox-page-header">
-      <div class="sandbox-page-title">🧪 ארגז החול שלי</div>
+      <div class="sandbox-page-title">🧪 המעבדה שלי</div>
       <button type="button" class="sandbox-add-btn" id="sandbox-add-more-btn">
         <i class="fas fa-plus" aria-hidden="true"></i> הוסף מסלולים
       </button>
@@ -5728,7 +5728,7 @@ const App = (() => {
       : '';
     bar.innerHTML = catRows.length
       ? `<span class="svb-category-list">${totalLine}${catRows.join('')}</span>`
-      : `<span class="svb-label">ארגז החול שלי</span><span class="svb-meta">${portfolio.length} מסלולים · ${Object.keys(catMap).length} קטגוריות</span>`;
+      : `<span class="svb-label">המעבדה שלי</span><span class="svb-meta">${portfolio.length} מסלולים · ${Object.keys(catMap).length} קטגוריות</span>`;
     // set initial centered position if not yet positioned
     if (!bar.style.left) {
       bar.style.left   = (window.innerWidth / 2 - 120) + 'px';
@@ -6802,7 +6802,7 @@ const App = (() => {
                   data-color="${escapeAttr(color)}"
                   ${_sbCbChecked}
                   ${_membershipTitle ? `title="${escapeAttr(_membershipTitle)}"` : ''}
-                  aria-label="הוסף ${escapeAttr(name)} לארגז החול שלי" />
+                  aria-label="הוסף ${escapeAttr(name)} למעבדה שלי" />
               </span>
               <div>
                 <div class="prov-name" style="color:${color}"><span class="prov-name-text">${name}</span>${allocationProfileIcon}${allocationIcon}</div>
@@ -8185,7 +8185,7 @@ const App = (() => {
         </button>
         <button type="button" class="advanced-search-sandbox-btn" id="advanced-search-sandbox-btn" disabled>
           <i class="fas fa-flask" aria-hidden="true"></i>
-          הוסף לארגז החול שלי
+          הוסף למעבדה שלי
         </button>
         <div class="advanced-search-selection-status" id="advanced-search-selection-status" hidden></div>
       </div>
@@ -8913,7 +8913,7 @@ const App = (() => {
 
   function addAdvancedSearchSelectionToSandbox(fundIds) {
     if (!Array.isArray(fundIds) || !fundIds.length) {
-      setAdvancedSearchSelectionStatus('בחר לפחות קופה אחת להוספה לארגז החול.');
+      setAdvancedSearchSelectionStatus('בחר לפחות קופה אחת להוספה למעבדה.');
       return;
     }
 
@@ -8973,9 +8973,9 @@ const App = (() => {
     setAdvancedSearchStatus('');
 
     if (added) {
-      setAdvancedSearchSelectionStatus(`נוספו ${added} מסלולים לארגז החול${skipped ? ` (${skipped} כבר היו קיימים)` : ''}.`, true);
+      setAdvancedSearchSelectionStatus(`נוספו ${added} מסלולים למעבדה${skipped ? ` (${skipped} כבר היו קיימים)` : ''}.`, true);
     } else {
-      setAdvancedSearchSelectionStatus('המסלולים שסימנת כבר קיימים בארגז החול.', true);
+      setAdvancedSearchSelectionStatus('המסלולים שסימנת כבר קיימים במעבדה.', true);
     }
   }
 
@@ -8994,7 +8994,7 @@ const App = (() => {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'advanced-search-go-sandbox-btn';
-      btn.innerHTML = '<i class="fas fa-arrow-left" aria-hidden="true"></i><span>מעבר לארגז החול</span>';
+      btn.innerHTML = '<i class="fas fa-arrow-left" aria-hidden="true"></i><span>מעבר למעבדה</span>';
       btn.addEventListener('click', event => {
         event.stopPropagation();
         closeAdvancedSearch();
@@ -13378,7 +13378,7 @@ const App = (() => {
         </button>
         <button type="button" class="advanced-search-sandbox-btn" id="advanced-search-sandbox-btn" disabled>
           <i class="fas fa-flask" aria-hidden="true"></i>
-          הוסף לארגז החול שלי
+          הוסף למעבדה שלי
         </button>
         <div class="advanced-search-selection-status" id="advanced-search-selection-status" hidden></div>
       </div>
@@ -13409,7 +13409,7 @@ const App = (() => {
       }
       if (sandboxBtn) {
         sandboxBtn.disabled = selectedCount < 1;
-        sandboxBtn.innerHTML = `<i class="fas fa-flask" aria-hidden="true"></i> הוסף לארגז החול שלי${selectedCount ? ` (${selectedCount})` : ''}`;
+        sandboxBtn.innerHTML = `<i class="fas fa-flask" aria-hidden="true"></i> הוסף למעבדה שלי${selectedCount ? ` (${selectedCount})` : ''}`;
       }
       if (selectAll) {
         selectAll.checked = selectedCount === checkboxes.length;
