@@ -17680,6 +17680,11 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     width: 104px !important;
     min-width: 104px !important;
     max-width: 104px !important;
+    direction: rtl !important;
+    justify-content: flex-start !important;
+    text-align: right !important;
+    padding-inline-start: 6px !important;
+    padding-inline-end: 2px !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table thead,
