@@ -655,12 +655,12 @@ function formatPercent(val) {
   if (val === null || val === undefined || val === '') return '-';
   const n = parseFloat(val);
   if (isNaN(n)) return '-';
-  return `${n.toFixed(2)}%`;
+  return `\u200E${n.toFixed(2)}%`;
 }
 
 function calcExposurePercent(exposureVal, totalAssets) {
   const pct = calcExposurePercentValue(exposureVal, totalAssets);
-  return pct === null ? '-' : `${pct.toFixed(1)}%`;
+  return pct === null ? '-' : `\u200E${pct.toFixed(1)}%`;
 }
 
 function calcExposurePercentValue(exposureVal, totalAssets) {

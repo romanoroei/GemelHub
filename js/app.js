@@ -5602,7 +5602,7 @@ const App = (() => {
 
   function _sbFmtPct(val, decimals = 2) {
     const n = parseFloat(val);
-    return (val === '' || val == null || isNaN(n)) ? '—' : n.toFixed(decimals) + '%';
+    return (val === '' || val == null || isNaN(n)) ? '—' : `\u200E${n.toFixed(decimals)}%`;
   }
 
   const SB_RETURN_FIELDS = [
@@ -5659,7 +5659,7 @@ const App = (() => {
 
   function _sbReturnCell(item, field) {
     const value = _sbReturnFieldValue(item, field);
-    return `<td class="sb-td-return sb-td-${field.id} sb-yield-col" data-return-field="${field.id}" style="color:${_sbYieldColor(value)};font-weight:700;font-size:.83rem">${_sbFmtPct(value)}</td>`;
+    return `<td class="sb-td-return sb-td-${field.id} sb-yield-col" data-return-field="${field.id}" style="color:${_sbYieldColor(value)};font-weight:700;font-size:.9rem">${_sbFmtPct(value)}</td>`;
   }
 
   function _sbReturnFieldMenuHtml() {
@@ -5739,7 +5739,7 @@ const App = (() => {
           .reduce((s, it) => s + (parseFloat(it.investPct) || 0), 0);
         const catAmtHas = items.some(it => it.investMode === 'amount' && it.investAmount !== '');
         const catPctHas = items.some(it => it.investMode === 'percent' && it.investPct !== '');
-        const catInvestDisplay = catAmtHas ? '₪' + Math.round(catAmtTotal).toLocaleString('he-IL') : catPctHas ? catPctTotal.toFixed(0) + '%' : '';
+        const catInvestDisplay = catAmtHas ? formatCurrencyILS(catAmtTotal) : catPctHas ? `\u200E${catPctTotal.toFixed(0)}%` : '';
         const catInvestMode = items.every(it => it.investMode === 'percent') ? 'percent' : 'amount';
 
         const latestPeriod = items.reduce((mx, it) => (it.reportPeriod || '') > mx ? (it.reportPeriod || '') : mx, '');
@@ -6131,12 +6131,12 @@ const App = (() => {
       </div>
       <div class="sb-returns-main">
         <span class="sb-returns-main-label">${mainLabel}</span>
-        <span class="sb-returns-main-value">${mainVal != null ? parseFloat(mainVal).toFixed(2) + '%' : '—'}</span>
+        <span class="sb-returns-main-value">${mainVal != null ? _sbFmtPct(mainVal) : '—'}</span>
       </div>
       <div class="sb-returns-mini-row">
         ${metrics.map(metric => `<div class="sb-returns-mini">
           <span>${metric.label}</span>
-          <strong class="${metric.val != null && parseFloat(metric.val) >= 0 ? 'pos' : 'neg'}">${metric.val != null ? parseFloat(metric.val).toFixed(2) + '%' : '—'}</strong>
+          <strong class="${metric.val != null && parseFloat(metric.val) >= 0 ? 'pos' : 'neg'}">${metric.val != null ? _sbFmtPct(metric.val) : '—'}</strong>
         </div>`).join('')}
       </div>
     </div>`;
@@ -6263,7 +6263,7 @@ const App = (() => {
       ? [{ color: '#0f766e', pct: stockPct, label: 'מניות' }, { color: '#c9b772', pct: 100 - stockPct, label: 'אג"ח / אחר' }]
       : [{ color: '#e2e8f0', pct: 100, label: 'אין נתונים' }];
     const geoSegs = abroadPct != null
-      ? [{ color: '#566a7c', pct: abroadPct, label: 'חו"ל', bg: 'usa' }, { color: '#0c2134', pct: 100 - abroadPct, label: 'ישראל', bg: 'israel' }]
+      ? [{ color: '#566a7c', pct: abroadPct, label: 'חו"ל', bg: 'world' }, { color: '#0c2134', pct: 100 - abroadPct, label: 'ישראל', bg: 'israel' }]
       : [{ color: '#e2e8f0', pct: 100, label: 'אין נתונים' }];
     const fxSegs = fxPct != null
       ? [{ color: '#c9b772', pct: fxPct, label: 'מט"ח', bg: 'fx' }, { color: '#6d7480', pct: 100 - fxPct, label: 'שקל', bg: 'shekel' }]
@@ -6323,7 +6323,7 @@ const App = (() => {
       </div>` : ''}
       <div class="sb-dn-card">
         <div class="sb-dn-label">ד"נ מצבירה משוקלל</div>
-        <div class="sb-dn-value ${wDn != null && parseFloat(wDn) >= 0 ? 'pos' : 'neg'}">${wDn != null ? parseFloat(wDn).toFixed(2) + '%' : '—'}</div>
+        <div class="sb-dn-value ${wDn != null && parseFloat(wDn) >= 0 ? 'pos' : 'neg'}">${wDn != null ? _sbFmtPct(wDn) : '—'}</div>
       </div>
     </div>`;
   }
@@ -6639,13 +6639,13 @@ const App = (() => {
         .reduce((s, it) => s + (parseFloat(it.investPct) || 0), 0);
       const catAmtHas2 = items.some(it => it.investMode === 'amount' && it.investAmount !== '');
       const catPctHas2 = items.some(it => it.investMode === 'percent' && it.investPct !== '');
-      const catInvDisp2 = catAmtHas2 ? '₪' + Math.round(catAmtTotal2).toLocaleString('he-IL') : catPctHas2 ? catPctTotal2.toFixed(0) + '%' : '';
+      const catInvDisp2 = catAmtHas2 ? formatCurrencyILS(catAmtTotal2) : catPctHas2 ? `\u200E${catPctTotal2.toFixed(0)}%` : '';
       // tds: [0]=label, [1]=blank, [2]=dn, [3]=dnDep(pension)|invest-total, [4/5]=y1, ...
       let i = 0;
       if (tds[i]) tds[i].innerHTML = `<span class="w-label">משוקלל</span>`; i++;
       if (tds[i]) tds[i].textContent = ''; i++; // מסלול blank
-      if (tds[i]) { tds[i].style.fontWeight = '800'; tds[i].textContent = wDn !== null ? wDn.toFixed(2)+'%' : '—'; } i++;
-      if (isPension) { if (tds[i]) { tds[i].style.fontWeight = '800'; tds[i].textContent = wDnDep !== null ? wDnDep.toFixed(2)+'%' : '—'; } i++; }
+      if (tds[i]) { tds[i].style.fontWeight = '800'; tds[i].textContent = wDn !== null ? _sbFmtPct(wDn) : '—'; } i++;
+      if (isPension) { if (tds[i]) { tds[i].style.fontWeight = '800'; tds[i].textContent = wDnDep !== null ? _sbFmtPct(wDnDep) : '—'; } i++; }
       if (tds[i]) { tds[i].style.fontWeight = '800'; tds[i].style.fontSize = '.78rem'; tds[i].style.color = 'var(--blue)'; tds[i].textContent = catInvDisp2; } i++; // invest total
       if (tds[i]) { tds[i].style.color = _sbYieldColor(wY1); tds[i].style.fontWeight = '800'; tds[i].textContent = _sbFmtPct(wY1); } i++;
       if (tds[i]) { tds[i].style.color = _sbYieldColor(wY3); tds[i].style.fontWeight = '800'; tds[i].textContent = _sbFmtPct(wY3); } i++;
@@ -7972,9 +7972,9 @@ const App = (() => {
     if (!Number.isFinite(raw)) return 'אין נתון';
     if (metricId === 'assets') return formatCurrencyILS(raw * 1000000);
     if (metricId === 'sharpe') return raw.toFixed(2);
-    if (metricId === 'positive') return `${Math.round(raw)}%`;
-    if (metricId === 'stddev') return `${raw.toFixed(2)}%`;
-    if (metricId === 'actuarial') return `${raw > 0 ? '+' : ''}${raw.toFixed(2)}%`;
+    if (metricId === 'positive') return `\u200E${Math.round(raw)}%`;
+    if (metricId === 'stddev') return `\u200E${raw.toFixed(2)}%`;
+    if (metricId === 'actuarial') return `\u200E${raw > 0 ? '+' : ''}${raw.toFixed(2)}%`;
     return formatPercent(raw);
   }
 
@@ -10406,12 +10406,12 @@ const App = (() => {
         : `${Math.round(raw).toLocaleString('he-IL')} מיליון`;
     }
     if (metricId === 'sharpe')    return isNaN(raw) ? '-' : raw.toFixed(2);
-    if (metricId === 'positive')  return isNaN(raw) ? '-' : `${Math.round(raw)}%`;
-    if (metricId === 'stddev')    return isNaN(raw) ? '-' : `${raw.toFixed(2)}%`;
+    if (metricId === 'positive')  return isNaN(raw) ? '-' : `\u200E${Math.round(raw)}%`;
+    if (metricId === 'stddev')    return isNaN(raw) ? '-' : `\u200E${raw.toFixed(2)}%`;
     if (metricId === 'momentum')  return isNaN(raw) ? '-' : `${Math.round(raw)} / 100`;
-    if (metricId === 'actuarial') return isNaN(raw) ? '-' : `${raw > 0 ? '+' : ''}${raw.toFixed(2)}%`;
-    if (metricId === 'alpha')     return isNaN(raw) ? '-' : `${raw > 0 ? '+' : ''}${raw.toFixed(2)}%`;
-    if (['stock','abroad','fx'].includes(metricId)) return isNaN(raw) ? '-' : `${raw.toFixed(1)}%`;
+    if (metricId === 'actuarial') return isNaN(raw) ? '-' : `\u200E${raw > 0 ? '+' : ''}${raw.toFixed(2)}%`;
+    if (metricId === 'alpha')     return isNaN(raw) ? '-' : `\u200E${raw > 0 ? '+' : ''}${raw.toFixed(2)}%`;
+    if (['stock','abroad','fx'].includes(metricId)) return isNaN(raw) ? '-' : `\u200E${raw.toFixed(1)}%`;
     return formatPercent(raw);
   }
 
@@ -12202,16 +12202,12 @@ const App = (() => {
 
   function formatCurrencyILS(value) {
     const num = Number(value) || 0;
-    return new Intl.NumberFormat('he-IL', {
-      style: 'currency',
-      currency: 'ILS',
-      maximumFractionDigits: 0
-    }).format(num);
+    return `\u200E${Math.round(num).toLocaleString('he-IL')} ₪`;
   }
 
   function formatPercentPlain(value, digits = 2) {
     const num = Number(value);
-    return Number.isFinite(num) ? `${num.toFixed(digits)}%` : '—';
+    return Number.isFinite(num) ? `\u200E${num.toFixed(digits)}%` : '—';
   }
 
   function clamp(value, min, max) {

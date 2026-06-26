@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=site-sandbox76-20260627" />
+  <link rel="stylesheet" href="css/style.css?v=site-sandbox77-20260627" />
   <link rel="stylesheet" href="css/fund.css?v=mobile-fixes19-20260626" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -292,7 +292,7 @@
   </div>
 </div>
 
-  <script src="js/config.js?v=fund-mobile-pies-agach25-20260614"></script>
+  <script src="js/config.js?v=minus-format-20260627"></script>
   <script src="js/api.js?v=gh-score-20260619c"></script>
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
@@ -754,7 +754,7 @@ function formatPercentNoPlus(val) {
   if (val === null || val === undefined || val === '') return '-';
   const n = parseFloat(val);
   if (isNaN(n)) return '-';
-  return `${n.toFixed(2)}%`;
+  return `\u200E${n.toFixed(2)}%`;
 }
 
 // ── Pie Charts (task 20) ───────────────────────────────────────
@@ -1354,7 +1354,7 @@ function renderAssetsChart(labels, monthly, cumulative, barColors, opts = {}) {
   const cumulativeAxisTitle = opts.cumulativeAxisTitle || 'מצטבר (%)';
   const valueFormatter = opts.valueFormatter || (v => {
     const sign = v > 0 ? '+' : '';
-    return `${sign}${v.toFixed(2)}%`;
+    return `\u200E${sign}${v.toFixed(2)}%`;
   });
   const tickFormatter = opts.tickFormatter || (v => `${v}%`);
   const ctx = document.getElementById('history-chart-static').getContext('2d');
@@ -2495,9 +2495,9 @@ function buildVsAvgDetail(hist36, peersMonthlyAvg) {
     const sign = above ? '+' : '';
     rows += `<tr style="border-bottom:1px solid #f1f5f9;background:${bg};">
       <td style="padding:7px 14px;font-size:.79rem;color:#475569;">${formatReportPeriod(r.REPORT_PERIOD)}</td>
-      <td style="padding:7px 10px;font-size:.83rem;font-weight:700;color:#1e293b;text-align:center;">${myY.toFixed(2)}%</td>
-      <td style="padding:7px 10px;font-size:.83rem;color:#475569;text-align:center;">${peerY.toFixed(2)}%</td>
-      <td style="padding:7px 14px;font-size:.83rem;font-weight:700;color:${col};text-align:center;">${sign}${diff.toFixed(2)}%</td>
+      <td style="padding:7px 10px;font-size:.83rem;font-weight:700;color:#1e293b;text-align:center;">\u200E${myY.toFixed(2)}%</td>
+      <td style="padding:7px 10px;font-size:.83rem;color:#475569;text-align:center;">\u200E${peerY.toFixed(2)}%</td>
+      <td style="padding:7px 14px;font-size:.83rem;font-weight:700;color:${col};text-align:center;">\u200E${sign}${diff.toFixed(2)}%</td>
     </tr>`;
   });
 
