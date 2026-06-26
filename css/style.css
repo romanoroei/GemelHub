@@ -16175,9 +16175,9 @@ body.h2h-active,
     background: #fefce8;
     border-bottom: 0;
     color: #0c2134;
-    font-size: .82rem;
+    font-size: 12px;
     font-weight: 900;
-    line-height: 1.12;
+    line-height: 1.05;
     white-space: nowrap;
     pointer-events: none;
   }
@@ -17666,6 +17666,19 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   html body .mobile-sticky-head-cell,
   html body .mobile-sticky-head-cell[data-sortfield] {
     pointer-events: none !important;
+  }
+
+  html body .mobile-sticky-head-cell {
+    font-size: 12px !important;
+    line-height: 1.05 !important;
+    font-weight: 900 !important;
+    touch-action: pan-y !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  html body .mobile-sticky-head-cell[data-sortfield] {
+    cursor: pointer !important;
+    pointer-events: auto !important;
   }
 
   html body .mobile-sticky-head-cell.is-rank {
