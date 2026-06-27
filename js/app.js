@@ -6176,30 +6176,52 @@ const App = (() => {
       return;
     }
     const currentName = state.sandbox.portfolioName;
-    const canCompare = list.length >= 2;
-    container.innerHTML = list.map(item => {
+    const hasCurrent  = state.sandbox.portfolio.length > 0;
+    const canCompare  = (hasCurrent && list.length >= 1) || list.length >= 2;
+    let html = '';
+
+    if (hasCurrent) {
+      const curName   = currentName || 'תיק נוכחי';
+      const curTot    = state.sandbox.portfolio.reduce((s, it) => s + (parseFloat(it.investAmount) || 0), 0);
+      const curTotStr = curTot > 0 ? '₪ ' + Math.round(curTot).toLocaleString('he-IL') : '';
+      const chk = canCompare
+        ? '<label class="sb-compare-check-wrap"><input type="checkbox" class="sb-compare-check" data-compare-id="__current__" /></label>'
+        : '<span class="sb-compare-check-placeholder"></span>';
+      html += '<div class="sb-saved-item sb-saved-item--current">'
+           + '<div class="sb-saved-item-info">' + chk
+           + '<div class="sb-saved-item-text">'
+           + '<strong class="sb-saved-name">' + curName + '</strong>'
+           + ' <span class="sb-saved-current-badge">נוכחי</span>'
+           + (curTotStr ? ' <span class="sb-saved-value-badge">' + curTotStr + '</span>' : '')
+           + '<span class="sb-saved-meta">תיק פעיל · ' + state.sandbox.portfolio.length + ' מסלולים</span>'
+           + '</div></div>'
+           + '<div class="sb-saved-actions"></div>'
+           + '</div>';
+    }
+
+    list.forEach(item => {
       const isCurrent = !!(currentName && item.name === currentName);
-      const tot = item.portfolio.reduce((s, it) => s + (parseFloat(it.investAmount) || 0), 0);
-      const totStr = tot > 0 ? ' \xb7 ₪ ' + Math.round(tot).toLocaleString('he-IL') : '';
-      const checkHtml = (canCompare && !isCurrent)
+      const tot    = item.portfolio.reduce((s, it) => s + (parseFloat(it.investAmount) || 0), 0);
+      const totStr = tot > 0 ? '₪ ' + Math.round(tot).toLocaleString('he-IL') : '';
+      const chk = (canCompare && !isCurrent)
         ? '<label class="sb-compare-check-wrap"><input type="checkbox" class="sb-compare-check" data-compare-id="' + item.id + '" /></label>'
         : '<span class="sb-compare-check-placeholder"></span>';
-      const badgeHtml = isCurrent ? ' <span class="sb-saved-current-badge">נוכחי</span>' : '';
-      return '<div class="sb-saved-item">'
-        + '<div class="sb-saved-item-info">'
-        + checkHtml
-        + '<div class="sb-saved-item-text">'
-        + '<strong class="sb-saved-name">' + item.name + '</strong>' + badgeHtml
-        + '<span class="sb-saved-meta">' + _sbFormatSavedDate(item.date) + ' \xb7 ' + item.portfolio.length + ' מסלולים' + totStr + '</span>'
-        + (item.notes ? '<span class="sb-saved-notes">' + item.notes + '</span>' : '')
-        + '</div>'
-        + '</div>'
-        + '<div class="sb-saved-actions">'
-        + '<button type="button" class="sb-load-item-btn" data-load-id="' + item.id + '"><i class="fas fa-folder-open" aria-hidden="true"></i> טען</button>'
-        + '<button type="button" class="sb-delete-item-btn" data-delete-id="' + item.id + '"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>'
-        + '</div>'
-        + '</div>';
-    }).join('');
+      html += '<div class="sb-saved-item">'
+           + '<div class="sb-saved-item-info">' + chk
+           + '<div class="sb-saved-item-text">'
+           + '<strong class="sb-saved-name">' + item.name + '</strong>'
+           + (isCurrent ? ' <span class="sb-saved-current-badge">נוכחי</span>' : '')
+           + (totStr ? ' <span class="sb-saved-value-badge">' + totStr + '</span>' : '')
+           + '<span class="sb-saved-meta">' + _sbFormatSavedDate(item.date) + ' · ' + item.portfolio.length + ' מסלולים</span>'
+           + (item.notes ? '<span class="sb-saved-notes">' + item.notes + '</span>' : '')
+           + '</div></div>'
+           + '<div class="sb-saved-actions">'
+           + '<button type="button" class="sb-load-item-btn" data-load-id="' + item.id + '"><i class="fas fa-folder-open" aria-hidden="true"></i> טען</button>'
+           + '<button type="button" class="sb-delete-item-btn" data-delete-id="' + item.id + '"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>'
+           + '</div></div>';
+    });
+    container.innerHTML = html;
+
     if (canCompare) {
       const footer = document.createElement('div');
       footer.className = 'sb-compare-multi-footer';
@@ -6210,9 +6232,10 @@ const App = (() => {
         + '<i class="fas fa-code-compare" aria-hidden="true"></i> השווה נבחרים</button>';
       container.appendChild(footer);
     }
+
     const _updateMultiFooter = () => {
       const checked = [...container.querySelectorAll('.sb-compare-check:checked')];
-      const footer = document.getElementById('sb-compare-multi-footer');
+      const footer  = document.getElementById('sb-compare-multi-footer');
       const countEl = document.getElementById('sb-compare-multi-count');
       if (!footer) return;
       footer.hidden = checked.length < 2;
@@ -6333,6 +6356,30 @@ const App = (() => {
     };
   }
 
+  function _sbBuildExtendedSummary(portfolio) {
+    let totalAmt = 0;
+    portfolio.forEach(it => { totalAmt += parseFloat(String(it.investAmount||'').replace(/,/g,'')) || 0; });
+    const wavg = (field) => {
+      let sum = 0, wsum = 0;
+      portfolio.forEach(it => {
+        const v = parseFloat(it[field]);
+        if (isNaN(v)) return;
+        const w = totalAmt > 0
+          ? (parseFloat(String(it.investAmount||'').replace(/,/g,'')) || 0) / totalAmt
+          : 1 / portfolio.length;
+        sum += w * v; wsum += w;
+      });
+      return wsum > 0 ? sum / wsum : null;
+    };
+    return {
+      count: portfolio.length, totalAmt,
+      avgFee: wavg('dnCumulative'),
+      avgY1: wavg('y1'), avgY3m: wavg('y3'),
+      avgY12: wavg('y12m'), avgY3y: wavg('y5'), avgY5yr: wavg('y5yr'),
+      avgStock: wavg('stock'), avgAbroad: wavg('abroad'), avgFx: wavg('fx'),
+    };
+  }
+
   function _sbCompareColHtml(name, portfolio) {
     const s = _sbBuildSummary(portfolio);
     const fmt = v => v != null ? v.toFixed(2) + '%' : '—';
@@ -6363,42 +6410,98 @@ const App = (() => {
   }
 
   function _sbRenderCompare(items) {
-    const colsHtml = items.map(item => _sbCompareColHtml(item.name, item.portfolio)).join('');
-    const title = items.length === 2
+    const n    = items.length;
+    const sums = items.map(it => _sbBuildExtendedSummary(it.portfolio));
+
+    // ── Section 1: Tracks per category
+    const allCats = {};
+    items.forEach(it => it.portfolio.forEach(t => {
+      if (!allCats[t.categoryId]) allCats[t.categoryId] = t.categoryLabel || t.categoryId;
+    }));
+    let tracksHtml = '<div class="sbcmp-section"><div class="sbcmp-section-head">מסלולים לפי קטגוריה</div>';
+    Object.entries(allCats).forEach(([catId, catLabel]) => {
+      tracksHtml += '<div class="sbcmp-cat-block"><div class="sbcmp-cat-head">' + catLabel + '</div>';
+      tracksHtml += '<div class="sbcmp-cat-cols sbcmp-cat-cols-' + n + '">';
+      tracksHtml += '<div class="sbcmp-col-name-row">';
+      items.forEach(it => { tracksHtml += '<div class="sbcmp-col-name">' + it.name + '</div>'; });
+      tracksHtml += '</div><div class="sbcmp-tracks-row">';
+      items.forEach(it => {
+        const tracks = it.portfolio.filter(t => t.categoryId === catId);
+        tracksHtml += '<div class="sbcmp-track-col">';
+        if (!tracks.length) {
+          tracksHtml += '<div class="sbcmp-track-empty">—</div>';
+        } else {
+          tracks.forEach(t => {
+            const amt    = parseFloat(String(t.investAmount || '').replace(/,/g, '')) || 0;
+            const amtStr = amt > 0 ? ' · ₪ ' + Math.round(amt).toLocaleString('he-IL') : '';
+            const feeStr = t.dnCumulative != null ? parseFloat(t.dnCumulative).toFixed(2) + '%' : '—';
+            tracksHtml += '<div class="sbcmp-track-item">'
+              + '<span class="sbcmp-track-dot" style="background:' + (t.color || '#999') + '"></span>'
+              + '<div class="sbcmp-track-info">'
+              + '<div class="sbcmp-track-name">' + (t.provider || '')
+              + (t.trackLabel ? ' — ' + t.trackLabel : (t.fundName ? ' — ' + t.fundName : ''))
+              + '</div>'
+              + '<div class="sbcmp-track-meta">ד"נ: ' + feeStr + amtStr + '</div>'
+              + '</div></div>';
+          });
+        }
+        tracksHtml += '</div>';
+      });
+      tracksHtml += '</div></div></div>';
+    });
+    tracksHtml += '</div>';
+
+    // ── Table builder helper
+    const mkTable = (headLabel, rows) => {
+      let t = '<table class="sbcmp-table"><thead><tr><th>' + headLabel + '</th>';
+      items.forEach(it => { t += '<th>' + it.name + '</th>'; });
+      if (n === 2) t += '<th class="sbcmp-diff-head">הפרש</th>';
+      t += '</tr></thead><tbody>';
+      rows.forEach(row => {
+        t += '<tr><td class="sbcmp-row-label">' + row.label + '</td>';
+        const vals = sums.map(s => s[row.key]);
+        vals.forEach(v => { t += '<td>' + (v != null ? v.toFixed(row.dec || 2) + '%' : '—') + '</td>'; });
+        if (n === 2 && vals[0] != null && vals[1] != null) {
+          const d = vals[0] - vals[1];
+          const cls = d > 0.005 ? 'pos' : d < -0.005 ? 'neg' : '';
+          t += '<td class="' + cls + '">' + (d >= 0 ? '+' : '') + d.toFixed(row.dec || 2) + '%</td>';
+        } else if (n === 2) { t += '<td>—</td>'; }
+        t += '</tr>';
+      });
+      return t + '</tbody></table>';
+    };
+
+    // ── Section 2: Returns
+    const returnsHtml = '<div class="sbcmp-section"><div class="sbcmp-section-head">תשואות (ממוצע משוקלל)</div>'
+      + mkTable('תקופה', [
+        { label: 'חודש אחרון', key: 'avgY1',   dec: 2 },
+        { label: '3 חודשים',   key: 'avgY3m',  dec: 2 },
+        { label: '12 חודשים',  key: 'avgY12',  dec: 2 },
+        { label: '3 שנים',     key: 'avgY3y',  dec: 2 },
+        { label: '5 שנים',     key: 'avgY5yr', dec: 2 },
+      ]) + '</div>';
+
+    // ── Section 3: Exposures
+    const exposuresHtml = '<div class="sbcmp-section"><div class="sbcmp-section-head">חשיפות (ממוצע משוקלל)</div>'
+      + mkTable('חשיפה', [
+        { label: 'מניות', key: 'avgStock',  dec: 1 },
+        { label: 'חו"ל',  key: 'avgAbroad', dec: 1 },
+        { label: 'מט"ח',  key: 'avgFx',     dec: 1 },
+      ]) + '</div>';
+
+    const title = n === 2
       ? 'השוואה: ' + items[0].name + ' vs ' + items[1].name
-      : 'השוואת ' + items.length + ' תיקים';
-    let diffHtml = '';
-    if (items.length === 2) {
-      const s0 = _sbBuildSummary(items[0].portfolio);
-      const s1 = _sbBuildSummary(items[1].portfolio);
-      const diffRow = (label, v0, v1, isAmt) => {
-        if (v0 == null || v1 == null) return '';
-        const diff = v0 - v1;
-        const cls = diff > 0.005 ? 'pos' : diff < -0.005 ? 'neg' : 'neu';
-        const fmtDiff = isAmt
-          ? (diff >= 0 ? '+' : '') + '₪ ' + Math.abs(Math.round(diff)).toLocaleString('he-IL')
-          : (diff >= 0 ? '+' : '') + diff.toFixed(2) + '%';
-        return '<div class="sb-compare-diff-row">'
-          + '<span class="sb-compare-diff-label">' + label + '</span>'
-          + '<span class="sb-compare-diff-val ' + cls + '">' + fmtDiff + '</span>'
-          + '</div>';
-      };
-      diffHtml = '<div class="sb-compare-diff-bar">'
-        + '<div class="sb-compare-diff-title">הפרש (' + items[0].name + ' פחות ' + items[1].name + ')</div>'
-        + diffRow('סה"כ השקעה', s0.totalAmt, s1.totalAmt, true)
-        + diffRow('ד"נ מצבירה', s0.avgFee, s1.avgFee, false)
-        + diffRow('תשואה 12 חודשים', s0.avgY12, s1.avgY12, false)
-        + diffRow('תשואה 3 שנים', s0.avgY3, s1.avgY3, false)
-        + '</div>';
-    }
+      : 'השוואת ' + n + ' תיקים';
     document.getElementById('sb-compare-title').textContent = title;
-    document.getElementById('sb-compare-content').innerHTML =
-      '<div class="sb-compare-grid sb-compare-grid-' + items.length + 'col">' + colsHtml + '</div>' + diffHtml;
+    document.getElementById('sb-compare-content').innerHTML = tracksHtml + returnsHtml + exposuresHtml;
   }
 
   function _sbOpenCompareDialogMulti(ids) {
     const list = _sbGetSavedPortfolios();
-    const items = ids.map(id => list.find(p => p.id === id)).filter(Boolean);
+    const items = ids.map(id => {
+      if (id === '__current__') return { name: state.sandbox.portfolioName || 'תיק נוכחי', portfolio: state.sandbox.portfolio };
+      return list.find(p => p.id === id);
+    }).filter(Boolean);
     if (items.length < 2) return;
     _sbCloseLoadDialog();
     _sbRenderCompare(items);
@@ -12193,7 +12296,7 @@ const App = (() => {
             </div>
             <div class="h2h-fund-line h2h-fund-line-details">
               <strong>${item.trackLabel}</strong>
-              <b>#${item.record.FUND_ID}${allocationIcon}</b>
+              <span class="h2h-fund-id-line"><b>#${item.record.FUND_ID}${allocationIcon}</b></span>
             </div>
           </a>
         </div>

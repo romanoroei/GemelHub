@@ -11432,7 +11432,7 @@ const App = (() => {
             </div>
             <div class="h2h-fund-line h2h-fund-line-details">
               <strong>${item.trackLabel}</strong>
-              <b>#${item.record.FUND_ID}${allocationIcon}</b>
+              <span class="h2h-fund-id-line"><b>#${item.record.FUND_ID}${allocationIcon}</b></span>
             </div>
           </a>
         </div>
