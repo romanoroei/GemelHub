@@ -19539,8 +19539,8 @@ html body .sandbox-track-id {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    min-height: 28px !important;
-    padding-top: 12px !important;
+    min-height: 24px !important;
+    padding-top: 7px !important;
     overflow: visible !important;
   }
 
@@ -19560,7 +19560,7 @@ html body .sandbox-track-id {
   }
 
   html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .yield-top-rank {
-    top: -1px !important;
+    top: -7px !important;
     width: 14px !important;
     height: 14px !important;
     min-width: 14px !important;

@@ -4419,7 +4419,7 @@ const App = (() => {
         el.style.setProperty('font-weight', '850', 'important');
       });
       table.querySelectorAll('.yield-top-rank').forEach(el => {
-        el.style.setProperty('top', '-1px', 'important');
+        el.style.setProperty('top', '-7px', 'important');
         el.style.setProperty('left', '50%', 'important');
         el.style.setProperty('right', 'auto', 'important');
         el.style.setProperty('transform', 'translateX(-50%)', 'important');
@@ -4659,7 +4659,7 @@ const App = (() => {
         el.style.setProperty('font-weight', '850', 'important');
       }
       if (el.matches('.yield-top-rank')) {
-        el.style.setProperty('top', '-1px', 'important');
+        el.style.setProperty('top', '-7px', 'important');
         el.style.setProperty('left', '50%', 'important');
         el.style.setProperty('right', 'auto', 'important');
         el.style.setProperty('transform', 'translateX(-50%)', 'important');
