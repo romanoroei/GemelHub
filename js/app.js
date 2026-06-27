@@ -7245,8 +7245,12 @@ const App = (() => {
 
   function expCell(pct, type) {
     if (pct === '-') return '<span class="exp-dash">-</span>';
-    const n = parseFloat(pct);
-    const w = Math.max(0, Math.min(n, 100));
+    const cleanPct = String(pct ?? '')
+      .replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '')
+      .replace('%', '')
+      .trim();
+    const n = parseFloat(cleanPct);
+    const w = Number.isFinite(n) ? Math.max(0, Math.min(n, 100)) : 0;
     const colorMap = { stock: '#6366f1', abroad: '#10b981', fx: '#f97316' };
     const color = colorMap[type] || '#6366f1';
     return `<div class="exp-wrap"><span class="exp-val">${pct}</span><div class="exp-bar-bg"><div class="exp-bar" style="width:${w}%;background:${color}"></div></div></div>`;

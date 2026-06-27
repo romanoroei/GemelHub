@@ -15934,9 +15934,9 @@ html body .sandbox-track-id {
 @media (max-width: 760px) {
   html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row),
   html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) > td {
-    height: 48px !important;
-    min-height: 48px !important;
-    max-height: 48px !important;
+    height: 54px !important;
+    min-height: 54px !important;
+    max-height: 54px !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) > td {
@@ -15946,9 +15946,9 @@ html body .sandbox-track-id {
   }
 
   html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .provider-cell {
-    height: 42px !important;
-    min-height: 42px !important;
-    max-height: 42px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
     align-items: center !important;
     overflow: hidden !important;
     padding-top: 0 !important;
@@ -15956,22 +15956,25 @@ html body .sandbox-track-id {
   }
 
   html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .provider-cell > div {
-    height: 38px !important;
-    min-height: 38px !important;
-    max-height: 38px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
     justify-content: center !important;
     overflow: hidden !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .prov-name,
   html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .prov-name-text {
-    display: block !important;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
     width: 100% !important;
     max-width: 100% !important;
-    height: 15px !important;
-    max-height: 15px !important;
+    height: auto !important;
+    min-height: 15px !important;
+    max-height: 30px !important;
     line-height: 15px !important;
-    white-space: nowrap !important;
+    white-space: normal !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     overflow-wrap: normal !important;
@@ -15979,9 +15982,9 @@ html body .sandbox-track-id {
   }
 
   html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .prov-id {
-    height: 15px !important;
-    max-height: 15px !important;
-    line-height: 15px !important;
+    height: 14px !important;
+    max-height: 14px !important;
+    line-height: 14px !important;
     overflow: visible !important;
     white-space: nowrap !important;
   }
