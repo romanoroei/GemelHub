@@ -12179,6 +12179,16 @@ const App = (() => {
       const ratio = raw > 0 ? raw / maxAbs : 0;
       return Math.max(8, Math.min(100, Math.round(ratio * 100)));
     };
+    const getH2HMetricHeadLabel = metric => {
+      if (!metric) return '';
+      if (metric.id === 'positive') return 'חודשים חיוביים';
+      return getH2HMetricShortLabel(metric);
+    };
+    const metricColumnWidth = metric => {
+      const chars = String(getH2HMetricHeadLabel(metric) || '').length;
+      return Math.max(64, Math.min(112, 44 + (chars * 5)));
+    };
+    const metricGridTemplate = activeMetrics.map(metric => `${metricColumnWidth(metric)}px`).join(' ');
     const metricGroups = [];
     activeMetrics.forEach(metric => {
       const current = metricGroups[metricGroups.length - 1];
@@ -12199,7 +12209,7 @@ const App = (() => {
       return `
       <div class="h2h-metric-head-card${blockStart}">
         <button type="button" class="h2h-metric-sort-btn${isSorted ? ' is-active' : ''}" data-h2h-sort-metric="${metric.id}" title="מיין ${metric.label} מהגבוה לנמוך">
-          <span>${getH2HMetricShortLabel(metric)}</span>
+          <span>${getH2HMetricHeadLabel(metric)}</span>
           <i class="fas fa-arrow-down-wide-short" aria-hidden="true"></i>
         </button>
         <button type="button" class="h2h-metric-remove-btn" data-h2h-remove-metric="${metric.id}" title="הסר עמודה" aria-label="הסר את ${metric.label}">×</button>
@@ -12269,15 +12279,27 @@ const App = (() => {
           }
         }
         const heat = displayOptions.heatmap ? getH2HHeatCellAttrs(raw, heatScales[metric.id]) : { cls: '', style: '' };
-        const showWinnerMark = isBest && !['stock', 'abroad', 'fx'].includes(metric.id);
+        const isAllocationMetric = ['stock', 'abroad', 'fx'].includes(metric.id);
+        const allocationColorMap = { stock: '#6366f1', abroad: '#10b981', fx: '#f97316' };
+        const heatStyle = heat.style ? heat.style.replace(/^ style="/, '').replace(/"$/, '') : '';
+        const styleVars = [
+          heatStyle,
+          isAllocationMetric ? `--h2h-bar-color:${allocationColorMap[metric.id] || '#c9b772'}` : ''
+        ].filter(Boolean).join(';');
+        const styleAttr = styleVars ? ` style="${styleVars}"` : '';
+        const allocationBar = isAllocationMetric && Number.isFinite(raw)
+          ? `<span class="h2h-mini-bar h2h-allocation-bar" aria-hidden="true"><span style="width:${valueBarPct(metric, raw)}%"></span></span>`
+          : '';
+        const showWinnerMark = isBest && !isAllocationMetric;
         const winnerMark = showWinnerMark ? `<span class="h2h-winner-crown" aria-hidden="true">👑</span>` : '<span class="h2h-winner-crown-placeholder" aria-hidden="true"></span>';
-        return `<div class="h2h-val h2h-val-visual${blockStart}${colorCls}${rankCls}${heat.cls}"${heat.style}>
+        return `<div class="h2h-val h2h-val-visual${isAllocationMetric ? ' h2h-allocation-val' : ''}${blockStart}${colorCls}${rankCls}${heat.cls}"${styleAttr}>
           <span class="h2h-cell-metric-name">${getH2HMetricShortLabel(metric)}</span>
           <span class="h2h-value-shell h2h-value-shell-visual">
             <span class="h2h-value-line">
               ${winnerMark}
               <span class="h2h-number">${getH2HMetricDisplay(item, metric.id)}</span>
             </span>
+            ${allocationBar}
           </span>
         </div>`;
       }).join('');
@@ -12308,7 +12330,7 @@ const App = (() => {
       <div class="h2h-results">
         ${leaderStrip}
         <div class="h2h-board-scroll">
-          <div class="h2h-board" style="--h2h-metric-count:${activeMetrics.length}">
+          <div class="h2h-board" style="--h2h-metric-count:${activeMetrics.length};--h2h-metric-columns:${metricGridTemplate}">
             <div class="h2h-board-head">
               <div class="h2h-fund-axis"><span>קופה</span></div>
               <div class="h2h-metrics-head-wrap">
@@ -12588,15 +12610,7 @@ const App = (() => {
 
     document.getElementById('h2h-mtog')?.addEventListener('click', () => {
       state.h2h.metricsOpen = !state.h2h.metricsOpen;
-      const panel = document.getElementById('h2h-mp');
-      const backdrop = document.getElementById('h2h-mp-backdrop');
-      ws.classList.toggle('h2h-metrics-open', !!state.h2h.metricsOpen);
-      if (panel) panel.style.display = state.h2h.metricsOpen ? '' : 'none';
-      if (backdrop) backdrop.style.display = state.h2h.metricsOpen ? '' : 'none';
-      const btn = document.getElementById('h2h-mtog');
-      if (btn) {
-        btn.querySelector('.fa-chevron-up,.fa-chevron-down').className = `fas fa-chevron-${state.h2h.metricsOpen ? 'up' : 'down'}`;
-      }
+      renderH2H();
     });
     document.getElementById('h2h-mp-close')?.addEventListener('click', () => {
       state.h2h.metricsOpen = false;
@@ -12606,6 +12620,22 @@ const App = (() => {
       state.h2h.metricsOpen = false;
       renderH2H();
     });
+    if (state.h2h.metricsOutsideHandler) {
+      document.removeEventListener('pointerdown', state.h2h.metricsOutsideHandler, true);
+      state.h2h.metricsOutsideHandler = null;
+    }
+    if (state.h2h.metricsOpen) {
+      state.h2h.metricsOutsideHandler = event => {
+        const panel = document.getElementById('h2h-mp');
+        const toggle = document.getElementById('h2h-mtog');
+        if (panel?.contains(event.target) || toggle?.contains(event.target)) return;
+        document.removeEventListener('pointerdown', state.h2h.metricsOutsideHandler, true);
+        state.h2h.metricsOutsideHandler = null;
+        state.h2h.metricsOpen = false;
+        renderH2H();
+      };
+      setTimeout(() => document.addEventListener('pointerdown', state.h2h.metricsOutsideHandler, true), 0);
+    }
 
     document.getElementById('h2h-add-btn')?.addEventListener('click', openH2HWizard);
     document.getElementById('h2h-add-btn-2')?.addEventListener('click', openH2HWizard);

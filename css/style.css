@@ -18699,10 +18699,10 @@ html body .sandbox-track-id {
     position: sticky !important;
     right: 0 !important;
     z-index: 4 !important;
-    flex: 0 0 180px !important;
-    width: 180px !important;
-    min-width: 180px !important;
-    max-width: 180px !important;
+    flex: 0 0 160px !important;
+    width: 160px !important;
+    min-width: 160px !important;
+    max-width: 160px !important;
     background-clip: padding-box !important;
     box-shadow: -5px 0 10px rgba(12, 33, 52, .08) !important;
   }
@@ -18719,7 +18719,7 @@ html body .sandbox-track-id {
   }
   body.h2h-active .h2h-board-groups,
   body.h2h-active .h2h-board-metrics {
-    grid-template-columns: repeat(var(--h2h-metric-count, 6), 92px) !important;
+    grid-template-columns: var(--h2h-metric-columns, repeat(var(--h2h-metric-count, 6), 82px)) !important;
   }
   body.h2h-active .h2h-group-head {
     min-height: 24px !important;
@@ -18727,13 +18727,18 @@ html body .sandbox-track-id {
     font-size: .68rem !important;
   }
   body.h2h-active .h2h-metric-head-card {
-    min-height: 34px !important;
-    padding: 5px 4px !important;
-    font-size: .7rem !important;
+    min-height: 42px !important;
+    padding: 5px 3px !important;
+    font-size: .68rem !important;
   }
   body.h2h-active .h2h-metric-sort-btn span {
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
     white-space: normal !important;
-    line-height: 1.05 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.08 !important;
   }
   body.h2h-active .h2h-board-row .h2h-fund-row-th {
     padding: 7px 7px !important;
@@ -18742,7 +18747,7 @@ html body .sandbox-track-id {
   body.h2h-active .h2h-board-row .h2h-fund-link {
     min-height: 68px !important;
     gap: 4px !important;
-    padding: 0 0 0 34px !important;
+    padding: 0 0 0 28px !important;
   }
   body.h2h-active .h2h-board-row .h2h-fund-pname {
     font-size: .86rem !important;
@@ -18844,15 +18849,35 @@ html body .sandbox-track-id {
     aspect-ratio: 1 / 1 !important;
   }
   body.h2h-active .h2h-board-row .h2h-val-visual {
-    width: 92px !important;
-    min-width: 92px !important;
+    width: auto !important;
+    min-width: 0 !important;
     min-height: 82px !important;
-    padding: 7px 5px !important;
+    padding: 7px 4px !important;
   }
   body.h2h-active .h2h-cell-metric-name { display: none !important; }
   body.h2h-active .h2h-value-line {
     min-height: 42px !important;
     gap: 3px !important;
+  }
+  body.h2h-active .h2h-board-row .h2h-allocation-val .h2h-value-shell-visual {
+    gap: 3px !important;
+  }
+  body.h2h-active .h2h-board-row .h2h-allocation-val .h2h-mini-bar {
+    display: block !important;
+    width: 100% !important;
+    max-width: 46px !important;
+    height: 6px !important;
+    margin: 1px auto 0 !important;
+    border-radius: 999px !important;
+    background: #e5e7eb !important;
+    overflow: hidden !important;
+    direction: ltr !important;
+  }
+  body.h2h-active .h2h-board-row .h2h-allocation-val .h2h-mini-bar span {
+    display: block !important;
+    height: 100% !important;
+    border-radius: inherit !important;
+    background: var(--h2h-bar-color, #c9b772) !important;
   }
   body.h2h-active .h2h-board-row .h2h-number { font-size: .88rem !important; }
   body.h2h-active .h2h-winner-crown,
@@ -18998,22 +19023,27 @@ html body .sandbox-track-id {
 }
 .sb-compare-btn:hover { background: #e0e7ff; }
 
-/* H2H mobile metrics drawer: stop above the personal-check CTA and bottom nav. */
+/* H2H mobile metrics drawer: reaches the bottom nav and sits above floating CTAs. */
 @media (max-width: 760px) {
   body.h2h-active .h2h-metrics-panel.h2h-metrics-drawer {
     top: 0 !important;
-    bottom: calc(var(--mobile-nav-h, 68px) + 64px) !important;
+    bottom: var(--mobile-nav-h, 68px) !important;
     height: auto !important;
-    max-height: calc(100dvh - var(--mobile-nav-h, 68px) - 64px) !important;
+    max-height: calc(100dvh - var(--mobile-nav-h, 68px)) !important;
     width: min(356px, calc(100vw - 78px)) !important;
     padding: 0 !important;
     border-radius: 0 0 0 10px !important;
     overflow: hidden !important;
+    z-index: 4200 !important;
+  }
+
+  body.h2h-active .h2h-metrics-backdrop {
+    z-index: 4100 !important;
   }
 
   body.h2h-active .h2h-drawer-head {
-    padding: 10px 12px 9px !important;
-    gap: 4px 8px !important;
+    padding: 8px 10px 7px !important;
+    gap: 3px 7px !important;
   }
 
   body.h2h-active .h2h-drawer-head strong {
@@ -19033,39 +19063,39 @@ html body .sandbox-track-id {
   }
 
   body.h2h-active .h2h-drawer-body {
-    padding: 10px 10px 14px !important;
+    padding: 8px 9px 10px !important;
     overflow-y: auto !important;
     overscroll-behavior: contain !important;
   }
 
   body.h2h-active .h2h-metrics-drawer .h2h-mgroup {
-    margin-bottom: 10px !important;
-    padding: 8px 10px !important;
+    margin-bottom: 7px !important;
+    padding: 6px 8px !important;
     border-radius: 10px !important;
   }
 
   body.h2h-active .h2h-mgroup-label {
-    margin-bottom: 5px !important;
-    font-size: .75rem !important;
-    line-height: 1.15 !important;
+    margin-bottom: 3px !important;
+    font-size: .72rem !important;
+    line-height: 1.1 !important;
   }
 
   body.h2h-active .h2h-mgroup-items {
-    gap: 1px !important;
+    gap: 0 !important;
   }
 
   body.h2h-active .h2h-mcheckbox {
-    min-height: 28px !important;
-    padding: 2px 0 !important;
-    gap: 6px !important;
-    font-size: .82rem !important;
-    line-height: 1.15 !important;
+    min-height: 24px !important;
+    padding: 1px 0 !important;
+    gap: 5px !important;
+    font-size: .79rem !important;
+    line-height: 1.08 !important;
   }
 
   body.h2h-active .h2h-mcheckbox input {
-    width: 15px !important;
-    height: 15px !important;
-    flex: 0 0 15px !important;
+    width: 14px !important;
+    height: 14px !important;
+    flex: 0 0 14px !important;
   }
 }
 
