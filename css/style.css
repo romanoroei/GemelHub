@@ -19560,17 +19560,61 @@ html body .sandbox-track-id {
   }
 
   html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .yield-top-rank {
-    width: 15px !important;
-    height: 15px !important;
-    min-width: 15px !important;
-    max-width: 15px !important;
-    min-height: 15px !important;
-    max-height: 15px !important;
+    top: 1px !important;
+    width: 13px !important;
+    height: 13px !important;
+    min-width: 13px !important;
+    max-width: 13px !important;
+    min-height: 13px !important;
+    max-height: 13px !important;
     padding: 0 !important;
-    font-size: .68rem !important;
+    font-size: 7px !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .yield-badge {
     font-size: .76em !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table th:nth-child(1),
+  html body #tracks-container .track-table-wrapper table.track-table td:nth-child(1) {
+    width: 22px !important;
+    min-width: 22px !important;
+    max-width: 22px !important;
+    padding-inline: 0 !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table th:nth-child(2),
+  html body #tracks-container .track-table-wrapper table.track-table td:nth-child(2) {
+    right: 22px !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons {
+    gap: 2px !important;
+    margin-inline-start: 4px !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-icons,
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .allocation-outlier-wrap,
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .allocation-outlier-btn,
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-icon,
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-flag-il,
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-warning {
+    transform: none !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-icon-abroad,
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-icon-fx,
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-icon-shekel,
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-warning {
+    width: 15px !important;
+    height: 15px !important;
+    flex-basis: 15px !important;
+    font-size: 13px !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-icon-us,
+  html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-flag-il {
+    width: 19px !important;
+    height: 13px !important;
   }
 }

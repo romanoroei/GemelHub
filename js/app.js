@@ -4322,7 +4322,7 @@ const App = (() => {
       const firstRowTHs = Array.from(table.querySelector('tr')?.children || []);
       const mobileColumnCount = firstRowTHs.length;
       if (mobileColumnCount > 2) {
-        const rankWidth = 28;
+        const rankWidth = 22;
         const managerWidth = 104;
         let expColWidth = 76;
         if (isExposureOnly) {
@@ -4396,7 +4396,7 @@ const App = (() => {
       table.querySelectorAll('thead th:nth-child(2)').forEach(el => {
         el.style.setProperty('position', 'sticky', 'important');
         el.style.setProperty('top', 'auto', 'important');
-        el.style.setProperty('right', '28px', 'important');
+        el.style.setProperty('right', '22px', 'important');
         el.style.setProperty('z-index', '703', 'important');
         el.style.setProperty('box-shadow', '-3px 0 8px -3px rgba(15,23,42,.2)', 'important');
       });
@@ -4419,11 +4419,15 @@ const App = (() => {
         el.style.setProperty('font-weight', '850', 'important');
       });
       table.querySelectorAll('.yield-top-rank').forEach(el => {
-        el.style.setProperty('font-size', '8px', 'important');
-        el.style.setProperty('width', '15px', 'important');
-        el.style.setProperty('height', '15px', 'important');
-        el.style.setProperty('min-width', '15px', 'important');
-        el.style.setProperty('min-height', '15px', 'important');
+        el.style.setProperty('top', '1px', 'important');
+        el.style.setProperty('left', '50%', 'important');
+        el.style.setProperty('right', 'auto', 'important');
+        el.style.setProperty('transform', 'translateX(-50%)', 'important');
+        el.style.setProperty('font-size', '7px', 'important');
+        el.style.setProperty('width', '13px', 'important');
+        el.style.setProperty('height', '13px', 'important');
+        el.style.setProperty('min-width', '13px', 'important');
+        el.style.setProperty('min-height', '13px', 'important');
       });
       normalizeMobileFinanceTablePresentation(table);
       if (isExposureOnly) {
@@ -4655,11 +4659,15 @@ const App = (() => {
         el.style.setProperty('font-weight', '850', 'important');
       }
       if (el.matches('.yield-top-rank')) {
-        el.style.setProperty('font-size', '8px', 'important');
-        el.style.setProperty('width', '15px', 'important');
-        el.style.setProperty('height', '15px', 'important');
-        el.style.setProperty('min-width', '15px', 'important');
-        el.style.setProperty('min-height', '15px', 'important');
+        el.style.setProperty('top', '1px', 'important');
+        el.style.setProperty('left', '50%', 'important');
+        el.style.setProperty('right', 'auto', 'important');
+        el.style.setProperty('transform', 'translateX(-50%)', 'important');
+        el.style.setProperty('font-size', '7px', 'important');
+        el.style.setProperty('width', '13px', 'important');
+        el.style.setProperty('height', '13px', 'important');
+        el.style.setProperty('min-width', '13px', 'important');
+        el.style.setProperty('min-height', '13px', 'important');
       }
     });
     // Re-apply sticky to rank+manager thead cells — must run last so nothing overrides it
@@ -4677,7 +4685,7 @@ const App = (() => {
       }
       if (th2) {
         th2.style.setProperty('position', 'sticky', 'important');
-        th2.style.setProperty('right', '30px', 'important');
+        th2.style.setProperty('right', '22px', 'important');
         th2.style.setProperty('z-index', '700', 'important');
         th2.style.setProperty('top', 'auto', 'important');
         th2.style.setProperty('box-shadow', '-1px 0 0 rgba(203,213,225,.9), -8px 0 12px -12px rgba(15,23,42,.35)', 'important');
