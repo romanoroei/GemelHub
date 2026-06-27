@@ -6125,14 +6125,14 @@ const App = (() => {
   function _sbFormatSavedDate(dateStr) {
     if (!dateStr) return '';
     try { const [y, m, d] = dateStr.split('-'); return `${d}.${m}.${y}`; } catch { return dateStr; }
-  
+  }
 
   function _sbFormatTime(isoStr) {
     if (!isoStr) return '';
     const d = new Date(isoStr);
     if (isNaN(d)) return '';
     return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
-  }}
+  }
 
   function _sbOpenSaveDialog() {
     const dialog = document.getElementById('sb-save-dialog');
