@@ -34,7 +34,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=mobile-row-bars-20260627" />
+  <link rel="stylesheet" href="css/style.css?v=donut-v3-20260627" />
   <style>
     @media (max-width: 760px) {
       .advanced-search-overlay { z-index: 9500 !important; }
@@ -460,6 +460,48 @@
   </div>
 </div>
 
+<!-- Sandbox: Save Portfolio Dialog -->
+<div id="sb-save-dialog" class="sb-dialog-overlay" hidden aria-modal="true" role="dialog" aria-label="שמירת תיק">
+  <div class="sb-dialog-box">
+    <div class="sb-dialog-head">
+      <h3>שמירת תיק</h3>
+      <button type="button" class="sb-dialog-close" id="sb-save-dialog-close" aria-label="סגור">✕</button>
+    </div>
+    <div class="sb-dialog-body">
+      <div class="sb-save-info">
+        <i class="fas fa-info-circle" aria-hidden="true"></i>
+        התיק נשמר בדפדפן שלך בלבד. הנתונים שמורים במכשיר זה ואינם מועברים לשרת — רק אתה יכול לראות אותם, ורק מהדפדפן הזה.
+      </div>
+      <label class="sb-field-label">שם התיק
+        <input type="text" id="sb-save-name" class="sb-field-input" placeholder="לדוגמה: תיק פנסיה 2026" maxlength="60" dir="rtl" />
+      </label>
+      <label class="sb-field-label">תאריך
+        <input type="date" id="sb-save-date" class="sb-field-input" dir="ltr" />
+      </label>
+      <label class="sb-field-label">הערות
+        <textarea id="sb-save-notes" class="sb-field-textarea" placeholder="הערות אופציונליות..." maxlength="300" dir="rtl"></textarea>
+      </label>
+    </div>
+    <div class="sb-dialog-footer">
+      <button type="button" class="sb-dialog-cancel" id="sb-save-dialog-cancel">ביטול</button>
+      <button type="button" class="sb-dialog-submit" id="sb-save-dialog-submit">
+        <i class="fas fa-floppy-disk" aria-hidden="true"></i> שמור
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Sandbox: Load Portfolio Dialog -->
+<div id="sb-load-dialog" class="sb-dialog-overlay" hidden aria-modal="true" role="dialog" aria-label="תיקים שמורים">
+  <div class="sb-dialog-box">
+    <div class="sb-dialog-head">
+      <h3>תיקים שמורים</h3>
+      <button type="button" class="sb-dialog-close" id="sb-load-dialog-close" aria-label="סגור">✕</button>
+    </div>
+    <div class="sb-dialog-body" id="sb-load-list"></div>
+  </div>
+</div>
+
 <!-- Sandbox floating selection bar -->
 <div id="sandbox-bar" class="sandbox-bar" role="status" aria-live="polite"></div>
 
@@ -537,6 +579,6 @@
 
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
-<script src="js/app.js?v=h2h-mobile-board-20260627"></script>
+<script src="js/app.js?v=donut-v2-20260627"></script>
 </body>
 </html>

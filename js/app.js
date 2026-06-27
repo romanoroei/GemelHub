@@ -37,6 +37,7 @@ const App = (() => {
     sandbox: {
       selections: [],  // pending selections (up to 6), not yet in portfolio
       portfolio: [],   // saved portfolio items (persisted in localStorage)
+      portfolioName: '',
       returnsMenuOpen: false,
       selectedReturnFields: ['monthly', 'ytd', '12m', '3y']
     }
@@ -47,6 +48,7 @@ const App = (() => {
   const DEFAULT_TARGET_POPULATION = 'כלל האוכלוסיה';
   const SANDBOX_STORAGE_KEY = 'gemelhub_sandbox_portfolio_v1';
   const SANDBOX_SELECTIONS_KEY = 'gemelhub_sandbox_selections_v1';
+  const SANDBOX_NAME_KEY = 'gemelhub_sandbox_portfolio_name_v1';
   const SANDBOX_RETURNS_FIELDS_KEY = 'gemelhub_sandbox_return_fields_v1';
   const ADVANCED_OPTIONS_AUTO_CLOSE_DELAY = 13000;
   const ADVANCED_OPTIONS_HOVER_TARGETS = [
@@ -647,6 +649,7 @@ const App = (() => {
     loadSandboxPortfolio();
     setupSandboxCheckboxes();
     setupSandboxBarActions();
+    setupSandboxPortfolioDialogs();
     window.addEventListener('resize', syncTracksDensityClasses);
     window.addEventListener('resize', updateStickyGapMask);
     window.addEventListener('resize', updateMobileStickyHeader);
@@ -5331,6 +5334,7 @@ const App = (() => {
       const savedSel = localStorage.getItem(SANDBOX_SELECTIONS_KEY);
       if (savedSel) state.sandbox.selections = JSON.parse(savedSel);
     } catch(e) { state.sandbox.selections = []; }
+    state.sandbox.portfolioName = localStorage.getItem(SANDBOX_NAME_KEY) || '';
     // On load: auto-merge any pending selections into portfolio so the bar
     // never reappears for items the user already "added" in a prior session.
     if (state.sandbox.selections.length > 0) {
@@ -5359,6 +5363,8 @@ const App = (() => {
     const _trySave = () => {
       localStorage.setItem(SANDBOX_STORAGE_KEY, pJson);
       localStorage.setItem(SANDBOX_SELECTIONS_KEY, sJson);
+      if (state.sandbox.portfolioName) localStorage.setItem(SANDBOX_NAME_KEY, state.sandbox.portfolioName);
+      else localStorage.removeItem(SANDBOX_NAME_KEY);
     };
     try {
       _trySave();
@@ -5371,6 +5377,17 @@ const App = (() => {
     }
     _sbUpdateTabBadge();
     syncFundMembershipIndicators();
+    _sbShowAutosaveIndicator();
+  }
+
+  let _sbAutosaveTimer = null;
+  function _sbShowAutosaveIndicator() {
+    const el = document.getElementById('sb-autosave-status');
+    if (!el) return;
+    el.textContent = '✓ נשמר';
+    el.classList.add('is-visible');
+    clearTimeout(_sbAutosaveTimer);
+    _sbAutosaveTimer = setTimeout(() => el.classList.remove('is-visible'), 2500);
   }
 
   function _sbUpdateTabBadge() {
@@ -5710,14 +5727,20 @@ const App = (() => {
     const portfolio = state.sandbox.portfolio;
 
     let html = `<div class="sandbox-page-header">
-      <div class="sandbox-page-title">🧪 המעבדה שלי</div>
+      <div class="sandbox-page-title">🧪 המעבדה שלי<span id="sb-autosave-status" class="sb-autosave-status" aria-live="polite"></span></div>
       <div class="sandbox-page-actions">
         <button type="button" class="sandbox-add-btn" id="sandbox-add-more-btn">
           <i class="fas fa-plus" aria-hidden="true"></i> הוסף מסלולים
         </button>
         ${_sbReturnFieldMenuHtml()}
+        <button type="button" class="sandbox-save-btn" id="sandbox-save-portfolio-btn" title="שמור תיק">
+          <i class="fas fa-floppy-disk" aria-hidden="true"></i> <span class="sb-btn-label">שמור תיק</span>
+        </button>
+        <button type="button" class="sandbox-load-btn" id="sandbox-load-portfolio-btn" title="טען תיק שמור">
+          <i class="fas fa-folder-open" aria-hidden="true"></i> <span class="sb-btn-label">טען תיק</span>
+        </button>
         ${portfolio.length > 0 ? `<button type="button" class="sandbox-clear-btn" id="sandbox-clear-portfolio-btn">
-          <i class="fas fa-trash-alt" aria-hidden="true"></i> מחק תיק</button>` : ''}
+          <i class="fas fa-trash-alt" aria-hidden="true"></i> <span class="sb-btn-label">מחק תיק</span></button>` : ''}
       </div>
     </div>`;
 
@@ -5860,8 +5883,21 @@ const App = (() => {
       html += _sbDashboardHtml(portfolio);
     }
 
+    // Rescue value bar before innerHTML wipe (it may have been moved inside section)
+    const _barBeforeRender = document.getElementById('sandbox-value-bar');
+    if (_barBeforeRender && _barBeforeRender.closest('#sandbox-section')) {
+      document.body.appendChild(_barBeforeRender);
+    }
+
     section.innerHTML = html;
     _sbAttachEvents(section);
+
+    // Anchor value bar below the sandbox header (CSS handles mobile vs desktop positioning)
+    const _sbPageHeader = section.querySelector('.sandbox-page-header');
+    const _sbValueBar = document.getElementById('sandbox-value-bar');
+    if (_sbPageHeader && _sbValueBar) {
+      _sbPageHeader.insertAdjacentElement('afterend', _sbValueBar);
+    }
   }
 
   function _sbDonut(title, segments, centerText) {
@@ -6037,9 +6073,14 @@ const App = (() => {
     const totalAmount = allInvestedAsAmount
       ? portfolio.reduce((sum, item) => sum + (parseFloat(String(item.investAmount).replace(/,/g, '')) || 0), 0)
       : 0;
-    const totalLine = allInvestedAsAmount && totalAmount > 0
-      ? `<span class="svb-total-row"><span class="svb-total-label">שווי התיק שלי</span><span class="svb-total-amount">${Math.round(totalAmount).toLocaleString('he-IL')} ש"ח</span></span>`
+    const portfolioNameLabel = state.sandbox.portfolioName
+      ? `<span class="svb-portfolio-name">${state.sandbox.portfolioName}</span>`
       : '';
+    const totalLine = allInvestedAsAmount && totalAmount > 0
+      ? `<span class="svb-total-row">${portfolioNameLabel}<span class="svb-total-label">שווי התיק שלי</span><span class="svb-total-amount">${Math.round(totalAmount).toLocaleString('he-IL')} ש"ח</span></span>`
+      : portfolioNameLabel
+        ? `<span class="svb-total-row">${portfolioNameLabel}</span>`
+        : '';
     bar.innerHTML = catRows.length
       ? `<span class="svb-category-list">${totalLine}${catRows.join('')}</span>`
       : `<span class="svb-label">המעבדה שלי</span><span class="svb-meta">${portfolio.length} מסלולים · ${Object.keys(catMap).length} קטגוריות</span>`;
@@ -6058,8 +6099,141 @@ const App = (() => {
       bar.classList.remove('is-visible');
       document.documentElement.style.setProperty('--sandbox-mobile-value-bar-space', '0px');
       document.documentElement.style.removeProperty('--sandbox-mobile-value-bar-top');
+      // No need to restore to body — CSS handles mobile fixed positioning
     }
   }
+
+  // ── Sandbox: Named Portfolio Save / Load ──────────────────────────────────
+  const SB_PORTFOLIOS_KEY = 'gemelhub_saved_portfolios_v1';
+
+  function _sbGetSavedPortfolios() {
+    try { return JSON.parse(localStorage.getItem(SB_PORTFOLIOS_KEY) || '[]'); } catch { return []; }
+  }
+
+  function _sbPutSavedPortfolios(list) {
+    localStorage.setItem(SB_PORTFOLIOS_KEY, JSON.stringify(list));
+  }
+
+  function _sbFormatSavedDate(dateStr) {
+    if (!dateStr) return '';
+    try { const [y, m, d] = dateStr.split('-'); return `${d}.${m}.${y}`; } catch { return dateStr; }
+  }
+
+  function _sbOpenSaveDialog() {
+    const dialog = document.getElementById('sb-save-dialog');
+    if (!dialog) return;
+    document.getElementById('sb-save-name').value = '';
+    document.getElementById('sb-save-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('sb-save-notes').value = '';
+    dialog.hidden = false;
+    setTimeout(() => document.getElementById('sb-save-name')?.focus(), 60);
+  }
+
+  function _sbCloseSaveDialog() {
+    const d = document.getElementById('sb-save-dialog');
+    if (d) d.hidden = true;
+  }
+
+  function _sbDoSavePortfolio() {
+    const name = (document.getElementById('sb-save-name')?.value || '').trim();
+    if (!name) { document.getElementById('sb-save-name')?.focus(); return; }
+    const date  = document.getElementById('sb-save-date')?.value  || new Date().toISOString().split('T')[0];
+    const notes = (document.getElementById('sb-save-notes')?.value || '').trim();
+    _sbSyncVisibleInputsToState();
+    const portfolio = JSON.parse(JSON.stringify(state.sandbox.portfolio));
+    const list = _sbGetSavedPortfolios();
+    list.push({ id: Date.now().toString(), name, date, notes, portfolio, savedAt: new Date().toISOString() });
+    _sbPutSavedPortfolios(list);
+    state.sandbox.portfolioName = name;
+    saveSandboxPortfolio();
+    _sbCloseSaveDialog();
+    _sbUpdateValueBar(state.sandbox.portfolio);
+    showToast(`התיק "${name}" נשמר בהצלחה`);
+  }
+
+  function _sbOpenLoadDialog() {
+    const dialog = document.getElementById('sb-load-dialog');
+    if (!dialog) return;
+    _sbRenderLoadList();
+    dialog.hidden = false;
+  }
+
+  function _sbCloseLoadDialog() {
+    const d = document.getElementById('sb-load-dialog');
+    if (d) d.hidden = true;
+  }
+
+  function _sbRenderLoadList() {
+    const container = document.getElementById('sb-load-list');
+    if (!container) return;
+    const list = _sbGetSavedPortfolios();
+    if (!list.length) {
+      container.innerHTML = '<p class="sb-load-empty">אין תיקים שמורים עדיין.</p>';
+      return;
+    }
+    container.innerHTML = list.map(item => `
+      <div class="sb-saved-item">
+        <div class="sb-saved-item-info">
+          <strong class="sb-saved-name">${item.name}</strong>
+          <span class="sb-saved-meta">${_sbFormatSavedDate(item.date)} · ${item.portfolio.length} מסלולים</span>
+          ${item.notes ? `<span class="sb-saved-notes">${item.notes}</span>` : ''}
+        </div>
+        <div class="sb-saved-actions">
+          <button type="button" class="sb-load-item-btn" data-load-id="${item.id}">
+            <i class="fas fa-folder-open" aria-hidden="true"></i> טען
+          </button>
+          <button type="button" class="sb-delete-item-btn" data-delete-id="${item.id}" aria-label="מחק תיק ${item.name}">
+            <i class="fas fa-trash-alt" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    `).join('');
+    container.querySelectorAll('.sb-load-item-btn').forEach(btn =>
+      btn.addEventListener('click', () => _sbDoLoadPortfolio(btn.dataset.loadId)));
+    container.querySelectorAll('.sb-delete-item-btn').forEach(btn =>
+      btn.addEventListener('click', () => _sbDoDeletePortfolio(btn.dataset.deleteId)));
+  }
+
+  function _sbDoLoadPortfolio(id) {
+    const list = _sbGetSavedPortfolios();
+    const item = list.find(p => p.id === id);
+    if (!item) return;
+    if (!confirm(`לטעון את התיק "${item.name}"?\nהתיק הנוכחי יוחלף.`)) return;
+    _sbCloseLoadDialog();
+    state.sandbox.portfolio = JSON.parse(JSON.stringify(item.portfolio));
+    state.sandbox.portfolioName = item.name;
+    saveSandboxPortfolio();
+    document.querySelectorAll('.sandbox-check').forEach(cb => {
+      cb.checked = false; cb.classList.remove('is-in-portfolio');
+    });
+    state.sandbox.portfolio.forEach(it => {
+      const cb = document.querySelector(`.sandbox-check[data-fundid="${it.fundId}"][data-trackid="${it.trackId}"][data-categoryid="${it.categoryId}"]`);
+      if (cb) { cb.checked = true; cb.classList.add('is-in-portfolio'); }
+    });
+    if (state.activeCategoryId !== 'sandbox') switchCategory('sandbox');
+    else renderSandboxPage();
+    showToast(`התיק "${item.name}" נטען בהצלחה`);
+  }
+
+  function _sbDoDeletePortfolio(id) {
+    const list = _sbGetSavedPortfolios();
+    const item = list.find(p => p.id === id);
+    if (!item || !confirm(`למחוק את התיק "${item.name}"?`)) return;
+    _sbPutSavedPortfolios(list.filter(p => p.id !== id));
+    _sbRenderLoadList();
+  }
+
+  function setupSandboxPortfolioDialogs() {
+    document.getElementById('sb-save-dialog-close')?.addEventListener('click', _sbCloseSaveDialog);
+    document.getElementById('sb-save-dialog-cancel')?.addEventListener('click', _sbCloseSaveDialog);
+    document.getElementById('sb-save-dialog-submit')?.addEventListener('click', _sbDoSavePortfolio);
+    document.getElementById('sb-load-dialog-close')?.addEventListener('click', _sbCloseLoadDialog);
+    document.getElementById('sb-save-dialog')?.addEventListener('click', e => { if (e.target === e.currentTarget) _sbCloseSaveDialog(); });
+    document.getElementById('sb-load-dialog')?.addEventListener('click', e => { if (e.target === e.currentTarget) _sbCloseLoadDialog(); });
+    // Enter key in save dialog
+    document.getElementById('sb-save-name')?.addEventListener('keydown', e => { if (e.key === 'Enter') _sbDoSavePortfolio(); });
+  }
+  // ────────────────────────────────────────────────────────────────────────────
 
   function _sbInitValueBarDrag() {
     const bar = document.getElementById('sandbox-value-bar');
@@ -6226,11 +6400,14 @@ const App = (() => {
           </div>
         </div>
         <div class="sb-distribution-legend">
-          ${activeSegments.map((segment, index) => `<button type="button" class="sb-distribution-legend-row" data-donut-index="${index}" data-label="${_sbEscapeAttr(segment.label)}" data-pct="${segment.pct.toFixed(0)}%" data-amount="${segment.amount != null ? _sbEscapeAttr(formatCurrencyILS(segment.amount)) : ''}">
+          ${activeSegments.map((segment, index) => {
+            const amtRtl = segment.amount != null ? `₪ ${Math.round(segment.amount).toLocaleString('he-IL')}` : '';
+            return `<button type="button" class="sb-distribution-legend-row" data-donut-index="${index}" data-label="${_sbEscapeAttr(segment.label)}" data-pct="${segment.pct.toFixed(0)}%" data-amount="${_sbEscapeAttr(amtRtl)}">
             <span class="sb-product-dot" style="background:${segment.color}"></span>
             <strong>${segment.label}</strong>
-            <span class="sb-distribution-legend-value">${segment.pct.toFixed(0)}%${hasAmounts && segment.amount != null ? `<em>${formatCurrencyILS(segment.amount)}</em>` : ''}</span>
-          </button>`).join('')}
+            <span class="sb-distribution-legend-value">${segment.pct.toFixed(0)}%${hasAmounts && segment.amount != null ? `<em>${amtRtl}</em>` : ''}</span>
+          </button>`;
+          }).join('')}
         </div>
       </div>
     </section>`;
@@ -6462,10 +6639,15 @@ const App = (() => {
       });
     });
 
+    // Save / Load portfolio buttons
+    section.querySelector('#sandbox-save-portfolio-btn')?.addEventListener('click', _sbOpenSaveDialog);
+    section.querySelector('#sandbox-load-portfolio-btn')?.addEventListener('click', _sbOpenLoadDialog);
+
     // Clear portfolio button
     section.querySelector('#sandbox-clear-portfolio-btn')?.addEventListener('click', () => {
       if (!confirm('האם למחוק את תיק ההשקעות לחלוטין?')) return;
       state.sandbox.portfolio = [];
+      state.sandbox.portfolioName = '';
       _sbHideValueBar();
       saveSandboxPortfolio();
       // uncheck all checkboxes in tables
