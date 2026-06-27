@@ -16066,3 +16066,18 @@ html body .sandbox-track-id {
   body.h2h-active .h2h-winner-crown,
   body.h2h-active .h2h-winner-crown-placeholder { width: 17px !important; height: 17px !important; flex-basis: 17px !important; font-size: .74rem !important; }
 }
+
+/* H2H mobile metrics drawer: stop above the personal-check CTA and bottom nav. */
+@media (max-width: 760px) {
+  body.h2h-active .h2h-metrics-panel.h2h-metrics-drawer { top: 0 !important; bottom: calc(var(--mobile-nav-h, 68px) + 64px) !important; height: auto !important; max-height: calc(100dvh - var(--mobile-nav-h, 68px) - 64px) !important; width: min(356px, calc(100vw - 78px)) !important; padding: 0 !important; border-radius: 0 0 0 10px !important; overflow: hidden !important; }
+  body.h2h-active .h2h-drawer-head { padding: 10px 12px 9px !important; gap: 4px 8px !important; }
+  body.h2h-active .h2h-drawer-head strong { font-size: .88rem !important; }
+  body.h2h-active .h2h-drawer-head .h2h-metrics-limit { font-size: .68rem !important; line-height: 1.2 !important; }
+  body.h2h-active .h2h-drawer-close { width: 28px !important; height: 28px !important; min-width: 28px !important; min-height: 28px !important; }
+  body.h2h-active .h2h-drawer-body { padding: 10px 10px 14px !important; overflow-y: auto !important; overscroll-behavior: contain !important; }
+  body.h2h-active .h2h-metrics-drawer .h2h-mgroup { margin-bottom: 10px !important; padding: 8px 10px !important; border-radius: 10px !important; }
+  body.h2h-active .h2h-mgroup-label { margin-bottom: 5px !important; font-size: .75rem !important; line-height: 1.15 !important; }
+  body.h2h-active .h2h-mgroup-items { gap: 1px !important; }
+  body.h2h-active .h2h-mcheckbox { min-height: 28px !important; padding: 2px 0 !important; gap: 6px !important; font-size: .82rem !important; line-height: 1.15 !important; }
+  body.h2h-active .h2h-mcheckbox input { width: 15px !important; height: 15px !important; flex: 0 0 15px !important; }
+}
