@@ -18915,12 +18915,10 @@ html body .sandbox-track-id {
     font-size: .74rem !important;
   }
 
-  /* Mobile: sandbox action buttons — equal flex, icon + short label */
+  /* Mobile: sandbox action buttons */
   .sandbox-add-btn,
   .sandbox-fields-btn,
-  .sandbox-save-btn,
-  .sandbox-load-btn,
-  .sandbox-clear-btn {
+  .sandbox-save-btn {
     flex: 1 1 0 !important;
     width: auto !important;
     min-width: 0 !important;
@@ -18932,15 +18930,44 @@ html body .sandbox-track-id {
     flex-shrink: 1 !important;
     overflow: hidden !important;
   }
+  /* Load button: fixed to its text — never truncates */
+  .sandbox-load-btn {
+    flex: 0 0 auto !important;
+    height: 36px !important;
+    padding: 0 10px !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    font-size: .7rem !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    flex-shrink: 0 !important;
+  }
+  /* Icon-only buttons on mobile */
+  .sandbox-clear-btn,
+  .sandbox-print-btn,
+  .sandbox-share-btn {
+    flex: 0 0 36px !important;
+    width: 36px !important;
+    min-width: 36px !important;
+    max-width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    overflow: visible !important;
+    flex-shrink: 0 !important;
+  }
   .sandbox-add-btn .sb-btn-label,
   .sandbox-fields-btn .sb-btn-label,
-  .sandbox-save-btn .sb-btn-label,
-  .sandbox-load-btn .sb-btn-label,
-  .sandbox-clear-btn .sb-btn-label {
+  .sandbox-save-btn .sb-btn-label {
     display: inline !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+    font-size: .7rem !important;
+  }
+  .sandbox-load-btn .sb-btn-label {
+    display: inline !important;
+    white-space: nowrap !important;
     font-size: .7rem !important;
   }
 
