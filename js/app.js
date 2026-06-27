@@ -2574,6 +2574,7 @@ const App = (() => {
 
   function updateComparisonUrl() {
     const url = new URL(window.location.href);
+    url.searchParams.delete('app');
     if (state.activeCategoryId) {
       url.searchParams.set('cat', state.activeCategoryId);
       if (getCurrentCompareMode() === 'actuarial') {
@@ -2594,6 +2595,18 @@ const App = (() => {
       url.searchParams.delete('provider');
     }
     history.replaceState({ catId: state.activeCategoryId, view: getCurrentCompareMode() }, '', url.toString());
+  }
+
+  function updateAppPageUrl(appId) {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('cat');
+    url.searchParams.delete('track');
+    url.searchParams.delete('view');
+    url.searchParams.delete('fund');
+    url.searchParams.delete('provider');
+    if (appId) url.searchParams.set('app', appId);
+    else url.searchParams.delete('app');
+    history.replaceState({ app: appId || 'home' }, '', url.toString());
   }
 
   async function renderComparisonView() {
@@ -5567,6 +5580,7 @@ const App = (() => {
     updateHeroContent('sandbox');
     state.isHomePage = false;
     state.activeCategoryId = 'sandbox';
+    updateAppPageUrl('sandbox');
     setActiveTab('sandbox');
     updateFilterBadge();
     showSection('sandbox');
@@ -8392,6 +8406,7 @@ const App = (() => {
   async function switchToH2H() {
     state.isHomePage = false;
     state.activeCategoryId = 'h2h';
+    updateAppPageUrl('h2h');
     setActiveTab('h2h');
     const filterBtn = document.getElementById('sidebar-toggle-btn');
     if (filterBtn) filterBtn.style.display = 'none';
