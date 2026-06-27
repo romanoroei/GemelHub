@@ -5743,7 +5743,7 @@ const App = (() => {
           <i class="fas fa-print" aria-hidden="true"></i>
         </button>
         <button type="button" class="sandbox-share-btn" id="sandbox-share-btn" title="שלח בווטסאפ">
-          <i class="fas fa-share-nodes" aria-hidden="true"></i> <span class="sb-btn-label">שתף</span>
+          <i class="fas fa-share-nodes" aria-hidden="true"></i>
         </button>` : ''}
       </div>
     </div>`;
@@ -6195,7 +6195,9 @@ const App = (() => {
            + (curTotStr ? ' <span class="sb-saved-value-badge">' + curTotStr + '</span>' : '')
            + '<span class="sb-saved-meta">תיק פעיל · ' + state.sandbox.portfolio.length + ' מסלולים</span>'
            + '</div></div>'
-           + '<div class="sb-saved-actions"></div>'
+           + '<div class="sb-saved-actions">'
+           + '<button type="button" class="sb-delete-current-btn" id="sb-delete-current-btn" title="נקה תיק נוכחי"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>'
+           + '</div>'
            + '</div>';
     }
 
@@ -6252,6 +6254,19 @@ const App = (() => {
       btn.addEventListener('click', () => _sbDoLoadPortfolio(btn.dataset.loadId)));
     container.querySelectorAll('.sb-delete-item-btn').forEach(btn =>
       btn.addEventListener('click', () => _sbDoDeletePortfolio(btn.dataset.deleteId)));
+    document.getElementById('sb-delete-current-btn')?.addEventListener('click', () => {
+      if (!confirm('לנקות את התיק הנוכחי מהמסך?')) return;
+      state.sandbox.portfolio = [];
+      state.sandbox.portfolioName = '';
+      localStorage.removeItem(SANDBOX_NAME_KEY);
+      _sbHideValueBar();
+      saveSandboxPortfolio();
+      document.querySelectorAll('.sandbox-check.is-in-portfolio').forEach(cb => {
+        cb.checked = false; cb.classList.remove('is-in-portfolio');
+      });
+      _sbCloseLoadDialog();
+      renderSandboxPage();
+    });
   }
 
   function _sbDoLoadPortfolio(id) {
@@ -6308,20 +6323,13 @@ const App = (() => {
     const data    = { p: state.sandbox.portfolio, n: state.sandbox.portfolioName || '' };
     const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
     const url     = location.origin + location.pathname + '#portfolio=' + encoded;
-    const text    = 'רציתי לשתף אותך בתיק הפיננסי שבניתי במערכת ה-GemelHub של רועי רומנו. התיק נמצא במעבדה. לצפייה בתיק שלי:\n';
+    const text    = 'רציתי לשתף אותך בתיק הפיננסי שבניתי במעבדה של מערכת ה-GemelHub של רועי רומנו. לצפייה בתיק שלי:\n';
     const openWA  = (link) => { window.open('https://wa.me/?text=' + encodeURIComponent(text + link), '_blank'); };
     try {
-      const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-      const timer = ctrl ? setTimeout(() => ctrl.abort(), 4000) : null;
-      fetch('https://cleanuri.com/api/v1/shorten', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'url=' + encodeURIComponent(url),
-        signal: ctrl ? ctrl.signal : undefined
-      })
-      .then(r => r.json())
-      .then(d => { if (timer) clearTimeout(timer); openWA(d.result_url || url); })
-      .catch(() => openWA(url));
+      fetch('https://is.gd/create.php?format=simple&url=' + encodeURIComponent(url))
+        .then(r => r.text())
+        .then(s => { openWA(s && s.startsWith('http') ? s.trim() : url); })
+        .catch(() => openWA(url));
     } catch(e) { openWA(url); }
   }
 
@@ -6382,6 +6390,7 @@ const App = (() => {
       avgY1: wavg('y1'), avgY3m: wavg('y3'),
       avgY12: wavg('y12m'), avgY3y: wavg('y5'), avgY5yr: wavg('y5yr'),
       avgStock: wavg('stock'), avgAbroad: wavg('abroad'), avgFx: wavg('fx'),
+      avgDnDeposit: wavg('dnDeposit'),
     };
   }
 
@@ -6428,17 +6437,21 @@ const App = (() => {
       tracksHtml += '<div class="sbcmp-cat-block"><div class="sbcmp-cat-head">' + catLabel + '</div>';
       tracksHtml += '<div class="sbcmp-cat-cols sbcmp-cat-cols-' + n + '">';
       tracksHtml += '<div class="sbcmp-col-name-row">';
-      items.forEach(it => { tracksHtml += '<div class="sbcmp-col-name">' + it.name + '</div>'; });
+      items.forEach((it, ci) => {
+        tracksHtml += '<div class="sbcmp-col-name sbcmp-col-' + ci + '">' + it.name + '</div>';
+      });
       tracksHtml += '</div><div class="sbcmp-tracks-row">';
-      items.forEach(it => {
+      items.forEach((it, ci) => {
         const tracks = it.portfolio.filter(t => t.categoryId === catId);
-        tracksHtml += '<div class="sbcmp-track-col">';
+        const catTot = tracks.reduce((s, t) => s + (parseFloat(String(t.investAmount||'').replace(/,/g,''))||0), 0);
+        tracksHtml += '<div class="sbcmp-track-col sbcmp-track-col-' + ci + '">'; // ci from outer forEach
         if (!tracks.length) {
           tracksHtml += '<div class="sbcmp-track-empty">—</div>';
         } else {
           tracks.forEach(t => {
             const amt    = parseFloat(String(t.investAmount || '').replace(/,/g, '')) || 0;
-            const amtStr = amt > 0 ? '₪ ' + Math.round(amt).toLocaleString('he-IL') : '';
+            const pct    = catTot > 0 && tracks.length > 1 ? ' (' + Math.round(amt / catTot * 100) + '%)' : '';
+            const amtStr = amt > 0 ? '<span dir="ltr">₪\u202f' + Math.round(amt).toLocaleString('he-IL') + '</span>' + pct : '';
             tracksHtml += '<div class="sbcmp-track-item">'
               + '<span class="sbcmp-track-dot" style="background:' + (t.color || '#999') + '"></span>'
               + '<div class="sbcmp-track-info">'
@@ -6464,7 +6477,7 @@ const App = (() => {
           wFee += f * w; wSum += w;
         });
         const avgFee = wSum > 0 ? (wFee / wSum).toFixed(2) + '%' : '—';
-        const totStr = tot > 0 ? '₪ ' + Math.round(tot).toLocaleString('he-IL') : '—';
+        const totStr = tot > 0 ? '<span dir="ltr">₪\u202f' + Math.round(tot).toLocaleString('he-IL') + '</span>' : '—';
         tracksHtml += '<div class="sbcmp-cat-sum-cell">'
           + '<span class="sbcmp-sum-amt">' + totStr + '</span>'
           + '<span class="sbcmp-sum-fee">ד"נ ממוצע: ' + avgFee + '</span>'
@@ -6478,7 +6491,7 @@ const App = (() => {
     // ── Table builder helper
     const mkTable = (headLabel, rows) => {
       let t = '<table class="sbcmp-table"><thead><tr><th>' + headLabel + '</th>';
-      items.forEach(it => { t += '<th>' + it.name + '</th>'; });
+      items.forEach((it, ci) => { t += '<th class="sbcmp-th-' + ci + '">' + it.name + '</th>'; });
       if (n === 2) t += '<th class="sbcmp-diff-head">הפרש</th>';
       t += '</tr></thead><tbody>';
       rows.forEach(row => {
@@ -6496,13 +6509,19 @@ const App = (() => {
     };
 
     // ── Section 2: Returns
-    const returnsHtml = '<div class="sbcmp-section"><div class="sbcmp-section-head">תשואות (ממוצע משוקלל)</div>'
+    const hasDeposit = items.some(it => it.portfolio.some(t => parseFloat(t.dnDeposit) > 0));
+    const feeRows = [
+      { label: 'ד"נ מצבירה', key: 'avgFee', dec: 2 },
+    ];
+    if (hasDeposit) feeRows.push({ label: 'ד"נ מהפקדה', key: 'avgDnDeposit', dec: 2 });
+    const returnsHtml = '<div class="sbcmp-section"><div class="sbcmp-section-head">תשואות ודמי ניהול (ממוצע משוקלל)</div>'
       + mkTable('תקופה', [
         { label: 'חודש אחרון', key: 'avgY1',   dec: 2 },
         { label: '3 חודשים',   key: 'avgY3m',  dec: 2 },
         { label: '12 חודשים',  key: 'avgY12',  dec: 2 },
         { label: '3 שנים',     key: 'avgY3y',  dec: 2 },
         { label: '5 שנים',     key: 'avgY5yr', dec: 2 },
+        ...feeRows,
       ]) + '</div>';
 
     // ── Section 3: Exposures
@@ -6550,9 +6569,9 @@ const App = (() => {
   function _sbShareCompareWhatsApp() {
     const dlg   = document.getElementById('sb-compare-title');
     const title = dlg ? dlg.textContent : 'השוואת תיקים';
-    const msg   = '📊 ' + title + ' — נעשה ב-GemelHub, '
-                + 'מערכת השוואת הפנסיה של יועץ הפנסיה רועי רומנו.\n'
-                + location.origin + location.pathname;
+    const siteUrl = location.origin + location.pathname;
+    const msg   = '📊 ' + title + ', נעשה במעבדה של GemelHub — '
+                + 'המערכת להשוואת נתונים פיננסיים של רועי רומנו.\n' + siteUrl;
     window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
   }
 
