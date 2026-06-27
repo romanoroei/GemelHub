@@ -5501,6 +5501,7 @@ const App = (() => {
       }
     });
     state.sandbox.selections = [];
+    _sbMarkPortfolioModified();
     saveSandboxPortfolio();
     updateSandboxBar();
     syncFundMembershipIndicators();
@@ -6178,7 +6179,7 @@ const App = (() => {
       <div class="sb-saved-item">
         <div class="sb-saved-item-info">
           <strong class="sb-saved-name">${item.name}</strong>
-          <span class="sb-saved-meta">${_sbFormatSavedDate(item.date)} · ${item.portfolio.length} מסלולים</span>
+          <span class="sb-saved-meta">${_sbFormatSavedDate(item.date)} · ${item.portfolio.length} מסלולים${(() => { const tot = item.portfolio.reduce((s, it) => s + (parseFloat(it.investAmount) || 0), 0); return tot > 0 ? ' · ₪ ' + Math.round(tot).toLocaleString('he-IL') : ''; })()}</span>
           ${item.notes ? `<span class="sb-saved-notes">${item.notes}</span>` : ''}
         </div>
         <div class="sb-saved-actions">
@@ -6229,6 +6230,14 @@ const App = (() => {
     if (!item || !confirm(`למחוק את התיק "${item.name}"?`)) return;
     _sbPutSavedPortfolios(list.filter(p => p.id !== id));
     _sbRenderLoadList();
+  }
+
+  // ── Mark modified (clears portfolio name badge on any change) ─────────────
+  function _sbMarkPortfolioModified() {
+    if (!state.sandbox.portfolioName) return;
+    state.sandbox.portfolioName = '';
+    localStorage.removeItem(SANDBOX_NAME_KEY);
+    _sbUpdateValueBar();
   }
 
   // ── Print ──────────────────────────────────────────────────────────────────
@@ -6828,6 +6837,7 @@ const App = (() => {
         if (removed) {
           const cb = document.querySelector(`.sandbox-check[data-fundid="${removed.fundId}"][data-trackid="${removed.trackId}"][data-categoryid="${removed.categoryId}"]`);
           if (cb) { cb.checked = false; cb.classList.remove('is-in-portfolio'); }
+          _sbMarkPortfolioModified();
         }
         saveSandboxPortfolio();
         renderSandboxPage();
@@ -6857,6 +6867,7 @@ const App = (() => {
         if (!item) return;
         if (field === 'dnCumulative') item.dnCumulative = input.value;
         else if (field === 'dnDeposit') item.dnDeposit = input.value;
+        _sbMarkPortfolioModified();
         saveSandboxPortfolio();
         _sbRefreshWeightedRows(section);
       };
@@ -6874,6 +6885,7 @@ const App = (() => {
           if (item) {
             if (item.investMode === 'percent') item.investPct = '';
             else item.investAmount = '';
+            _sbMarkPortfolioModified();
             saveSandboxPortfolio();
             _sbRefreshWeightedRows(section);
           }
@@ -6888,6 +6900,7 @@ const App = (() => {
         if (item) {
           if (item.investMode === 'percent') item.investPct = raw;
           else item.investAmount = raw;
+          _sbMarkPortfolioModified();
           saveSandboxPortfolio();
           _sbRefreshWeightedRows(section);
         }
