@@ -6641,7 +6641,7 @@ const App = (() => {
 
     // Clear portfolio button
     section.querySelector('#sandbox-clear-portfolio-btn')?.addEventListener('click', () => {
-      if (!confirm('האם למחוק את תיק ההשקעות לחלוטין?')) return;
+      if (!confirm('לנקות את התיק מהמסך?\n\nהתיק השמור לא יימחק — ניתן לטעון אותו שוב דרך כפתור "טען תיק".')) return;
       state.sandbox.portfolio = [];
       state.sandbox.portfolioName = '';
       _sbHideValueBar();

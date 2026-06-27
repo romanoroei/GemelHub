@@ -18783,24 +18783,39 @@ html body .sandbox-track-id {
     font-size: .74rem !important;
   }
 
-  /* Mobile: all sandbox action buttons — square icon only */
-  .sandbox-add-btn .sb-btn-label,
-  .sandbox-fields-btn .sb-btn-label,
-  .sandbox-save-btn .sb-btn-label,
-  .sandbox-load-btn .sb-btn-label,
-  .sandbox-clear-btn .sb-btn-label {
-    display: none !important;
-  }
+  /* Mobile: sandbox action buttons — equal flex, icon + short label */
   .sandbox-add-btn,
   .sandbox-fields-btn,
   .sandbox-save-btn,
   .sandbox-load-btn,
   .sandbox-clear-btn {
-    width: 36px !important;
+    flex: 1 1 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
     height: 36px !important;
-    padding: 0 !important;
+    padding: 0 6px !important;
     justify-content: center !important;
-    flex-shrink: 0 !important;
+    gap: 4px !important;
+    font-size: .7rem !important;
+    flex-shrink: 1 !important;
+    overflow: hidden !important;
+  }
+  .sandbox-add-btn .sb-btn-label,
+  .sandbox-fields-btn .sb-btn-label,
+  .sandbox-save-btn .sb-btn-label,
+  .sandbox-load-btn .sb-btn-label,
+  .sandbox-clear-btn .sb-btn-label {
+    display: inline !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: .7rem !important;
+  }
+
+  /* Mobile: save dialog appears near top */
+  #sb-save-dialog.sb-dialog-overlay {
+    align-items: flex-start !important;
+    padding-top: 90px !important;
   }
 
   /* Mobile: sandbox dialogs full-screen friendly */
