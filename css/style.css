@@ -101,11 +101,42 @@
 
   html body table.track-table .prov-name {
     font-size: clamp(.54rem, 1.9vw, .68rem) !important;
-    line-height: 1.02 !important;
+    line-height: 1.0 !important;
   }
 
   html body table.track-table .prov-id {
     font-size: clamp(.4rem, 1.25vw, .48rem) !important;
+    line-height: 1.0 !important;
+  }
+
+  /* Reduce td line-height: base is 1.35 which wastes vertical space on mobile */
+  html body table.track-table th,
+  html body table.track-table td {
+    line-height: 1.0 !important;
+  }
+
+  /* Stack prov-name + prov-id on ONE line to halve the provider-cell height */
+  html body table.track-table .provider-cell > div {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: baseline !important;
+    flex-wrap: nowrap !important;
+    gap: 2px !important;
+    min-width: 0 !important;
+  }
+
+  html body table.track-table .prov-name {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  html body table.track-table .prov-id {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
   }
 }
 
