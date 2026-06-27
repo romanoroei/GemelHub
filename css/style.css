@@ -5805,6 +5805,34 @@ table.track-table.has-yearly-returns .exp-bar-bg {
   font-size: .68rem;
 }
 
+#tracks-container table.track-table .prov-id {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  direction: ltr;
+  unicode-bidi: isolate;
+  overflow: visible;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+#tracks-container table.track-table .fund-id-number {
+  direction: ltr;
+  unicode-bidi: isolate;
+  flex: 0 0 auto;
+}
+
+#tracks-container table.track-table .fund-id-tag-icons {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 0 0 auto;
+  gap: 2px;
+  margin-inline-start: 0;
+  overflow: visible;
+}
+
 #tracks-container table.track-table .prov-name {
   display: inline-flex;
   align-items: center;
@@ -18114,4 +18142,62 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   html body .svb-meta {
     font-size: .62rem !important;
   }
+}
+
+/* Final override: tags stay to the left of the full #fund id in all tables. */
+html body #tracks-container table.track-table .prov-id,
+html body #tracks-container .track-table-wrapper table.track-table .prov-id {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+  gap: 3px !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+  max-width: none !important;
+}
+
+html body #tracks-container table.track-table .fund-id-number,
+html body #tracks-container .track-table-wrapper table.track-table .fund-id-number,
+html body .sandbox-track-number {
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+  flex: 0 0 auto !important;
+  order: 1 !important;
+}
+
+html body #tracks-container table.track-table .fund-id-tag-icons,
+html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons,
+html body .sandbox-track-id-icons {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+  flex: 0 0 auto !important;
+  order: 2 !important;
+  gap: 2px !important;
+  margin-inline-start: 0 !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+}
+
+html body #tracks-container table.track-table .fund-id-tag-icons .table-allocation-icons,
+html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-icons,
+html body .sandbox-track-id-icons .table-allocation-icons {
+  display: inline-flex !important;
+  opacity: 1 !important;
+  width: auto !important;
+  max-width: none !important;
+  overflow: visible !important;
+}
+
+html body .sandbox-track-id {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+  gap: 3px !important;
 }

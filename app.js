@@ -5494,7 +5494,7 @@ const App = (() => {
             <td>
               <div class="sandbox-track-cell">
                 <button type="button" class="sandbox-track-link" data-sandbox-track-cat="${item.categoryId}" data-sandbox-track-id="${item.trackId}">${item.trackLabel}</button>
-                <div class="sandbox-track-id"><span class="sandbox-track-hash">#</span><span class="sandbox-track-id-icons">${allocationIcon}</span><span class="sandbox-track-number">${item.fundId || ''}</span></div>
+                <div class="sandbox-track-id"><span class="sandbox-track-number">#${item.fundId || ''}</span><span class="sandbox-track-id-icons">${allocationIcon}</span></div>
               </div>
             </td>
             <td><input type="number" step="0.01" min="0" max="5" class="sandbox-fee-input"
@@ -6832,7 +6832,7 @@ const App = (() => {
               </span>
               <div>
                 <div class="prov-name" style="color:${color}"><span class="prov-name-text">${name}</span></div>
-                <div class="prov-id">#${fundId}<span class="fund-id-tag-icons">${fundIdTagIcons}</span></div>
+                <div class="prov-id"><span class="fund-id-number">#${fundId}</span><span class="fund-id-tag-icons">${fundIdTagIcons}</span></div>
               </div>
               <span class="fund-link-icon"><i class="fas fa-external-link-alt"></i></span>
             </div>
