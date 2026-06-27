@@ -123,9 +123,27 @@
     padding-inline: 1px !important;
   }
 
-  /* No gap between fund name and id — they're already tiny */
+  /* flex-column removes wasteful inline line-box height (was 2 × 21px = 42px) */
   html body table.track-table .provider-cell > div {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
     gap: 0 !important;
+    min-width: 0 !important;
+  }
+
+  /* Shrink allocation icons so prov-id line = ~10px instead of 15px */
+  html body table.track-table .table-allocation-icon-abroad,
+  html body table.track-table .table-allocation-icon-fx,
+  html body table.track-table .table-allocation-icon-shekel {
+    width: 10px !important;
+    height: 10px !important;
+  }
+
+  html body table.track-table .table-allocation-icon-us,
+  html body table.track-table .table-allocation-flag-il {
+    width: 13px !important;
+    height: 9px !important;
   }
 }
 
