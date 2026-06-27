@@ -19436,3 +19436,30 @@ html body .sandbox-track-id {
   }
   @page { margin: 12mm; size: A4; }
 }
+
+/* ── Mobile table row-height squeeze (overrides "polish pass" at ~12420) ── */
+@media (max-width: 760px) {
+  html body #tracks-container table.track-table th,
+  html body #tracks-container table.track-table td,
+  html body #tracks-container:not(.tracks-two-col-blocked) table.track-table th,
+  html body #tracks-container:not(.tracks-two-col-blocked) table.track-table td {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+  }
+
+  /* Provider-cell td: align content to top so bottom-border is flush with #id */
+  html body #tracks-container table.track-table td:nth-child(2),
+  html body #tracks-container:not(.tracks-two-col-blocked) table.track-table td:nth-child(2) {
+    vertical-align: top !important;
+  }
+
+  /* Rank column: keep narrow */
+  html body #tracks-container table.track-table td:nth-child(1),
+  html body #tracks-container table.track-table th:nth-child(1),
+  html body #tracks-container:not(.tracks-two-col-blocked) table.track-table td:nth-child(1),
+  html body #tracks-container:not(.tracks-two-col-blocked) table.track-table th:nth-child(1) {
+    width: 16px !important;
+    min-width: 0 !important;
+    padding-inline: 1px !important;
+  }
+}
