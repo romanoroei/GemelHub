@@ -126,7 +126,9 @@
     @media (max-width: 760px) {
       /* DIAGNOSTIC v19 */
       #tracks-container table.track-table td:nth-child(1) { background: #bfdbfe !important; }
-      /* Padding squeeze — overrides all linked-CSS rules */
+      /* Padding squeeze — :not() raises specificity to (1,2,2) to tie+beat polish-pass */
+      #tracks-container:not(.tracks-two-col-blocked) table.track-table th,
+      #tracks-container:not(.tracks-two-col-blocked) table.track-table td,
       #tracks-container table.track-table th,
       #tracks-container table.track-table td {
         padding-top: 1px !important;
