@@ -6393,7 +6393,7 @@ const App = (() => {
         <div class="sb-compare-diff-title">הפרש (${items[0].name} פחות ${items[1].name})</div>
         ${diffRow('סה"כ השקעה', s0.totalAmt, s1.totalAmt, true)}
         ${diffRow('ד"נ מצבירה', s0.avgFee, s1.avgFee, false)}
-        ${diffRow('תשואה 12 חוד'', s0.avgY12, s1.avgY12, false)}
+        ${diffRow("תשואה 12 חוד'", s0.avgY12, s1.avgY12, false)}
         ${diffRow('תשואה 3 שנים', s0.avgY3, s1.avgY3, false)}
       </div>`;
     }
