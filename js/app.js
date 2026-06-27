@@ -6180,36 +6180,36 @@ const App = (() => {
     container.innerHTML = list.map(item => {
       const isCurrent = !!(currentName && item.name === currentName);
       const tot = item.portfolio.reduce((s, it) => s + (parseFloat(it.investAmount) || 0), 0);
-      const totStr = tot > 0 ? ' · ₪ ' + Math.round(tot).toLocaleString('he-IL') : '';
-      return `
-      <div class="sb-saved-item">
-        <div class="sb-saved-item-info">
-          ${canCompare && !isCurrent
-            ? `<label class="sb-compare-check-wrap" title="בחר להשוואה"><input type="checkbox" class="sb-compare-check" data-compare-id="${item.id}" /></label>`
-            : `<span class="sb-compare-check-placeholder"></span>`}
-          <div class="sb-saved-item-text">
-            <strong class="sb-saved-name">${item.name}</strong>${isCurrent ? ' <span class="sb-saved-current-badge">נוכחי</span>' : ''}
-            <span class="sb-saved-meta">${_sbFormatSavedDate(item.date)} · ${item.portfolio.length} מסלולים${totStr}</span>
-            ${item.notes ? `<span class="sb-saved-notes">${item.notes}</span>` : ''}
-          </div>
-        </div>
-        <div class="sb-saved-actions">
-          <button type="button" class="sb-load-item-btn" data-load-id="${item.id}">
-            <i class="fas fa-folder-open" aria-hidden="true"></i> טען
-          </button>
-          <button type="button" class="sb-delete-item-btn" data-delete-id="${item.id}" aria-label="מחק תיק ${item.name}">
-            <i class="fas fa-trash-alt" aria-hidden="true"></i>
-          </button>
-        </div>
-      </div>`;
-    }).join('') + (canCompare ? `
-      <div class="sb-compare-multi-footer" id="sb-compare-multi-footer" hidden>
-        <span id="sb-compare-multi-count"></span>
-        <button type="button" id="sb-compare-multi-btn" class="sb-compare-multi-go-btn">
-          <i class="fas fa-code-compare" aria-hidden="true"></i> השווה נבחרים
-        </button>
-      </div>` : '');
-
+      const totStr = tot > 0 ? ' \xb7 ₪ ' + Math.round(tot).toLocaleString('he-IL') : '';
+      const checkHtml = (canCompare && !isCurrent)
+        ? '<label class="sb-compare-check-wrap"><input type="checkbox" class="sb-compare-check" data-compare-id="' + item.id + '" /></label>'
+        : '<span class="sb-compare-check-placeholder"></span>';
+      const badgeHtml = isCurrent ? ' <span class="sb-saved-current-badge">נוכחי</span>' : '';
+      return '<div class="sb-saved-item">'
+        + '<div class="sb-saved-item-info">'
+        + checkHtml
+        + '<div class="sb-saved-item-text">'
+        + '<strong class="sb-saved-name">' + item.name + '</strong>' + badgeHtml
+        + '<span class="sb-saved-meta">' + _sbFormatSavedDate(item.date) + ' \xb7 ' + item.portfolio.length + ' מסלולים' + totStr + '</span>'
+        + (item.notes ? '<span class="sb-saved-notes">' + item.notes + '</span>' : '')
+        + '</div>'
+        + '</div>'
+        + '<div class="sb-saved-actions">'
+        + '<button type="button" class="sb-load-item-btn" data-load-id="' + item.id + '"><i class="fas fa-folder-open" aria-hidden="true"></i> טען</button>'
+        + '<button type="button" class="sb-delete-item-btn" data-delete-id="' + item.id + '"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+    if (canCompare) {
+      const footer = document.createElement('div');
+      footer.className = 'sb-compare-multi-footer';
+      footer.id = 'sb-compare-multi-footer';
+      footer.hidden = true;
+      footer.innerHTML = '<span id="sb-compare-multi-count"></span>'
+        + '<button type="button" id="sb-compare-multi-btn" class="sb-compare-multi-go-btn">'
+        + '<i class="fas fa-code-compare" aria-hidden="true"></i> השווה נבחרים</button>';
+      container.appendChild(footer);
+    }
     const _updateMultiFooter = () => {
       const checked = [...container.querySelectorAll('.sb-compare-check:checked')];
       const footer = document.getElementById('sb-compare-multi-footer');
@@ -6217,13 +6217,9 @@ const App = (() => {
       if (!footer) return;
       footer.hidden = checked.length < 2;
       if (countEl) countEl.textContent = checked.length + ' תיקים נבחרו';
-      container.querySelectorAll('.sb-compare-check:not(:checked)').forEach(cb => {
-        cb.disabled = checked.length >= 3;
-      });
+      container.querySelectorAll('.sb-compare-check:not(:checked)').forEach(cb => { cb.disabled = checked.length >= 3; });
     };
-
-    container.querySelectorAll('.sb-compare-check').forEach(cb =>
-      cb.addEventListener('change', _updateMultiFooter));
+    container.querySelectorAll('.sb-compare-check').forEach(cb => cb.addEventListener('change', _updateMultiFooter));
     document.getElementById('sb-compare-multi-btn')?.addEventListener('click', () => {
       const ids = [...container.querySelectorAll('.sb-compare-check:checked')].map(cb => cb.dataset.compareId);
       if (ids.length >= 2) _sbOpenCompareDialogMulti(ids);
@@ -6263,7 +6259,7 @@ const App = (() => {
     _sbRenderLoadList();
   }
 
-  // ── Mark modified (clears portfolio name badge on any change) ─────────────
+  // ── Mark modified ────────────────────────────────────────────────────────
   function _sbMarkPortfolioModified() {
     if (!state.sandbox.portfolioName) return;
     state.sandbox.portfolioName = '';
@@ -6367,12 +6363,10 @@ const App = (() => {
   }
 
   function _sbRenderCompare(items) {
-    // items: array of saved portfolio objects
     const colsHtml = items.map(item => _sbCompareColHtml(item.name, item.portfolio)).join('');
     const title = items.length === 2
-      ? `השוואה: ${items[0].name} vs ${items[1].name}`
-      : `השוואת ${items.length} תיקים`;
-
+      ? 'השוואה: ' + items[0].name + ' vs ' + items[1].name
+      : 'השוואת ' + items.length + ' תיקים';
     let diffHtml = '';
     if (items.length === 2) {
       const s0 = _sbBuildSummary(items[0].portfolio);
@@ -6384,24 +6378,22 @@ const App = (() => {
         const fmtDiff = isAmt
           ? (diff >= 0 ? '+' : '') + '₪ ' + Math.abs(Math.round(diff)).toLocaleString('he-IL')
           : (diff >= 0 ? '+' : '') + diff.toFixed(2) + '%';
-        return `<div class="sb-compare-diff-row">
-          <span class="sb-compare-diff-label">${label}</span>
-          <span class="sb-compare-diff-val ${cls}">${fmtDiff}</span>
-        </div>`;
+        return '<div class="sb-compare-diff-row">'
+          + '<span class="sb-compare-diff-label">' + label + '</span>'
+          + '<span class="sb-compare-diff-val ' + cls + '">' + fmtDiff + '</span>'
+          + '</div>';
       };
-      diffHtml = `<div class="sb-compare-diff-bar">
-        <div class="sb-compare-diff-title">הפרש (${items[0].name} פחות ${items[1].name})</div>
-        ${diffRow('סה"כ השקעה', s0.totalAmt, s1.totalAmt, true)}
-        ${diffRow('ד"נ מצבירה', s0.avgFee, s1.avgFee, false)}
-        ${diffRow("תשואה 12 חוד'", s0.avgY12, s1.avgY12, false)}
-        ${diffRow('תשואה 3 שנים', s0.avgY3, s1.avgY3, false)}
-      </div>`;
+      diffHtml = '<div class="sb-compare-diff-bar">'
+        + '<div class="sb-compare-diff-title">הפרש (' + items[0].name + ' פחות ' + items[1].name + ')</div>'
+        + diffRow('סה"כ השקעה', s0.totalAmt, s1.totalAmt, true)
+        + diffRow('ד"נ מצבירה', s0.avgFee, s1.avgFee, false)
+        + diffRow('תשואה 12 חודשים', s0.avgY12, s1.avgY12, false)
+        + diffRow('תשואה 3 שנים', s0.avgY3, s1.avgY3, false)
+        + '</div>';
     }
-
     document.getElementById('sb-compare-title').textContent = title;
-    document.getElementById('sb-compare-content').innerHTML = `
-      <div class="sb-compare-grid sb-compare-grid-${items.length}col">${colsHtml}</div>
-      ${diffHtml}`;
+    document.getElementById('sb-compare-content').innerHTML =
+      '<div class="sb-compare-grid sb-compare-grid-' + items.length + 'col">' + colsHtml + '</div>' + diffHtml;
   }
 
   function _sbOpenCompareDialogMulti(ids) {
