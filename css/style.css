@@ -10210,14 +10210,12 @@ body.h2h-active,
   border-bottom: 1px solid rgba(255,255,255,.22);
 }
 .svb-portfolio-name {
-  font-size: .78rem;
-  font-weight: 700;
-  color: rgba(255,255,255,.75);
-  background: rgba(0,0,0,.18);
-  border-radius: 6px;
-  padding: 1px 7px;
+  font-size: .88rem;
+  font-weight: 900;
+  color: #ffd700;
   letter-spacing: .01em;
   align-self: center;
+  text-shadow: 0 1px 4px rgba(0,0,0,.35);
 }
 .svb-total-label {
   font-size: .92rem;
@@ -19032,6 +19030,41 @@ html body .sandbox-track-id {
   flex-shrink: 0;
 }
 .sb-delete-current-btn:hover { background: #fff1f2; }
+
+/* ── Category picker popup ── */
+.sb-cat-picker {
+  position: fixed;
+  z-index: 9800;
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(15,23,42,.22);
+  padding: 8px;
+  min-width: 170px;
+  max-height: 70vh;
+  overflow-y: auto;
+  direction: rtl;
+}
+.sb-cat-pick-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border: none;
+  background: none;
+  border-radius: 9px;
+  font-size: .88rem;
+  font-weight: 600;
+  color: #0f2744;
+  cursor: pointer;
+  text-align: right;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.sb-cat-pick-btn:hover, .sb-cat-pick-btn:active { background: #f0f4ff; }
+.sb-cat-pick-icon { font-size: 1.1rem; flex-shrink: 0; }
+.sb-cat-pick-label { flex: 1; }
 
 /* ── sbcmp category summary ── */
 .sbcmp-cat-summary-row {

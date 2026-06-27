@@ -5729,16 +5729,16 @@ const App = (() => {
       <div class="sandbox-page-title">🧪 המעבדה שלי<span id="sb-autosave-status" class="sb-autosave-status" aria-live="polite"></span></div>
       <div class="sandbox-page-actions">
         <button type="button" class="sandbox-add-btn" id="sandbox-add-more-btn">
-          <i class="fas fa-plus" aria-hidden="true"></i> <span class="sb-btn-label">הוסף מסלולים</span>
+          <i class="fas fa-plus" aria-hidden="true"></i> <span class="sb-btn-label">+הוסף</span>
         </button>
         <button type="button" class="sandbox-save-btn" id="sandbox-save-portfolio-btn" title="שמור תיק">
           <i class="fas fa-floppy-disk" aria-hidden="true"></i> <span class="sb-btn-label">שמור תיק</span>
         </button>
         <button type="button" class="sandbox-load-btn" id="sandbox-load-portfolio-btn" title="טען תיק שמור">
-          <i class="fas fa-folder-open" aria-hidden="true"></i> <span class="sb-btn-label">טען תיק</span>
+          <i class="fas fa-folder-open" aria-hidden="true"></i> <span class="sb-btn-label">טען</span>
         </button>
         ${portfolio.length > 0 ? `<button type="button" class="sandbox-clear-btn" id="sandbox-clear-portfolio-btn">
-          <i class="fas fa-trash-alt" aria-hidden="true"></i> <span class="sb-btn-label">נקה</span></button>
+          <i class="fas fa-trash-alt" aria-hidden="true"></i></button>
         <button type="button" class="sandbox-print-btn" id="sandbox-print-btn" title="הדפס תיק">
           <i class="fas fa-print" aria-hidden="true"></i>
         </button>
@@ -6183,7 +6183,7 @@ const App = (() => {
     if (hasCurrent) {
       const curName   = currentName || 'תיק נוכחי';
       const curTot    = state.sandbox.portfolio.reduce((s, it) => s + (parseFloat(it.investAmount) || 0), 0);
-      const curTotStr = curTot > 0 ? '₪ ' + Math.round(curTot).toLocaleString('he-IL') : '';
+      const curTotStr = curTot > 0 ? '<span dir="ltr">₪\u202f' + Math.round(curTot).toLocaleString('he-IL') + '</span>' : '';
       const chk = canCompare
         ? '<label class="sb-compare-check-wrap"><input type="checkbox" class="sb-compare-check" data-compare-id="__current__" /></label>'
         : '<span class="sb-compare-check-placeholder"></span>';
@@ -6191,7 +6191,7 @@ const App = (() => {
            + '<div class="sb-saved-item-info">' + chk
            + '<div class="sb-saved-item-text">'
            + '<strong class="sb-saved-name">' + curName + '</strong>'
-           + ' <span class="sb-saved-current-badge">נוכחי</span>'
+           + ' <span class="sb-saved-current-badge">תיק פעיל</span>'
            + (curTotStr ? ' <span class="sb-saved-value-badge">' + curTotStr + '</span>' : '')
            + '<span class="sb-saved-meta">תיק פעיל · ' + state.sandbox.portfolio.length + ' מסלולים</span>'
            + '</div></div>'
@@ -6204,7 +6204,7 @@ const App = (() => {
     list.forEach(item => {
       const isCurrent = !!(currentName && item.name === currentName);
       const tot    = item.portfolio.reduce((s, it) => s + (parseFloat(it.investAmount) || 0), 0);
-      const totStr = tot > 0 ? '₪ ' + Math.round(tot).toLocaleString('he-IL') : '';
+      const totStr = tot > 0 ? '<span dir="ltr">₪\u202f' + Math.round(tot).toLocaleString('he-IL') + '</span>' : '';
       if (isCurrent) return; // already shown at top as __current__
       const chk = canCompare
         ? '<label class="sb-compare-check-wrap"><input type="checkbox" class="sb-compare-check" data-compare-id="' + item.id + '" /></label>'
@@ -6213,7 +6213,7 @@ const App = (() => {
            + '<div class="sb-saved-item-info">' + chk
            + '<div class="sb-saved-item-text">'
            + '<strong class="sb-saved-name">' + item.name + '</strong>'
-           + (isCurrent ? ' <span class="sb-saved-current-badge">נוכחי</span>' : '')
+           + (isCurrent ? ' <span class="sb-saved-current-badge">תיק פעיל</span>' : '')
            + (totStr ? ' <span class="sb-saved-value-badge">' + totStr + '</span>' : '')
            + '<span class="sb-saved-meta">' + _sbFormatSavedDate(item.date) + ' · ' + item.portfolio.length + ' מסלולים</span>'
            + (item.notes ? '<span class="sb-saved-notes">' + item.notes + '</span>' : '')
@@ -6940,12 +6940,38 @@ const App = (() => {
 
   function _sbAttachEvents(section) {
     // Add more button
-    section.querySelector('#sandbox-add-more-btn')?.addEventListener('click', () => {
+    section.querySelector('#sandbox-add-more-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
       _sbSyncVisibleInputsToState();
       saveSandboxPortfolio();
-      const firstCat = CONFIG.PRODUCT_CATEGORIES.find(c => !REMOVED_CATEGORY_IDS.has(c.id));
-      if (firstCat) switchCategory(firstCat.id);
-      else showHomePage();
+      const existing = document.getElementById('sb-cat-picker');
+      if (existing) { existing.remove(); return; }
+      const cats = CONFIG.PRODUCT_CATEGORIES.filter(c => !REMOVED_CATEGORY_IDS.has(c.id));
+      const popup = document.createElement('div');
+      popup.id = 'sb-cat-picker';
+      popup.className = 'sb-cat-picker';
+      popup.innerHTML = cats.map(c =>
+        '<button type="button" class="sb-cat-pick-btn" data-cat="' + c.id + '">'
+        + '<span class="sb-cat-pick-icon">' + (c.icon || '📊') + '</span>'
+        + '<span class="sb-cat-pick-label">' + c.label + '</span>'
+        + '</button>'
+      ).join('');
+      const btn = e.currentTarget;
+      const rect = btn.getBoundingClientRect();
+      popup.style.position = 'fixed';
+      popup.style.top  = (rect.bottom + 6) + 'px';
+      popup.style.right = (window.innerWidth - rect.right) + 'px';
+      document.body.appendChild(popup);
+      popup.querySelectorAll('.sb-cat-pick-btn').forEach(pb => {
+        pb.addEventListener('click', () => { popup.remove(); switchCategory(pb.dataset.cat); });
+      });
+      const _close = (ev) => {
+        if (!popup.contains(ev.target) && ev.target !== btn) {
+          popup.remove();
+          document.removeEventListener('click', _close);
+        }
+      };
+      setTimeout(() => document.addEventListener('click', _close), 0);
     });
 
     section.querySelector('#sandbox-return-fields-btn')?.addEventListener('click', event => {
