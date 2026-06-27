@@ -11417,6 +11417,7 @@ const App = (() => {
           </span>
         </div>`;
       }).join('');
+      const safeCatId = String(item.catId || 'general').replace(/[^a-z0-9_-]/gi, '-');
       return `<div class="h2h-board-row ${index === championIndex ? 'is-champion' : ''}">
       <div class="h2h-fund-th h2h-fund-row-th" draggable="true" data-h2h-drag-idx="${index}">
         <div class="h2h-fund-card" title="אפשר לגרור לשינוי מיקום">
@@ -11425,14 +11426,13 @@ const App = (() => {
           <a class="h2h-fund-link" href="${fundUrl}" draggable="false" title="מעבר לדף הקופה">
             <div class="h2h-fund-card-top">
               <span class="h2h-fund-pname" style="color:${providerColor(item.provName)}">${item.provName}</span>
-              ${allocationIcon}
             </div>
             <div class="h2h-fund-line h2h-fund-line-category">
-              <span>${item.catLabel}</span>
+              <span class="h2h-category-pill h2h-cat-${safeCatId}">${item.catLabel}</span>
             </div>
             <div class="h2h-fund-line h2h-fund-line-details">
               <strong>${item.trackLabel}</strong>
-              <b>#${item.record.FUND_ID}</b>
+              <b>#${item.record.FUND_ID}${allocationIcon}</b>
             </div>
           </a>
         </div>
@@ -11682,25 +11682,23 @@ const App = (() => {
     ws.classList.toggle('h2h-metrics-open', !!state.h2h.metricsOpen);
     ws.innerHTML = `
       <div class="h2h-topbar">
-        <div class="h2h-topbar-main">
+        <div class="h2h-topbar-actions">
+          <button class="h2h-add-btn" id="h2h-add-btn">
+            <i class="fas fa-plus-circle"></i> הוסף קופה
+          </button>
           <button class="tbl-ctrl-btn h2h-metrics-tog-btn" id="h2h-mtog">
             <i class="fas fa-sliders"></i> בחירת מדדים
             <i class="fas fa-chevron-${state.h2h.metricsOpen ? 'up' : 'down'}" style="font-size:.55rem;"></i>
           </button>
+          <button class="h2h-clear-btn" id="h2h-clear-btn" ${hasItems ? '' : 'disabled'}>
+            <i class="fas fa-trash-alt"></i> נקה השוואה
+          </button>
+        </div>
+        <div class="h2h-topbar-main">
           <div class="h2h-inline-stats" aria-label="סטטוס השוואה">
             <span><strong>${state.h2h.items.length}</strong> קופות בהשוואה</span>
             <span><strong>${activeMetricCount}</strong> מדדים פעילים</span>
           </div>
-        </div>
-        <div class="h2h-topbar-actions">
-          ${hasItems ? `
-            <button class="h2h-clear-btn" id="h2h-clear-btn">
-              <i class="fas fa-trash-alt"></i> נקה השוואה
-            </button>
-          ` : ''}
-          ${hasItems ? `<button class="h2h-add-btn" id="h2h-add-btn">
-            <i class="fas fa-plus-circle"></i> הוסף קופה להשוואה
-          </button>` : ''}
         </div>
       </div>
       <div class="h2h-metrics-backdrop" id="h2h-mp-backdrop" style="display:${state.h2h.metricsOpen ? '' : 'none'}"></div>
