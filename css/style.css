@@ -19445,6 +19445,7 @@ html body .sandbox-track-id {
   html body #tracks-container:not(.tracks-two-col-blocked) table.track-table td {
     padding-top: 1px !important;
     padding-bottom: 1px !important;
+    /* DIAGNOSTIC: border-top: 2px solid red !important; */
   }
 
   /* Provider-cell td: align content to top so bottom-border is flush with #id */
@@ -19461,5 +19462,10 @@ html body .sandbox-track-id {
     width: 16px !important;
     min-width: 0 !important;
     padding-inline: 1px !important;
+  }
+
+  /* DIAGNOSTIC — rank column background: visible only if THIS block loads */
+  html body #tracks-container table.track-table td:nth-child(1) {
+    background: #e0f2fe !important;
   }
 }
