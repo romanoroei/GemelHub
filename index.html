@@ -34,7 +34,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=compare-v18-20260627" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-row-density-20260628" />
   <style>
     @media (max-width: 760px) {
       .advanced-search-overlay { z-index: 9500 !important; }
@@ -124,9 +124,7 @@
   </style>
   <style id="mobile-compact-rows">
     @media (max-width: 760px) {
-      /* DIAGNOSTIC v19 */
-      #tracks-container table.track-table td:nth-child(1) { background: #bfdbfe !important; }
-      /* Padding squeeze — :not() raises specificity to (1,2,2) to tie+beat polish-pass */
+      /* Padding squeeze - :not() raises specificity to tie and beat polish-pass */
       #tracks-container:not(.tracks-two-col-blocked) table.track-table th,
       #tracks-container:not(.tracks-two-col-blocked) table.track-table td,
       #tracks-container table.track-table th,
@@ -134,13 +132,14 @@
         padding-top: 1px !important;
         padding-bottom: 1px !important;
       }
-      /* Provider cell: top-align so content is flush with bottom border */
-      #tracks-container table.track-table td:nth-child(2) { vertical-align: top !important; }
+      /* Provider cell: compact, but never clipped */
+      #tracks-container table.track-table td:nth-child(2) { vertical-align: middle !important; }
       /* Inner div: flex-column eliminates 21px line-box strut */
       #tracks-container table.track-table .provider-cell > div {
         display: flex !important; flex-direction: column !important;
         align-items: flex-start !important; gap: 0 !important;
-        line-height: 0 !important;
+        height: auto !important; max-height: none !important;
+        overflow: visible !important; line-height: 1.05 !important;
       }
       /* Rank column narrow */
       #tracks-container table.track-table td:nth-child(1),
