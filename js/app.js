@@ -6381,16 +6381,22 @@ const App = (() => {
     if (hash.startsWith('#compare=')) {
       try {
         const data = JSON.parse(decodeURIComponent(escape(atob(hash.slice('#compare='.length)))));
+        const isV2 = data.v === 2;
         if (data.portfolios && Array.isArray(data.portfolios) && data.portfolios.length) {
           history.replaceState(null, '', location.pathname + location.search);
           const list = _sbGetSavedPortfolios();
           const newIds = [];
           const now = new Date();
+          const baseTs = now.getTime();
           data.portfolios.forEach(function(port, idx) {
             if (!port.p || !port.p.length) return;
+            // Expand v2 mini-arrays back to full portfolio items
+            const portfolio = isV2
+              ? port.p.map(_sbExpandMiniItem)
+              : port.p;
             const name = port.n || ('תיק מקושר ' + (idx + 1));
-            const id   = 'shared_' + Date.now() + '_' + idx;
-            list.push({ id: id, name: name, date: now.toISOString().split('T')[0], savedAt: now.toISOString(), notes: 'נטען מקישור', portfolio: port.p });
+            const id   = 'shared_' + (baseTs + idx);
+            list.push({ id: id, name: name, date: now.toISOString().split('T')[0], savedAt: now.toISOString(), notes: 'נטען מקישור', portfolio: portfolio });
             newIds.push(id);
           });
           localStorage.setItem(SB_PORTFOLIOS_KEY, JSON.stringify(list));
@@ -6398,8 +6404,8 @@ const App = (() => {
           else renderSandboxPage();
           setTimeout(function() {
             if (newIds.length >= 2) _sbOpenCompareDialogMulti(newIds);
-            else if (newIds.length === 1) { _sbDoLoadPortfolio(newIds[0]); }
-          }, 400);
+            else if (newIds.length === 1) _sbDoLoadPortfolio(newIds[0]);
+          }, 500);
           showToast('נטענו ' + newIds.length + ' תיקים מקישור — ההשוואה נפתחת');
         }
       } catch(e) {}
@@ -6622,6 +6628,34 @@ const App = (() => {
     window.print();
   }
 
+  // Mini-encode a portfolio item to compact array (v2 format)
+  function _sbMiniItem(it) {
+    var r2 = function(n) { return Math.round((+n||0)*100)/100; };
+    return [
+      it.fundId, it.fundName, it.provider,
+      it.trackId, it.trackLabel,
+      it.categoryId, it.categoryLabel || '',
+      r2(it.y1), r2(it.y12m), r2(it.y3), r2(it.y5), r2(it.y5yr),
+      r2(it.stock), r2(it.abroad), r2(it.fx),
+      Math.round((+it.dnCumulative||0)*10000)/10000,
+      Math.round((+it.dnDeposit||0)*10000)/10000,
+      it.investAmount||0, it.investMode||'amount', it.investPct||''
+    ];
+  }
+  // Expand v2 mini-array back to full portfolio item
+  function _sbExpandMiniItem(a) {
+    return {
+      fundId: String(a[0]), fundName: a[1], provider: a[2],
+      trackId: a[3], trackLabel: a[4],
+      categoryId: a[5], categoryLabel: a[6]||a[5],
+      y1: String(a[7]), y12m: String(a[8]), y3: String(a[9]),
+      y5: String(a[10]), y5yr: String(a[11]),
+      stock: String(a[12]), abroad: String(a[13]), fx: String(a[14]),
+      dnCumulative: String(a[15]), dnDeposit: String(a[16]),
+      investAmount: String(a[17]||0), investMode: a[18]||'amount', investPct: String(a[19]||'')
+    };
+  }
+
   function _sbShareCompareWhatsApp() {
     const titleEl = document.getElementById('sb-compare-title');
     const title   = titleEl ? titleEl.textContent : 'השוואת תיקים';
@@ -6629,10 +6663,11 @@ const App = (() => {
     let   compareUrl = location.origin + location.pathname;
     if (items.length > 0) {
       try {
-        const portfolios = items.filter(function(it) { return it.portfolio && it.portfolio.length; })
-                                .map(function(it) { return { p: it.portfolio, n: it.name || '' }; });
+        const portfolios = items
+          .filter(function(it) { return it && it.portfolio && it.portfolio.length; })
+          .map(function(it) { return { n: it.name || '', p: it.portfolio.map(_sbMiniItem) }; });
         if (portfolios.length > 0) {
-          const enc = btoa(unescape(encodeURIComponent(JSON.stringify({ portfolios: portfolios }))));
+          const enc = btoa(unescape(encodeURIComponent(JSON.stringify({ v: 2, portfolios: portfolios }))));
           compareUrl = location.origin + location.pathname + '#compare=' + enc;
         }
       } catch(e) {}
@@ -6644,7 +6679,10 @@ const App = (() => {
     try {
       fetch('https://is.gd/create.php?format=simple&url=' + encodeURIComponent(compareUrl))
         .then(function(r) { return r.text(); })
-        .then(function(s) { openWA(s && s.startsWith('http') ? s.trim() : compareUrl); })
+        .then(function(s) {
+          if (s && s.startsWith('http')) { openWA(s.trim()); }
+          else { openWA(compareUrl); }
+        })
         .catch(function() { openWA(compareUrl); });
     } catch(e) { openWA(compareUrl); }
   }
