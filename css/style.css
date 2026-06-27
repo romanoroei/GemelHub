@@ -10593,6 +10593,7 @@ body.h2h-active,
 .sb-saved-current-badge {
   font-size: .65rem; font-weight: 700; background: #dcfce7; color: #166534;
   border-radius: 4px; padding: 1px 5px; vertical-align: middle;
+  align-self: flex-start; display: inline-block;
 }
 .sb-saved-actions { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
 .sb-compare-check-wrap {

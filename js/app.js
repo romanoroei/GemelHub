@@ -51,6 +51,7 @@ const App = (() => {
   const SANDBOX_STORAGE_KEY = 'gemelhub_sandbox_portfolio_v1';
   const SANDBOX_SELECTIONS_KEY = 'gemelhub_sandbox_selections_v1';
   const SANDBOX_NAME_KEY = 'gemelhub_sandbox_portfolio_name_v1';
+  const SANDBOX_LAST_MOD_KEY = 'gemelhub_sandbox_last_modified_v1';
   const SANDBOX_RETURNS_FIELDS_KEY = 'gemelhub_sandbox_return_fields_v1';
   const ADVANCED_OPTIONS_AUTO_CLOSE_DELAY = 13000;
   const ADVANCED_OPTIONS_HOVER_TARGETS = [
@@ -5338,6 +5339,7 @@ const App = (() => {
       if (savedSel) state.sandbox.selections = JSON.parse(savedSel);
     } catch(e) { state.sandbox.selections = []; }
     state.sandbox.portfolioName = localStorage.getItem(SANDBOX_NAME_KEY) || '';
+    state.sandbox.lastModified  = localStorage.getItem(SANDBOX_LAST_MOD_KEY) || '';
     // On load: auto-merge any pending selections into portfolio so the bar
     // never reappears for items the user already "added" in a prior session.
     if (state.sandbox.selections.length > 0) {
@@ -5368,6 +5370,9 @@ const App = (() => {
       localStorage.setItem(SANDBOX_SELECTIONS_KEY, sJson);
       if (state.sandbox.portfolioName) localStorage.setItem(SANDBOX_NAME_KEY, state.sandbox.portfolioName);
       else localStorage.removeItem(SANDBOX_NAME_KEY);
+      const _now = new Date().toISOString();
+      state.sandbox.lastModified = _now;
+      localStorage.setItem(SANDBOX_LAST_MOD_KEY, _now);
     };
     try {
       _trySave();
@@ -6198,13 +6203,19 @@ const App = (() => {
       const chk = canCompare
         ? '<label class="sb-compare-check-wrap"><input type="checkbox" class="sb-compare-check" data-compare-id="__current__" /></label>'
         : '<span class="sb-compare-check-placeholder"></span>';
+      const curLastMod = state.sandbox.lastModified;
+      const curModStr  = curLastMod
+        ? _sbFormatSavedDate(curLastMod.split('T')[0]) + ' · ' + _sbFormatTime(curLastMod)
+        : '';
       html += '<div class="sb-saved-item sb-saved-item--current">'
            + '<div class="sb-saved-item-info">' + chk
            + '<div class="sb-saved-item-text">'
            + '<strong class="sb-saved-name">' + curName + '</strong>'
            + ' <span class="sb-saved-current-badge">תיק פעיל</span>'
            + (curTotStr ? ' <span class="sb-saved-value-badge">' + curTotStr + '</span>' : '')
-           + '<span class="sb-saved-meta">' + state.sandbox.portfolio.length + ' מסלולים</span>'
+           + '<span class="sb-saved-meta">'
+           + (curModStr ? 'עדכון אחרון: ' + curModStr + ' · ' : '')
+           + state.sandbox.portfolio.length + ' מסלולים</span>'
            + '</div></div>'
            + '<div class="sb-saved-actions">'
            + '<button type="button" class="sb-delete-current-btn" id="sb-delete-current-btn" title="נקה תיק נוכחי"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>'
