@@ -18917,10 +18917,11 @@ html body .sandbox-track-id {
     font-size: .7rem !important;
   }
 
-  /* Mobile: save dialog appears near top */
-  #sb-save-dialog.sb-dialog-overlay {
+  /* Mobile: dialogs appear near top */
+  #sb-save-dialog.sb-dialog-overlay,
+  #sb-load-dialog.sb-dialog-overlay {
     align-items: flex-start !important;
-    padding-top: 90px !important;
+    padding-top: 52px !important;
   }
 
   /* Mobile: sandbox dialogs full-screen friendly */
@@ -18996,11 +18997,50 @@ html body .sandbox-track-id {
 /* ── Value badge in saved list ── */
 .sb-saved-value-badge {
   display: inline-block;
-  font-size: .78rem; font-weight: 800; color: #1a3560;
-  background: #fffbeb; border: 1px solid #fcd34d;
-  border-radius: 6px; padding: 1px 7px; margin-right: 4px;
+  font-size: .82rem; font-weight: 900; color: #0f2744;
+  margin-right: 4px;
 }
-.sb-saved-item--current { background: #f0f4ff; border-color: #a5b4fc !important; }
+.sb-saved-item--current { border-color: #a5b4fc !important; }
+
+/* ── sbcmp category summary ── */
+.sbcmp-cat-summary-row {
+  display: grid; gap: 6px; margin-top: 6px;
+  padding-top: 6px; border-top: 1px dashed #e2e8f0;
+}
+.sbcmp-cat-cols-2 .sbcmp-cat-summary-row { grid-template-columns: 1fr 1fr; }
+.sbcmp-cat-cols-3 .sbcmp-cat-summary-row { grid-template-columns: 1fr 1fr 1fr; }
+.sbcmp-cat-sum-cell { font-size: .7rem; display: flex; flex-direction: column; gap: 2px; padding: 4px 6px; background: #f8fafc; border-radius: 6px; }
+.sbcmp-sum-amt  { font-weight: 900; color: #0f2744; }
+.sbcmp-sum-fee  { color: #64748b; }
+
+/* ── compare dialog header actions ── */
+.sb-compare-head-actions { display: flex; align-items: center; gap: 6px; }
+.sb-compare-head-btn {
+  background: none; border: 1.5px solid #e2e8f0; border-radius: 8px;
+  color: #4338ca; cursor: pointer; font-size: .82rem; padding: 4px 9px;
+  display: inline-flex; align-items: center; gap: 4px; transition: background .15s;
+}
+.sb-compare-head-btn:hover { background: #f0f4ff; }
+.sb-compare-head-btn.wa  { color: #16a34a; border-color: #bbf7d0; }
+.sb-compare-head-btn.wa:hover { background: #f0fdf4; }
+
+/* ── print compare dialog ── */
+@media print {
+  body.sb-compare-printing > *:not(#sb-compare-dialog) { display: none !important; }
+  body.sb-compare-printing #sb-compare-dialog {
+    position: static !important; background: none !important; padding: 0 !important;
+  }
+  body.sb-compare-printing .sb-dialog-box {
+    box-shadow: none !important; max-width: 100% !important; max-height: none !important;
+  }
+  body.sb-compare-printing .sb-compare-head-actions { display: none !important; }
+}
+
+/* ── mobile sandbox track name overflow ── */
+@media (max-width: 760px) {
+  .sandbox-track-name { overflow-wrap: break-word; word-break: break-word; min-width: 0; }
+  .sandbox-track-meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
 .sb-compare-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

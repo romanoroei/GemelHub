@@ -34,7 +34,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=compare-redesign-20260627" />
+  <link rel="stylesheet" href="css/style.css?v=compare-full-20260627" />
   <style>
     @media (max-width: 760px) {
       .advanced-search-overlay { z-index: 9500 !important; }
@@ -507,7 +507,15 @@
   <div class="sb-dialog-box sb-compare-box">
     <div class="sb-dialog-head">
       <h3 id="sb-compare-title">השוואת תיקים</h3>
-      <button type="button" class="sb-dialog-close" id="sb-compare-dialog-close" aria-label="סגור">✕</button>
+      <div class="sb-compare-head-actions">
+        <button type="button" class="sb-compare-head-btn wa" id="sb-compare-share-btn" title="שלח בווטסאפ">
+          <i class="fab fa-whatsapp" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="sb-compare-head-btn" id="sb-compare-print-btn" title="הדפס השוואה">
+          <i class="fas fa-print" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="sb-dialog-close" id="sb-compare-dialog-close" aria-label="סגור">✕</button>
+      </div>
     </div>
     <div class="sb-dialog-body sb-compare-body" id="sb-compare-content"></div>
   </div>
@@ -590,6 +598,6 @@
 
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
-  <script src="js/app.js?v=compare-redesign-20260627"></script>
+  <script src="js/app.js?v=compare-full-20260627"></script>
 </body>
 </html>

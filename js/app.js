@@ -5740,9 +5740,9 @@ const App = (() => {
         ${portfolio.length > 0 ? `<button type="button" class="sandbox-clear-btn" id="sandbox-clear-portfolio-btn">
           <i class="fas fa-trash-alt" aria-hidden="true"></i> <span class="sb-btn-label">נקה</span></button>
         <button type="button" class="sandbox-print-btn" id="sandbox-print-btn" title="הורד סיכום PDF">
-          <i class="fas fa-file-pdf" aria-hidden="true"></i> <span class="sb-btn-label">PDF</span>
+          <i class="fas fa-file-pdf" aria-hidden="true"></i>
         </button>
-        <button type="button" class="sandbox-share-btn" id="sandbox-share-btn" title="שתף תיק בקישור">
+        <button type="button" class="sandbox-share-btn" id="sandbox-share-btn" title="שלח בווטסאפ">
           <i class="fas fa-share-nodes" aria-hidden="true"></i> <span class="sb-btn-label">שתף</span>
         </button>` : ''}
       </div>
@@ -6305,19 +6305,15 @@ const App = (() => {
   function _sbSharePortfolio() {
     if (!state.sandbox.portfolio.length) { showToast('אין מסלולים לשיתוף'); return; }
     try {
-      const data = { p: state.sandbox.portfolio, n: state.sandbox.portfolioName || '' };
+      const data    = { p: state.sandbox.portfolio, n: state.sandbox.portfolioName || '' };
       const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
-      const url = location.origin + location.pathname + '#portfolio=' + encoded;
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(url).then(() => showToast('קישור הועתק ללוח ✓'));
-      } else {
-        const ta = document.createElement('textarea');
-        ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
-        document.body.appendChild(ta); ta.select(); document.execCommand('copy');
-        document.body.removeChild(ta);
-        showToast('קישור הועתק ללוח ✓');
-      }
-    } catch(e) { showToast('שגיאה ביצירת הקישור'); }
+      const url     = location.origin + location.pathname + '#portfolio=' + encoded;
+      const name    = state.sandbox.portfolioName || 'תיק פנסיוני';
+      const msg     = '🏆 בניתי ' + name + ' ב-GemelHub '
+                    + '— מערכת השוואת הפנסיה של יועץ הפנסיה רועי רומנו.\n'
+                    + 'לצפייה בתיק שלי 👇\n' + url;
+      window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+    } catch(e) { showToast('שגיאה בשיתוף'); }
   }
 
   function _sbCheckUrlHash() {
@@ -6447,6 +6443,25 @@ const App = (() => {
         }
         tracksHtml += '</div>';
       });
+      // category summary row
+      tracksHtml += '<div class="sbcmp-cat-summary-row sbcmp-cat-cols-' + n + '">'
+      items.forEach(it => {
+        const tracks = it.portfolio.filter(t => t.categoryId === catId);
+        const tot = tracks.reduce((s, t) => s + (parseFloat(String(t.investAmount||''). replace(/,/g,'')) || 0), 0);
+        let wFee = 0, wSum = 0;
+        tracks.forEach(t => {
+          const w = parseFloat(String(t.investAmount||''). replace(/,/g,'')) || 0;
+          const f = parseFloat(t.dnCumulative) || 0;
+          wFee += f * w; wSum += w;
+        });
+        const avgFee = wSum > 0 ? (wFee / wSum).toFixed(2) + '%' : '—';
+        const totStr = tot > 0 ? '₪ ' + Math.round(tot).toLocaleString('he-IL') : '—';
+        tracksHtml += '<div class="sbcmp-cat-sum-cell">'
+          + '<span class="sbcmp-sum-amt">' + totStr + '</span>'
+          + '<span class="sbcmp-sum-fee">ד"נ ממוצע: ' + avgFee + '</span>'
+          + '</div>';
+      });
+      tracksHtml += '</div>';
       tracksHtml += '</div></div></div>';
     });
     tracksHtml += '</div>';
@@ -6514,12 +6529,32 @@ const App = (() => {
     if (dlg) { dlg.hidden = true; document.body.style.overflow = ''; }
   }
 
+  function _sbPrintCompare() {
+    document.body.classList.add('sb-compare-printing');
+    window.addEventListener('afterprint', function cleanup() {
+      document.body.classList.remove('sb-compare-printing');
+      window.removeEventListener('afterprint', cleanup);
+    });
+    window.print();
+  }
+
+  function _sbShareCompareWhatsApp() {
+    const dlg   = document.getElementById('sb-compare-title');
+    const title = dlg ? dlg.textContent : 'השוואת תיקים';
+    const msg   = '📊 ' + title + ' — נעשה ב-GemelHub, '
+                + 'מערכת השוואת הפנסיה של יועץ הפנסיה רועי רומנו.\n'
+                + location.origin + location.pathname;
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  }
+
   function setupSandboxPortfolioDialogs() {
     document.getElementById('sb-save-dialog-close')?.addEventListener('click', _sbCloseSaveDialog);
     document.getElementById('sb-save-dialog-cancel')?.addEventListener('click', _sbCloseSaveDialog);
     document.getElementById('sb-save-dialog-submit')?.addEventListener('click', _sbDoSavePortfolio);
     document.getElementById('sb-load-dialog-close')?.addEventListener('click', _sbCloseLoadDialog);
     document.getElementById('sb-compare-dialog-close')?.addEventListener('click', _sbCloseCompareDialog);
+    document.getElementById('sb-compare-print-btn')?.addEventListener('click', _sbPrintCompare);
+    document.getElementById('sb-compare-share-btn')?.addEventListener('click', _sbShareCompareWhatsApp);
     document.getElementById('sb-save-dialog')?.addEventListener('click', e => { if (e.target === e.currentTarget) _sbCloseSaveDialog(); });
     document.getElementById('sb-load-dialog')?.addEventListener('click', e => { if (e.target === e.currentTarget) _sbCloseLoadDialog(); });
     document.getElementById('sb-compare-dialog')?.addEventListener('click', e => { if (e.target === e.currentTarget) _sbCloseCompareDialog(); });
