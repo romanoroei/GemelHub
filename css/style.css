@@ -18144,18 +18144,30 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   }
 }
 
-/* Final override: tags stay to the left of the full #fund id in all tables. */
+/* Final override: fund id stays right-aligned and allocation tags sit to its left. */
+html body #tracks-container table.track-table .provider-cell > div,
+html body #tracks-container .track-table-wrapper table.track-table .provider-cell > div {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  direction: rtl !important;
+  min-width: 0 !important;
+}
+
 html body #tracks-container table.track-table .prov-id,
 html body #tracks-container .track-table-wrapper table.track-table .prov-id {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: flex-start !important;
-  direction: ltr !important;
+  direction: rtl !important;
   unicode-bidi: isolate !important;
   gap: 3px !important;
   overflow: visible !important;
   white-space: nowrap !important;
-  max-width: none !important;
+  width: auto !important;
+  max-width: 100% !important;
+  align-self: flex-start !important;
+  text-align: right !important;
 }
 
 html body #tracks-container table.track-table .fund-id-number,
@@ -18173,31 +18185,38 @@ html body .sandbox-track-id-icons {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: flex-start !important;
-  direction: ltr !important;
+  direction: rtl !important;
   unicode-bidi: isolate !important;
   flex: 0 0 auto !important;
   order: 2 !important;
   gap: 2px !important;
   margin-inline-start: 0 !important;
+  margin-inline-end: 0 !important;
   overflow: visible !important;
   opacity: 1 !important;
 }
 
 html body #tracks-container table.track-table .fund-id-tag-icons .table-allocation-icons,
 html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-icons,
+html body #tracks-container table.track-table .provider-cell.allocation-icons-hover-only .fund-id-tag-icons .table-allocation-icons,
+html body #tracks-container .track-table-wrapper table.track-table .provider-cell.allocation-icons-hover-only .fund-id-tag-icons .table-allocation-icons,
 html body .sandbox-track-id-icons .table-allocation-icons {
   display: inline-flex !important;
   opacity: 1 !important;
   width: auto !important;
   max-width: none !important;
+  min-width: max-content !important;
   overflow: visible !important;
+  pointer-events: auto !important;
 }
 
 html body .sandbox-track-id {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: flex-start !important;
-  direction: ltr !important;
+  direction: rtl !important;
   unicode-bidi: isolate !important;
   gap: 3px !important;
+  align-self: flex-start !important;
+  text-align: right !important;
 }
