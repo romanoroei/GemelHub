@@ -5729,13 +5729,13 @@ const App = (() => {
       <div class="sandbox-page-title">🧪 המעבדה שלי<span id="sb-autosave-status" class="sb-autosave-status" aria-live="polite"></span></div>
       <div class="sandbox-page-actions">
         <button type="button" class="sandbox-add-btn" id="sandbox-add-more-btn">
-          <i class="fas fa-plus" aria-hidden="true"></i> <span class="sb-btn-label">+הוסף</span>
+          <i class="fas fa-plus" aria-hidden="true"></i> <span class="sb-btn-label">הוסף</span>
         </button>
         <button type="button" class="sandbox-save-btn" id="sandbox-save-portfolio-btn" title="שמור תיק">
-          <i class="fas fa-floppy-disk" aria-hidden="true"></i> <span class="sb-btn-label">שמור תיק</span>
+          <i class="fas fa-floppy-disk" aria-hidden="true"></i> <span class="sb-btn-label">שמור</span>
         </button>
         <button type="button" class="sandbox-load-btn" id="sandbox-load-portfolio-btn" title="טען תיק שמור">
-          <i class="fas fa-folder-open" aria-hidden="true"></i> <span class="sb-btn-label">טען</span>
+          <i class="fas fa-folder-open" aria-hidden="true"></i> <span class="sb-btn-label">טען והשווה</span>
         </button>
         ${portfolio.length > 0 ? `<button type="button" class="sandbox-clear-btn" id="sandbox-clear-portfolio-btn">
           <i class="fas fa-trash-alt" aria-hidden="true"></i></button>
@@ -6193,7 +6193,7 @@ const App = (() => {
            + '<strong class="sb-saved-name">' + curName + '</strong>'
            + ' <span class="sb-saved-current-badge">תיק פעיל</span>'
            + (curTotStr ? ' <span class="sb-saved-value-badge">' + curTotStr + '</span>' : '')
-           + '<span class="sb-saved-meta">תיק פעיל · ' + state.sandbox.portfolio.length + ' מסלולים</span>'
+           + '<span class="sb-saved-meta">' + state.sandbox.portfolio.length + ' מסלולים</span>'
            + '</div></div>'
            + '<div class="sb-saved-actions">'
            + '<button type="button" class="sb-delete-current-btn" id="sb-delete-current-btn" title="נקה תיק נוכחי"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>'
@@ -6201,25 +6201,27 @@ const App = (() => {
            + '</div>';
     }
 
+    const ITEM_COLORS = ['sb-item-c0', 'sb-item-c1', 'sb-item-c2', 'sb-item-c3'];
+    let colorIdx = 0;
     list.forEach(item => {
       const isCurrent = !!(currentName && item.name === currentName);
       const tot    = item.portfolio.reduce((s, it) => s + (parseFloat(it.investAmount) || 0), 0);
       const totStr = tot > 0 ? '<span dir="ltr">₪\u202f' + Math.round(tot).toLocaleString('he-IL') + '</span>' : '';
       if (isCurrent) return; // already shown at top as __current__
+      const colorCls = ITEM_COLORS[colorIdx % ITEM_COLORS.length];
+      colorIdx++;
       const chk = canCompare
         ? '<label class="sb-compare-check-wrap"><input type="checkbox" class="sb-compare-check" data-compare-id="' + item.id + '" /></label>'
         : '<span class="sb-compare-check-placeholder"></span>';
-      html += '<div class="sb-saved-item">'
+      html += '<div class="sb-saved-item ' + colorCls + '">'
            + '<div class="sb-saved-item-info">' + chk
-           + '<div class="sb-saved-item-text">'
+           + '<div class="sb-saved-item-text sb-load-area" data-load-id="' + item.id + '" role="button" tabindex="0" aria-label="טען תיק ' + item.name + '">'
            + '<strong class="sb-saved-name">' + item.name + '</strong>'
-           + (isCurrent ? ' <span class="sb-saved-current-badge">תיק פעיל</span>' : '')
            + (totStr ? ' <span class="sb-saved-value-badge">' + totStr + '</span>' : '')
            + '<span class="sb-saved-meta">' + _sbFormatSavedDate(item.date) + ' · ' + item.portfolio.length + ' מסלולים</span>'
            + (item.notes ? '<span class="sb-saved-notes">' + item.notes + '</span>' : '')
            + '</div></div>'
            + '<div class="sb-saved-actions">'
-           + '<button type="button" class="sb-load-item-btn" data-load-id="' + item.id + '"><i class="fas fa-folder-open" aria-hidden="true"></i> טען</button>'
            + '<button type="button" class="sb-delete-item-btn" data-delete-id="' + item.id + '"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>'
            + '</div></div>';
     });
@@ -6250,8 +6252,10 @@ const App = (() => {
       const ids = [...container.querySelectorAll('.sb-compare-check:checked')].map(cb => cb.dataset.compareId);
       if (ids.length >= 2) _sbOpenCompareDialogMulti(ids);
     });
-    container.querySelectorAll('.sb-load-item-btn').forEach(btn =>
-      btn.addEventListener('click', () => _sbDoLoadPortfolio(btn.dataset.loadId)));
+    container.querySelectorAll('.sb-load-area').forEach(area => {
+      area.addEventListener('click',   () => _sbDoLoadPortfolio(area.dataset.loadId));
+      area.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') _sbDoLoadPortfolio(area.dataset.loadId); });
+    });
     container.querySelectorAll('.sb-delete-item-btn').forEach(btn =>
       btn.addEventListener('click', () => _sbDoDeletePortfolio(btn.dataset.deleteId)));
     document.getElementById('sb-delete-current-btn')?.addEventListener('click', () => {
