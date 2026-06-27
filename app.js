@@ -6775,13 +6775,14 @@ const App = (() => {
       const stockRaw  = calcExposurePercentValue(r.STOCK_MARKET_EXPOSURE, ta)?.toFixed(2) ?? '';
       const abroadRaw = calcExposurePercentValue(r.FOREIGN_EXPOSURE, ta)?.toFixed(2) ?? '';
       const fxRaw     = calcExposurePercentValue(r.FOREIGN_CURRENCY_EXPOSURE, ta)?.toFixed(2) ?? '';
-      const allocationOutliers = exposureOutliers({ stock, abroad, fx });
+      const allocationValues = { stock: stockRaw, abroad: abroadRaw, fx: fxRaw };
+      const allocationOutliers = exposureOutliers(allocationValues);
       const allocationIcon = allocationOutlierIcon(allocationOutliers);
       const allocationProfile = allocationProfileWithMedianSignal(
-        allocationProfileFor({ stock, abroad, fx }),
-        { stock, abroad, fx }
+        ghAllocationProfileFor(allocationValues),
+        allocationValues
       );
-      const allocationProfileIcon = allocationProfileIcons(allocationProfile, `${r.FUND_NAME || ''} ${r.SUB_SPECIALIZATION || ''}`);
+      const allocationProfileIcon = ghAllocationProfileIcons(allocationProfile, `${_sbGetTrackLabel(trackId)} ${r.FUND_NAME || ''} ${r.SUB_SPECIALIZATION || ''}`);
       const fundIdTagIcons = `${allocationProfileIcon}${allocationIcon}`;
 
       // דירוג (task 10) — rank לפי הסדר הממוין הנוכחי
