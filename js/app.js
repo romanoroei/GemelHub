@@ -5739,8 +5739,8 @@ const App = (() => {
         </button>
         ${portfolio.length > 0 ? `<button type="button" class="sandbox-clear-btn" id="sandbox-clear-portfolio-btn">
           <i class="fas fa-trash-alt" aria-hidden="true"></i> <span class="sb-btn-label">נקה</span></button>
-        <button type="button" class="sandbox-print-btn" id="sandbox-print-btn" title="הורד סיכום PDF">
-          <i class="fas fa-file-pdf" aria-hidden="true"></i>
+        <button type="button" class="sandbox-print-btn" id="sandbox-print-btn" title="הדפס תיק">
+          <i class="fas fa-print" aria-hidden="true"></i>
         </button>
         <button type="button" class="sandbox-share-btn" id="sandbox-share-btn" title="שלח בווטסאפ">
           <i class="fas fa-share-nodes" aria-hidden="true"></i> <span class="sb-btn-label">שתף</span>
@@ -6203,7 +6203,8 @@ const App = (() => {
       const isCurrent = !!(currentName && item.name === currentName);
       const tot    = item.portfolio.reduce((s, it) => s + (parseFloat(it.investAmount) || 0), 0);
       const totStr = tot > 0 ? '₪ ' + Math.round(tot).toLocaleString('he-IL') : '';
-      const chk = (canCompare && !isCurrent)
+      if (isCurrent) return; // already shown at top as __current__
+      const chk = canCompare
         ? '<label class="sb-compare-check-wrap"><input type="checkbox" class="sb-compare-check" data-compare-id="' + item.id + '" /></label>'
         : '<span class="sb-compare-check-placeholder"></span>';
       html += '<div class="sb-saved-item">'
@@ -6304,16 +6305,24 @@ const App = (() => {
   // ── Share via URL hash ─────────────────────────────────────────────────────
   function _sbSharePortfolio() {
     if (!state.sandbox.portfolio.length) { showToast('אין מסלולים לשיתוף'); return; }
+    const data    = { p: state.sandbox.portfolio, n: state.sandbox.portfolioName || '' };
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+    const url     = location.origin + location.pathname + '#portfolio=' + encoded;
+    const text    = 'רציתי לשתף אותך בתיק הפיננסי שבניתי במערכת ה-GemelHub של רועי רומנו. התיק נמצא במעבדה. לצפייה בתיק שלי:\n';
+    const openWA  = (link) => { window.open('https://wa.me/?text=' + encodeURIComponent(text + link), '_blank'); };
     try {
-      const data    = { p: state.sandbox.portfolio, n: state.sandbox.portfolioName || '' };
-      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
-      const url     = location.origin + location.pathname + '#portfolio=' + encoded;
-      const name    = state.sandbox.portfolioName || 'תיק פנסיוני';
-      const msg     = '🏆 בניתי ' + name + ' ב-GemelHub '
-                    + '— מערכת השוואת הפנסיה של יועץ הפנסיה רועי רומנו.\n'
-                    + 'לצפייה בתיק שלי 👇\n' + url;
-      window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
-    } catch(e) { showToast('שגיאה בשיתוף'); }
+      const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      const timer = ctrl ? setTimeout(() => ctrl.abort(), 4000) : null;
+      fetch('https://cleanuri.com/api/v1/shorten', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'url=' + encodeURIComponent(url),
+        signal: ctrl ? ctrl.signal : undefined
+      })
+      .then(r => r.json())
+      .then(d => { if (timer) clearTimeout(timer); openWA(d.result_url || url); })
+      .catch(() => openWA(url));
+    } catch(e) { openWA(url); }
   }
 
   function _sbCheckUrlHash() {
@@ -6429,28 +6438,28 @@ const App = (() => {
         } else {
           tracks.forEach(t => {
             const amt    = parseFloat(String(t.investAmount || '').replace(/,/g, '')) || 0;
-            const amtStr = amt > 0 ? ' · ₪ ' + Math.round(amt).toLocaleString('he-IL') : '';
-            const feeStr = t.dnCumulative != null ? parseFloat(t.dnCumulative).toFixed(2) + '%' : '—';
+            const amtStr = amt > 0 ? '₪ ' + Math.round(amt).toLocaleString('he-IL') : '';
             tracksHtml += '<div class="sbcmp-track-item">'
               + '<span class="sbcmp-track-dot" style="background:' + (t.color || '#999') + '"></span>'
               + '<div class="sbcmp-track-info">'
               + '<div class="sbcmp-track-name">' + (t.provider || '')
               + (t.trackLabel ? ' — ' + t.trackLabel : (t.fundName ? ' — ' + t.fundName : ''))
               + '</div>'
-              + '<div class="sbcmp-track-meta">ד"נ: ' + feeStr + amtStr + '</div>'
+              + (amtStr ? '<div class="sbcmp-track-meta">' + amtStr + '</div>' : '')
               + '</div></div>';
           });
         }
         tracksHtml += '</div>';
       });
       // category summary row
-      tracksHtml += '<div class="sbcmp-cat-summary-row sbcmp-cat-cols-' + n + '">'
+      tracksHtml += '</div>'; // close sbcmp-tracks-row
+      tracksHtml += '<div class="sbcmp-cat-summary">'
       items.forEach(it => {
         const tracks = it.portfolio.filter(t => t.categoryId === catId);
-        const tot = tracks.reduce((s, t) => s + (parseFloat(String(t.investAmount||''). replace(/,/g,'')) || 0), 0);
+        const tot = tracks.reduce((s, t) => s + (parseFloat(String(t.investAmount||'').replace(/,/g,'')) || 0), 0);
         let wFee = 0, wSum = 0;
         tracks.forEach(t => {
-          const w = parseFloat(String(t.investAmount||''). replace(/,/g,'')) || 0;
+          const w = parseFloat(String(t.investAmount||'').replace(/,/g,'')) || 0;
           const f = parseFloat(t.dnCumulative) || 0;
           wFee += f * w; wSum += w;
         });
@@ -6461,8 +6470,8 @@ const App = (() => {
           + '<span class="sbcmp-sum-fee">ד"נ ממוצע: ' + avgFee + '</span>'
           + '</div>';
       });
-      tracksHtml += '</div>';
-      tracksHtml += '</div></div></div>';
+      tracksHtml += '</div>'; // close sbcmp-cat-summary
+      tracksHtml += '</div></div>';
     });
     tracksHtml += '</div>';
 
