@@ -4401,22 +4401,29 @@ const App = (() => {
         el.style.setProperty('box-shadow', '-3px 0 8px -3px rgba(15,23,42,.2)', 'important');
       });
       table.querySelectorAll('td.yield-cell, td.exp-col, .yield-value-wrap, .yield-number-shell, .yield-number, .exp-val').forEach(el => {
-        el.style.setProperty('font-size', '12px', 'important');
-        el.style.setProperty('line-height', '1.05', 'important');
+        el.style.setProperty('font-size', '13px', 'important');
+        el.style.setProperty('line-height', '1.06', 'important');
         el.style.setProperty('font-weight', '800', 'important');
       });
       table.querySelectorAll('.prov-name').forEach(el => {
-        el.style.setProperty('font-size', '12px', 'important');
-        el.style.setProperty('line-height', '1.05', 'important');
+        el.style.setProperty('font-size', '13px', 'important');
+        el.style.setProperty('line-height', '1.06', 'important');
       });
       table.querySelectorAll('.prov-id').forEach(el => {
         el.style.setProperty('font-size', '10px', 'important');
         el.style.setProperty('line-height', '1.02', 'important');
       });
       table.querySelectorAll('tr.average-row td, tr.average-row td *, tr.average-row .yield-number').forEach(el => {
-        el.style.setProperty('font-size', '12px', 'important');
-        el.style.setProperty('line-height', '1.05', 'important');
+        el.style.setProperty('font-size', '13px', 'important');
+        el.style.setProperty('line-height', '1.06', 'important');
         el.style.setProperty('font-weight', '850', 'important');
+      });
+      table.querySelectorAll('.yield-top-rank').forEach(el => {
+        el.style.setProperty('font-size', '8px', 'important');
+        el.style.setProperty('width', '15px', 'important');
+        el.style.setProperty('height', '15px', 'important');
+        el.style.setProperty('min-width', '15px', 'important');
+        el.style.setProperty('min-height', '15px', 'important');
       });
       normalizeMobileFinanceTablePresentation(table);
       if (isExposureOnly) {
@@ -4625,8 +4632,8 @@ const App = (() => {
       }
       if (el.matches('td.yield-cell, td.exp-col, .yield-value-wrap, .yield-number-shell, .yield-number, .exp-val')) {
         const isExposureOnlyValue = el.matches('.exp-val') && !!el.closest('table.exposure-only');
-        el.style.setProperty('font-size', '12px', 'important');
-        el.style.setProperty('line-height', '1.05', 'important');
+        el.style.setProperty('font-size', '13px', 'important');
+        el.style.setProperty('line-height', '1.06', 'important');
         el.style.setProperty('font-weight', isExposureOnlyValue ? '900' : '800', 'important');
       }
       if (el.matches('table.exposure-only .exp-bar-bg')) {
@@ -4635,17 +4642,24 @@ const App = (() => {
         el.style.setProperty('min-height', '7px', 'important');
       }
       if (el.matches('.prov-name')) {
-        el.style.setProperty('font-size', '12px', 'important');
-        el.style.setProperty('line-height', '1.05', 'important');
+        el.style.setProperty('font-size', '13px', 'important');
+        el.style.setProperty('line-height', '1.06', 'important');
       }
       if (el.matches('.prov-id')) {
         el.style.setProperty('font-size', '10px', 'important');
         el.style.setProperty('line-height', '1.02', 'important');
       }
       if (el.matches('tr.average-row td, tr.average-row td *, tr.average-row .yield-number')) {
-        el.style.setProperty('font-size', '12px', 'important');
-        el.style.setProperty('line-height', '1.05', 'important');
+        el.style.setProperty('font-size', '13px', 'important');
+        el.style.setProperty('line-height', '1.06', 'important');
         el.style.setProperty('font-weight', '850', 'important');
+      }
+      if (el.matches('.yield-top-rank')) {
+        el.style.setProperty('font-size', '8px', 'important');
+        el.style.setProperty('width', '15px', 'important');
+        el.style.setProperty('height', '15px', 'important');
+        el.style.setProperty('min-width', '15px', 'important');
+        el.style.setProperty('min-height', '15px', 'important');
       }
     });
     // Re-apply sticky to rank+manager thead cells — must run last so nothing overrides it

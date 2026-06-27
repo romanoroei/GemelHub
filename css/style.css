@@ -18571,8 +18571,8 @@ html body .sandbox-track-id {
   }
 
   html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) > td {
-    padding-top: 2px !important;
-    padding-bottom: 2px !important;
+    padding-top: 3px !important;
+    padding-bottom: 3px !important;
     vertical-align: middle !important;
   }
 
@@ -18603,6 +18603,7 @@ html body .sandbox-track-id {
     min-height: 0 !important;
     max-height: none !important;
     line-height: 1.08 !important;
+    font-size: .84rem !important;
     white-space: normal !important;
     overflow: visible !important;
     text-overflow: clip !important;
@@ -18629,8 +18630,16 @@ html body .sandbox-track-id {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    min-height: 0 !important;
+    min-height: 21px !important;
+    padding-top: 7px !important;
     line-height: 1 !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) td.yield-cell,
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) td.yield-cell *,
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .yield-number {
+    font-size: .86rem !important;
+    line-height: 1.05 !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .yield-badge,
@@ -18639,27 +18648,27 @@ html body .sandbox-track-id {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
+    top: 0 !important;
+    transform: translateX(-50%) !important;
     margin: 0 !important;
     line-height: 1 !important;
     pointer-events: none !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .yield-badge {
-    left: -9px !important;
+    left: 50% !important;
     right: auto !important;
-    font-size: .54em !important;
+    font-size: .66em !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .yield-top-rank {
-    right: -9px !important;
-    left: auto !important;
-    width: 11px !important;
-    height: 11px !important;
-    min-width: 11px !important;
+    left: 50% !important;
+    right: auto !important;
+    width: 13px !important;
+    height: 13px !important;
+    min-width: 13px !important;
     padding: 0 !important;
-    font-size: .48rem !important;
+    font-size: .56rem !important;
   }
 }
 
@@ -19500,4 +19509,68 @@ html body .sandbox-track-id {
     padding-inline: 1px !important;
   }
 
+}
+
+/* Final mobile density tuning: readable returns and rank badges without tall rows. */
+@media (max-width: 760px) {
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) > td {
+    padding-top: 3px !important;
+    padding-bottom: 3px !important;
+    vertical-align: middle !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) td.yield-cell,
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) td.yield-cell *,
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .yield-number,
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .yield-number-shell {
+    font-size: .9rem !important;
+    line-height: 1.05 !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .prov-name,
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .prov-name-text {
+    font-size: .88rem !important;
+    line-height: 1.08 !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .yield-value-wrap,
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .yield-number-shell {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 24px !important;
+    padding-top: 8px !important;
+    overflow: visible !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .yield-badge,
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .yield-top-rank {
+    position: absolute !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    top: 0 !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+    pointer-events: none !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .yield-top-rank {
+    width: 15px !important;
+    height: 15px !important;
+    min-width: 15px !important;
+    max-width: 15px !important;
+    min-height: 15px !important;
+    max-height: 15px !important;
+    padding: 0 !important;
+    font-size: .68rem !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .yield-badge {
+    font-size: .76em !important;
+  }
 }
