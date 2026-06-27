@@ -647,6 +647,7 @@ const App = (() => {
     setupMobileStickyThead();
     updateMobileStickyHeader();
     loadSandboxPortfolio();
+    _sbCheckUrlHash();
     setupSandboxCheckboxes();
     setupSandboxBarActions();
     setupSandboxPortfolioDialogs();
@@ -5736,7 +5737,13 @@ const App = (() => {
           <i class="fas fa-folder-open" aria-hidden="true"></i> <span class="sb-btn-label">טען תיק</span>
         </button>
         ${portfolio.length > 0 ? `<button type="button" class="sandbox-clear-btn" id="sandbox-clear-portfolio-btn">
-          <i class="fas fa-trash-alt" aria-hidden="true"></i> <span class="sb-btn-label">מחק תיק</span></button>` : ''}
+          <i class="fas fa-trash-alt" aria-hidden="true"></i> <span class="sb-btn-label">נקה</span></button>
+        <button type="button" class="sandbox-print-btn" id="sandbox-print-btn" title="הורד סיכום PDF">
+          <i class="fas fa-file-pdf" aria-hidden="true"></i> <span class="sb-btn-label">PDF</span>
+        </button>
+        <button type="button" class="sandbox-share-btn" id="sandbox-share-btn" title="שתף תיק בקישור">
+          <i class="fas fa-share-nodes" aria-hidden="true"></i> <span class="sb-btn-label">שתף</span>
+        </button>` : ''}
       </div>
     </div>`;
 
@@ -6178,6 +6185,9 @@ const App = (() => {
           <button type="button" class="sb-load-item-btn" data-load-id="${item.id}">
             <i class="fas fa-folder-open" aria-hidden="true"></i> טען
           </button>
+          ${state.sandbox.portfolio.length > 0 ? `<button type="button" class="sb-compare-btn" data-compare-id="${item.id}">
+            <i class="fas fa-code-compare" aria-hidden="true"></i> השווה
+          </button>` : ''}
           <button type="button" class="sb-delete-item-btn" data-delete-id="${item.id}" aria-label="מחק תיק ${item.name}">
             <i class="fas fa-trash-alt" aria-hidden="true"></i>
           </button>
@@ -6186,6 +6196,8 @@ const App = (() => {
     `).join('');
     container.querySelectorAll('.sb-load-item-btn').forEach(btn =>
       btn.addEventListener('click', () => _sbDoLoadPortfolio(btn.dataset.loadId)));
+    container.querySelectorAll('.sb-compare-btn').forEach(btn =>
+      btn.addEventListener('click', () => _sbOpenCompareDialog(btn.dataset.compareId)));
     container.querySelectorAll('.sb-delete-item-btn').forEach(btn =>
       btn.addEventListener('click', () => _sbDoDeletePortfolio(btn.dataset.deleteId)));
   }
@@ -6219,13 +6231,163 @@ const App = (() => {
     _sbRenderLoadList();
   }
 
+  // ── Print ──────────────────────────────────────────────────────────────────
+  function _sbPrintSummary() {
+    _sbSyncVisibleInputsToState();
+    document.body.classList.add('sb-printing');
+    window.addEventListener('afterprint', function cleanup() {
+      document.body.classList.remove('sb-printing');
+      window.removeEventListener('afterprint', cleanup);
+    });
+    window.print();
+  }
+
+  // ── Share via URL hash ─────────────────────────────────────────────────────
+  function _sbSharePortfolio() {
+    if (!state.sandbox.portfolio.length) { showToast('אין מסלולים לשיתוף'); return; }
+    try {
+      const data = { p: state.sandbox.portfolio, n: state.sandbox.portfolioName || '' };
+      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+      const url = location.origin + location.pathname + '#portfolio=' + encoded;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => showToast('קישור הועתק ללוח ✓'));
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('קישור הועתק ללוח ✓');
+      }
+    } catch(e) { showToast('שגיאה ביצירת הקישור'); }
+  }
+
+  function _sbCheckUrlHash() {
+    const hash = location.hash;
+    if (!hash.startsWith('#portfolio=')) return;
+    try {
+      const encoded = hash.slice('#portfolio='.length);
+      const data = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+      if (data.p && Array.isArray(data.p) && data.p.length) {
+        state.sandbox.portfolio = data.p;
+        state.sandbox.portfolioName = data.n || 'תיק משותף';
+        saveSandboxPortfolio();
+        history.replaceState(null, '', location.pathname + location.search);
+        if (state.activeCategoryId !== 'sandbox') switchCategory('sandbox');
+        else renderSandboxPage();
+        showToast(`התיק "${state.sandbox.portfolioName}" נטען מקישור`);
+      }
+    } catch(e) { /* invalid hash — ignore */ }
+  }
+
+  // ── Compare ────────────────────────────────────────────────────────────────
+  function _sbBuildSummary(portfolio) {
+    let totalAmt = 0, wFee = 0, wY12 = 0, wY3 = 0, n = 0;
+    portfolio.forEach(item => {
+      const amt = parseFloat(item.investAmount) || 0;
+      const fee = parseFloat(item.dnCumulative) || 0;
+      const y12 = parseFloat(item.y12m) || 0;
+      const y3  = parseFloat(item.y5)   || 0;
+      totalAmt += amt; wFee += fee * amt; wY12 += y12 * amt; wY3 += y3 * amt; n++;
+    });
+    return {
+      count: n, totalAmt,
+      avgFee: totalAmt > 0 ? wFee / totalAmt : null,
+      avgY12: totalAmt > 0 ? wY12 / totalAmt : null,
+      avgY3:  totalAmt > 0 ? wY3  / totalAmt : null,
+    };
+  }
+
+  function _sbCompareColHtml(name, portfolio) {
+    const s = _sbBuildSummary(portfolio);
+    const fmt = v => v != null ? v.toFixed(2) + '%' : '—';
+    const fmtAmt = v => v > 0 ? '₪ ' + Math.round(v).toLocaleString('he-IL') : '—';
+    const rows = [
+      ['מסלולים', s.count],
+      ['סה"כ השקעה', fmtAmt(s.totalAmt)],
+      ['ד"נ מצבירה ממוצע', fmt(s.avgFee)],
+      ['תשואה 12 חוד׳ ממוצעת', fmt(s.avgY12)],
+      ['תשואה 3 שנים ממוצעת', fmt(s.avgY3)],
+    ];
+    const tableRows = rows.map(([label, val]) =>
+      `<tr><td>${label}</td><td>${val}</td></tr>`).join('');
+    const trackList = portfolio.map(it =>
+      `<div class="sb-compare-track-row">
+        <span class="sb-product-dot" style="background:${it.color || '#999'};width:8px;height:8px;border-radius:50%;flex-shrink:0"></span>
+        <span>${it.provider || ''} — ${it.trackLabel || it.fundName || ''}</span>
+      </div>`).join('');
+    return `
+      <div class="sb-compare-col">
+        <div class="sb-compare-col-head">${name}</div>
+        <table class="sb-compare-table"><tbody>${tableRows}</tbody></table>
+        <div class="sb-compare-tracks">
+          <div class="sb-compare-tracks-head">מסלולים בתיק</div>
+          ${trackList || '<div class="sb-compare-track-row" style="color:#aaa">—</div>'}
+        </div>
+      </div>`;
+  }
+
+  function _sbRenderCompare(savedItem) {
+    const currentName = state.sandbox.portfolioName || 'תיק נוכחי';
+    const savedName   = savedItem.name;
+    const cur = _sbBuildSummary(state.sandbox.portfolio);
+    const sav = _sbBuildSummary(savedItem.portfolio);
+
+    const diffRow = (label, curVal, savVal, isAmt) => {
+      if (curVal == null || savVal == null) return '';
+      const diff = curVal - savVal;
+      const cls = diff > 0.005 ? 'pos' : diff < -0.005 ? 'neg' : 'neu';
+      const sign = diff >= 0 ? '+' : '';
+      const fmtDiff = isAmt
+        ? (diff >= 0 ? '+' : '') + '₪ ' + Math.abs(Math.round(diff)).toLocaleString('he-IL')
+        : sign + diff.toFixed(2) + '%';
+      return `<div class="sb-compare-diff-row">
+        <span class="sb-compare-diff-label">${label}</span>
+        <span class="sb-compare-diff-val ${cls}">${fmtDiff}</span>
+      </div>`;
+    };
+
+    const diffHtml = `
+      <div class="sb-compare-diff-bar">
+        <div class="sb-compare-diff-title">הפרש (נוכחי פחות שמור)</div>
+        ${diffRow('סה"כ השקעה', cur.totalAmt, sav.totalAmt, true)}
+        ${diffRow('ד"נ מצבירה', cur.avgFee, sav.avgFee, false)}
+        ${diffRow('תשואה 12 חוד׳', cur.avgY12, sav.avgY12, false)}
+        ${diffRow('תשואה 3 שנים', cur.avgY3, sav.avgY3, false)}
+      </div>`;
+
+    document.getElementById('sb-compare-title').textContent = `השוואה: ${currentName} vs ${savedName}`;
+    document.getElementById('sb-compare-content').innerHTML = `
+      <div class="sb-compare-grid">
+        ${_sbCompareColHtml(currentName, state.sandbox.portfolio)}
+        ${_sbCompareColHtml(savedName, savedItem.portfolio)}
+      </div>
+      ${diffHtml}`;
+  }
+
+  function _sbOpenCompareDialog(id) {
+    const list = _sbGetSavedPortfolios();
+    const item = list.find(p => p.id === id);
+    if (!item) return;
+    _sbCloseLoadDialog();
+    _sbRenderCompare(item);
+    const dlg = document.getElementById('sb-compare-dialog');
+    if (dlg) { dlg.hidden = false; document.body.style.overflow = 'hidden'; }
+  }
+
+  function _sbCloseCompareDialog() {
+    const dlg = document.getElementById('sb-compare-dialog');
+    if (dlg) { dlg.hidden = true; document.body.style.overflow = ''; }
+  }
+
   function setupSandboxPortfolioDialogs() {
     document.getElementById('sb-save-dialog-close')?.addEventListener('click', _sbCloseSaveDialog);
     document.getElementById('sb-save-dialog-cancel')?.addEventListener('click', _sbCloseSaveDialog);
     document.getElementById('sb-save-dialog-submit')?.addEventListener('click', _sbDoSavePortfolio);
     document.getElementById('sb-load-dialog-close')?.addEventListener('click', _sbCloseLoadDialog);
+    document.getElementById('sb-compare-dialog-close')?.addEventListener('click', _sbCloseCompareDialog);
     document.getElementById('sb-save-dialog')?.addEventListener('click', e => { if (e.target === e.currentTarget) _sbCloseSaveDialog(); });
     document.getElementById('sb-load-dialog')?.addEventListener('click', e => { if (e.target === e.currentTarget) _sbCloseLoadDialog(); });
+    document.getElementById('sb-compare-dialog')?.addEventListener('click', e => { if (e.target === e.currentTarget) _sbCloseCompareDialog(); });
     // Enter key in save dialog
     document.getElementById('sb-save-name')?.addEventListener('keydown', e => { if (e.key === 'Enter') _sbDoSavePortfolio(); });
   }
@@ -6638,6 +6800,8 @@ const App = (() => {
     // Save / Load portfolio buttons
     section.querySelector('#sandbox-save-portfolio-btn')?.addEventListener('click', _sbOpenSaveDialog);
     section.querySelector('#sandbox-load-portfolio-btn')?.addEventListener('click', _sbOpenLoadDialog);
+    section.querySelector('#sandbox-print-btn')?.addEventListener('click', _sbPrintSummary);
+    section.querySelector('#sandbox-share-btn')?.addEventListener('click', _sbSharePortfolio);
 
     // Clear portfolio button
     section.querySelector('#sandbox-clear-portfolio-btn')?.addEventListener('click', () => {
