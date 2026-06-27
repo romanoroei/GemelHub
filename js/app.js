@@ -5662,10 +5662,7 @@ const App = (() => {
   }
 
   function _sbSelectedReturnFields() {
-    state.sandbox.selectedReturnFields = _sbNormalizeReturnFields(state.sandbox.selectedReturnFields);
-    return state.sandbox.selectedReturnFields
-      .map(id => SB_RETURN_FIELDS.find(field => field.id === id))
-      .filter(Boolean);
+    return SB_RETURN_FIELDS;
   }
 
   function _sbLoadReturnFields() {
@@ -5732,7 +5729,6 @@ const App = (() => {
         <button type="button" class="sandbox-add-btn" id="sandbox-add-more-btn">
           <i class="fas fa-plus" aria-hidden="true"></i> <span class="sb-btn-label">הוסף מסלולים</span>
         </button>
-        ${_sbReturnFieldMenuHtml()}
         <button type="button" class="sandbox-save-btn" id="sandbox-save-portfolio-btn" title="שמור תיק">
           <i class="fas fa-floppy-disk" aria-hidden="true"></i> <span class="sb-btn-label">שמור תיק</span>
         </button>

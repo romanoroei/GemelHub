@@ -11667,14 +11667,14 @@ body.h2h-active,
   .sandbox-cat-table {
     font-size: .74rem;
   }
-  .sandbox-cat-table .sb-col-provider { width: 78px; }
-  .sandbox-cat-table .sb-col-track { width: 80px; }
+  .sandbox-cat-table .sb-col-provider { width: 60px; }
+  .sandbox-cat-table .sb-col-track { width: 92px; }
   .sandbox-cat-table .sb-col-fee { width: 58px; }
   .sandbox-cat-table .sb-col-invest { width: 68px; }
   .sandbox-cat-table .sb-col-yield { width: 48px; }
   .sandbox-cat-table .sb-col-exp { width: 42px; }
   .sandbox-cat-table .sb-col-remove { width: 24px; }
-  .sandbox-cat-table.is-pension-table .sb-col-provider { width: 70px; }
+  .sandbox-cat-table.is-pension-table .sb-col-provider { width: 56px; }
   .sandbox-cat-table.is-pension-table .sb-col-track { width: 82px; }
   .sandbox-cat-table.is-pension-table .sb-col-fee { width: 58px; }
   .sandbox-cat-table.is-pension-table .sb-col-invest { width: 70px; }
@@ -18799,7 +18799,7 @@ html body .sandbox-track-id {
     font-size: .74rem !important;
   }
 
-  /* Mobile: all sandbox action buttons — icon only */
+  /* Mobile: all sandbox action buttons — square icon only */
   .sandbox-add-btn .sb-btn-label,
   .sandbox-fields-btn .sb-btn-label,
   .sandbox-save-btn .sb-btn-label,
@@ -18812,9 +18812,11 @@ html body .sandbox-track-id {
   .sandbox-save-btn,
   .sandbox-load-btn,
   .sandbox-clear-btn {
-    padding: 8px 10px !important;
-    min-width: 36px !important;
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
     justify-content: center !important;
+    flex-shrink: 0 !important;
   }
 
   /* Mobile: sandbox dialogs full-screen friendly */
