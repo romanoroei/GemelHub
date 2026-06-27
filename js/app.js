@@ -39,6 +39,7 @@ const App = (() => {
       portfolio: [],   // saved portfolio items (persisted in localStorage)
       portfolioName: '',
       portfolioColorIdx: -1,
+      compareItems: null,
       returnsMenuOpen: false,
       selectedReturnFields: ['monthly', 'ytd', '12m', '3y']
     }
@@ -6468,15 +6469,15 @@ const App = (() => {
         } else {
           tracks.forEach(t => {
             const amt    = parseFloat(String(t.investAmount || '').replace(/,/g, '')) || 0;
-            const pct    = catTot > 0 && tracks.length > 1 ? ' (' + Math.round(amt / catTot * 100) + '%)' : '';
-            const amtStr = amt > 0 ? '<span dir="ltr">₪\u202f' + Math.round(amt).toLocaleString('he-IL') + '</span>' + pct : '';
+            const pct    = catTot > 0 && tracks.length > 1 ? ' <strong class="sbcmp-pct">' + Math.round(amt / catTot * 100) + '%</strong>' : '';
+            const amtStr = amt > 0 ? '<span dir="ltr">₪\u202f' + Math.round(amt).toLocaleString('he-IL') + '</span>' : '';
             tracksHtml += '<div class="sbcmp-track-item">'
               + '<span class="sbcmp-track-dot" style="background:' + (t.color || '#999') + '"></span>'
               + '<div class="sbcmp-track-info">'
               + '<div class="sbcmp-track-name">' + (t.provider || '')
               + (t.trackLabel ? ' — ' + t.trackLabel : (t.fundName ? ' — ' + t.fundName : ''))
               + '</div>'
-              + (amtStr ? '<div class="sbcmp-track-meta">' + amtStr + '</div>' : '')
+              + (amtStr || pct ? '<div class="sbcmp-track-meta">' + amtStr + pct + '</div>' : '')
               + '</div></div>';
           });
         }
@@ -6555,6 +6556,7 @@ const App = (() => {
       : 'השוואת ' + n + ' תיקים';
     document.getElementById('sb-compare-title').textContent = title;
     document.getElementById('sb-compare-content').innerHTML = tracksHtml + returnsHtml + exposuresHtml;
+    state.sandbox.compareItems = items; // stored for share
   }
 
   function _sbOpenCompareDialogMulti(ids) {
@@ -6585,12 +6587,28 @@ const App = (() => {
   }
 
   function _sbShareCompareWhatsApp() {
-    const dlg   = document.getElementById('sb-compare-title');
-    const title = dlg ? dlg.textContent : 'השוואת תיקים';
-    const siteUrl = location.origin + location.pathname;
-    const msg   = '📊 ' + title + ', נעשה במעבדה של GemelHub — '
-                + 'המערכת להשוואת נתונים פיננסיים של רועי רומנו.\n' + siteUrl;
-    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+    const titleEl = document.getElementById('sb-compare-title');
+    const title   = titleEl ? titleEl.textContent : 'השוואת תיקים';
+    const items   = state.sandbox.compareItems || [];
+    // encode first portfolio so recipient can load it
+    let   portfolioUrl = location.origin + location.pathname;
+    if (items.length > 0 && items[0].portfolio) {
+      try {
+        const d = { p: items[0].portfolio, n: items[0].name || '' };
+        const enc = btoa(unescape(encodeURIComponent(JSON.stringify(d))));
+        portfolioUrl = location.origin + location.pathname + '#portfolio=' + enc;
+      } catch(e) {}
+    }
+    const text = '📊 ' + title + ', נעשה במעבדה של GemelHub — '
+              + 'המערכת להשוואת נתונים פיננסיים של רועי רומנו.\n'
+              + 'לטעינת התיק למעבדה שלך 👇\n';
+    const openWA = (link) => window.open('https://wa.me/?text=' + encodeURIComponent(text + link), '_blank');
+    try {
+      fetch('https://is.gd/create.php?format=simple&url=' + encodeURIComponent(portfolioUrl))
+        .then(r => r.text())
+        .then(s => { openWA(s && s.startsWith('http') ? s.trim() : portfolioUrl); })
+        .catch(() => openWA(portfolioUrl));
+    } catch(e) { openWA(portfolioUrl); }
   }
 
   function setupSandboxPortfolioDialogs() {

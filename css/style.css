@@ -10219,10 +10219,10 @@ body.h2h-active,
   border-radius: 6px;
   padding: 2px 8px;
 }
-.svb-pname-c0 { background: rgba(99,102,241,.25); color: #c7d2fe; }
-.svb-pname-c1 { background: rgba(8,145,178,.25);  color: #a5f3fc; }
-.svb-pname-c2 { background: rgba(22,163,74,.25);  color: #bbf7d0; }
-.svb-pname-c3 { background: rgba(234,88,12,.25);  color: #fed7aa; }
+.svb-pname-c0 { background: rgba(99,102,241,.45);  border: 1.5px solid #818cf8; color: #e0e7ff; }
+.svb-pname-c1 { background: rgba(8,145,178,.45);   border: 1.5px solid #67e8f9; color: #cffafe; }
+.svb-pname-c2 { background: rgba(22,163,74,.45);   border: 1.5px solid #86efac; color: #dcfce7; }
+.svb-pname-c3 { background: rgba(234,88,12,.45);   border: 1.5px solid #fdba74; color: #ffedd5; }
 
 /* ── Save button animation ── */
 .sb-save-hidden { display: none !important; }
@@ -10623,8 +10623,8 @@ body.h2h-active,
 }
 .sb-load-item-btn:hover { background: #fef3c7; }
 .sb-delete-item-btn {
-  background: #fff1f2; border: 1px solid #fecaca; border-radius: 7px;
-  color: #dc2626; font-size: .78rem; padding: 5px 8px; cursor: pointer;
+  background: #fff1f2; border: 1px solid #fecaca; border-radius: 4px;
+  color: #dc2626; font-size: .82rem; padding: 6px 7px; cursor: pointer; line-height: 1;
 }
 .sb-delete-item-btn:hover { background: #fee2e2; }
 .sb-load-empty { font-size: .85rem; color: #94a3b8; text-align: center; padding: 20px 0; }
@@ -19048,9 +19048,9 @@ html body .sandbox-track-id {
 }
 .sb-saved-item--current { border-color: #a5b4fc !important; }
 .sb-delete-current-btn {
-  background: none; border: 1px solid #fca5a5; border-radius: 8px;
-  color: #dc2626; cursor: pointer; font-size: .82rem; padding: 5px 8px;
-  flex-shrink: 0;
+  background: none; border: 1px solid #fca5a5; border-radius: 4px;
+  color: #dc2626; cursor: pointer; font-size: .82rem; padding: 6px 7px;
+  flex-shrink: 0; line-height: 1;
 }
 .sb-delete-current-btn:hover { background: #fff1f2; }
 
@@ -19117,6 +19117,7 @@ html body .sandbox-track-id {
 .sbcmp-cat-sum-cell { font-size: .7rem; display: flex; flex-direction: column; gap: 2px; padding: 4px 6px; background: #f8fafc; border-radius: 6px; }
 .sbcmp-sum-amt  { font-weight: 900; color: #0f2744; }
 .sbcmp-sum-fee  { color: #64748b; }
+.sbcmp-pct { font-weight: 900; color: #4338ca; font-size: .8rem; }
 
 /* ── compare dialog header actions ── */
 .sb-compare-head-actions { display: flex; align-items: center; gap: 6px; }
