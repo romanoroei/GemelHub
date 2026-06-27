@@ -4419,15 +4419,15 @@ const App = (() => {
         el.style.setProperty('font-weight', '850', 'important');
       });
       table.querySelectorAll('.yield-top-rank').forEach(el => {
-        el.style.setProperty('top', '1px', 'important');
+        el.style.setProperty('top', '-1px', 'important');
         el.style.setProperty('left', '50%', 'important');
         el.style.setProperty('right', 'auto', 'important');
         el.style.setProperty('transform', 'translateX(-50%)', 'important');
-        el.style.setProperty('font-size', '7px', 'important');
-        el.style.setProperty('width', '13px', 'important');
-        el.style.setProperty('height', '13px', 'important');
-        el.style.setProperty('min-width', '13px', 'important');
-        el.style.setProperty('min-height', '13px', 'important');
+        el.style.setProperty('font-size', '7.5px', 'important');
+        el.style.setProperty('width', '14px', 'important');
+        el.style.setProperty('height', '14px', 'important');
+        el.style.setProperty('min-width', '14px', 'important');
+        el.style.setProperty('min-height', '14px', 'important');
       });
       normalizeMobileFinanceTablePresentation(table);
       if (isExposureOnly) {
@@ -4659,15 +4659,15 @@ const App = (() => {
         el.style.setProperty('font-weight', '850', 'important');
       }
       if (el.matches('.yield-top-rank')) {
-        el.style.setProperty('top', '1px', 'important');
+        el.style.setProperty('top', '-1px', 'important');
         el.style.setProperty('left', '50%', 'important');
         el.style.setProperty('right', 'auto', 'important');
         el.style.setProperty('transform', 'translateX(-50%)', 'important');
-        el.style.setProperty('font-size', '7px', 'important');
-        el.style.setProperty('width', '13px', 'important');
-        el.style.setProperty('height', '13px', 'important');
-        el.style.setProperty('min-width', '13px', 'important');
-        el.style.setProperty('min-height', '13px', 'important');
+        el.style.setProperty('font-size', '7.5px', 'important');
+        el.style.setProperty('width', '14px', 'important');
+        el.style.setProperty('height', '14px', 'important');
+        el.style.setProperty('min-width', '14px', 'important');
+        el.style.setProperty('min-height', '14px', 'important');
       }
     });
     // Re-apply sticky to rank+manager thead cells — must run last so nothing overrides it

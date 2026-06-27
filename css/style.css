@@ -19539,8 +19539,8 @@ html body .sandbox-track-id {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    min-height: 24px !important;
-    padding-top: 8px !important;
+    min-height: 28px !important;
+    padding-top: 12px !important;
     overflow: visible !important;
   }
 
@@ -19560,15 +19560,15 @@ html body .sandbox-track-id {
   }
 
   html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .yield-top-rank {
-    top: 1px !important;
-    width: 13px !important;
-    height: 13px !important;
-    min-width: 13px !important;
-    max-width: 13px !important;
-    min-height: 13px !important;
-    max-height: 13px !important;
+    top: -1px !important;
+    width: 14px !important;
+    height: 14px !important;
+    min-width: 14px !important;
+    max-width: 14px !important;
+    min-height: 14px !important;
+    max-height: 14px !important;
     padding: 0 !important;
-    font-size: 7px !important;
+    font-size: 7.5px !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .yield-badge {
@@ -19606,10 +19606,10 @@ html body .sandbox-track-id {
   html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-icon-fx,
   html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-icon-shekel,
   html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-warning {
-    width: 15px !important;
-    height: 15px !important;
-    flex-basis: 15px !important;
-    font-size: 13px !important;
+    width: 14px !important;
+    height: 14px !important;
+    flex-basis: 14px !important;
+    font-size: 12px !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-icon-us,
