@@ -5700,7 +5700,7 @@ const App = (() => {
     const selected = new Set(state.sandbox.selectedReturnFields);
     return `<div class="sandbox-return-fields-wrap">
       <button type="button" class="sandbox-fields-btn" id="sandbox-return-fields-btn" aria-expanded="${state.sandbox.returnsMenuOpen ? 'true' : 'false'}">
-        <i class="fas fa-table-columns" aria-hidden="true"></i> הוסף שדות
+        <i class="fas fa-table-columns" aria-hidden="true"></i> <span class="sb-btn-label">הוסף שדות</span>
       </button>
       ${state.sandbox.returnsMenuOpen ? `<div class="sandbox-fields-panel" id="sandbox-return-fields-panel">
         ${SB_RETURN_FIELDS.map(field => {
@@ -5730,7 +5730,7 @@ const App = (() => {
       <div class="sandbox-page-title">🧪 המעבדה שלי<span id="sb-autosave-status" class="sb-autosave-status" aria-live="polite"></span></div>
       <div class="sandbox-page-actions">
         <button type="button" class="sandbox-add-btn" id="sandbox-add-more-btn">
-          <i class="fas fa-plus" aria-hidden="true"></i> הוסף מסלולים
+          <i class="fas fa-plus" aria-hidden="true"></i> <span class="sb-btn-label">הוסף מסלולים</span>
         </button>
         ${_sbReturnFieldMenuHtml()}
         <button type="button" class="sandbox-save-btn" id="sandbox-save-portfolio-btn" title="שמור תיק">

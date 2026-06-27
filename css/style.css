@@ -10759,7 +10759,7 @@ body.h2h-active,
   table-layout: fixed;
 }
 .sandbox-cat-table .sb-col-provider { width: 100px; }
-.sandbox-cat-table .sb-col-track { width: 122px; }
+.sandbox-cat-table .sb-col-track { width: 108px; }
 .sandbox-cat-table .sb-col-fee { width: 62px; }
 .sandbox-cat-table .sb-col-invest { width: 88px; }
 .sandbox-cat-table .sb-col-yield { width: 58px; }
@@ -11668,7 +11668,7 @@ body.h2h-active,
     font-size: .74rem;
   }
   .sandbox-cat-table .sb-col-provider { width: 78px; }
-  .sandbox-cat-table .sb-col-track { width: 92px; }
+  .sandbox-cat-table .sb-col-track { width: 80px; }
   .sandbox-cat-table .sb-col-fee { width: 58px; }
   .sandbox-cat-table .sb-col-invest { width: 68px; }
   .sandbox-cat-table .sb-col-yield { width: 48px; }
@@ -18799,13 +18799,19 @@ html body .sandbox-track-id {
     font-size: .74rem !important;
   }
 
-  /* Mobile: hide text labels on save/load buttons — icon only */
+  /* Mobile: all sandbox action buttons — icon only */
+  .sandbox-add-btn .sb-btn-label,
+  .sandbox-fields-btn .sb-btn-label,
   .sandbox-save-btn .sb-btn-label,
-  .sandbox-load-btn .sb-btn-label {
+  .sandbox-load-btn .sb-btn-label,
+  .sandbox-clear-btn .sb-btn-label {
     display: none !important;
   }
+  .sandbox-add-btn,
+  .sandbox-fields-btn,
   .sandbox-save-btn,
-  .sandbox-load-btn {
+  .sandbox-load-btn,
+  .sandbox-clear-btn {
     padding: 8px 10px !important;
     min-width: 36px !important;
     justify-content: center !important;
