@@ -10216,7 +10216,22 @@ body.h2h-active,
   letter-spacing: .01em;
   align-self: center;
   text-shadow: 0 1px 4px rgba(0,0,0,.35);
+  border-radius: 6px;
+  padding: 2px 8px;
 }
+.svb-pname-c0 { background: rgba(99,102,241,.25); color: #c7d2fe; }
+.svb-pname-c1 { background: rgba(8,145,178,.25);  color: #a5f3fc; }
+.svb-pname-c2 { background: rgba(22,163,74,.25);  color: #bbf7d0; }
+.svb-pname-c3 { background: rgba(234,88,12,.25);  color: #fed7aa; }
+
+/* ── Save button animation ── */
+.sb-save-hidden { display: none !important; }
+@keyframes sbSaveAppear {
+  from { transform: scale(0.4); opacity: 0; }
+  60%  { transform: scale(1.12); }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.sb-save-appear { animation: sbSaveAppear .38s cubic-bezier(.34,1.56,.64,1) both; }
 .svb-total-label {
   font-size: .92rem;
   font-weight: 900;
@@ -10608,7 +10623,7 @@ body.h2h-active,
 }
 .sb-load-item-btn:hover { background: #fef3c7; }
 .sb-delete-item-btn {
-  background: #fff1f2; border: 1.5px solid #fecaca; border-radius: 7px;
+  background: #fff1f2; border: 1px solid #fecaca; border-radius: 7px;
   color: #dc2626; font-size: .78rem; padding: 5px 8px; cursor: pointer;
 }
 .sb-delete-item-btn:hover { background: #fee2e2; }
@@ -19033,7 +19048,7 @@ html body .sandbox-track-id {
 }
 .sb-saved-item--current { border-color: #a5b4fc !important; }
 .sb-delete-current-btn {
-  background: none; border: 1.5px solid #fca5a5; border-radius: 8px;
+  background: none; border: 1px solid #fca5a5; border-radius: 8px;
   color: #dc2626; cursor: pointer; font-size: .82rem; padding: 5px 8px;
   flex-shrink: 0;
 }

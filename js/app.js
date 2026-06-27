@@ -38,6 +38,7 @@ const App = (() => {
       selections: [],  // pending selections (up to 6), not yet in portfolio
       portfolio: [],   // saved portfolio items (persisted in localStorage)
       portfolioName: '',
+      portfolioColorIdx: -1,
       returnsMenuOpen: false,
       selectedReturnFields: ['monthly', 'ytd', '12m', '3y']
     }
@@ -5731,9 +5732,9 @@ const App = (() => {
         <button type="button" class="sandbox-add-btn" id="sandbox-add-more-btn">
           <i class="fas fa-plus" aria-hidden="true"></i> <span class="sb-btn-label">הוסף</span>
         </button>
-        <button type="button" class="sandbox-save-btn" id="sandbox-save-portfolio-btn" title="שמור תיק">
-          <i class="fas fa-floppy-disk" aria-hidden="true"></i> <span class="sb-btn-label">שמור</span>
-        </button>
+        ${!state.sandbox.portfolioName && portfolio.length > 0
+          ? '<button type="button" class="sandbox-save-btn sb-save-appear" id="sandbox-save-portfolio-btn" title="שמור תיק"><i class="fas fa-floppy-disk" aria-hidden="true"></i> <span class="sb-btn-label">שמור</span></button>'
+          : '<button type="button" class="sandbox-save-btn sb-save-hidden" id="sandbox-save-portfolio-btn" title="שמור תיק" aria-hidden="true"></button>'}
         <button type="button" class="sandbox-load-btn" id="sandbox-load-portfolio-btn" title="טען תיק שמור">
           <i class="fas fa-folder-open" aria-hidden="true"></i> <span class="sb-btn-label">טען והשווה</span>
         </button>
@@ -6077,8 +6078,10 @@ const App = (() => {
     const totalAmount = allInvestedAsAmount
       ? portfolio.reduce((sum, item) => sum + (parseFloat(String(item.investAmount).replace(/,/g, '')) || 0), 0)
       : 0;
+    const _pci = state.sandbox.portfolioColorIdx;
+    const _pColorCls = (_pci >= 0) ? ' svb-pname-c' + _pci : '';
     const portfolioNameLabel = state.sandbox.portfolioName
-      ? `<span class="svb-portfolio-name">${state.sandbox.portfolioName}</span>`
+      ? `<span class="svb-portfolio-name${_pColorCls}">${state.sandbox.portfolioName}</span>`
       : '';
     const totalLine = allInvestedAsAmount && totalAmount > 0
       ? `<span class="svb-total-row">${portfolioNameLabel}<span class="svb-total-label">שווי התיק שלי</span><span class="svb-total-amount">${Math.round(totalAmount).toLocaleString('he-IL')} ש"ח</span></span>`
@@ -6279,8 +6282,10 @@ const App = (() => {
     if (!item) return;
     if (!confirm(`לטעון את התיק "${item.name}"?\nהתיק הנוכחי יוחלף.`)) return;
     _sbCloseLoadDialog();
+    const _loadedIdx = list.findIndex(p => p.id === id);
     state.sandbox.portfolio = JSON.parse(JSON.stringify(item.portfolio));
     state.sandbox.portfolioName = item.name;
+    state.sandbox.portfolioColorIdx = _loadedIdx >= 0 ? _loadedIdx % 4 : 0;
     saveSandboxPortfolio();
     document.querySelectorAll('.sandbox-check').forEach(cb => {
       cb.checked = false; cb.classList.remove('is-in-portfolio');
@@ -6306,8 +6311,17 @@ const App = (() => {
   function _sbMarkPortfolioModified() {
     if (!state.sandbox.portfolioName) return;
     state.sandbox.portfolioName = '';
+    state.sandbox.portfolioColorIdx = -1;
     localStorage.removeItem(SANDBOX_NAME_KEY);
     _sbUpdateValueBar();
+    const btn = document.getElementById('sandbox-save-portfolio-btn');
+    if (btn) {
+      btn.classList.remove('sb-save-hidden');
+      btn.removeAttribute('aria-hidden');
+      btn.innerHTML = '<i class="fas fa-floppy-disk" aria-hidden="true"></i> <span class="sb-btn-label">שמור</span>';
+      void btn.offsetWidth;
+      btn.classList.add('sb-save-appear');
+    }
   }
 
   // ── Print ──────────────────────────────────────────────────────────────────
