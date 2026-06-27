@@ -122,6 +122,31 @@
       }
     }
   </style>
+  <style id="mobile-compact-rows">
+    @media (max-width: 760px) {
+      /* DIAGNOSTIC v19 */
+      #tracks-container table.track-table td:nth-child(1) { background: #bfdbfe !important; }
+      /* Padding squeeze — overrides all linked-CSS rules */
+      #tracks-container table.track-table th,
+      #tracks-container table.track-table td {
+        padding-top: 1px !important;
+        padding-bottom: 1px !important;
+      }
+      /* Provider cell: top-align so content is flush with bottom border */
+      #tracks-container table.track-table td:nth-child(2) { vertical-align: top !important; }
+      /* Inner div: flex-column eliminates 21px line-box strut */
+      #tracks-container table.track-table .provider-cell > div {
+        display: flex !important; flex-direction: column !important;
+        align-items: flex-start !important; gap: 0 !important;
+        line-height: 0 !important;
+      }
+      /* Rank column narrow */
+      #tracks-container table.track-table td:nth-child(1),
+      #tracks-container table.track-table th:nth-child(1) {
+        width: 16px !important; min-width: 0 !important; padding-inline: 1px !important;
+      }
+    }
+  </style>
 </head>
 <body>
 <a href="#content-area" class="skip-link">דלג לתוכן הראשי</a>
