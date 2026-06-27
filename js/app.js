@@ -6125,7 +6125,14 @@ const App = (() => {
   function _sbFormatSavedDate(dateStr) {
     if (!dateStr) return '';
     try { const [y, m, d] = dateStr.split('-'); return `${d}.${m}.${y}`; } catch { return dateStr; }
-  }
+  
+
+  function _sbFormatTime(isoStr) {
+    if (!isoStr) return '';
+    const d = new Date(isoStr);
+    if (isNaN(d)) return '';
+    return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
+  }}
 
   function _sbOpenSaveDialog() {
     const dialog = document.getElementById('sb-save-dialog');
@@ -6222,7 +6229,7 @@ const App = (() => {
            + '<div class="sb-saved-item-text sb-load-area" data-load-id="' + item.id + '" role="button" tabindex="0" aria-label="טען תיק ' + item.name + '">'
            + '<strong class="sb-saved-name">' + item.name + '</strong>'
            + (totStr ? ' <span class="sb-saved-value-badge">' + totStr + '</span>' : '')
-           + '<span class="sb-saved-meta">' + _sbFormatSavedDate(item.date) + ' · ' + item.portfolio.length + ' מסלולים</span>'
+           + '<span class="sb-saved-meta">' + _sbFormatSavedDate(item.date) + (item.savedAt ? ' · ' + _sbFormatTime(item.savedAt) : '') + ' · ' + item.portfolio.length + ' מסלולים</span>'
            + (item.notes ? '<span class="sb-saved-notes">' + item.notes + '</span>' : '')
            + '</div></div>'
            + '<div class="sb-saved-actions">'
@@ -6354,20 +6361,49 @@ const App = (() => {
 
   function _sbCheckUrlHash() {
     const hash = location.hash;
-    if (!hash.startsWith('#portfolio=')) return;
-    try {
-      const encoded = hash.slice('#portfolio='.length);
-      const data = JSON.parse(decodeURIComponent(escape(atob(encoded))));
-      if (data.p && Array.isArray(data.p) && data.p.length) {
-        state.sandbox.portfolio = data.p;
-        state.sandbox.portfolioName = data.n || 'תיק משותף';
-        saveSandboxPortfolio();
-        history.replaceState(null, '', location.pathname + location.search);
-        if (state.activeCategoryId !== 'sandbox') switchCategory('sandbox');
-        else renderSandboxPage();
-        showToast(`התיק "${state.sandbox.portfolioName}" נטען מקישור`);
-      }
-    } catch(e) { /* invalid hash — ignore */ }
+    // Single portfolio share
+    if (hash.startsWith('#portfolio=')) {
+      try {
+        const data = JSON.parse(decodeURIComponent(escape(atob(hash.slice('#portfolio='.length)))));
+        if (data.p && Array.isArray(data.p) && data.p.length) {
+          state.sandbox.portfolio = data.p;
+          state.sandbox.portfolioName = data.n || 'תיק משותף';
+          saveSandboxPortfolio();
+          history.replaceState(null, '', location.pathname + location.search);
+          if (state.activeCategoryId !== 'sandbox') switchCategory('sandbox');
+          else renderSandboxPage();
+          showToast('התיק "' + state.sandbox.portfolioName + '" נטען מקישור');
+        }
+      } catch(e) {}
+      return;
+    }
+    // Multi-portfolio compare share
+    if (hash.startsWith('#compare=')) {
+      try {
+        const data = JSON.parse(decodeURIComponent(escape(atob(hash.slice('#compare='.length)))));
+        if (data.portfolios && Array.isArray(data.portfolios) && data.portfolios.length) {
+          history.replaceState(null, '', location.pathname + location.search);
+          const list = _sbGetSavedPortfolios();
+          const newIds = [];
+          const now = new Date();
+          data.portfolios.forEach(function(port, idx) {
+            if (!port.p || !port.p.length) return;
+            const name = port.n || ('תיק מקושר ' + (idx + 1));
+            const id   = 'shared_' + Date.now() + '_' + idx;
+            list.push({ id: id, name: name, date: now.toISOString().split('T')[0], savedAt: now.toISOString(), notes: 'נטען מקישור', portfolio: port.p });
+            newIds.push(id);
+          });
+          localStorage.setItem(SB_PORTFOLIOS_KEY, JSON.stringify(list));
+          if (state.activeCategoryId !== 'sandbox') switchCategory('sandbox');
+          else renderSandboxPage();
+          setTimeout(function() {
+            if (newIds.length >= 2) _sbOpenCompareDialogMulti(newIds);
+            else if (newIds.length === 1) { _sbDoLoadPortfolio(newIds[0]); }
+          }, 400);
+          showToast('נטענו ' + newIds.length + ' תיקים מקישור — ההשוואה נפתחת');
+        }
+      } catch(e) {}
+    }
   }
 
   // ── Compare ────────────────────────────────────────────────────────────────
@@ -6470,7 +6506,7 @@ const App = (() => {
           tracks.forEach(t => {
             const amt    = parseFloat(String(t.investAmount || '').replace(/,/g, '')) || 0;
             const pct    = catTot > 0 && tracks.length > 1 ? ' <strong class="sbcmp-pct">' + Math.round(amt / catTot * 100) + '%</strong>' : '';
-            const amtStr = amt > 0 ? '<span dir="ltr">₪\u202f' + Math.round(amt).toLocaleString('he-IL') + '</span>' : '';
+            const amtStr = amt > 0 ? '<strong class="sbcmp-amt"><span dir="ltr">₪\u202f' + Math.round(amt).toLocaleString('he-IL') + '</span></strong>' : '';
             tracksHtml += '<div class="sbcmp-track-item">'
               + '<span class="sbcmp-track-dot" style="background:' + (t.color || '#999') + '"></span>'
               + '<div class="sbcmp-track-info">'
@@ -6590,25 +6626,27 @@ const App = (() => {
     const titleEl = document.getElementById('sb-compare-title');
     const title   = titleEl ? titleEl.textContent : 'השוואת תיקים';
     const items   = state.sandbox.compareItems || [];
-    // encode first portfolio so recipient can load it
-    let   portfolioUrl = location.origin + location.pathname;
-    if (items.length > 0 && items[0].portfolio) {
+    let   compareUrl = location.origin + location.pathname;
+    if (items.length > 0) {
       try {
-        const d = { p: items[0].portfolio, n: items[0].name || '' };
-        const enc = btoa(unescape(encodeURIComponent(JSON.stringify(d))));
-        portfolioUrl = location.origin + location.pathname + '#portfolio=' + enc;
+        const portfolios = items.filter(function(it) { return it.portfolio && it.portfolio.length; })
+                                .map(function(it) { return { p: it.portfolio, n: it.name || '' }; });
+        if (portfolios.length > 0) {
+          const enc = btoa(unescape(encodeURIComponent(JSON.stringify({ portfolios: portfolios }))));
+          compareUrl = location.origin + location.pathname + '#compare=' + enc;
+        }
       } catch(e) {}
     }
     const text = '📊 ' + title + ', נעשה במעבדה של GemelHub — '
               + 'המערכת להשוואת נתונים פיננסיים של רועי רומנו.\n'
-              + 'לטעינת התיק למעבדה שלך 👇\n';
-    const openWA = (link) => window.open('https://wa.me/?text=' + encodeURIComponent(text + link), '_blank');
+              + 'לטעינת ההשוואה למעבדה שלך 👇\n';
+    const openWA = function(link) { window.open('https://wa.me/?text=' + encodeURIComponent(text + link), '_blank'); };
     try {
-      fetch('https://is.gd/create.php?format=simple&url=' + encodeURIComponent(portfolioUrl))
-        .then(r => r.text())
-        .then(s => { openWA(s && s.startsWith('http') ? s.trim() : portfolioUrl); })
-        .catch(() => openWA(portfolioUrl));
-    } catch(e) { openWA(portfolioUrl); }
+      fetch('https://is.gd/create.php?format=simple&url=' + encodeURIComponent(compareUrl))
+        .then(function(r) { return r.text(); })
+        .then(function(s) { openWA(s && s.startsWith('http') ? s.trim() : compareUrl); })
+        .catch(function() { openWA(compareUrl); });
+    } catch(e) { openWA(compareUrl); }
   }
 
   function setupSandboxPortfolioDialogs() {

@@ -10444,6 +10444,8 @@ body.h2h-active,
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 .sandbox-load-btn:hover { background: #fef3c7; }
 
@@ -11690,7 +11692,9 @@ body.h2h-active,
   .sandbox-clear-btn {
     padding: 8px 10px;
     font-size: .78rem;
-  }
+  flex-shrink: 1;
+  min-width: 0;
+}
   .sandbox-cat-block {
     border-radius: 10px;
     margin-bottom: 14px;
@@ -19118,6 +19122,7 @@ html body .sandbox-track-id {
 .sbcmp-sum-amt  { font-weight: 900; color: #0f2744; }
 .sbcmp-sum-fee  { color: #64748b; }
 .sbcmp-pct { font-weight: 900; color: #4338ca; font-size: .8rem; }
+.sbcmp-amt { font-weight: 900; font-size: .8rem; }
 
 /* ── compare dialog header actions ── */
 .sb-compare-head-actions { display: flex; align-items: center; gap: 6px; }
