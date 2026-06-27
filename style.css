@@ -15929,3 +15929,65 @@ html body .sandbox-track-id {
   align-self: flex-start !important;
   text-align: right !important;
 }
+
+/* Mobile table row-height trial: keep fund rows visually uniform and reversible. */
+@media (max-width: 760px) {
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row),
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) > td {
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) > td {
+    padding-top: 3px !important;
+    padding-bottom: 3px !important;
+    vertical-align: middle !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .provider-cell {
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+    align-items: center !important;
+    overflow: hidden !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .provider-cell > div {
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .prov-name,
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .prov-name-text {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 15px !important;
+    max-height: 15px !important;
+    line-height: 15px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    overflow-wrap: normal !important;
+    word-break: keep-all !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .prov-id {
+    height: 15px !important;
+    max-height: 15px !important;
+    line-height: 15px !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .yield-value-wrap,
+  html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) .yield-number-shell {
+    max-height: 24px !important;
+  }
+}
