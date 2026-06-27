@@ -6175,30 +6175,61 @@ const App = (() => {
       container.innerHTML = '<p class="sb-load-empty">אין תיקים שמורים עדיין.</p>';
       return;
     }
-    container.innerHTML = list.map(item => `
+    const currentName = state.sandbox.portfolioName;
+    const canCompare = list.length >= 2;
+    container.innerHTML = list.map(item => {
+      const isCurrent = !!(currentName && item.name === currentName);
+      const tot = item.portfolio.reduce((s, it) => s + (parseFloat(it.investAmount) || 0), 0);
+      const totStr = tot > 0 ? ' · ₪ ' + Math.round(tot).toLocaleString('he-IL') : '';
+      return `
       <div class="sb-saved-item">
         <div class="sb-saved-item-info">
-          <strong class="sb-saved-name">${item.name}</strong>
-          <span class="sb-saved-meta">${_sbFormatSavedDate(item.date)} · ${item.portfolio.length} מסלולים${(() => { const tot = item.portfolio.reduce((s, it) => s + (parseFloat(it.investAmount) || 0), 0); return tot > 0 ? ' · ₪ ' + Math.round(tot).toLocaleString('he-IL') : ''; })()}</span>
-          ${item.notes ? `<span class="sb-saved-notes">${item.notes}</span>` : ''}
+          ${canCompare && !isCurrent
+            ? `<label class="sb-compare-check-wrap" title="בחר להשוואה"><input type="checkbox" class="sb-compare-check" data-compare-id="${item.id}" /></label>`
+            : `<span class="sb-compare-check-placeholder"></span>`}
+          <div class="sb-saved-item-text">
+            <strong class="sb-saved-name">${item.name}</strong>${isCurrent ? ' <span class="sb-saved-current-badge">נוכחי</span>' : ''}
+            <span class="sb-saved-meta">${_sbFormatSavedDate(item.date)} · ${item.portfolio.length} מסלולים${totStr}</span>
+            ${item.notes ? `<span class="sb-saved-notes">${item.notes}</span>` : ''}
+          </div>
         </div>
         <div class="sb-saved-actions">
           <button type="button" class="sb-load-item-btn" data-load-id="${item.id}">
             <i class="fas fa-folder-open" aria-hidden="true"></i> טען
           </button>
-          ${state.sandbox.portfolio.length > 0 ? `<button type="button" class="sb-compare-btn" data-compare-id="${item.id}">
-            <i class="fas fa-code-compare" aria-hidden="true"></i> השווה
-          </button>` : ''}
           <button type="button" class="sb-delete-item-btn" data-delete-id="${item.id}" aria-label="מחק תיק ${item.name}">
             <i class="fas fa-trash-alt" aria-hidden="true"></i>
           </button>
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('') + (canCompare ? `
+      <div class="sb-compare-multi-footer" id="sb-compare-multi-footer" hidden>
+        <span id="sb-compare-multi-count"></span>
+        <button type="button" id="sb-compare-multi-btn" class="sb-compare-multi-go-btn">
+          <i class="fas fa-code-compare" aria-hidden="true"></i> השווה נבחרים
+        </button>
+      </div>` : '');
+
+    const _updateMultiFooter = () => {
+      const checked = [...container.querySelectorAll('.sb-compare-check:checked')];
+      const footer = document.getElementById('sb-compare-multi-footer');
+      const countEl = document.getElementById('sb-compare-multi-count');
+      if (!footer) return;
+      footer.hidden = checked.length < 2;
+      if (countEl) countEl.textContent = checked.length + ' תיקים נבחרו';
+      container.querySelectorAll('.sb-compare-check:not(:checked)').forEach(cb => {
+        cb.disabled = checked.length >= 3;
+      });
+    };
+
+    container.querySelectorAll('.sb-compare-check').forEach(cb =>
+      cb.addEventListener('change', _updateMultiFooter));
+    document.getElementById('sb-compare-multi-btn')?.addEventListener('click', () => {
+      const ids = [...container.querySelectorAll('.sb-compare-check:checked')].map(cb => cb.dataset.compareId);
+      if (ids.length >= 2) _sbOpenCompareDialogMulti(ids);
+    });
     container.querySelectorAll('.sb-load-item-btn').forEach(btn =>
       btn.addEventListener('click', () => _sbDoLoadPortfolio(btn.dataset.loadId)));
-    container.querySelectorAll('.sb-compare-btn').forEach(btn =>
-      btn.addEventListener('click', () => _sbOpenCompareDialog(btn.dataset.compareId)));
     container.querySelectorAll('.sb-delete-item-btn').forEach(btn =>
       btn.addEventListener('click', () => _sbDoDeletePortfolio(btn.dataset.deleteId)));
   }
@@ -6335,50 +6366,50 @@ const App = (() => {
       </div>`;
   }
 
-  function _sbRenderCompare(savedItem) {
-    const currentName = state.sandbox.portfolioName || 'תיק נוכחי';
-    const savedName   = savedItem.name;
-    const cur = _sbBuildSummary(state.sandbox.portfolio);
-    const sav = _sbBuildSummary(savedItem.portfolio);
+  function _sbRenderCompare(items) {
+    // items: array of saved portfolio objects
+    const colsHtml = items.map(item => _sbCompareColHtml(item.name, item.portfolio)).join('');
+    const title = items.length === 2
+      ? `השוואה: ${items[0].name} vs ${items[1].name}`
+      : `השוואת ${items.length} תיקים`;
 
-    const diffRow = (label, curVal, savVal, isAmt) => {
-      if (curVal == null || savVal == null) return '';
-      const diff = curVal - savVal;
-      const cls = diff > 0.005 ? 'pos' : diff < -0.005 ? 'neg' : 'neu';
-      const sign = diff >= 0 ? '+' : '';
-      const fmtDiff = isAmt
-        ? (diff >= 0 ? '+' : '') + '₪ ' + Math.abs(Math.round(diff)).toLocaleString('he-IL')
-        : sign + diff.toFixed(2) + '%';
-      return `<div class="sb-compare-diff-row">
-        <span class="sb-compare-diff-label">${label}</span>
-        <span class="sb-compare-diff-val ${cls}">${fmtDiff}</span>
+    let diffHtml = '';
+    if (items.length === 2) {
+      const s0 = _sbBuildSummary(items[0].portfolio);
+      const s1 = _sbBuildSummary(items[1].portfolio);
+      const diffRow = (label, v0, v1, isAmt) => {
+        if (v0 == null || v1 == null) return '';
+        const diff = v0 - v1;
+        const cls = diff > 0.005 ? 'pos' : diff < -0.005 ? 'neg' : 'neu';
+        const fmtDiff = isAmt
+          ? (diff >= 0 ? '+' : '') + '₪ ' + Math.abs(Math.round(diff)).toLocaleString('he-IL')
+          : (diff >= 0 ? '+' : '') + diff.toFixed(2) + '%';
+        return `<div class="sb-compare-diff-row">
+          <span class="sb-compare-diff-label">${label}</span>
+          <span class="sb-compare-diff-val ${cls}">${fmtDiff}</span>
+        </div>`;
+      };
+      diffHtml = `<div class="sb-compare-diff-bar">
+        <div class="sb-compare-diff-title">הפרש (${items[0].name} פחות ${items[1].name})</div>
+        ${diffRow('סה"כ השקעה', s0.totalAmt, s1.totalAmt, true)}
+        ${diffRow('ד"נ מצבירה', s0.avgFee, s1.avgFee, false)}
+        ${diffRow('תשואה 12 חוד'', s0.avgY12, s1.avgY12, false)}
+        ${diffRow('תשואה 3 שנים', s0.avgY3, s1.avgY3, false)}
       </div>`;
-    };
+    }
 
-    const diffHtml = `
-      <div class="sb-compare-diff-bar">
-        <div class="sb-compare-diff-title">הפרש (נוכחי פחות שמור)</div>
-        ${diffRow('סה"כ השקעה', cur.totalAmt, sav.totalAmt, true)}
-        ${diffRow('ד"נ מצבירה', cur.avgFee, sav.avgFee, false)}
-        ${diffRow('תשואה 12 חוד׳', cur.avgY12, sav.avgY12, false)}
-        ${diffRow('תשואה 3 שנים', cur.avgY3, sav.avgY3, false)}
-      </div>`;
-
-    document.getElementById('sb-compare-title').textContent = `השוואה: ${currentName} vs ${savedName}`;
+    document.getElementById('sb-compare-title').textContent = title;
     document.getElementById('sb-compare-content').innerHTML = `
-      <div class="sb-compare-grid">
-        ${_sbCompareColHtml(currentName, state.sandbox.portfolio)}
-        ${_sbCompareColHtml(savedName, savedItem.portfolio)}
-      </div>
+      <div class="sb-compare-grid sb-compare-grid-${items.length}col">${colsHtml}</div>
       ${diffHtml}`;
   }
 
-  function _sbOpenCompareDialog(id) {
+  function _sbOpenCompareDialogMulti(ids) {
     const list = _sbGetSavedPortfolios();
-    const item = list.find(p => p.id === id);
-    if (!item) return;
+    const items = ids.map(id => list.find(p => p.id === id)).filter(Boolean);
+    if (items.length < 2) return;
     _sbCloseLoadDialog();
-    _sbRenderCompare(item);
+    _sbRenderCompare(items);
     const dlg = document.getElementById('sb-compare-dialog');
     if (dlg) { dlg.hidden = false; document.body.style.overflow = 'hidden'; }
   }
