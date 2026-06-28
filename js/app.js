@@ -7749,7 +7749,7 @@ const App = (() => {
         ? '<span title="אין נתונים מלאים ל-84 חודשים" style="color:var(--gray-300)">—</span>'
         : _yr7Val !== undefined && _yr7Val !== null
           ? _yieldWithBadge(_yr7Val, _badge(_gold(_yr7Val,'yr7'), _tomato(_yr7Val,'yr7')), sortField === '7yr' ? yieldClass(_yr7Val) : '', _rankVals.yr7.get(idx), _heatScales.yr7)
-          : (trailing7Loading ? '<span style="color:var(--gray-300)">...</span>' : '-');
+          : (trailing7Loading ? '<span class="cell-loader"></span>' : '-');
 
       // ????? 12M ??????
       const _12mMap = _12mMapPre;
@@ -7774,7 +7774,7 @@ const App = (() => {
           ? '<span style="color:var(--gray-300)">—</span>'
           : _yieldWithBadge(value, _badge(_yearGold(value, year), _yearTomato(value, year)), '', _yearRankVals[year]?.get(idx), _yearHeatScales[year]);
         return `<td class="yield-cell ${(sortField===sortKey?yieldClass(value):'')}${sc(sortKey)}">${content}</td>`;
-      }).join('') : `<td class="yield-cell">${yearlyState?.loading ? '...' : '—'}</td>`;
+      }).join('') : `<td class="yield-cell">${yearlyState?.loading ? '<span class="cell-loader"></span>' : '—'}</td>`;
       const yearlyReturnCells = `${yearlyYtdCell}${yearlyCells}`;
 
       const ta     = parseFloat(r.TOTAL_ASSETS) || 0;
@@ -7889,7 +7889,7 @@ const App = (() => {
         <td class="yield-cell ${sortField==='5yr'?(state.yieldMode==='annualized'?yieldClass(_ann5Avg):yieldClass(avg.YIELD_TRAILING_5_YRS)):''}">
           ${state.yieldMode==='annualized'?(_ann5Avg!==null?formatPercent(_ann5Avg):'-'):(avg.YIELD_TRAILING_5_YRS!==null?formatPercent(avg.YIELD_TRAILING_5_YRS):'-')}
         </td>
-        <td class="yield-cell ${sortField==='7yr'?yieldClass(state.yieldMode==='annualized'?_expAvg.avg7yAnn:_expAvg.avg7y):''}">${state.yieldMode==='annualized'?(_expAvg.avg7yAnn!==null?formatPercent(_expAvg.avg7yAnn):(trailing7Loading?'...':'-')):(_expAvg.avg7y!==null?formatPercent(_expAvg.avg7y):(trailing7Loading?'...':'-'))}</td>`) : ''}
+        <td class="yield-cell ${sortField==='7yr'?yieldClass(state.yieldMode==='annualized'?_expAvg.avg7yAnn:_expAvg.avg7y):''}">${state.yieldMode==='annualized'?(_expAvg.avg7yAnn!==null?formatPercent(_expAvg.avg7yAnn):(trailing7Loading?'<span class="cell-loader"></span>':'-')):(_expAvg.avg7y!==null?formatPercent(_expAvg.avg7y):(trailing7Loading?'<span class="cell-loader"></span>':'-'))}</td>`) : ''}
         ${state.showExposure ? `<td class="exp-col">${_expAvg.stock!==null?_expAvg.stock.toFixed(1)+'%':'-'}</td>
         <td class="exp-col">${_expAvg.abroad!==null?_expAvg.abroad.toFixed(1)+'%':'-'}</td>
         <td class="exp-col">${_expAvg.fx!==null?_expAvg.fx.toFixed(1)+'%':'-'}</td>` : ''}
