@@ -11639,12 +11639,15 @@ body.h2h-active,
   font-weight: 950;
   line-height: 1.05;
 }
+.sb-distribution-products .sb-distribution-center {
+  width: 116px;
+}
 .sb-distribution-products .sb-distribution-center strong {
-  font-size: .88rem;
-  line-height: 1.08;
+  font-size: .82rem;
+  line-height: 1.15;
   white-space: normal;
   overflow: visible;
-  text-overflow: unset;
+  text-overflow: clip;
   word-break: break-word;
 }
 .sb-distribution-center span {
