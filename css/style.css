@@ -19662,23 +19662,24 @@ html body .sandbox-track-id {
   body.sb-printing .sandbox-cat-table .sb-yield-col {
     font-size: .62rem !important;
   }
-  /* Allocation %: clearly smaller */
-  html body.sb-printing .sandbox-cat-table td.sb-td-stock,
-  html body.sb-printing .sandbox-cat-table td.sb-td-abroad,
-  html body.sb-printing .sandbox-cat-table td.sb-td-fx {
-    font-size: .41rem !important;
+  /* Allocation % — must target .exp-val directly (it has its own font-size) */
+  html body.sb-printing .sandbox-cat-table .sb-td-stock .exp-val,
+  html body.sb-printing .sandbox-cat-table .sb-td-abroad .exp-val,
+  html body.sb-printing .sandbox-cat-table .sb-td-fx .exp-val {
+    font-size: .40rem !important;
+    min-width: 0 !important;
   }
-  /* Fee — center header and value */
+  /* Fee — center header and cell; keep input inline so td centering works */
   html body.sb-printing .sandbox-cat-table th.sb-fee-head,
   html body.sb-printing .sandbox-cat-table th:nth-child(4),
   html body.sb-printing .sandbox-cat-table td:nth-child(4) {
     text-align: center !important;
   }
   html body.sb-printing .sandbox-fee-input {
+    display: inline !important;
+    width: auto !important;
     font-size: .62rem !important;
     text-align: center !important;
-    display: block !important;
-    width: 100% !important;
   }
   body.sb-printing .sandbox-invest-input {
     font-size: .62rem !important;
