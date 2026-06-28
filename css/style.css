@@ -19518,7 +19518,7 @@ html body .sandbox-track-id {
 
 /* ── Print styles ── */
 @media print {
-  @page { size: A4 portrait; margin: 10mm 12mm; }
+  @page { size: A4 portrait; margin: 12mm 15mm; }
 
   /* ── Force background colors & images to print ── */
   body.sb-printing,
@@ -19678,19 +19678,37 @@ html body .sandbox-track-id {
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
     gap: 6px !important;
+    margin-top: 8px !important;
   }
+  body.sb-printing button.sb-returns-mini,
   body.sb-printing .sb-returns-mini {
     display: block !important;
     appearance: none !important;
+    -webkit-appearance: none !important;
     border: 1px solid #dde3ea !important;
     border-radius: 6px !important;
     box-shadow: none !important;
-    padding: 6px !important;
+    padding: 6px 8px !important;
     background: #f8fafc !important;
     cursor: default !important;
+    text-align: center !important;
+    width: 100% !important;
+    font-family: inherit !important;
   }
-  body.sb-printing .sb-returns-mini span { white-space: nowrap !important; font-size: .65rem !important; display: block !important; }
-  body.sb-printing .sb-returns-mini strong { font-size: .9rem !important; white-space: nowrap !important; display: block !important; }
+  body.sb-printing button.sb-returns-mini span,
+  body.sb-printing .sb-returns-mini span {
+    display: block !important;
+    white-space: nowrap !important;
+    font-size: .65rem !important;
+    color: #64748b !important;
+    margin-bottom: 2px !important;
+  }
+  body.sb-printing button.sb-returns-mini strong,
+  body.sb-printing .sb-returns-mini strong {
+    display: block !important;
+    font-size: .9rem !important;
+    white-space: nowrap !important;
+  }
 
   /* ── Allocation bars ── */
   body.sb-printing .sb-allocation-section {
@@ -19706,6 +19724,19 @@ html body .sandbox-track-id {
     border-radius: 8px !important;
     padding: 8px 10px !important;
     background: #fff !important;
+    overflow: hidden !important;
+    min-width: 0 !important;
+  }
+  body.sb-printing .sb-allocation-row {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  body.sb-printing .sb-allocation-track {
+    overflow: hidden !important;
+  }
+  body.sb-printing .sb-allocation-text {
+    white-space: nowrap !important;
+    font-size: .68rem !important;
   }
 
   /* ── Distribution donuts ── */
