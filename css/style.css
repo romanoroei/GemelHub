@@ -19643,6 +19643,9 @@ html body .sandbox-track-id {
     font-size: .68rem !important;
     display: block !important;
   }
+  body.sb-printing .sandbox-track-cell {
+    padding-inline-end: 10px !important;
+  }
   body.sb-printing .sandbox-track-link {
     font-size: .64rem !important;
     display: block !important;
@@ -19656,16 +19659,19 @@ html body .sandbox-track-id {
   body.sb-printing .sandbox-cat-table .sb-yield-col {
     font-size: .62rem !important;
   }
-  /* Allocation %: same size as track name */
+  /* Allocation %: slightly smaller */
   body.sb-printing .sandbox-cat-table .sb-td-stock,
   body.sb-printing .sandbox-cat-table .sb-td-abroad,
   body.sb-printing .sandbox-cat-table .sb-td-fx {
-    font-size: .64rem !important;
+    font-size: .57rem !important;
   }
-  /* Fee & invest inputs */
+  /* Fee & invest inputs — centered */
   body.sb-printing .sandbox-fee-input,
   body.sb-printing .sandbox-invest-input {
     font-size: .62rem !important;
+    text-align: center !important;
+  }
+  body.sb-printing .sandbox-cat-table th.sb-fee-head {
     text-align: center !important;
   }
   body.sb-printing .sandbox-cat-block {
