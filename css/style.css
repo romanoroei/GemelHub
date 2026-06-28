@@ -19607,43 +19607,54 @@ html body .sandbox-track-id {
     width: 100% !important;
   }
   body.sb-printing .sandbox-cat-table {
-    font-size: .52rem !important;
     width: 100% !important;
     table-layout: auto !important;
     border-collapse: collapse !important;
     page-break-inside: auto !important;
   }
-  body.sb-printing .sandbox-cat-table td,
+  /* ── All th/td: uniform base ── */
   body.sb-printing .sandbox-cat-table th {
-    padding: 2px 3px !important;
+    padding: 3px 4px !important;
     white-space: nowrap !important;
-    overflow: visible !important;
-    border-bottom: 1px solid #e8ecf0 !important;
+    border-bottom: 1px solid #c8d0da !important;
     vertical-align: middle !important;
-    hyphens: none !important;
-    font-size: .52rem !important;
+    font-size: .61rem !important;
     line-height: 1.3 !important;
   }
-  /* Keep fee & invest at legible size */
-  body.sb-printing .sandbox-cat-table td:has(.sandbox-fee-input),
-  body.sb-printing .sandbox-cat-table td.sb-invest-col,
-  body.sb-printing .sandbox-cat-table th.sb-fee-head,
-  body.sb-printing .sandbox-cat-table th.sb-invest-head {
-    font-size: .64rem !important;
+  body.sb-printing .sandbox-cat-table td {
+    padding: 3px 4px !important;
+    white-space: nowrap !important;
+    border-bottom: 1px solid #e8ecf0 !important;
+    vertical-align: middle !important;
+    font-size: .59rem !important;
+    line-height: 1.3 !important;
   }
-  body.sb-printing .sandbox-fee-input,
-  body.sb-printing .sandbox-invest-input {
-    font-size: .64rem !important;
-  }
-  /* Manager / track name — wrap on word boundary only */
+  /* Manager / track name — restore to readable size + wrap */
   body.sb-printing .sandbox-provider-cell,
-  body.sb-printing .sandbox-track-cell {
+  body.sb-printing .sandbox-provider-link,
+  body.sb-printing .sandbox-track-cell,
+  body.sb-printing .sandbox-track-link {
+    font-size: .65rem !important;
     white-space: normal !important;
     word-break: normal !important;
     hyphens: none !important;
-    line-height: 1.3 !important;
-    min-width: 55px !important;
-    max-width: 100px !important;
+    line-height: 1.35 !important;
+    min-width: 60px !important;
+    max-width: 105px !important;
+    display: block !important;
+  }
+  /* Returns and exposure match allocation font size */
+  body.sb-printing .sandbox-cat-table .sb-yield-col,
+  body.sb-printing .sandbox-cat-table .sb-td-stock,
+  body.sb-printing .sandbox-cat-table .sb-td-abroad,
+  body.sb-printing .sandbox-cat-table .sb-td-fx {
+    font-size: .62rem !important;
+  }
+  /* Fee & invest inputs */
+  body.sb-printing .sandbox-fee-input,
+  body.sb-printing .sandbox-invest-input {
+    font-size: .62rem !important;
+    text-align: center !important;
   }
   body.sb-printing .sandbox-cat-block {
     page-break-inside: avoid !important;
