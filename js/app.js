@@ -6782,25 +6782,40 @@ const App = (() => {
     });
   }
 
+  // Chronological order of all 4 return periods (index = chronological rank, right→left in RTL)
+  const _sbReturnPeriods = [
+    { key: 'ytd',  label: 'מתחילת שנה' },
+    { key: 'y12m', label: '12 חודשים אחרונים' },
+    { key: 'y3',   label: '3 שנים' },
+    { key: 'y5',   label: '5 שנים' }
+  ];
+
   function _sbBuildReturnsHero(title, items) {
     const weights = _sbWeights(items);
-    const ytd = _sbWeightedVal(items, weights, it => it.y3);
-    const y12m = _sbWeightedVal(items, weights, it => it.y12m);
-    const y3 = _sbWeightedVal(items, weights, it => it.y5);
-    const y5 = _sbWeightedVal(items, weights, it => it.y5yr);
-    const mainVal = y12m != null ? y12m : (y3 != null ? y3 : ytd);
-    const mainLabel = y12m != null ? '12 חודשים אחרונים' : (y3 != null ? '3 שנים' : 'מתחילת שנה');
+    const vals = {
+      ytd:  _sbWeightedVal(items, weights, it => it.y3),
+      y12m: _sbWeightedVal(items, weights, it => it.y12m),
+      y3:   _sbWeightedVal(items, weights, it => it.y5),
+      y5:   _sbWeightedVal(items, weights, it => it.y5yr)
+    };
+    const activeKey = vals.y12m != null ? 'y12m' : (vals.y3 != null ? 'y3' : 'ytd');
+    const mainVal = vals[activeKey];
+    const mainLabel = _sbReturnPeriods.find(p => p.key === activeKey).label;
     const isPos = mainVal != null && parseFloat(mainVal) >= 0;
     const sparkPath = isPos
       ? 'M2,82 C4,74 5,69 8,70 C11,62 14,60 17,58 C20,55 23,54 26,50 C29,47 32,50 35,45 C38,40 41,38 44,35 C46,39 48,42 50,37 C52,31 55,29 57,32 C60,24 63,23 65,25 C68,19 71,17 73,21 C76,15 79,18 81,14 C83,18 85,20 87,16 C90,12 93,16 96,11 C98,13 99,12 100,10'
       : 'M2,18 C4,26 5,31 8,30 C11,38 14,40 17,42 C20,45 23,46 26,50 C29,53 32,50 35,55 C38,60 41,62 44,65 C46,61 48,58 50,63 C52,69 55,71 57,68 C60,76 63,77 65,75 C68,81 71,83 73,79 C76,85 79,82 81,86 C83,82 85,80 87,84 C90,88 93,84 96,89 C98,87 99,88 100,90';
     const areaPath = `${sparkPath} L100,96 L2,96 Z`;
-    const metrics = [
-      { label: 'מתחילת שנה', val: ytd },
-      { label: '3 שנים', val: y3 },
-      { label: '5 שנים', val: y5 }
-    ];
-    return `<div class="sb-returns-hero ${isPos ? 'is-positive' : 'is-negative'}">
+    const miniPeriods = _sbReturnPeriods.filter(p => p.key !== activeKey);
+    const miniHtml = miniPeriods.map(p => {
+      const v = vals[p.key];
+      return `<button type="button" class="sb-returns-mini" data-returns-period="${p.key}">
+        <span>${p.label}</span>
+        <strong class="${v != null && parseFloat(v) >= 0 ? 'pos' : 'neg'}">${v != null ? _sbFmtPct(v) : '—'}</strong>
+      </button>`;
+    }).join('');
+    const valsJson = _sbEscapeAttr(JSON.stringify(vals));
+    return `<div class="sb-returns-hero ${isPos ? 'is-positive' : 'is-negative'}" data-returns-hero data-returns-active="${activeKey}" data-returns-vals="${valsJson}">
       <div class="sb-returns-hero-bg" aria-hidden="true">
         <svg viewBox="0 0 100 100" preserveAspectRatio="none">
           <defs>
@@ -6822,16 +6837,49 @@ const App = (() => {
         <span class="sb-returns-trend" aria-hidden="true">${isPos ? '↗' : '↘'}</span>
       </div>
       <div class="sb-returns-main">
-        <span class="sb-returns-main-label">${mainLabel}</span>
-        <span class="sb-returns-main-value">${mainVal != null ? _sbFmtPct(mainVal) : '—'}</span>
+        <span class="sb-returns-main-label" data-returns-main-label>${mainLabel}</span>
+        <span class="sb-returns-main-value" data-returns-main-value>${mainVal != null ? _sbFmtPct(mainVal) : '—'}</span>
       </div>
-      <div class="sb-returns-mini-row">
-        ${metrics.map(metric => `<div class="sb-returns-mini">
-          <span>${metric.label}</span>
-          <strong class="${metric.val != null && parseFloat(metric.val) >= 0 ? 'pos' : 'neg'}">${metric.val != null ? _sbFmtPct(metric.val) : '—'}</strong>
-        </div>`).join('')}
+      <div class="sb-returns-mini-row" data-returns-mini-row>
+        ${miniHtml}
       </div>
     </div>`;
+  }
+
+  function _sbAttachReturnsHeroEvents(root) {
+    root.querySelectorAll('[data-returns-hero]').forEach(hero => {
+      if (hero.dataset.returnsHeroBound === '1') return;
+      hero.dataset.returnsHeroBound = '1';
+      hero.addEventListener('click', e => {
+        const btn = e.target.closest('[data-returns-period]');
+        if (!btn) return;
+        const newKey = btn.dataset.returnsPeriod;
+        const vals = JSON.parse(hero.dataset.returnsVals || '{}');
+        const newVal = vals[newKey];
+        const newLabel = _sbReturnPeriods.find(p => p.key === newKey).label;
+        const isPos = newVal != null && parseFloat(newVal) >= 0;
+        hero.dataset.returnsActive = newKey;
+        hero.classList.toggle('is-positive', isPos);
+        hero.classList.toggle('is-negative', !isPos);
+        const mainLabel = hero.querySelector('[data-returns-main-label]');
+        const mainValue = hero.querySelector('[data-returns-main-value]');
+        const trend = hero.querySelector('.sb-returns-trend');
+        if (mainLabel) mainLabel.textContent = newLabel;
+        if (mainValue) mainValue.textContent = newVal != null ? _sbFmtPct(newVal) : '—';
+        if (trend) trend.textContent = isPos ? '↗' : '↘';
+        const miniRow = hero.querySelector('[data-returns-mini-row]');
+        if (miniRow) {
+          const miniPeriods = _sbReturnPeriods.filter(p => p.key !== newKey);
+          miniRow.innerHTML = miniPeriods.map(p => {
+            const v = vals[p.key];
+            return `<button type="button" class="sb-returns-mini" data-returns-period="${p.key}">
+              <span>${p.label}</span>
+              <strong class="${v != null && parseFloat(v) >= 0 ? 'pos' : 'neg'}">${v != null ? _sbFmtPct(v) : '—'}</strong>
+            </button>`;
+          }).join('');
+        }
+      });
+    });
   }
 
   function _sbAllocationBar(title, visual, segments) {
@@ -7278,6 +7326,7 @@ const App = (() => {
 
     // Interactive SVG donuts — segment hover + legend sync
     _sbAttachDistributionDonutEvents(section);
+    _sbAttachReturnsHeroEvents(section);
 
     section.querySelectorAll('.sb-chart-card').forEach(card => {
       const svg = card.querySelector('.sb-donut-svg');
@@ -7391,6 +7440,7 @@ const App = (() => {
     if (dashEl) {
       dashEl.outerHTML = _sbDashboardHtml(portfolio);
       _sbAttachDistributionDonutEvents(section);
+    _sbAttachReturnsHeroEvents(section);
     }
   }
 
