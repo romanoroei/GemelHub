@@ -19607,7 +19607,7 @@ html body .sandbox-track-id {
     width: 100% !important;
   }
   body.sb-printing .sandbox-cat-table {
-    font-size: .58rem !important;
+    font-size: .52rem !important;
     width: 100% !important;
     table-layout: auto !important;
     border-collapse: collapse !important;
@@ -19615,31 +19615,35 @@ html body .sandbox-track-id {
   }
   body.sb-printing .sandbox-cat-table td,
   body.sb-printing .sandbox-cat-table th {
-    padding: 3px 4px !important;
+    padding: 2px 3px !important;
     white-space: nowrap !important;
     overflow: visible !important;
     border-bottom: 1px solid #e8ecf0 !important;
     vertical-align: middle !important;
     hyphens: none !important;
+    font-size: .52rem !important;
+    line-height: 1.3 !important;
   }
-  /* Keep fee & invest columns at legible size */
-  body.sb-printing .sandbox-cat-table .sandbox-fee-input,
-  body.sb-printing .sandbox-cat-table .sb-fee-head,
-  body.sb-printing .sandbox-cat-table .sb-invest-col,
-  body.sb-printing .sandbox-cat-table .sandbox-invest-input,
-  body.sb-printing .sandbox-cat-table .sb-invest-head {
-    font-size: .66rem !important;
+  /* Keep fee & invest at legible size */
+  body.sb-printing .sandbox-cat-table td:has(.sandbox-fee-input),
+  body.sb-printing .sandbox-cat-table td.sb-invest-col,
+  body.sb-printing .sandbox-cat-table th.sb-fee-head,
+  body.sb-printing .sandbox-cat-table th.sb-invest-head {
+    font-size: .64rem !important;
   }
-  /* Manager / track name columns — allow wrapping, no hyphenation */
-  body.sb-printing .sandbox-cat-table .sb-col-provider,
-  body.sb-printing .sandbox-cat-table .sb-col-track {
+  body.sb-printing .sandbox-fee-input,
+  body.sb-printing .sandbox-invest-input {
+    font-size: .64rem !important;
+  }
+  /* Manager / track name — wrap on word boundary only */
+  body.sb-printing .sandbox-provider-cell,
+  body.sb-printing .sandbox-track-cell {
     white-space: normal !important;
     word-break: normal !important;
-    overflow-wrap: normal !important;
     hyphens: none !important;
     line-height: 1.3 !important;
-    min-width: 60px !important;
-    max-width: 110px !important;
+    min-width: 55px !important;
+    max-width: 100px !important;
   }
   body.sb-printing .sandbox-cat-block {
     page-break-inside: avoid !important;
