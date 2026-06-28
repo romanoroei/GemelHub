@@ -7205,6 +7205,17 @@ body.fund-page table.track-table th {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* Tiny inline cell loader for table yield cells */
+.cell-loader {
+  display: inline-block; vertical-align: middle;
+  width: 11px; height: 11px;
+  border: 1.5px solid var(--gray-200);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  opacity: .75;
+}
+
 /* ─── הסתרת שורת חיפוש/סינון בקטגוריית ראש בראש ─── */
 body.h2h-active .title-search-bar { display: none !important; }
 
