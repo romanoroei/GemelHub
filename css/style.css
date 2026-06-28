@@ -19666,7 +19666,7 @@ html body .sandbox-track-id {
   html body.sb-printing .sandbox-cat-table .sb-td-stock .exp-val,
   html body.sb-printing .sandbox-cat-table .sb-td-abroad .exp-val,
   html body.sb-printing .sandbox-cat-table .sb-td-fx .exp-val {
-    font-size: .40rem !important;
+    font-size: .80rem !important;
     min-width: 0 !important;
   }
   /* Fee — center header and cell; keep input inline so td centering works */
