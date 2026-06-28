@@ -19631,24 +19631,36 @@ html body .sandbox-track-id {
   }
   /* Manager / track name — restore to readable size + wrap */
   body.sb-printing .sandbox-provider-cell,
-  body.sb-printing .sandbox-provider-link,
-  body.sb-printing .sandbox-track-cell,
-  body.sb-printing .sandbox-track-link {
-    font-size: .65rem !important;
+  body.sb-printing .sandbox-track-cell {
     white-space: normal !important;
     word-break: normal !important;
     hyphens: none !important;
     line-height: 1.35 !important;
     min-width: 60px !important;
     max-width: 105px !important;
+  }
+  body.sb-printing .sandbox-provider-link {
+    font-size: .68rem !important;
     display: block !important;
   }
-  /* Returns and exposure match allocation font size */
-  body.sb-printing .sandbox-cat-table .sb-yield-col,
+  body.sb-printing .sandbox-track-link {
+    font-size: .64rem !important;
+    display: block !important;
+  }
+  body.sb-printing .sandbox-track-number {
+    font-size: .47rem !important;
+    display: block !important;
+  }
+  body.sb-printing .sandbox-track-id-icons { display: none !important; }
+  /* Returns: same size as track name */
+  body.sb-printing .sandbox-cat-table .sb-yield-col {
+    font-size: .62rem !important;
+  }
+  /* Allocation %: same size as track name */
   body.sb-printing .sandbox-cat-table .sb-td-stock,
   body.sb-printing .sandbox-cat-table .sb-td-abroad,
   body.sb-printing .sandbox-cat-table .sb-td-fx {
-    font-size: .62rem !important;
+    font-size: .64rem !important;
   }
   /* Fee & invest inputs */
   body.sb-printing .sandbox-fee-input,
