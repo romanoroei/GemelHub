@@ -6161,22 +6161,86 @@ const App = (() => {
     return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
   }
 
+  let _sbSaveMode = 'new'; // 'new' | 'update'
+  let _sbUpdateSelectedId = null;
+
   function _sbOpenSaveDialog() {
     const dialog = document.getElementById('sb-save-dialog');
     if (!dialog) return;
+    _sbSaveMode = 'new';
+    _sbUpdateSelectedId = null;
+    // Reset new-portfolio form
     document.getElementById('sb-save-name').value = '';
     document.getElementById('sb-save-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('sb-save-notes').value = '';
+    // Show/hide mode tabs based on whether saved portfolios exist
+    const hasSaved = _sbGetSavedPortfolios().length > 0;
+    const tabs = document.getElementById('sb-save-mode-tabs');
+    if (tabs) tabs.hidden = !hasSaved;
+    _sbSetSaveMode('new');
     dialog.hidden = false;
     setTimeout(() => document.getElementById('sb-save-name')?.focus(), 60);
+  }
+
+  function _sbSetSaveMode(mode) {
+    _sbSaveMode = mode;
+    const newPanel    = document.getElementById('sb-save-new-panel');
+    const updatePanel = document.getElementById('sb-save-update-panel');
+    const submitLabel = document.getElementById('sb-save-dialog-submit-label');
+    const title       = document.getElementById('sb-save-dialog-title');
+    document.querySelectorAll('.sb-save-mode-tab').forEach(tab => {
+      tab.classList.toggle('is-active', tab.dataset.saveMode === mode);
+    });
+    if (mode === 'new') {
+      if (newPanel)    newPanel.hidden    = false;
+      if (updatePanel) updatePanel.hidden = true;
+      if (submitLabel) submitLabel.textContent = 'שמור';
+      if (title)       title.textContent  = 'שמירת תיק';
+    } else {
+      if (newPanel)    newPanel.hidden    = true;
+      if (updatePanel) updatePanel.hidden = false;
+      if (submitLabel) submitLabel.textContent = 'עדכן';
+      if (title)       title.textContent  = 'עדכון תיק קיים';
+      _sbRenderUpdateList();
+    }
+  }
+
+  function _sbRenderUpdateList() {
+    const container = document.getElementById('sb-save-update-list');
+    if (!container) return;
+    const list = _sbGetSavedPortfolios();
+    if (!list.length) {
+      container.innerHTML = '<p class="sb-load-empty">אין תיקים שמורים עדיין.</p>';
+      return;
+    }
+    container.innerHTML = list.map(item => {
+      const tot = item.portfolio.reduce((s, it) => s + (parseFloat(it.investAmount) || 0), 0);
+      const totStr = tot > 0 ? `<span dir="ltr">₪ ${Math.round(tot).toLocaleString('he-IL')}</span>` : '';
+      return `<button type="button" class="sb-update-item" data-update-id="${item.id}">
+        <span class="sb-update-item-name">${item.name}</span>
+        <span class="sb-saved-meta">${_sbFormatSavedDate(item.date)}${item.savedAt ? ' · ' + _sbFormatTime(item.savedAt) : ''} · ${item.portfolio.length} מסלולים${totStr ? ' · ' + totStr : ''}</span>
+      </button>`;
+    }).join('');
+    container.querySelectorAll('.sb-update-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        _sbUpdateSelectedId = btn.dataset.updateId;
+        container.querySelectorAll('.sb-update-item').forEach(b => b.classList.remove('is-selected'));
+        btn.classList.add('is-selected');
+      });
+    });
   }
 
   function _sbCloseSaveDialog() {
     const d = document.getElementById('sb-save-dialog');
     if (d) d.hidden = true;
+    _sbUpdateSelectedId = null;
   }
 
   function _sbDoSavePortfolio() {
+    if (_sbSaveMode === 'update') {
+      _sbDoUpdatePortfolio();
+      return;
+    }
     const name = (document.getElementById('sb-save-name')?.value || '').trim();
     if (!name) { document.getElementById('sb-save-name')?.focus(); return; }
     const date  = document.getElementById('sb-save-date')?.value  || new Date().toISOString().split('T')[0];
@@ -6191,6 +6255,25 @@ const App = (() => {
     _sbCloseSaveDialog();
     _sbUpdateValueBar(state.sandbox.portfolio);
     showToast(`התיק "${name}" נשמר בהצלחה`);
+  }
+
+  function _sbDoUpdatePortfolio() {
+    if (!_sbUpdateSelectedId) {
+      showToast('יש לבחור תיק לעדכון', 'warn');
+      return;
+    }
+    const list = _sbGetSavedPortfolios();
+    const idx = list.findIndex(p => p.id === _sbUpdateSelectedId);
+    if (idx === -1) return;
+    _sbSyncVisibleInputsToState();
+    list[idx].portfolio = JSON.parse(JSON.stringify(state.sandbox.portfolio));
+    list[idx].savedAt = new Date().toISOString();
+    _sbPutSavedPortfolios(list);
+    state.sandbox.portfolioName = list[idx].name;
+    saveSandboxPortfolio();
+    _sbCloseSaveDialog();
+    _sbUpdateValueBar(state.sandbox.portfolio);
+    showToast(`התיק "${list[idx].name}" עודכן בהצלחה`);
   }
 
   function _sbOpenLoadDialog() {
@@ -6724,6 +6807,10 @@ const App = (() => {
     document.getElementById('sb-save-dialog-close')?.addEventListener('click', _sbCloseSaveDialog);
     document.getElementById('sb-save-dialog-cancel')?.addEventListener('click', _sbCloseSaveDialog);
     document.getElementById('sb-save-dialog-submit')?.addEventListener('click', _sbDoSavePortfolio);
+    document.getElementById('sb-save-mode-tabs')?.addEventListener('click', e => {
+      const tab = e.target.closest('.sb-save-mode-tab');
+      if (tab) _sbSetSaveMode(tab.dataset.saveMode);
+    });
     document.getElementById('sb-load-dialog-close')?.addEventListener('click', _sbCloseLoadDialog);
     document.getElementById('sb-compare-dialog-close')?.addEventListener('click', _sbCloseCompareDialog);
     document.getElementById('sb-compare-print-btn')?.addEventListener('click', _sbPrintCompare);

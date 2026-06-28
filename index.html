@@ -490,28 +490,38 @@
 <div id="sb-save-dialog" class="sb-dialog-overlay" hidden aria-modal="true" role="dialog" aria-label="שמירת תיק">
   <div class="sb-dialog-box">
     <div class="sb-dialog-head">
-      <h3>שמירת תיק</h3>
+      <h3 id="sb-save-dialog-title">שמירת תיק</h3>
       <button type="button" class="sb-dialog-close" id="sb-save-dialog-close" aria-label="סגור">✕</button>
     </div>
+    <div class="sb-save-mode-tabs" id="sb-save-mode-tabs" hidden>
+      <button type="button" class="sb-save-mode-tab is-active" data-save-mode="new">שמור כחדש</button>
+      <button type="button" class="sb-save-mode-tab" data-save-mode="update">עדכן תיק קיים</button>
+    </div>
     <div class="sb-dialog-body">
-      <div class="sb-save-info">
-        <i class="fas fa-info-circle" aria-hidden="true"></i>
-        התיק והנתונים שלו נשמרים בדפדפן שלך בלבד ואינם מועברים לשרת — רק אתה יכול לראות אותם, ורק מהדפדפן הזה.
+      <div id="sb-save-new-panel">
+        <div class="sb-save-info">
+          <i class="fas fa-info-circle" aria-hidden="true"></i>
+          התיק והנתונים שלו נשמרים בדפדפן שלך בלבד ואינם מועברים לשרת — רק אתה יכול לראות אותם, ורק מהדפדפן הזה.
+        </div>
+        <label class="sb-field-label">שם התיק
+          <input type="text" id="sb-save-name" class="sb-field-input" placeholder="לדוגמה: תיק פנסיה 2026" maxlength="60" dir="rtl" />
+        </label>
+        <label class="sb-field-label">תאריך
+          <input type="date" id="sb-save-date" class="sb-field-input" dir="ltr" />
+        </label>
+        <label class="sb-field-label">הערות
+          <textarea id="sb-save-notes" class="sb-field-textarea" placeholder="הערות אופציונליות..." maxlength="300" dir="rtl"></textarea>
+        </label>
       </div>
-      <label class="sb-field-label">שם התיק
-        <input type="text" id="sb-save-name" class="sb-field-input" placeholder="לדוגמה: תיק פנסיה 2026" maxlength="60" dir="rtl" />
-      </label>
-      <label class="sb-field-label">תאריך
-        <input type="date" id="sb-save-date" class="sb-field-input" dir="ltr" />
-      </label>
-      <label class="sb-field-label">הערות
-        <textarea id="sb-save-notes" class="sb-field-textarea" placeholder="הערות אופציונליות..." maxlength="300" dir="rtl"></textarea>
-      </label>
+      <div id="sb-save-update-panel" hidden>
+        <p class="sb-save-update-hint">בחר את התיק שברצונך לעדכן בנתונים הנוכחיים:</p>
+        <div id="sb-save-update-list"></div>
+      </div>
     </div>
     <div class="sb-dialog-footer">
       <button type="button" class="sb-dialog-cancel" id="sb-save-dialog-cancel">ביטול</button>
       <button type="button" class="sb-dialog-submit" id="sb-save-dialog-submit">
-        <i class="fas fa-floppy-disk" aria-hidden="true"></i> שמור
+        <i class="fas fa-floppy-disk" aria-hidden="true"></i> <span id="sb-save-dialog-submit-label">שמור</span>
       </button>
     </div>
   </div>
