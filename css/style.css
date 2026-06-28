@@ -19599,7 +19599,6 @@ html body .sandbox-track-id {
   body.sb-printing #mobile-options-sheet,
   body.sb-printing #cookie-notice,
   body.sb-printing .sb-dialog-overlay,
-  body.sb-printing .sb-dn-card,
   body.sb-printing .sb-returns-hero-bg,
   body.sb-printing [data-returns-period] { display: none !important; }
 
@@ -19622,19 +19621,24 @@ html body .sandbox-track-id {
     overflow: hidden !important;
     border-bottom: 1px solid #e8ecf0 !important;
     vertical-align: middle !important;
+    hyphens: none !important;
   }
-  /* Manager / track name columns — allow wrapping only here */
+  /* Manager / track name columns — wrap on word boundary only, no hyphenation */
   body.sb-printing .sandbox-cat-table .sb-col-provider {
-    width: 72px !important;
+    width: 76px !important;
     white-space: normal !important;
-    word-break: keep-all !important;
-    line-height: 1.25 !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    hyphens: none !important;
+    line-height: 1.3 !important;
   }
   body.sb-printing .sandbox-cat-table .sb-col-track {
-    width: 100px !important;
+    width: 104px !important;
     white-space: normal !important;
-    word-break: keep-all !important;
-    line-height: 1.25 !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    hyphens: none !important;
+    line-height: 1.3 !important;
   }
   body.sb-printing .sandbox-cat-block {
     page-break-inside: avoid !important;
@@ -19733,16 +19737,15 @@ html body .sandbox-track-id {
     flex-shrink: 0 !important;
   }
   body.sb-printing .sb-distribution-center {
-    width: 60px !important;
+    width: 80px !important;
   }
   body.sb-printing .sb-distribution-center strong,
   body.sb-printing .sb-distribution-center span,
   body.sb-printing .sb-distribution-center em {
-    white-space: normal !important;
+    white-space: nowrap !important;
     overflow: visible !important;
     text-overflow: clip !important;
-    word-break: keep-all !important;
-    font-size: .62rem !important;
+    font-size: .6rem !important;
   }
   body.sb-printing .sb-distribution-legend {
     flex: 1 !important;
@@ -19773,6 +19776,16 @@ html body .sandbox-track-id {
   }
   body.sb-printing .sb-distribution-slice-label {
     font-size: .5rem !important;
+  }
+
+  /* ── Dn card (דמי ניהול ממוצעים) ── */
+  body.sb-printing .sb-dn-card {
+    box-shadow: none !important;
+    border: 1px solid #dde3ea !important;
+    border-radius: 8px !important;
+    padding: 8px 14px !important;
+    margin-top: 10px !important;
+    page-break-inside: avoid !important;
   }
 }
 
