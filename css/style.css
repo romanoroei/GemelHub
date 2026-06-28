@@ -11642,6 +11642,10 @@ body.h2h-active,
 .sb-distribution-products .sb-distribution-center strong {
   font-size: .88rem;
   line-height: 1.08;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  word-break: break-word;
 }
 .sb-distribution-center span {
   color: #324a5e;
