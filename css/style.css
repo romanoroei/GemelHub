@@ -19643,9 +19643,14 @@ html body .sandbox-track-id {
     font-size: .68rem !important;
     display: block !important;
   }
-  body.sb-printing .sandbox-track-cell {
+  /* מסלול column — both header and cells shift left */
+  body.sb-printing .sandbox-cat-table th:nth-child(3),
+  body.sb-printing .sandbox-cat-table td:nth-child(3) {
     text-align: left !important;
     padding-right: 14px !important;
+  }
+  body.sb-printing .sandbox-track-cell {
+    text-align: left !important;
   }
   body.sb-printing .sandbox-track-link {
     font-size: .64rem !important;
@@ -19660,20 +19665,25 @@ html body .sandbox-track-id {
   body.sb-printing .sandbox-cat-table .sb-yield-col {
     font-size: .62rem !important;
   }
-  /* Allocation %: noticeably smaller */
+  /* Allocation %: clearly smaller */
   body.sb-printing .sandbox-cat-table td.sb-td-stock,
   body.sb-printing .sandbox-cat-table td.sb-td-abroad,
   body.sb-printing .sandbox-cat-table td.sb-td-fx {
-    font-size: .53rem !important;
+    font-size: .47rem !important;
   }
-  /* Fee inputs — center under header */
-  body.sb-printing .sandbox-cat-table th.sb-fee-head,
-  body.sb-printing .sandbox-cat-table td:has(.sandbox-fee-input) {
+  /* Fee — center header and value under it */
+  body.sb-printing .sandbox-cat-table th.sb-fee-head {
+    text-align: center !important;
+  }
+  body.sb-printing .sandbox-cat-table th:nth-child(4),
+  body.sb-printing .sandbox-cat-table td:nth-child(4) {
     text-align: center !important;
   }
   body.sb-printing .sandbox-fee-input {
     font-size: .62rem !important;
     text-align: center !important;
+    display: block !important;
+    margin: 0 auto !important;
     width: 100% !important;
   }
   body.sb-printing .sandbox-invest-input {
