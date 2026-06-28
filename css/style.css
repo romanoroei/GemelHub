@@ -19518,9 +19518,16 @@ html body .sandbox-track-id {
 
 /* ── Print styles ── */
 @media print {
-  @page { size: A4 portrait; margin: 14mm 12mm; }
+  @page { size: A4 portrait; margin: 10mm 12mm; }
 
-  /* ── Show only the sandbox section ── */
+  /* ── Force background colors & images to print ── */
+  body.sb-printing,
+  body.sb-printing * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* ── Show only the sandbox section (fix: sandbox-section is nested inside .page-body > main) ── */
   body.sb-printing > * { display: none !important; }
   body.sb-printing > .page-body { display: block !important; }
   body.sb-printing .page-body > *:not(main) { display: none !important; }
@@ -19543,34 +19550,34 @@ html body .sandbox-track-id {
   /* ── Print report header ── */
   body.sb-printing .sb-print-report-header {
     display: flex !important;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 2px solid #1a3560;
-    padding-bottom: 8px;
-    margin-bottom: 14px;
-    direction: rtl;
-    page-break-after: avoid;
+    align-items: center !important;
+    justify-content: space-between !important;
+    border-bottom: 2px solid #1a3560 !important;
+    padding-bottom: 8px !important;
+    margin-bottom: 14px !important;
+    direction: rtl !important;
+    page-break-after: avoid !important;
   }
   body.sb-printing .sb-print-logo {
-    font-size: 1.15rem;
-    font-weight: 900;
-    color: #1a3560;
-    letter-spacing: -.5px;
+    font-size: 1.1rem !important;
+    font-weight: 900 !important;
+    color: #1a3560 !important;
+    letter-spacing: -.5px !important;
+    white-space: nowrap !important;
   }
-  body.sb-printing .sb-print-logo span {
-    color: #6c3fc5;
-  }
+  body.sb-printing .sb-print-logo span { color: #6c3fc5 !important; }
   body.sb-printing .sb-print-portfolio-title {
-    font-size: .95rem;
-    font-weight: 800;
-    color: #1a3560;
-    text-align: center;
+    font-size: 1rem !important;
+    font-weight: 800 !important;
+    color: #1a3560 !important;
+    text-align: center !important;
   }
   body.sb-printing .sb-print-meta {
-    font-size: .72rem;
-    color: #64748b;
-    text-align: left;
-    line-height: 1.6;
+    font-size: .68rem !important;
+    color: #64748b !important;
+    text-align: left !important;
+    line-height: 1.6 !important;
+    white-space: nowrap !important;
   }
 
   /* ── Hide interactive & chrome elements ── */
@@ -19593,7 +19600,8 @@ html body .sandbox-track-id {
   body.sb-printing #cookie-notice,
   body.sb-printing .sb-dialog-overlay,
   body.sb-printing .sb-dn-card,
-  body.sb-printing .sb-returns-hero-bg { display: none !important; }
+  body.sb-printing .sb-returns-hero-bg,
+  body.sb-printing [data-returns-period] { display: none !important; }
 
   /* ── Tables ── */
   body.sb-printing .sandbox-cat-table-wrap {
@@ -19601,86 +19609,170 @@ html body .sandbox-track-id {
     width: 100% !important;
   }
   body.sb-printing .sandbox-cat-table {
-    font-size: .66rem !important;
+    font-size: .67rem !important;
     width: 100% !important;
-    table-layout: auto !important;
+    table-layout: fixed !important;
     border-collapse: collapse !important;
     page-break-inside: auto !important;
   }
   body.sb-printing .sandbox-cat-table td,
   body.sb-printing .sandbox-cat-table th {
-    padding: 3px 5px !important;
-    white-space: normal !important;
-    word-break: break-word !important;
-    border-bottom: 1px solid #e2e8f0 !important;
+    padding: 4px 5px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    border-bottom: 1px solid #e8ecf0 !important;
+    vertical-align: middle !important;
   }
-  body.sb-printing .sandbox-cat-table .sb-col-provider { width: 80px !important; }
-  body.sb-printing .sandbox-cat-table .sb-col-track    { width: 115px !important; }
+  /* Manager / track name columns — allow wrapping only here */
+  body.sb-printing .sandbox-cat-table .sb-col-provider {
+    width: 72px !important;
+    white-space: normal !important;
+    word-break: keep-all !important;
+    line-height: 1.25 !important;
+  }
+  body.sb-printing .sandbox-cat-table .sb-col-track {
+    width: 100px !important;
+    white-space: normal !important;
+    word-break: keep-all !important;
+    line-height: 1.25 !important;
+  }
   body.sb-printing .sandbox-cat-block {
-    page-break-inside: avoid;
+    page-break-inside: avoid !important;
     margin-bottom: 12px !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 0 !important;
-    padding: 8px !important;
+    border: 1px solid #dde3ea !important;
+    border-radius: 8px !important;
+    padding: 8px 10px !important;
+    background: #fff !important;
   }
   body.sb-printing .sandbox-cat-block-title {
-    font-size: .8rem !important;
-    margin-bottom: 4px !important;
+    font-size: .82rem !important;
+    margin-bottom: 5px !important;
   }
   body.sb-printing .sandbox-invest-input,
   body.sb-printing .sandbox-fee-input {
     border: none !important;
     background: transparent !important;
     padding: 0 !important;
-    font-size: .66rem !important;
+    font-size: .67rem !important;
+    text-align: center !important;
   }
 
-  /* ── Dashboard charts ── */
-  body.sb-printing .sb-dashboard {
-    page-break-before: avoid;
-    margin-top: 10px !important;
-  }
-  body.sb-printing .sb-distribution-section {
+  /* ── Returns hero ── */
+  body.sb-printing .sb-returns-hero-list {
     display: flex !important;
-    flex-direction: row !important;
-    gap: 16px !important;
-    page-break-inside: avoid;
+    flex-direction: column !important;
+    gap: 8px !important;
+    margin-bottom: 10px !important;
   }
-  body.sb-printing .sb-distribution-donut-card {
-    flex: 1 !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 0 !important;
-    padding: 8px !important;
+  body.sb-printing .sb-returns-hero {
+    position: relative !important;
     box-shadow: none !important;
+    border: 1px solid #dde3ea !important;
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+    page-break-inside: avoid !important;
+    min-height: unset !important;
+    overflow: visible !important;
   }
-  body.sb-printing .sb-distribution-donut-shell {
-    width: 140px !important;
+  body.sb-printing .sb-returns-main-value {
+    font-size: 2rem !important;
   }
+  body.sb-printing .sb-returns-mini-row {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px !important;
+  }
+  body.sb-printing .sb-returns-mini {
+    border: 1px solid #dde3ea !important;
+    border-radius: 6px !important;
+    box-shadow: none !important;
+    padding: 6px !important;
+  }
+  body.sb-printing .sb-returns-mini span { white-space: nowrap !important; font-size: .65rem !important; }
+  body.sb-printing .sb-returns-mini strong { font-size: .88rem !important; white-space: nowrap !important; }
+
+  /* ── Allocation bars ── */
   body.sb-printing .sb-allocation-section {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 10px !important;
-    page-break-inside: avoid;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    page-break-inside: avoid !important;
     margin-bottom: 10px !important;
   }
   body.sb-printing .sb-allocation-card {
+    box-shadow: none !important;
+    border: 1px solid #dde3ea !important;
+    border-radius: 8px !important;
+    padding: 8px 10px !important;
+    background: #fff !important;
+  }
+
+  /* ── Distribution donuts ── */
+  body.sb-printing .sb-distribution-section {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    page-break-inside: avoid !important;
+  }
+  body.sb-printing .sb-distribution-donut-card {
+    border: 1px solid #dde3ea !important;
+    border-radius: 8px !important;
+    padding: 10px !important;
+    box-shadow: none !important;
+    background: #fff !important;
+  }
+  body.sb-printing .sb-distribution-donut-wrap {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+  body.sb-printing .sb-distribution-donut-shell {
+    width: 110px !important;
+    min-width: 110px !important;
+    flex-shrink: 0 !important;
+  }
+  body.sb-printing .sb-distribution-center {
+    width: 60px !important;
+  }
+  body.sb-printing .sb-distribution-center strong,
+  body.sb-printing .sb-distribution-center span,
+  body.sb-printing .sb-distribution-center em {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    word-break: keep-all !important;
+    font-size: .62rem !important;
+  }
+  body.sb-printing .sb-distribution-legend {
     flex: 1 !important;
-    box-shadow: none !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 0 !important;
-    padding: 6px 8px !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    gap: 4px !important;
   }
-  body.sb-printing .sb-returns-hero {
-    box-shadow: none !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 0 !important;
-    padding: 10px 14px !important;
-    page-break-inside: avoid;
-    margin-bottom: 10px !important;
+  body.sb-printing .sb-distribution-legend-row {
+    padding: 3px 5px !important;
+    font-size: .68rem !important;
+    border: none !important;
+    background: none !important;
   }
-  body.sb-printing .sb-returns-mini {
-    border: 1px solid #e2e8f0 !important;
-    box-shadow: none !important;
+  body.sb-printing .sb-distribution-legend-row strong {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 90px !important;
+    display: inline-block !important;
+    font-size: .68rem !important;
+  }
+  body.sb-printing .sb-distribution-legend-value {
+    font-size: .72rem !important;
+    min-width: 36px !important;
+  }
+  body.sb-printing .sb-distribution-legend-value em {
+    font-size: .65rem !important;
+  }
+  body.sb-printing .sb-distribution-slice-label {
+    font-size: .5rem !important;
   }
 }
 
