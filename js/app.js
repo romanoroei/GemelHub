@@ -6451,9 +6451,27 @@ const App = (() => {
   // ── Print ──────────────────────────────────────────────────────────────────
   function _sbPrintSummary() {
     _sbSyncVisibleInputsToState();
+    const section = document.getElementById('sandbox-section');
+    if (!section) return;
+
+    // Inject print report header
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const timeStr = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+    const portfolioName = state.sandbox.portfolioName || 'תיק השקעות';
+    const header = document.createElement('div');
+    header.className = 'sb-print-report-header';
+    header.innerHTML = `
+      <div class="sb-print-logo">Gemel<span>Hub</span> 💰</div>
+      <div class="sb-print-portfolio-title">${portfolioName}</div>
+      <div class="sb-print-meta">הופק: ${dateStr} &nbsp;|&nbsp; ${timeStr}<br>gemelhub.com</div>
+    `;
+    section.insertBefore(header, section.firstChild);
+
     document.body.classList.add('sb-printing');
     window.addEventListener('afterprint', function cleanup() {
       document.body.classList.remove('sb-printing');
+      if (header.parentNode) header.parentNode.removeChild(header);
       window.removeEventListener('afterprint', cleanup);
     });
     window.print();

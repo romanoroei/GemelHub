@@ -19518,7 +19518,19 @@ html body .sandbox-track-id {
 
 /* ── Print styles ── */
 @media print {
-  body.sb-printing > *:not(#sandbox-section) { display: none !important; }
+  @page { size: A4 portrait; margin: 14mm 12mm; }
+
+  /* ── Show only the sandbox section ── */
+  body.sb-printing > * { display: none !important; }
+  body.sb-printing > .page-body { display: block !important; }
+  body.sb-printing .page-body > *:not(main) { display: none !important; }
+  body.sb-printing main {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #fff !important;
+  }
+  body.sb-printing main > *:not(#sandbox-section) { display: none !important; }
   body.sb-printing #sandbox-section {
     display: block !important;
     position: static !important;
@@ -19527,12 +19539,46 @@ html body .sandbox-track-id {
     width: 100% !important;
     background: #fff !important;
   }
-  /* Hide all interactive & fixed elements */
+
+  /* ── Print report header ── */
+  body.sb-printing .sb-print-report-header {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid #1a3560;
+    padding-bottom: 8px;
+    margin-bottom: 14px;
+    direction: rtl;
+    page-break-after: avoid;
+  }
+  body.sb-printing .sb-print-logo {
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: #1a3560;
+    letter-spacing: -.5px;
+  }
+  body.sb-printing .sb-print-logo span {
+    color: #6c3fc5;
+  }
+  body.sb-printing .sb-print-portfolio-title {
+    font-size: .95rem;
+    font-weight: 800;
+    color: #1a3560;
+    text-align: center;
+  }
+  body.sb-printing .sb-print-meta {
+    font-size: .72rem;
+    color: #64748b;
+    text-align: left;
+    line-height: 1.6;
+  }
+
+  /* ── Hide interactive & chrome elements ── */
   body.sb-printing .sandbox-page-actions,
+  body.sb-printing .sandbox-page-header,
   body.sb-printing .sandbox-remove-btn,
   body.sb-printing .sandbox-cat-add-btn,
   body.sb-printing .sandbox-invest-toggle,
-  body.sb-printing .sb-distribution-seg,
   body.sb-printing .sandbox-cat-mode-toggle,
   body.sb-printing .sandbox-print-btn,
   body.sb-printing .sandbox-share-btn,
@@ -19546,32 +19592,39 @@ html body .sandbox-track-id {
   body.sb-printing #mobile-options-sheet,
   body.sb-printing #cookie-notice,
   body.sb-printing .sb-dialog-overlay,
-  body.sb-printing .sandbox-cat-mode-toggle { display: none !important; }
-  /* Tables */
+  body.sb-printing .sb-dn-card,
+  body.sb-printing .sb-returns-hero-bg { display: none !important; }
+
+  /* ── Tables ── */
   body.sb-printing .sandbox-cat-table-wrap {
     overflow: visible !important;
     width: 100% !important;
   }
   body.sb-printing .sandbox-cat-table {
-    font-size: .68rem !important;
+    font-size: .66rem !important;
     width: 100% !important;
     table-layout: auto !important;
+    border-collapse: collapse !important;
     page-break-inside: auto !important;
   }
   body.sb-printing .sandbox-cat-table td,
   body.sb-printing .sandbox-cat-table th {
-    padding: 3px 4px !important;
+    padding: 3px 5px !important;
     white-space: normal !important;
     word-break: break-word !important;
+    border-bottom: 1px solid #e2e8f0 !important;
   }
   body.sb-printing .sandbox-cat-table .sb-col-provider { width: 80px !important; }
-  body.sb-printing .sandbox-cat-table .sb-col-track    { width: 110px !important; }
-  body.sb-printing .sandbox-cat-block { page-break-inside: avoid; margin-bottom: 10px !important; }
-  body.sb-printing .sandbox-page-title { font-size: 1.1rem !important; margin-bottom: 6px !important; }
-  body.sb-printing .sb-print-header {
-    display: block !important;
-    font-size: .7rem !important;
-    color: #64748b !important;
+  body.sb-printing .sandbox-cat-table .sb-col-track    { width: 115px !important; }
+  body.sb-printing .sandbox-cat-block {
+    page-break-inside: avoid;
+    margin-bottom: 12px !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 0 !important;
+    padding: 8px !important;
+  }
+  body.sb-printing .sandbox-cat-block-title {
+    font-size: .8rem !important;
     margin-bottom: 4px !important;
   }
   body.sb-printing .sandbox-invest-input,
@@ -19579,8 +19632,56 @@ html body .sandbox-track-id {
     border: none !important;
     background: transparent !important;
     padding: 0 !important;
+    font-size: .66rem !important;
   }
-  @page { margin: 12mm; size: A4; }
+
+  /* ── Dashboard charts ── */
+  body.sb-printing .sb-dashboard {
+    page-break-before: avoid;
+    margin-top: 10px !important;
+  }
+  body.sb-printing .sb-distribution-section {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 16px !important;
+    page-break-inside: avoid;
+  }
+  body.sb-printing .sb-distribution-donut-card {
+    flex: 1 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 0 !important;
+    padding: 8px !important;
+    box-shadow: none !important;
+  }
+  body.sb-printing .sb-distribution-donut-shell {
+    width: 140px !important;
+  }
+  body.sb-printing .sb-allocation-section {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 10px !important;
+    page-break-inside: avoid;
+    margin-bottom: 10px !important;
+  }
+  body.sb-printing .sb-allocation-card {
+    flex: 1 !important;
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 0 !important;
+    padding: 6px 8px !important;
+  }
+  body.sb-printing .sb-returns-hero {
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 0 !important;
+    padding: 10px 14px !important;
+    page-break-inside: avoid;
+    margin-bottom: 10px !important;
+  }
+  body.sb-printing .sb-returns-mini {
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+  }
 }
 
 /* ── Mobile table row-height squeeze (overrides "polish pass" at ~12420) ── */
