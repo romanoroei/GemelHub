@@ -19666,21 +19666,18 @@ html body .sandbox-track-id {
   html body.sb-printing .sandbox-cat-table td.sb-td-stock,
   html body.sb-printing .sandbox-cat-table td.sb-td-abroad,
   html body.sb-printing .sandbox-cat-table td.sb-td-fx {
-    font-size: .46rem !important;
+    font-size: .41rem !important;
   }
-  /* Fee — center header and value under it */
-  body.sb-printing .sandbox-cat-table th.sb-fee-head {
+  /* Fee — center header and value */
+  html body.sb-printing .sandbox-cat-table th.sb-fee-head,
+  html body.sb-printing .sandbox-cat-table th:nth-child(4),
+  html body.sb-printing .sandbox-cat-table td:nth-child(4) {
     text-align: center !important;
   }
-  body.sb-printing .sandbox-cat-table th:nth-child(4),
-  body.sb-printing .sandbox-cat-table td:nth-child(4) {
-    text-align: center !important;
-  }
-  body.sb-printing .sandbox-fee-input {
+  html body.sb-printing .sandbox-fee-input {
     font-size: .62rem !important;
     text-align: center !important;
     display: block !important;
-    margin: 0 auto !important;
     width: 100% !important;
   }
   body.sb-printing .sandbox-invest-input {
