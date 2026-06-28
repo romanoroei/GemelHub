@@ -19643,14 +19643,11 @@ html body .sandbox-track-id {
     font-size: .68rem !important;
     display: block !important;
   }
-  /* מסלול column — both header and cells shift left */
+  /* מסלול column — shift entire column left by adding right padding on both header and cells */
   body.sb-printing .sandbox-cat-table th:nth-child(3),
   body.sb-printing .sandbox-cat-table td:nth-child(3) {
-    text-align: left !important;
-    padding-right: 14px !important;
-  }
-  body.sb-printing .sandbox-track-cell {
-    text-align: left !important;
+    padding-right: 22px !important;
+    padding-left: 4px !important;
   }
   body.sb-printing .sandbox-track-link {
     font-size: .64rem !important;
@@ -19666,10 +19663,10 @@ html body .sandbox-track-id {
     font-size: .62rem !important;
   }
   /* Allocation %: clearly smaller */
-  body.sb-printing .sandbox-cat-table td.sb-td-stock,
-  body.sb-printing .sandbox-cat-table td.sb-td-abroad,
-  body.sb-printing .sandbox-cat-table td.sb-td-fx {
-    font-size: .47rem !important;
+  html body.sb-printing .sandbox-cat-table td.sb-td-stock,
+  html body.sb-printing .sandbox-cat-table td.sb-td-abroad,
+  html body.sb-printing .sandbox-cat-table td.sb-td-fx {
+    font-size: .46rem !important;
   }
   /* Fee — center header and value under it */
   body.sb-printing .sandbox-cat-table th.sb-fee-head {
