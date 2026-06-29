@@ -6499,14 +6499,13 @@ const App = (() => {
     if (!_sbPrintHeader) {
       const now = new Date();
       const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
-      const timeStr = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
       const portfolioName = state.sandbox.portfolioName || 'תיק השקעות';
       _sbPrintHeader = document.createElement('div');
       _sbPrintHeader.className = 'sb-print-report-header';
       _sbPrintHeader.innerHTML = `
         <div class="sb-print-logo">Gemel<span>Hub</span> 💰</div>
         <div class="sb-print-portfolio-title">${portfolioName}</div>
-        <div class="sb-print-meta">הופק: ${dateStr} &nbsp;|&nbsp; ${timeStr}<br>רועי רומנו, מתכנן פיננסי וסוכן פנסיוני מורשה | 052-8089808</div>
+        <div class="sb-print-meta">הופק: ${dateStr}<br>רועי רומנו, מתכנן פיננסי וסוכן פנסיוני מורשה | 052-8089808</div>
       `;
       section.insertBefore(_sbPrintHeader, section.firstChild);
     }

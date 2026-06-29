@@ -19710,27 +19710,35 @@ html body .sandbox-track-id {
     font-size: .58rem !important;
     line-height: 1.2 !important;
   }
-  /* Manager name and track name: align from top so they start at the same line */
+  /* Manager + track tds: align from top so names are on the same line */
   html body.sb-printing .sandbox-cat-table td:nth-child(2),
   html body.sb-printing .sandbox-cat-table td:nth-child(3) {
     vertical-align: top !important;
+    padding-top: 3px !important;
   }
-  /* Provider / track cells: allow wrap but stay compact */
-  html body.sb-printing .sandbox-provider-cell,
-  html body.sb-printing .sandbox-track-cell {
+  /* Switch flex containers to block so content starts at the very top */
+  html body.sb-printing .sandbox-provider-cell {
+    display: block !important;
     white-space: normal !important;
-    word-break: normal !important;
-    hyphens: none !important;
     line-height: 1.2 !important;
     min-width: 50px !important;
     max-width: 90px !important;
   }
+  html body.sb-printing .sandbox-track-cell {
+    display: block !important;
+    white-space: normal !important;
+    line-height: 1.2 !important;
+    min-width: 50px !important;
+    max-width: 90px !important;
+  }
+  html body.sb-printing .prov-dot { display: none !important; }
   html body.sb-printing .sandbox-provider-link {
     font-size: .66rem !important;
     display: block !important;
     padding: 0 !important;
     margin: 0 !important;
     line-height: 1.2 !important;
+    white-space: normal !important;
   }
   html body.sb-printing .sandbox-track-link {
     font-size: .62rem !important;
@@ -19741,15 +19749,15 @@ html body .sandbox-track-id {
     white-space: normal !important;
   }
   html body.sb-printing .sandbox-track-number {
-    font-size: .44rem !important;
+    font-size: .50rem !important;
     display: block !important;
-    margin-top: 0 !important;
+    margin-top: 1px !important;
     line-height: 1.1 !important;
   }
   html body.sb-printing .sandbox-track-id {
-    margin-top: 0 !important;
+    margin-top: 1px !important;
     line-height: 1.1 !important;
-    font-size: .44rem !important;
+    font-size: .50rem !important;
   }
   html body.sb-printing .sandbox-track-id-icons { display: none !important; }
   /* Restore allocation bars in table cells — slim 18px bar */
@@ -19782,7 +19790,7 @@ html body .sandbox-track-id {
     width: auto !important;
     height: auto !important;
     min-height: 0 !important;
-    font-size: .60rem !important;
+    font-size: .45rem !important;
     text-align: center !important;
   }
   html body.sb-printing .sandbox-invest-input {
@@ -19989,16 +19997,20 @@ html body .sandbox-track-id {
   body.sb-printing .sb-dn-label { font-size: .64rem !important; }
   body.sb-printing .sb-dn-value { font-size: 1.05rem !important; }
 
-  /* ── Print disclaimer footer ── */
+  /* ── Print disclaimer — fixed footer at bottom of every page ── */
   body.sb-printing .sb-print-disclaimer {
-    margin-top: 14px !important;
-    padding-top: 8px !important;
+    position: fixed !important;
+    bottom: 6mm !important;
+    left: 8mm !important;
+    right: 8mm !important;
     border-top: 1px solid #dde3ea !important;
-    font-size: .55rem !important;
+    padding-top: 4px !important;
+    font-size: .50rem !important;
     color: #94a3b8 !important;
     line-height: 1.5 !important;
     direction: rtl !important;
-    text-align: right !important;
+    text-align: center !important;
+    background: #fff !important;
   }
 
   /* ── Prevent blank second page ── */
