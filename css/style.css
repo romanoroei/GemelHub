@@ -19720,7 +19720,12 @@ html body .sandbox-track-id {
     line-height: 1.08 !important;
     height: auto !important;
   }
-  /* Switch flex containers to block so content starts at the very top */
+  /* Force provider column to vertical-align:middle, override mobile top rule */
+  html body.sb-printing .sandbox-cat-table td:nth-child(2) {
+    vertical-align: middle !important;
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+  }
   html body.sb-printing .sandbox-provider-cell {
     display: inline-block !important;
     vertical-align: middle !important;
