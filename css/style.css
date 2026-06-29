@@ -19680,88 +19680,85 @@ html body .sandbox-track-id {
     padding: 0 !important;
   }
 
-  /* ── Tables ── */
-  body.sb-printing .sandbox-cat-table-wrap {
+  /* ── Tables — all rules use html body.sb-printing to beat mobile !important overrides ── */
+  html body.sb-printing .sandbox-cat-table-wrap {
     overflow: visible !important;
     width: 100% !important;
   }
-  body.sb-printing .sandbox-cat-table {
+  html body.sb-printing .sandbox-cat-table {
     width: 100% !important;
     table-layout: auto !important;
     border-collapse: collapse !important;
     page-break-inside: auto !important;
   }
-  /* ── All th/td: uniform base ── */
-  body.sb-printing .sandbox-cat-table th {
-    padding: 3px 4px !important;
+  html body.sb-printing .sandbox-cat-table th {
+    padding: 2px 3px !important;
     white-space: nowrap !important;
     border-bottom: 1px solid #c8d0da !important;
     vertical-align: middle !important;
-    font-size: .61rem !important;
-    line-height: 1.3 !important;
+    font-size: .60rem !important;
+    line-height: 1.2 !important;
   }
-  body.sb-printing .sandbox-cat-table td {
-    padding: 3px 4px !important;
+  html body.sb-printing .sandbox-cat-table td {
+    padding: 2px 3px !important;
     white-space: nowrap !important;
     border-bottom: 1px solid #e8ecf0 !important;
     vertical-align: middle !important;
-    font-size: .59rem !important;
-    line-height: 1.3 !important;
+    font-size: .58rem !important;
+    line-height: 1.2 !important;
   }
-  /* Manager / track name — restore to readable size + wrap */
-  body.sb-printing .sandbox-provider-cell,
-  body.sb-printing .sandbox-track-cell {
+  /* Provider / track cells: allow wrap but stay compact */
+  html body.sb-printing .sandbox-provider-cell,
+  html body.sb-printing .sandbox-track-cell {
     white-space: normal !important;
     word-break: normal !important;
     hyphens: none !important;
-    line-height: 1.35 !important;
-    min-width: 60px !important;
-    max-width: 105px !important;
+    line-height: 1.2 !important;
+    min-width: 50px !important;
+    max-width: 90px !important;
   }
-  body.sb-printing .sandbox-provider-link {
-    font-size: .68rem !important;
+  html body.sb-printing .sandbox-provider-link {
+    font-size: .66rem !important;
     display: block !important;
-  }
-  /* מסלול column — shift entire column left by adding right padding on both header and cells */
-  body.sb-printing .sandbox-cat-table th:nth-child(3),
-  body.sb-printing .sandbox-cat-table td:nth-child(3) {
-    padding-right: 22px !important;
-    padding-left: 4px !important;
-  }
-  body.sb-printing .sandbox-track-link {
-    font-size: .64rem !important;
-    display: block !important;
-  }
-  body.sb-printing .sandbox-track-number {
-    font-size: .47rem !important;
-    display: block !important;
-  }
-  body.sb-printing .sandbox-track-id-icons { display: none !important; }
-  /* Compact track/provider cells to reduce row height */
-  body.sb-printing .sandbox-track-link,
-  body.sb-printing .sandbox-provider-link {
     padding: 0 !important;
     margin: 0 !important;
+    line-height: 1.2 !important;
   }
-  body.sb-printing .sandbox-track-id {
-    margin-top: 1px !important;
-    line-height: 1 !important;
-  }
-  /* Hide allocation bars — makes cells narrower so table fits on page */
-  body.sb-printing .exp-bar-bg { display: none !important; }
-  body.sb-printing .exp-wrap { gap: 2px !important; min-width: 0 !important; }
-  /* Returns: same size as track name */
-  body.sb-printing .sandbox-cat-table .sb-yield-col {
+  html body.sb-printing .sandbox-track-link {
     font-size: .62rem !important;
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+    white-space: normal !important;
   }
-  /* Allocation % — must target .exp-val directly (it has its own font-size) */
+  html body.sb-printing .sandbox-track-number {
+    font-size: .44rem !important;
+    display: block !important;
+    margin-top: 0 !important;
+    line-height: 1.1 !important;
+  }
+  html body.sb-printing .sandbox-track-id {
+    margin-top: 0 !important;
+    line-height: 1.1 !important;
+    font-size: .44rem !important;
+  }
+  html body.sb-printing .sandbox-track-id-icons { display: none !important; }
+  /* Hide allocation bars to save column width */
+  html body.sb-printing .exp-bar-bg { display: none !important; }
+  html body.sb-printing .exp-wrap { gap: 1px !important; min-width: 0 !important; }
+  /* Returns */
+  html body.sb-printing .sandbox-cat-table .sb-yield-col {
+    font-size: .60rem !important;
+  }
+  /* Allocation % */
   html body.sb-printing .sandbox-cat-table .sb-td-stock .exp-val,
   html body.sb-printing .sandbox-cat-table .sb-td-abroad .exp-val,
   html body.sb-printing .sandbox-cat-table .sb-td-fx .exp-val {
-    font-size: .60rem !important;
+    font-size: .58rem !important;
     min-width: 0 !important;
   }
-  /* Fee — center header and cell; keep input inline so td centering works */
+  /* Fee — center */
   html body.sb-printing .sandbox-cat-table th.sb-fee-head,
   html body.sb-printing .sandbox-cat-table th:nth-child(4),
   html body.sb-printing .sandbox-cat-table td:nth-child(4) {
@@ -19770,12 +19767,23 @@ html body .sandbox-track-id {
   html body.sb-printing .sandbox-fee-input {
     display: inline !important;
     width: auto !important;
-    font-size: .62rem !important;
+    font-size: .60rem !important;
     text-align: center !important;
   }
-  body.sb-printing .sandbox-invest-input {
-    font-size: .62rem !important;
+  html body.sb-printing .sandbox-invest-input {
+    font-size: .60rem !important;
     text-align: center !important;
+  }
+  /* מסלול column header + cells shift left */
+  html body.sb-printing .sandbox-cat-table th:nth-child(3),
+  html body.sb-printing .sandbox-cat-table td:nth-child(3) {
+    padding-right: 10px !important;
+    padding-left: 2px !important;
+  }
+  /* Remove btn column: zero width in print */
+  html body.sb-printing .sandbox-cat-table th:nth-child(1),
+  html body.sb-printing .sandbox-cat-table td:nth-child(1) {
+    display: none !important;
   }
   body.sb-printing .sandbox-cat-block {
     page-break-inside: avoid !important;
