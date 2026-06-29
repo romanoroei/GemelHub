@@ -6490,6 +6490,7 @@ const App = (() => {
 
   // ── Print ──────────────────────────────────────────────────────────────────
   let _sbPrintHeader = null;
+  let _sbPrintFooter = null;
 
   function _sbInjectPrintState() {
     const section = document.getElementById('sandbox-section');
@@ -6505,9 +6506,15 @@ const App = (() => {
       _sbPrintHeader.innerHTML = `
         <div class="sb-print-logo">Gemel<span>Hub</span> 💰</div>
         <div class="sb-print-portfolio-title">${portfolioName}</div>
-        <div class="sb-print-meta">הופק: ${dateStr} &nbsp;|&nbsp; ${timeStr}<br>gemelhub.com</div>
+        <div class="sb-print-meta">הופק: ${dateStr} &nbsp;|&nbsp; ${timeStr}<br>רועי רומנו, מתכנן פיננסי וסוכן פנסיוני מורשה | 052-8089808</div>
       `;
       section.insertBefore(_sbPrintHeader, section.firstChild);
+    }
+    if (!_sbPrintFooter) {
+      _sbPrintFooter = document.createElement('div');
+      _sbPrintFooter.className = 'sb-print-disclaimer';
+      _sbPrintFooter.textContent = 'המידע נועד לספק תמונת מצב כללית והשוואתית בלבד ואינו מהווה ייעוץ השקעות, שיווק פנסיוני או תחליף לייעוץ אישי המותאם לצרכי הלקוח. הנתונים מבוססים על מקורות פומביים ועשויים להכיל טעויות או אי-דיוקים. אין לראות בתשואות העבר התחייבות לתשואות עתידיות. לפני קבלת החלטה פיננסית מומלץ להתייעץ עם בעל רישיון.';
+      section.appendChild(_sbPrintFooter);
     }
     document.body.classList.add('sb-printing');
     return true;
@@ -6519,6 +6526,10 @@ const App = (() => {
       _sbPrintHeader.parentNode.removeChild(_sbPrintHeader);
     }
     _sbPrintHeader = null;
+    if (_sbPrintFooter && _sbPrintFooter.parentNode) {
+      _sbPrintFooter.parentNode.removeChild(_sbPrintFooter);
+    }
+    _sbPrintFooter = null;
   }
 
   function setupPrintListeners() {

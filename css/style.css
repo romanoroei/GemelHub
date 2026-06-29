@@ -19632,6 +19632,7 @@ html body .sandbox-track-id {
     white-space: nowrap !important;
     flex-shrink: 0 !important;
     overflow: visible !important;
+    margin-inline-start: 6px !important;
   }
   body.sb-printing .sb-print-logo span { color: #6c3fc5 !important; }
   body.sb-printing .sb-print-portfolio-title {
@@ -19708,6 +19709,11 @@ html body .sandbox-track-id {
     vertical-align: middle !important;
     font-size: .58rem !important;
     line-height: 1.2 !important;
+  }
+  /* Manager name and track name: align from top so they start at the same line */
+  html body.sb-printing .sandbox-cat-table td:nth-child(2),
+  html body.sb-printing .sandbox-cat-table td:nth-child(3) {
+    vertical-align: top !important;
   }
   /* Provider / track cells: allow wrap but stay compact */
   html body.sb-printing .sandbox-provider-cell,
@@ -19982,6 +19988,18 @@ html body .sandbox-track-id {
   }
   body.sb-printing .sb-dn-label { font-size: .64rem !important; }
   body.sb-printing .sb-dn-value { font-size: 1.05rem !important; }
+
+  /* ── Print disclaimer footer ── */
+  body.sb-printing .sb-print-disclaimer {
+    margin-top: 14px !important;
+    padding-top: 8px !important;
+    border-top: 1px solid #dde3ea !important;
+    font-size: .55rem !important;
+    color: #94a3b8 !important;
+    line-height: 1.5 !important;
+    direction: rtl !important;
+    text-align: right !important;
+  }
 
   /* ── Prevent blank second page ── */
   html body.sb-printing {
