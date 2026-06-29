@@ -7233,6 +7233,10 @@ const App = (() => {
         }).join('');
     return `<div class="sb-dashboard">
       <div class="sb-returns-hero-list">${returnsHeroes}</div>
+      <div class="sb-dn-card">
+        <div class="sb-dn-label">ד"נ מצבירה משוקלל</div>
+        <div class="sb-dn-value ${wDn != null && parseFloat(wDn) >= 0 ? 'pos' : 'neg'}">${wDn != null ? _sbFmtPct(wDn) : '—'}</div>
+      </div>
       ${canShowPortfolioExposures ? `<div class="sb-allocation-section">
         ${_sbAllocationBar('חשיפה מנייתית', 'stock', mkSegs)}
         ${_sbAllocationBar('חשיפה גיאוגרפית', 'geo', geoSegs)}
@@ -7242,10 +7246,6 @@ const App = (() => {
         ${_sbManagerDonut(provSegs)}
         ${_sbProductDonut(catSegs)}
       </div>` : ''}
-      <div class="sb-dn-card">
-        <div class="sb-dn-label">ד"נ מצבירה משוקלל</div>
-        <div class="sb-dn-value ${wDn != null && parseFloat(wDn) >= 0 ? 'pos' : 'neg'}">${wDn != null ? _sbFmtPct(wDn) : '—'}</div>
-      </div>
     </div>`;
   }
 

@@ -11940,7 +11940,8 @@ body.h2h-active,
     font-size: .66rem;
   }
   .sandbox-cat-table .exp-bar-bg {
-    display: none;
+    display: block;
+    width: 24px;
   }
   .sandbox-cat-table .exp-val {
     min-width: 0;
@@ -19708,14 +19709,10 @@ html body .sandbox-track-id {
     padding: 1px 3px !important;
     white-space: nowrap !important;
     border-bottom: 1px solid #e8ecf0 !important;
-    vertical-align: middle !important;
+    vertical-align: top !important;
     font-size: .58rem !important;
     line-height: 1.08 !important;
-  }
-  /* Manager + track tds: vertical-align middle so both blocks center together */
-  html body.sb-printing .sandbox-cat-table td:nth-child(2),
-  html body.sb-printing .sandbox-cat-table td:nth-child(3) {
-    vertical-align: middle !important;
+    height: auto !important;
   }
   /* Switch flex containers to block so content starts at the very top */
   html body.sb-printing .sandbox-provider-cell {
@@ -19824,8 +19821,17 @@ html body .sandbox-track-id {
   html body.sb-printing .sandbox-invest-input {
     height: auto !important;
     min-height: 0 !important;
+    line-height: 1 !important;
+    padding: 0 2px !important;
     font-size: .60rem !important;
     text-align: center !important;
+  }
+  html body.sb-printing .sandbox-invest-toggle {
+    display: none !important;
+  }
+  html body.sb-printing .sandbox-invest-control {
+    display: block !important;
+    line-height: 1 !important;
   }
   /* מסלול column header + cells shift left */
   html body.sb-printing .sandbox-cat-table th:nth-child(3),
