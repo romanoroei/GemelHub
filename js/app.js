@@ -5802,10 +5802,10 @@ const App = (() => {
           <i class="fas fa-plus" aria-hidden="true"></i> <span class="sb-btn-label">הוסף</span>
         </button>
         ${!state.sandbox.portfolioName && portfolio.length > 0
-          ? '<button type="button" class="sandbox-save-btn sb-save-appear" id="sandbox-save-portfolio-btn" title="שמור תיק"><i class="fas fa-floppy-disk" aria-hidden="true"></i> <span class="sb-btn-label">שמור</span></button>'
+          ? '<button type="button" class="sandbox-save-btn sb-save-appear" id="sandbox-save-portfolio-btn" title="שמור תיק"><i class="fas fa-floppy-disk" aria-hidden="true"></i> <span class="sb-btn-label">שמור בשם</span></button>'
           : '<button type="button" class="sandbox-save-btn sb-save-hidden" id="sandbox-save-portfolio-btn" title="שמור תיק" aria-hidden="true"></button>'}
         <button type="button" class="sandbox-load-btn" id="sandbox-load-portfolio-btn" title="טען תיק שמור">
-          <i class="fas fa-folder-open" aria-hidden="true"></i> <span class="sb-btn-label">טען והשווה</span>
+          <i class="fas fa-folder-open" aria-hidden="true"></i> <span class="sb-btn-label">פתח/השווה</span>
         </button>
         ${portfolio.length > 0 ? `<button type="button" class="sandbox-clear-btn" id="sandbox-clear-portfolio-btn">
           <i class="fas fa-trash-alt" aria-hidden="true"></i></button>
@@ -6483,7 +6483,7 @@ const App = (() => {
     if (btn) {
       btn.classList.remove('sb-save-hidden');
       btn.removeAttribute('aria-hidden');
-      btn.innerHTML = '<i class="fas fa-floppy-disk" aria-hidden="true"></i> <span class="sb-btn-label">שמור</span>';
+      btn.innerHTML = '<i class="fas fa-floppy-disk" aria-hidden="true"></i> <span class="sb-btn-label">שמור בשם</span>';
       void btn.offsetWidth;
       btn.classList.add('sb-save-appear');
     }
