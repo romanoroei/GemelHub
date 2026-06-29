@@ -11834,8 +11834,8 @@ body.h2h-active,
 .sb-legend-name { flex:1; color:var(--gray-700); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .sb-legend-val { font-weight:700; color:var(--gray-500); }
 .sb-dn-card { background:#fff; border:1px solid var(--gray-100); border-radius:12px; padding:16px 28px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
-.sb-dn-label { font-size:.85rem; color:var(--gray-500); font-weight:600; }
-.sb-dn-value { font-size:1.4rem; font-weight:800; }
+.sb-dn-label { font-size:.64rem; color:var(--gray-500); font-weight:600; }
+.sb-dn-value { font-size:1.05rem; font-weight:800; }
 .sb-dn-value.pos { color:#16a34a; }
 .sb-dn-value.neg { color:#dc2626; }
 .sb-bar-chart-inner { display:flex; gap:16px; align-items:flex-end; overflow-x:auto; padding-bottom:4px; }
@@ -19891,6 +19891,8 @@ html body .sandbox-track-id {
     margin-top: 10px !important;
     page-break-inside: avoid !important;
   }
+  body.sb-printing .sb-dn-label { font-size: .64rem !important; }
+  body.sb-printing .sb-dn-value { font-size: 1.05rem !important; }
 }
 
 /* ── Mobile table row-height squeeze (overrides "polish pass" at ~12420) ── */
