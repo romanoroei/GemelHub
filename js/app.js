@@ -6824,12 +6824,32 @@ const App = (() => {
   }
 
   function _sbPrintCompare() {
-    document.body.classList.add('sb-compare-printing');
-    window.addEventListener('afterprint', function cleanup() {
-      document.body.classList.remove('sb-compare-printing');
-      window.removeEventListener('afterprint', cleanup);
-    });
-    window.print();
+    const content = document.getElementById('sb-compare-content');
+    if (!content) return;
+    const title = document.getElementById('sb-compare-title')?.textContent || 'השוואת תיקים';
+    const cssLink = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+      .map(l => l.href).find(h => h && h.includes('style.css')) || '';
+    const faLink = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+      .map(l => l.href).find(h => h && (h.includes('font-awesome') || h.includes('fontawesome'))) || '';
+
+    const pw = window.open('', '_blank');
+    if (!pw) return;
+    pw.document.write(
+      '<!DOCTYPE html><html dir="rtl" lang="he"><head>' +
+      '<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+      '<title>' + title + '</title>' +
+      (cssLink ? '<link rel="stylesheet" href="' + cssLink + '">' : '') +
+      (faLink  ? '<link rel="stylesheet" href="' + faLink + '">'  : '') +
+      '<style>body{font-family:Assistant,Arial,sans-serif;direction:rtl;padding:14px;background:#fff;margin:0}' +
+      '.sb-compare-head-actions{display:none!important}' +
+      '@media print{body{margin:0;padding:8px}}</style>' +
+      '</head><body>' +
+      '<h2 style="font-size:.95rem;margin:0 0 12px;font-weight:900;">' + title + '</h2>' +
+      content.innerHTML +
+      '<script>window.addEventListener("load",function(){window.print();window.close();});<\/script>' +
+      '</body></html>'
+    );
+    pw.document.close();
   }
 
   // Mini-encode a portfolio item to compact array (v2 format)
