@@ -18559,6 +18559,8 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   html body .sandbox-cat-table .exp-bar-bg {
     display: block !important;
     width: 24px !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
   }
 
   html body .sandbox-remove-btn {
@@ -19786,9 +19788,6 @@ html body .sandbox-track-id {
     height: 10px !important;
   }
   /* Track column — align to top so number+icons sit tight under track name */
-  html body.sb-printing .sandbox-cat-table td:nth-child(3) {
-    vertical-align: top !important;
-  }
   /* Restore allocation bars in table cells — slim 18px bar */
   html body.sb-printing .exp-bar-bg {
     display: block !important;
@@ -20032,7 +20031,7 @@ html body .sandbox-track-id {
     margin-bottom: 0 !important;
     page-break-inside: avoid !important;
   }
-  body.sb-printing .sb-dn-label { font-size: .48rem !important; }
+  body.sb-printing .sb-dn-label { font-size: .85rem !important; color: #111 !important; }
   body.sb-printing .sb-dn-value { font-size: .79rem !important; }
 
   /* ── Print disclaimer — fixed footer at bottom of every page ── */
