@@ -655,6 +655,7 @@ const App = (() => {
     setupSandboxBarActions();
     setupValueBarRename();
     setupSandboxPortfolioDialogs();
+    setupPrintListeners();
     window.addEventListener('resize', syncTracksDensityClasses);
     window.addEventListener('resize', updateStickyGapMask);
     window.addEventListener('resize', updateMobileStickyHeader);
@@ -6488,32 +6489,49 @@ const App = (() => {
   }
 
   // ── Print ──────────────────────────────────────────────────────────────────
-  function _sbPrintSummary() {
-    _sbSyncVisibleInputsToState();
+  let _sbPrintHeader = null;
+
+  function _sbInjectPrintState() {
     const section = document.getElementById('sandbox-section');
-    if (!section) return;
-
-    // Inject print report header
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    const timeStr = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-    const portfolioName = state.sandbox.portfolioName || 'תיק השקעות';
-    const header = document.createElement('div');
-    header.className = 'sb-print-report-header';
-    header.innerHTML = `
-      <div class="sb-print-logo">Gemel<span>Hub</span> 💰</div>
-      <div class="sb-print-portfolio-title">${portfolioName}</div>
-      <div class="sb-print-meta">הופק: ${dateStr} &nbsp;|&nbsp; ${timeStr}<br>gemelhub.com</div>
-    `;
-    section.insertBefore(header, section.firstChild);
-
+    if (!section || section.style.display === 'none') return false;
+    _sbSyncVisibleInputsToState();
+    if (!_sbPrintHeader) {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      const timeStr = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+      const portfolioName = state.sandbox.portfolioName || 'תיק השקעות';
+      _sbPrintHeader = document.createElement('div');
+      _sbPrintHeader.className = 'sb-print-report-header';
+      _sbPrintHeader.innerHTML = `
+        <div class="sb-print-logo">Gemel<span>Hub</span> 💰</div>
+        <div class="sb-print-portfolio-title">${portfolioName}</div>
+        <div class="sb-print-meta">הופק: ${dateStr} &nbsp;|&nbsp; ${timeStr}<br>gemelhub.com</div>
+      `;
+      section.insertBefore(_sbPrintHeader, section.firstChild);
+    }
     document.body.classList.add('sb-printing');
-    window.addEventListener('afterprint', function cleanup() {
-      document.body.classList.remove('sb-printing');
-      if (header.parentNode) header.parentNode.removeChild(header);
-      window.removeEventListener('afterprint', cleanup);
+    return true;
+  }
+
+  function _sbCleanupPrintState() {
+    document.body.classList.remove('sb-printing');
+    if (_sbPrintHeader && _sbPrintHeader.parentNode) {
+      _sbPrintHeader.parentNode.removeChild(_sbPrintHeader);
+    }
+    _sbPrintHeader = null;
+  }
+
+  function setupPrintListeners() {
+    window.addEventListener('beforeprint', function() {
+      _sbInjectPrintState();
     });
-    window.print();
+    window.addEventListener('afterprint', function() {
+      _sbCleanupPrintState();
+    });
+  }
+
+  function _sbPrintSummary() {
+    if (_sbInjectPrintState()) window.print();
   }
 
   // ── Share via URL hash ─────────────────────────────────────────────────────
