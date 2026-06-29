@@ -6958,6 +6958,9 @@ const App = (() => {
   }
 
   // Chronological order of all 4 return periods (index = chronological rank, right→left in RTL)
+  const _sbSparkPos = 'M2,82 C4,74 5,69 8,70 C11,62 14,60 17,58 C20,55 23,54 26,50 C29,47 32,50 35,45 C38,40 41,38 44,35 C46,39 48,42 50,37 C52,31 55,29 57,32 C60,24 63,23 65,25 C68,19 71,17 73,21 C76,15 79,18 81,14 C83,18 85,20 87,16 C90,12 93,16 96,11 C98,13 99,12 100,10';
+  const _sbSparkNeg = 'M2,18 C4,26 5,31 8,30 C11,38 14,40 17,42 C20,45 23,46 26,50 C29,53 32,50 35,55 C38,60 41,62 44,65 C46,61 48,58 50,63 C52,69 55,71 57,68 C60,76 63,77 65,75 C68,81 71,83 73,79 C76,85 79,82 81,86 C83,82 85,80 87,84 C90,88 93,84 96,89 C98,87 99,88 100,90';
+
   const _sbReturnPeriods = [
     { key: 'ytd',  label: 'מתחילת שנה' },
     { key: 'y12m', label: '12 חודשים אחרונים' },
@@ -6977,9 +6980,7 @@ const App = (() => {
     const mainVal = vals[activeKey];
     const mainLabel = _sbReturnPeriods.find(p => p.key === activeKey).label;
     const isPos = mainVal != null && parseFloat(mainVal) >= 0;
-    const sparkPath = isPos
-      ? 'M2,82 C4,74 5,69 8,70 C11,62 14,60 17,58 C20,55 23,54 26,50 C29,47 32,50 35,45 C38,40 41,38 44,35 C46,39 48,42 50,37 C52,31 55,29 57,32 C60,24 63,23 65,25 C68,19 71,17 73,21 C76,15 79,18 81,14 C83,18 85,20 87,16 C90,12 93,16 96,11 C98,13 99,12 100,10'
-      : 'M2,18 C4,26 5,31 8,30 C11,38 14,40 17,42 C20,45 23,46 26,50 C29,53 32,50 35,55 C38,60 41,62 44,65 C46,61 48,58 50,63 C52,69 55,71 57,68 C60,76 63,77 65,75 C68,81 71,83 73,79 C76,85 79,82 81,86 C83,82 85,80 87,84 C90,88 93,84 96,89 C98,87 99,88 100,90';
+    const sparkPath = isPos ? _sbSparkPos : _sbSparkNeg;
     const areaPath = `${sparkPath} L100,96 L2,96 Z`;
     const miniPeriods = _sbReturnPeriods.filter(p => p.key !== activeKey);
     const miniHtml = miniPeriods.map(p => {
@@ -7042,6 +7043,11 @@ const App = (() => {
         if (mainLabel) mainLabel.textContent = newLabel;
         if (mainValue) mainValue.textContent = newVal != null ? _sbFmtPct(newVal) : '—';
         if (trend) trend.textContent = isPos ? '↗' : '↘';
+        const newSparkPath = isPos ? _sbSparkPos : _sbSparkNeg;
+        const newAreaPath = newSparkPath + ' L100,96 L2,96 Z';
+        const svgPaths = hero.querySelectorAll('.sb-returns-hero-bg svg path');
+        if (svgPaths[0]) svgPaths[0].setAttribute('d', newAreaPath);
+        if (svgPaths[1]) svgPaths[1].setAttribute('d', newSparkPath);
         const miniRow = hero.querySelector('[data-returns-mini-row]');
         if (miniRow) {
           const miniPeriods = _sbReturnPeriods.filter(p => p.key !== newKey);
