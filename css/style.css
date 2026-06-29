@@ -11834,7 +11834,7 @@ body.h2h-active,
 .sb-legend-name { flex:1; color:var(--gray-700); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .sb-legend-val { font-weight:700; color:var(--gray-500); }
 .sb-dn-card { background:#fff; border:1px solid var(--gray-100); border-radius:12px; padding:16px 28px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
-.sb-dn-label { font-size:.95rem; color:#111; font-weight:700; }
+.sb-dn-label { font-size:.71rem; color:#111; font-weight:700; }
 .sb-dn-value { font-size:1.18rem; font-weight:800; }
 .sb-dn-value.pos { color:#16a34a; }
 .sb-dn-value.neg { color:#dc2626; }
@@ -20037,7 +20037,7 @@ html body .sandbox-track-id {
     margin-bottom: 0 !important;
     page-break-inside: avoid !important;
   }
-  body.sb-printing .sb-dn-label { font-size: .85rem !important; color: #111 !important; }
+  body.sb-printing .sb-dn-label { font-size: .64rem !important; color: #111 !important; }
   body.sb-printing .sb-dn-value { font-size: .79rem !important; }
 
   /* ── Print disclaimer — fixed footer at bottom of every page ── */
