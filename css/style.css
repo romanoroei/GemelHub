@@ -19722,7 +19722,8 @@ html body .sandbox-track-id {
   }
   /* Switch flex containers to block so content starts at the very top */
   html body.sb-printing .sandbox-provider-cell {
-    display: block !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
     white-space: normal !important;
     line-height: 1.2 !important;
     min-width: 50px !important;
