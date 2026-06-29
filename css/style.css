@@ -19710,11 +19710,10 @@ html body .sandbox-track-id {
     font-size: .58rem !important;
     line-height: 1.2 !important;
   }
-  /* Manager + track tds: align from top so names are on the same line */
+  /* Manager + track tds: vertical-align middle so both blocks center together */
   html body.sb-printing .sandbox-cat-table td:nth-child(2),
   html body.sb-printing .sandbox-cat-table td:nth-child(3) {
-    vertical-align: top !important;
-    padding-top: 3px !important;
+    vertical-align: middle !important;
   }
   /* Switch flex containers to block so content starts at the very top */
   html body.sb-printing .sandbox-provider-cell {
@@ -19790,7 +19789,7 @@ html body .sandbox-track-id {
     width: auto !important;
     height: auto !important;
     min-height: 0 !important;
-    font-size: .45rem !important;
+    font-size: .60rem !important;
     text-align: center !important;
   }
   html body.sb-printing .sandbox-invest-input {
@@ -19994,8 +19993,8 @@ html body .sandbox-track-id {
     margin-bottom: 0 !important;
     page-break-inside: avoid !important;
   }
-  body.sb-printing .sb-dn-label { font-size: .64rem !important; }
-  body.sb-printing .sb-dn-value { font-size: 1.05rem !important; }
+  body.sb-printing .sb-dn-label { font-size: .48rem !important; }
+  body.sb-printing .sb-dn-value { font-size: .79rem !important; }
 
   /* ── Print disclaimer — fixed footer at bottom of every page ── */
   body.sb-printing .sb-print-disclaimer {
