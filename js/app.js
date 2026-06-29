@@ -6825,31 +6825,26 @@ const App = (() => {
 
   function _sbPrintCompare() {
     const content = document.getElementById('sb-compare-content');
-    if (!content) return;
+    const printArea = document.getElementById('sb-compare-print-area');
+    if (!content || !printArea) return;
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const title = document.getElementById('sb-compare-title')?.textContent || 'השוואת תיקים';
-    const cssLink = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
-      .map(l => l.href).find(h => h && h.includes('style.css')) || '';
-    const faLink = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
-      .map(l => l.href).find(h => h && (h.includes('font-awesome') || h.includes('fontawesome'))) || '';
-
-    const pw = window.open('', '_blank');
-    if (!pw) return;
-    pw.document.write(
-      '<!DOCTYPE html><html dir="rtl" lang="he"><head>' +
-      '<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
-      '<title>' + title + '</title>' +
-      (cssLink ? '<link rel="stylesheet" href="' + cssLink + '">' : '') +
-      (faLink  ? '<link rel="stylesheet" href="' + faLink + '">'  : '') +
-      '<style>body{font-family:Assistant,Arial,sans-serif;direction:rtl;padding:14px;background:#fff;margin:0}' +
-      '.sb-compare-head-actions{display:none!important}' +
-      '@media print{body{margin:0;padding:8px}}</style>' +
-      '</head><body>' +
-      '<h2 style="font-size:.95rem;margin:0 0 12px;font-weight:900;">' + title + '</h2>' +
+    printArea.innerHTML =
+      '<div class="sb-print-report-header">' +
+        '<div class="sb-print-logo">Gemel<span>Hub</span> 💰</div>' +
+        '<div class="sb-print-portfolio-title">' + title + '</div>' +
+        '<div class="sb-print-meta">הופק: ' + dateStr + '<br>רועי רומנו, מתכנן פיננסי וסוכן פנסיוני מורשה | 052-8089808</div>' +
+      '</div>' +
       content.innerHTML +
-      '<script>window.addEventListener("load",function(){window.print();window.close();});<\/script>' +
-      '</body></html>'
-    );
-    pw.document.close();
+      '<div class="sb-print-disclaimer">המידע נועד לספק תמונת מצב כללית והשוואתית בלבד ואינו מהווה ייעוץ השקעות, שיווק פנסיוני או תחליף לייעוץ אישי המותאם לצרכי הלקוח. הנתונים מבוססים על מקורות פומביים ועשויים להכיל טעויות או אי-דיוקים. אין לראות בתשואות העבר התחייבות לתשואות עתידיות. לפני קבלת החלטה פיננסית מומלץ להתייעץ עם בעל רישיון.</div>';
+    document.body.classList.add('sb-compare-printing');
+    window.addEventListener('afterprint', function cleanup() {
+      document.body.classList.remove('sb-compare-printing');
+      printArea.innerHTML = '';
+      window.removeEventListener('afterprint', cleanup);
+    });
+    window.print();
   }
 
   // Mini-encode a portfolio item to compact array (v2 format)

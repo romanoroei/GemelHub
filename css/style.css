@@ -19390,31 +19390,12 @@ html body .sandbox-track-id {
 
 /* ── print compare dialog ── */
 @media print {
-  body.sb-compare-printing > *:not(#sb-compare-dialog) { display: none !important; }
-  body.sb-compare-printing #sb-compare-dialog {
+  body.sb-compare-printing > *:not(#sb-compare-print-area) { display: none !important; }
+  body.sb-compare-printing #sb-compare-print-area {
     display: block !important;
-    position: static !important;
-    background: none !important;
-    padding: 0 !important;
     width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
+    direction: rtl;
   }
-  body.sb-compare-printing .sb-dialog-box {
-    display: block !important;
-    box-shadow: none !important;
-    max-width: 100% !important;
-    max-height: none !important;
-    height: auto !important;
-    overflow: visible !important;
-    border-radius: 0 !important;
-  }
-  body.sb-compare-printing .sb-compare-body {
-    overflow: visible !important;
-    max-height: none !important;
-    height: auto !important;
-  }
-  body.sb-compare-printing .sb-compare-head-actions { display: none !important; }
 }
 
 /* ── mobile sandbox track name overflow ── */
