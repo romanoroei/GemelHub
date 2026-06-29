@@ -761,6 +761,7 @@ const App = (() => {
         abroad: cb.dataset.abroad,
         fx:     cb.dataset.fx,
         color:  cb.dataset.color,
+        fundIdTagIcons: cb.dataset.fundIdTagIcons || '',
         reportPeriod: cb.dataset.reportPeriod || ''
       };
 
@@ -5871,7 +5872,7 @@ const App = (() => {
           const rawInvestVal = item.investMode === 'percent' ? item.investPct : item.investAmount;
           const displayInvest = rawInvestVal !== '' ? Number(String(rawInvestVal).replace(/,/g, '')).toLocaleString('he-IL') : '';
           const allocationProfile = ghAllocationProfileFor({ stock: item.stock, abroad: item.abroad, fx: item.fx });
-          const allocationIcon = ghAllocationProfileIcons(allocationProfile, item.trackLabel || '');
+          const allocationIcon = item.fundIdTagIcons || ghAllocationProfileIcons(allocationProfile, item.trackLabel || '');
           const fundUrl = `fund.html?id=${encodeURIComponent(item.fundId || '')}&cat=${encodeURIComponent(item.categoryId || '')}`;
           const returnCells = returnFields.map(field => _sbReturnCell(item, field)).join('');
           return `<tr data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}">
@@ -8063,6 +8064,7 @@ const App = (() => {
                   data-abroad="${escapeAttr(abroadRaw)}"
                   data-fx="${escapeAttr(fxRaw)}"
                   data-color="${escapeAttr(color)}"
+                  data-fund-id-tag-icons="${escapeAttr(fundIdTagIcons)}"
                   ${_sbCbChecked}
                   ${_membershipTitle ? `title="${escapeAttr(_membershipTitle)}"` : ''}
                   aria-label="הוסף ${escapeAttr(name)} למעבדה שלי" />

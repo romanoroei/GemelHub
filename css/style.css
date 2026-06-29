@@ -18423,6 +18423,8 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     word-break: break-word !important;
     display: block !important;
     max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   html body .sandbox-clear-btn {
