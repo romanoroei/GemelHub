@@ -19550,16 +19550,47 @@ html body .sandbox-track-id {
     print-color-adjust: exact !important;
   }
 
-  /* ── Mobile resets: undo overflow-x:hidden, padding, and single-column layouts ── */
+  /* ── Universal print resets (apply even without sb-printing class — covers native mobile PDF) ── */
   html, body {
     overflow: visible !important;
     max-width: none !important;
   }
-  body.sb-printing .page-body {
+  .page-body {
     padding-inline: 0 !important;
     max-width: none !important;
     width: 100% !important;
-    min-width: 0 !important;
+  }
+  /* Always hide chrome/UI elements in any print */
+  html body .sandbox-page-actions,
+  html body .sandbox-page-header,
+  html body .sandbox-remove-btn,
+  html body .sandbox-cat-add-btn,
+  html body .sandbox-invest-toggle,
+  html body .sandbox-cat-mode-toggle,
+  html body .sandbox-print-btn,
+  html body .sandbox-share-btn,
+  html body .sandbox-value-bar,
+  html body #sandbox-value-bar,
+  html body #sandbox-section .sandbox-value-bar,
+  html body .sandbox-bar-chips,
+  html body .sb-save-section,
+  html body .sb-load-section,
+  html body .mobile-app-nav,
+  html body .sticky-header,
+  html body .hero-banner,
+  html body #mobile-options-sheet,
+  html body #cookie-notice,
+  html body .sb-dialog-overlay,
+  html body .sb-returns-hero-bg { display: none !important; }
+  html body .sandbox-value-bar,
+  html body #sandbox-value-bar,
+  html body #sandbox-section .sandbox-value-bar {
+    position: static !important;
+    z-index: auto !important;
+  }
+  html body #sandbox-section {
+    padding: 0 !important;
+    display: block !important;
   }
 
   /* ── Show only the sandbox section (fix: sandbox-section is nested inside .page-body > main) ── */
