@@ -19705,12 +19705,12 @@ html body .sandbox-track-id {
     line-height: 1.2 !important;
   }
   html body.sb-printing .sandbox-cat-table td {
-    padding: 2px 3px !important;
+    padding: 1px 3px !important;
     white-space: nowrap !important;
     border-bottom: 1px solid #e8ecf0 !important;
     vertical-align: middle !important;
     font-size: .58rem !important;
-    line-height: 1.2 !important;
+    line-height: 1.08 !important;
   }
   /* Manager + track tds: vertical-align middle so both blocks center together */
   html body.sb-printing .sandbox-cat-table td:nth-child(2),
@@ -19729,9 +19729,9 @@ html body .sandbox-track-id {
     display: flex !important;
     flex-direction: column !important;
     align-items: flex-start !important;
-    gap: 1px !important;
+    gap: 0 !important;
     white-space: normal !important;
-    line-height: 1.2 !important;
+    line-height: 1.05 !important;
     min-width: 50px !important;
     max-width: 90px !important;
   }
@@ -19741,7 +19741,7 @@ html body .sandbox-track-id {
     display: block !important;
     padding: 0 !important;
     margin: 0 !important;
-    line-height: 1.2 !important;
+    line-height: 1.05 !important;
     white-space: normal !important;
   }
   html body.sb-printing .sandbox-track-link {
