@@ -6534,9 +6534,11 @@ const App = (() => {
 
   function setupPrintListeners() {
     window.addEventListener('beforeprint', function() {
+      if (document.body.classList.contains('sb-compare-printing')) return;
       _sbInjectPrintState();
     });
     window.addEventListener('afterprint', function() {
+      if (document.body.classList.contains('sb-compare-printing')) return;
       _sbCleanupPrintState();
     });
   }
