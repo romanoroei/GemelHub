@@ -19541,7 +19541,7 @@ html body .sandbox-track-id {
 
 /* ── Print styles ── */
 @media print {
-  @page { size: A4 portrait; margin: 12mm 15mm; }
+  @page { size: A4 portrait; margin: 8mm 8mm; }
 
   /* ── Force background colors & images to print ── */
   body.sb-printing,
@@ -19737,6 +19737,19 @@ html body .sandbox-track-id {
     display: block !important;
   }
   body.sb-printing .sandbox-track-id-icons { display: none !important; }
+  /* Compact track/provider cells to reduce row height */
+  body.sb-printing .sandbox-track-link,
+  body.sb-printing .sandbox-provider-link {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  body.sb-printing .sandbox-track-id {
+    margin-top: 1px !important;
+    line-height: 1 !important;
+  }
+  /* Hide allocation bars — makes cells narrower so table fits on page */
+  body.sb-printing .exp-bar-bg { display: none !important; }
+  body.sb-printing .exp-wrap { gap: 2px !important; min-width: 0 !important; }
   /* Returns: same size as track name */
   body.sb-printing .sandbox-cat-table .sb-yield-col {
     font-size: .62rem !important;
