@@ -19616,25 +19616,38 @@ html body .sandbox-track-id {
   }
 
   /* ── Hide interactive & chrome elements ── */
-  body.sb-printing .sandbox-page-actions,
-  body.sb-printing .sandbox-page-header,
-  body.sb-printing .sandbox-remove-btn,
-  body.sb-printing .sandbox-cat-add-btn,
-  body.sb-printing .sandbox-invest-toggle,
-  body.sb-printing .sandbox-cat-mode-toggle,
-  body.sb-printing .sandbox-print-btn,
-  body.sb-printing .sandbox-share-btn,
-  body.sb-printing .sandbox-value-bar,
-  body.sb-printing .sandbox-bar-chips,
-  body.sb-printing .sb-save-section,
-  body.sb-printing .sb-load-section,
-  body.sb-printing .mobile-app-nav,
-  body.sb-printing .sticky-header,
-  body.sb-printing .hero-banner,
-  body.sb-printing #mobile-options-sheet,
-  body.sb-printing #cookie-notice,
-  body.sb-printing .sb-dialog-overlay,
-  body.sb-printing .sb-returns-hero-bg { display: none !important; }
+  /* Use html+body prefix and ID selectors to beat mobile-specific !important rules */
+  html body.sb-printing .sandbox-page-actions,
+  html body.sb-printing .sandbox-page-header,
+  html body.sb-printing .sandbox-remove-btn,
+  html body.sb-printing .sandbox-cat-add-btn,
+  html body.sb-printing .sandbox-invest-toggle,
+  html body.sb-printing .sandbox-cat-mode-toggle,
+  html body.sb-printing .sandbox-print-btn,
+  html body.sb-printing .sandbox-share-btn,
+  html body.sb-printing .sandbox-value-bar,
+  html body.sb-printing #sandbox-value-bar,
+  html body.sb-printing #sandbox-section .sandbox-value-bar,
+  html body.sb-printing .sandbox-bar-chips,
+  html body.sb-printing .sb-save-section,
+  html body.sb-printing .sb-load-section,
+  html body.sb-printing .mobile-app-nav,
+  html body.sb-printing .sticky-header,
+  html body.sb-printing .hero-banner,
+  html body.sb-printing #mobile-options-sheet,
+  html body.sb-printing #cookie-notice,
+  html body.sb-printing .sb-dialog-overlay,
+  html body.sb-printing .sb-returns-hero-bg { display: none !important; }
+  /* Also reset position so fixed/sticky elements don't overlay content */
+  html body.sb-printing .sandbox-page-header,
+  html body.sb-printing #sandbox-value-bar,
+  html body.sb-printing .sandbox-value-bar {
+    position: static !important;
+    z-index: auto !important;
+  }
+  html body.sb-printing #sandbox-section {
+    padding: 0 !important;
+  }
 
   /* ── Tables ── */
   body.sb-printing .sandbox-cat-table-wrap {
