@@ -10277,6 +10277,29 @@ body.h2h-active,
   border-radius: 6px;
   padding: 2px 8px;
 }
+.svb-rename-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: .55;
+  padding: 0 0 0 4px;
+  vertical-align: middle;
+  color: inherit;
+  line-height: 1;
+  transition: opacity .15s;
+}
+.svb-rename-btn:hover { opacity: 1; }
+.svb-rename-input {
+  background: rgba(255,255,255,.15);
+  border: 1.5px solid rgba(255,255,255,.5);
+  border-radius: 4px;
+  color: inherit;
+  font-size: .88rem;
+  font-weight: 900;
+  outline: none;
+  padding: 1px 6px;
+  width: 140px;
+}
 .svb-pname-c0 { background: rgba(99,102,241,.45);  border: 1.5px solid #818cf8; color: #e0e7ff; }
 .svb-pname-c1 { background: rgba(8,145,178,.45);   border: 1.5px solid #67e8f9; color: #cffafe; }
 .svb-pname-c2 { background: rgba(22,163,74,.45);   border: 1.5px solid #86efac; color: #dcfce7; }

@@ -653,6 +653,7 @@ const App = (() => {
     _sbCheckUrlHash();
     setupSandboxCheckboxes();
     setupSandboxBarActions();
+    setupValueBarRename();
     setupSandboxPortfolioDialogs();
     window.addEventListener('resize', syncTracksDensityClasses);
     window.addEventListener('resize', updateStickyGapMask);
@@ -5505,6 +5506,44 @@ const App = (() => {
     });
   }
 
+  function setupValueBarRename() {
+    const vbar = document.getElementById('sandbox-value-bar');
+    if (!vbar) return;
+    vbar.addEventListener('click', e => {
+      const btn = e.target.closest('.svb-rename-btn');
+      if (!btn) return;
+      const nameSpan = btn.closest('.svb-portfolio-name');
+      if (!nameSpan || nameSpan.querySelector('.svb-rename-input')) return;
+      const currentName = state.sandbox.portfolioName || '';
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'svb-rename-input';
+      input.value = currentName;
+      input.maxLength = 40;
+      nameSpan.innerHTML = '';
+      nameSpan.appendChild(input);
+      input.focus();
+      input.select();
+      const commit = () => {
+        const newName = input.value.trim();
+        if (newName && newName !== currentName) {
+          state.sandbox.portfolioName = newName;
+          localStorage.setItem(SANDBOX_NAME_KEY, newName);
+          // also update saved portfolio if one is loaded
+          const loaded = _sbGetSavedPortfolios();
+          const idx = loaded.findIndex(p => p.name === currentName);
+          if (idx >= 0) { loaded[idx].name = newName; _sbPutSavedPortfolios(loaded); }
+        }
+        _sbUpdateValueBar(state.sandbox.portfolio);
+      };
+      input.addEventListener('blur', commit);
+      input.addEventListener('keydown', ev => {
+        if (ev.key === 'Enter') { ev.preventDefault(); input.blur(); }
+        if (ev.key === 'Escape') { input.removeEventListener('blur', commit); _sbUpdateValueBar(state.sandbox.portfolio); }
+      });
+    });
+  }
+
   function _sbDefaultFee(catId) {
     if (catId === 'pension_mekafit' || catId === 'pension_mashlima') return '0.15';
     if (catId === 'polisa_chisachon') return '0.95';
@@ -6109,7 +6148,7 @@ const App = (() => {
     const _pci = state.sandbox.portfolioColorIdx;
     const _pColorCls = (_pci >= 0) ? ' svb-pname-c' + _pci : '';
     const portfolioNameLabel = state.sandbox.portfolioName
-      ? `<span class="svb-portfolio-name${_pColorCls}">${state.sandbox.portfolioName}</span>`
+      ? `<span class="svb-portfolio-name${_pColorCls}">${state.sandbox.portfolioName}<button type="button" class="svb-rename-btn" title="שנה שם תיק"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="13" height="13"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg></button></span>`
       : '';
     const totalLine = allInvestedAsAmount && totalAmount > 0
       ? `<span class="svb-total-row">${portfolioNameLabel}<span class="svb-total-label">שווי התיק שלי</span><span class="svb-total-amount">${Math.round(totalAmount).toLocaleString('he-IL')} ש"ח</span></span>`
