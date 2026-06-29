@@ -19767,7 +19767,30 @@ html body .sandbox-track-id {
     line-height: 1.1 !important;
     font-size: .50rem !important;
   }
-  html body.sb-printing .sandbox-track-id-icons { display: none !important; }
+  html body.sb-printing .sandbox-track-id-icons {
+    display: inline-flex !important;
+    gap: 2px !important;
+    vertical-align: middle !important;
+    align-items: center !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+  html body.sb-printing .sandbox-track-id-icons .table-allocation-icon-abroad,
+  html body.sb-printing .sandbox-track-id-icons .table-allocation-icon-fx,
+  html body.sb-printing .sandbox-track-id-icons .table-allocation-icon-shekel,
+  html body.sb-printing .sandbox-track-id-icons .table-allocation-warning {
+    width: 11px !important;
+    height: 11px !important;
+  }
+  html body.sb-printing .sandbox-track-id-icons .table-allocation-icon-us,
+  html body.sb-printing .sandbox-track-id-icons .table-allocation-flag-il {
+    width: 14px !important;
+    height: 10px !important;
+  }
+  /* Track column — align to top so number+icons sit tight under track name */
+  html body.sb-printing .sandbox-cat-table td:nth-child(3) {
+    vertical-align: top !important;
+  }
   /* Restore allocation bars in table cells — slim 18px bar */
   html body.sb-printing .exp-bar-bg {
     display: block !important;
