@@ -19726,12 +19726,9 @@ html body .sandbox-track-id {
     max-width: 90px !important;
   }
   html body.sb-printing .sandbox-track-cell {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 0 !important;
+    display: block !important;
     white-space: normal !important;
-    line-height: 1.05 !important;
+    line-height: 1 !important;
     min-width: 50px !important;
     max-width: 90px !important;
   }
