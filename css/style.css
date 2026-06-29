@@ -19630,6 +19630,8 @@ html body .sandbox-track-id {
     color: #1a3560 !important;
     letter-spacing: -.5px !important;
     white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    overflow: visible !important;
   }
   body.sb-printing .sb-print-logo span { color: #6c3fc5 !important; }
   body.sb-printing .sb-print-portfolio-title {
@@ -19695,7 +19697,7 @@ html body .sandbox-track-id {
     padding: 2px 3px !important;
     white-space: nowrap !important;
     border-bottom: 1px solid #c8d0da !important;
-    vertical-align: top !important;
+    vertical-align: middle !important;
     font-size: .60rem !important;
     line-height: 1.2 !important;
   }
@@ -19703,7 +19705,7 @@ html body .sandbox-track-id {
     padding: 2px 3px !important;
     white-space: nowrap !important;
     border-bottom: 1px solid #e8ecf0 !important;
-    vertical-align: top !important;
+    vertical-align: middle !important;
     font-size: .58rem !important;
     line-height: 1.2 !important;
   }
@@ -19716,7 +19718,6 @@ html body .sandbox-track-id {
     line-height: 1.2 !important;
     min-width: 50px !important;
     max-width: 90px !important;
-    align-items: flex-start !important;
   }
   html body.sb-printing .sandbox-provider-link {
     font-size: .66rem !important;
@@ -19736,11 +19737,11 @@ html body .sandbox-track-id {
   html body.sb-printing .sandbox-track-number {
     font-size: .44rem !important;
     display: block !important;
-    margin-top: 1px !important;
+    margin-top: 0 !important;
     line-height: 1.1 !important;
   }
   html body.sb-printing .sandbox-track-id {
-    margin-top: 1px !important;
+    margin-top: 0 !important;
     line-height: 1.1 !important;
     font-size: .44rem !important;
   }
@@ -19773,10 +19774,14 @@ html body .sandbox-track-id {
   html body.sb-printing .sandbox-fee-input {
     display: inline !important;
     width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
     font-size: .60rem !important;
     text-align: center !important;
   }
   html body.sb-printing .sandbox-invest-input {
+    height: auto !important;
+    min-height: 0 !important;
     font-size: .60rem !important;
     text-align: center !important;
   }
@@ -19892,7 +19897,7 @@ html body .sandbox-track-id {
   body.sb-printing .sb-allocation-track {
     overflow: hidden !important;
   }
-  body.sb-printing .sb-allocation-bg-icon { display: none !important; }
+  body.sb-printing .sb-allocation-bg-icon { display: inline !important; }
   body.sb-printing .sb-allocation-text {
     white-space: nowrap !important;
     font-size: .68rem !important;
@@ -19979,6 +19984,17 @@ html body .sandbox-track-id {
   body.sb-printing .sb-dn-value { font-size: 1.05rem !important; }
 
   /* ── Prevent blank second page ── */
+  html body.sb-printing {
+    min-height: 0 !important;
+    height: auto !important;
+  }
+  body.sb-printing > .page-body {
+    min-height: 0 !important;
+    height: auto !important;
+  }
+  body.sb-printing main {
+    min-height: 0 !important;
+  }
   html body.sb-printing #sandbox-section {
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
