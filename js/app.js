@@ -6839,14 +6839,36 @@ const App = (() => {
       '</div>' +
       content.innerHTML +
       '<div class="sb-print-disclaimer">המידע נועד לספק תמונת מצב כללית והשוואתית בלבד ואינו מהווה ייעוץ השקעות, שיווק פנסיוני או תחליף לייעוץ אישי המותאם לצרכי הלקוח. הנתונים מבוססים על מקורות פומביים ועשויים להכיל טעויות או אי-דיוקים. אין לראות בתשואות העבר התחייבות לתשואות עתידיות. לפני קבלת החלטה פיננסית מומלץ להתייעץ עם בעל רישיון.</div>';
+
+    // Hide all body children except print area — works on mobile even without @media print support
+    var hiddenEls = [];
+    Array.from(document.body.children).forEach(function(el) {
+      if (el.id !== 'sb-compare-print-area' && el.tagName !== 'SCRIPT' && el.tagName !== 'LINK') {
+        hiddenEls.push({ el: el, prev: el.style.display });
+        el.style.display = 'none';
+      }
+    });
+    printArea.style.display = 'block';
     if (dlg) dlg.hidden = true;
     document.body.classList.add('sb-compare-printing');
-    window.addEventListener('afterprint', function cleanup() {
+
+    function restoreCompare() {
       document.body.classList.remove('sb-compare-printing');
+      hiddenEls.forEach(function(o) { o.el.style.display = o.prev; });
+      printArea.style.display = '';
       printArea.innerHTML = '';
       if (dlg) dlg.hidden = false;
+    }
+
+    window.addEventListener('afterprint', function cleanup() {
+      restoreCompare();
       window.removeEventListener('afterprint', cleanup);
     });
+    // Fallback: restore if afterprint never fires (some mobile browsers)
+    setTimeout(function() {
+      if (document.body.classList.contains('sb-compare-printing')) restoreCompare();
+    }, 8000);
+
     setTimeout(function() { window.print(); }, 80);
   }
 
