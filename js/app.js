@@ -6826,6 +6826,7 @@ const App = (() => {
   function _sbPrintCompare() {
     const content = document.getElementById('sb-compare-content');
     const printArea = document.getElementById('sb-compare-print-area');
+    const dlg = document.getElementById('sb-compare-dialog');
     if (!content || !printArea) return;
     const now = new Date();
     const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -6838,13 +6839,15 @@ const App = (() => {
       '</div>' +
       content.innerHTML +
       '<div class="sb-print-disclaimer">המידע נועד לספק תמונת מצב כללית והשוואתית בלבד ואינו מהווה ייעוץ השקעות, שיווק פנסיוני או תחליף לייעוץ אישי המותאם לצרכי הלקוח. הנתונים מבוססים על מקורות פומביים ועשויים להכיל טעויות או אי-דיוקים. אין לראות בתשואות העבר התחייבות לתשואות עתידיות. לפני קבלת החלטה פיננסית מומלץ להתייעץ עם בעל רישיון.</div>';
+    if (dlg) dlg.hidden = true;
     document.body.classList.add('sb-compare-printing');
     window.addEventListener('afterprint', function cleanup() {
       document.body.classList.remove('sb-compare-printing');
       printArea.innerHTML = '';
+      if (dlg) dlg.hidden = false;
       window.removeEventListener('afterprint', cleanup);
     });
-    window.print();
+    setTimeout(function() { window.print(); }, 80);
   }
 
   // Mini-encode a portfolio item to compact array (v2 format)
