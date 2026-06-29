@@ -7137,12 +7137,17 @@ const App = (() => {
 
     // Product categories
     const catMap = {};
-    portfolio.forEach((it, i) => { catMap[it.categoryId] = (catMap[it.categoryId] || 0) + weights[i]; });
+    const catAmountMap = {};
+    portfolio.forEach((it, i) => {
+      catMap[it.categoryId] = (catMap[it.categoryId] || 0) + weights[i];
+      const amt = it.investMode === 'amount' ? (parseFloat(String(it.investAmount).replace(/,/g, '')) || 0) : 0;
+      catAmountMap[it.categoryId] = (catAmountMap[it.categoryId] || 0) + amt;
+    });
     const catSegs = Object.entries(catMap)
       .sort((a, b) => b[1] - a[1])
       .map(([catId, w]) => {
         const cat = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === catId) || { label: catId, color: '#94a3b8' };
-        return { color: cat.color, pct: w * 100, label: cat.label };
+        return { color: cat.color, pct: w * 100, label: cat.label, amount: totalValue > 0 ? (catAmountMap[catId] || 0) : null };
       });
 
     _sbUpdateValueBar(portfolio, totalValue, catMap);
