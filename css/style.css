@@ -19695,7 +19695,7 @@ html body .sandbox-track-id {
     padding: 2px 3px !important;
     white-space: nowrap !important;
     border-bottom: 1px solid #c8d0da !important;
-    vertical-align: middle !important;
+    vertical-align: top !important;
     font-size: .60rem !important;
     line-height: 1.2 !important;
   }
@@ -19703,7 +19703,7 @@ html body .sandbox-track-id {
     padding: 2px 3px !important;
     white-space: nowrap !important;
     border-bottom: 1px solid #e8ecf0 !important;
-    vertical-align: middle !important;
+    vertical-align: top !important;
     font-size: .58rem !important;
     line-height: 1.2 !important;
   }
@@ -19716,6 +19716,7 @@ html body .sandbox-track-id {
     line-height: 1.2 !important;
     min-width: 50px !important;
     max-width: 90px !important;
+    align-items: flex-start !important;
   }
   html body.sb-printing .sandbox-provider-link {
     font-size: .66rem !important;
@@ -19735,18 +19736,23 @@ html body .sandbox-track-id {
   html body.sb-printing .sandbox-track-number {
     font-size: .44rem !important;
     display: block !important;
-    margin-top: 0 !important;
+    margin-top: 1px !important;
     line-height: 1.1 !important;
   }
   html body.sb-printing .sandbox-track-id {
-    margin-top: 0 !important;
+    margin-top: 1px !important;
     line-height: 1.1 !important;
     font-size: .44rem !important;
   }
   html body.sb-printing .sandbox-track-id-icons { display: none !important; }
-  /* Hide allocation bars to save column width */
-  html body.sb-printing .exp-bar-bg { display: none !important; }
-  html body.sb-printing .exp-wrap { gap: 1px !important; min-width: 0 !important; }
+  /* Restore allocation bars in table cells — slim 18px bar */
+  html body.sb-printing .exp-bar-bg {
+    display: block !important;
+    width: 18px !important;
+    height: 3px !important;
+    border-radius: 2px !important;
+  }
+  html body.sb-printing .exp-wrap { gap: 2px !important; min-width: 0 !important; align-items: center !important; }
   /* Returns */
   html body.sb-printing .sandbox-cat-table .sb-yield-col {
     font-size: .60rem !important;
@@ -19777,7 +19783,7 @@ html body .sandbox-track-id {
   /* מסלול column header + cells shift left */
   html body.sb-printing .sandbox-cat-table th:nth-child(3),
   html body.sb-printing .sandbox-cat-table td:nth-child(3) {
-    padding-right: 10px !important;
+    padding-right: 16px !important;
     padding-left: 2px !important;
   }
   /* Remove btn column: zero width in print */
@@ -19966,10 +19972,25 @@ html body .sandbox-track-id {
     border-radius: 8px !important;
     padding: 8px 14px !important;
     margin-top: 10px !important;
+    margin-bottom: 0 !important;
     page-break-inside: avoid !important;
   }
   body.sb-printing .sb-dn-label { font-size: .64rem !important; }
   body.sb-printing .sb-dn-value { font-size: 1.05rem !important; }
+
+  /* ── Prevent blank second page ── */
+  html body.sb-printing #sandbox-section {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+  html body.sb-printing .sb-dashboard {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
 }
 
 /* ── Mobile table row-height squeeze (overrides "polish pass" at ~12420) ── */
