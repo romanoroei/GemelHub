@@ -19550,6 +19550,18 @@ html body .sandbox-track-id {
     print-color-adjust: exact !important;
   }
 
+  /* ── Mobile resets: undo overflow-x:hidden, padding, and single-column layouts ── */
+  html, body {
+    overflow: visible !important;
+    max-width: none !important;
+  }
+  body.sb-printing .page-body {
+    padding-inline: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
   /* ── Show only the sandbox section (fix: sandbox-section is nested inside .page-body > main) ── */
   body.sb-printing > * { display: none !important; }
   body.sb-printing > .page-body { display: block !important; }
