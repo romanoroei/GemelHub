@@ -6863,29 +6863,16 @@ const App = (() => {
       if (dlg) dlg.hidden = false;
     }
 
-    // On desktop: afterprint fires AFTER the dialog closes — safe to restore immediately.
-    // On Android Chrome: afterprint fires IMMEDIATELY (before print capture) — must NOT restore here.
-    // We detect this by timing: if afterprint fires within 800ms of window.print(), it's mobile-early.
+    // Desktop: afterprint fires AFTER the user closes the print dialog (elapsed > 800ms) → restore quickly.
+    // Android: afterprint fires IMMEDIATELY after window.print() (elapsed < 800ms).
+    //   The print sheet captures the page content THEN opens — restoration 2s later is safe:
+    //   the capture already happened, and when the user returns the page is already in normal state.
     var _printCalledAt = 0;
     window.addEventListener('afterprint', function cleanup() {
       window.removeEventListener('afterprint', cleanup);
-      if (Date.now() - _printCalledAt > 800) {
-        // Desktop: afterprint fired after user closed the dialog
-        setTimeout(restoreCompare, 200);
-      }
-      // Mobile: afterprint fired immediately — restore will happen via visibilitychange instead
+      var elapsed = Date.now() - _printCalledAt;
+      setTimeout(restoreCompare, elapsed > 800 ? 200 : 2000);
     });
-
-    // Mobile restore: fires when user returns from the Android print sheet
-    document.addEventListener('visibilitychange', function onVisible() {
-      if (!document.hidden) {
-        document.removeEventListener('visibilitychange', onVisible);
-        setTimeout(restoreCompare, 400);
-      }
-    });
-
-    // Long fallback in case neither fires (e.g. browser blocks print)
-    setTimeout(restoreCompare, 30000);
 
     setTimeout(function() {
       _printCalledAt = Date.now();
