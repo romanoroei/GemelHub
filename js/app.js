@@ -6863,31 +6863,28 @@ const App = (() => {
       if (dlg) dlg.hidden = false;
     }
 
-    function _onReturnFromPrint() {
-      document.removeEventListener('visibilitychange', _onVisChange);
-      window.removeEventListener('focus', _onReturnFromPrint);
-      restoreCompare();
-    }
     function _onVisChange() {
-      if (!document.hidden) _onReturnFromPrint();
+      if (!document.hidden) {
+        document.removeEventListener('visibilitychange', _onVisChange);
+        // Double rAF: skip the first "reveal" frame so the restore paint is the first thing shown
+        requestAnimationFrame(function() { requestAnimationFrame(restoreCompare); });
+      }
     }
 
     // Desktop: afterprint fires after the user dismisses the print dialog → restore immediately.
-    // Android: afterprint fires immediately (before capture) → ignore it, wait for page-return events.
+    // Android: afterprint fires immediately (before capture) → ignore it, wait for visibilitychange.
     var _printCalledAt = 0;
     window.addEventListener('afterprint', function cleanup() {
       window.removeEventListener('afterprint', cleanup);
       if (Date.now() - _printCalledAt > 800) {
         // Desktop
         document.removeEventListener('visibilitychange', _onVisChange);
-        window.removeEventListener('focus', _onReturnFromPrint);
         setTimeout(restoreCompare, 200);
       }
     });
 
-    // Mobile: restore when the Android print sheet is dismissed and the page returns to foreground
+    // Mobile: restore when the Android print sheet is dismissed (page returns to foreground)
     document.addEventListener('visibilitychange', _onVisChange);
-    window.addEventListener('focus', _onReturnFromPrint);
 
     setTimeout(function() {
       _printCalledAt = Date.now();
