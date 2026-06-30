@@ -6852,7 +6852,10 @@ const App = (() => {
     if (dlg) dlg.hidden = true;
     document.body.classList.add('sb-compare-printing');
 
+    var _cmpRestored = false;
     function restoreCompare() {
+      if (_cmpRestored) return;
+      _cmpRestored = true;
       document.body.classList.remove('sb-compare-printing');
       hiddenEls.forEach(function(o) { o.el.style.display = o.prev; });
       printArea.style.display = '';
@@ -6860,14 +6863,17 @@ const App = (() => {
       if (dlg) dlg.hidden = false;
     }
 
+    // afterprint works on desktop; visibilitychange works on mobile (fires when user returns from print sheet)
     window.addEventListener('afterprint', function cleanup() {
-      restoreCompare();
       window.removeEventListener('afterprint', cleanup);
+      setTimeout(restoreCompare, 300);
     });
-    // Fallback: restore if afterprint never fires (some mobile browsers)
-    setTimeout(function() {
-      if (document.body.classList.contains('sb-compare-printing')) restoreCompare();
-    }, 8000);
+    document.addEventListener('visibilitychange', function onVisible() {
+      if (!document.hidden) {
+        document.removeEventListener('visibilitychange', onVisible);
+        setTimeout(restoreCompare, 300);
+      }
+    });
 
     setTimeout(function() { window.print(); }, 80);
   }
