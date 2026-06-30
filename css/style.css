@@ -19436,26 +19436,7 @@ html body .sandbox-track-id {
   text-align: center;
 }
 
-.sb-compare-print-close-btn {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  display: block;
-  width: 100%;
-  margin: 0 0 14px;
-  padding: 10px 14px;
-  font-size: .85rem;
-  font-weight: 800;
-  font-family: inherit;
-  color: #fff;
-  background: #1a3560;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
 @media print {
-  .sb-compare-print-close-btn { display: none !important; }
   body.sb-compare-printing > *:not(#sb-compare-print-area) { display: none !important; }
   body.sb-compare-printing {
     height: auto !important;
