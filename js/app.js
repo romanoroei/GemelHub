@@ -6258,9 +6258,13 @@ const App = (() => {
     container.innerHTML = list.map(item => {
       const tot = item.portfolio.reduce((s, it) => s + (parseFloat(it.investAmount) || 0), 0);
       const totStr = tot > 0 ? `<span dir="ltr">₪ ${Math.round(tot).toLocaleString('he-IL')}</span>` : '';
-      return `<button type="button" class="sb-update-item" data-update-id="${item.id}">
-        <span class="sb-update-item-name">${item.name}</span>
-        <span class="sb-saved-meta">${_sbFormatSavedDate(item.date)}${item.savedAt ? ' · ' + _sbFormatTime(item.savedAt) : ''} · ${item.portfolio.length} מסלולים${totStr ? ' · ' + totStr : ''}</span>
+      const itemIdAttr = ghEscapeAttr(item.id);
+      const itemNameHtml = escapeHtml(item.name);
+      const dateHtml = escapeHtml(_sbFormatSavedDate(item.date));
+      const timeHtml = escapeHtml(_sbFormatTime(item.savedAt));
+      return `<button type="button" class="sb-update-item" data-update-id="${itemIdAttr}">
+        <span class="sb-update-item-name">${itemNameHtml}</span>
+        <span class="sb-saved-meta">${dateHtml}${item.savedAt ? ' · ' + timeHtml : ''} · ${item.portfolio.length} מסלולים${totStr ? ' · ' + totStr : ''}</span>
       </button>`;
     }).join('');
     container.querySelectorAll('.sb-update-item').forEach(btn => {
@@ -6346,6 +6350,7 @@ const App = (() => {
 
     if (hasCurrent) {
       const curName   = currentName || 'תיק נוכחי';
+      const curNameHtml = escapeHtml(curName);
       const curTot    = state.sandbox.portfolio.reduce((s, it) => s + (parseFloat(it.investAmount) || 0), 0);
       const curTotStr = curTot > 0 ? '<span dir="ltr">₪\u202f' + Math.round(curTot).toLocaleString('he-IL') + '</span>' : '';
       const chk = canCompare
@@ -6355,14 +6360,15 @@ const App = (() => {
       const curModStr  = curLastMod
         ? _sbFormatSavedDate(curLastMod.split('T')[0]) + ' · ' + _sbFormatTime(curLastMod)
         : '';
+      const curModHtml = escapeHtml(curModStr);
       html += '<div class="sb-saved-item sb-saved-item--current">'
            + '<div class="sb-saved-item-info">' + chk
            + '<div class="sb-saved-item-text">'
-           + '<strong class="sb-saved-name">' + curName + '</strong>'
+           + '<strong class="sb-saved-name">' + curNameHtml + '</strong>'
            + ' <span class="sb-saved-current-badge">תיק פעיל</span>'
            + (curTotStr ? ' <span class="sb-saved-value-badge">' + curTotStr + '</span>' : '')
            + '<span class="sb-saved-meta">'
-           + (curModStr ? 'עדכון אחרון: ' + curModStr + ' · ' : '')
+           + (curModStr ? 'עדכון אחרון: ' + curModHtml + ' · ' : '')
            + state.sandbox.portfolio.length + ' מסלולים</span>'
            + '</div></div>'
            + '<div class="sb-saved-actions">'
@@ -6380,19 +6386,25 @@ const App = (() => {
       if (isCurrent) return; // already shown at top as __current__
       const colorCls = ITEM_COLORS[colorIdx % ITEM_COLORS.length];
       colorIdx++;
+      const itemIdAttr = ghEscapeAttr(item.id);
+      const itemNameHtml = escapeHtml(item.name);
+      const itemNameAttr = ghEscapeAttr(item.name);
+      const itemNotesHtml = escapeHtml(item.notes);
+      const itemDateHtml = escapeHtml(_sbFormatSavedDate(item.date));
+      const itemTimeHtml = escapeHtml(_sbFormatTime(item.savedAt));
       const chk = canCompare
-        ? '<label class="sb-compare-check-wrap"><input type="checkbox" class="sb-compare-check" data-compare-id="' + item.id + '" /></label>'
+        ? '<label class="sb-compare-check-wrap"><input type="checkbox" class="sb-compare-check" data-compare-id="' + itemIdAttr + '" /></label>'
         : '<span class="sb-compare-check-placeholder"></span>';
       html += '<div class="sb-saved-item ' + colorCls + '">'
            + '<div class="sb-saved-item-info">' + chk
-           + '<div class="sb-saved-item-text sb-load-area" data-load-id="' + item.id + '" role="button" tabindex="0" aria-label="טען תיק ' + item.name + '">'
-           + '<strong class="sb-saved-name">' + item.name + '</strong>'
+           + '<div class="sb-saved-item-text sb-load-area" data-load-id="' + itemIdAttr + '" role="button" tabindex="0" aria-label="טען תיק ' + itemNameAttr + '">'
+           + '<strong class="sb-saved-name">' + itemNameHtml + '</strong>'
            + (totStr ? ' <span class="sb-saved-value-badge">' + totStr + '</span>' : '')
-           + '<span class="sb-saved-meta">' + _sbFormatSavedDate(item.date) + (item.savedAt ? ' · ' + _sbFormatTime(item.savedAt) : '') + ' · ' + item.portfolio.length + ' מסלולים</span>'
-           + (item.notes ? '<span class="sb-saved-notes">' + item.notes + '</span>' : '')
+           + '<span class="sb-saved-meta">' + itemDateHtml + (item.savedAt ? ' · ' + itemTimeHtml : '') + ' · ' + item.portfolio.length + ' מסלולים</span>'
+           + (item.notes ? '<span class="sb-saved-notes">' + itemNotesHtml + '</span>' : '')
            + '</div></div>'
            + '<div class="sb-saved-actions">'
-           + '<button type="button" class="sb-delete-item-btn" data-delete-id="' + item.id + '"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>'
+           + '<button type="button" class="sb-delete-item-btn" data-delete-id="' + itemIdAttr + '"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>'
            + '</div></div>';
     });
     container.innerHTML = html;
@@ -6502,7 +6514,7 @@ const App = (() => {
     if (!_sbPrintHeader) {
       const now = new Date();
       const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
-      const portfolioName = state.sandbox.portfolioName || 'תיק השקעות';
+      const portfolioName = escapeHtml(state.sandbox.portfolioName || 'תיק השקעות');
       _sbPrintHeader = document.createElement('div');
       _sbPrintHeader.className = 'sb-print-report-header';
       _sbPrintHeader.innerHTML = `
@@ -6670,15 +6682,15 @@ const App = (() => {
       ['תשואה 3 שנים ממוצעת', fmt(s.avgY3)],
     ];
     const tableRows = rows.map(([label, val]) =>
-      `<tr><td>${label}</td><td>${val}</td></tr>`).join('');
+      `<tr><td>${escapeHtml(label)}</td><td>${escapeHtml(val)}</td></tr>`).join('');
     const trackList = portfolio.map(it =>
       `<div class="sb-compare-track-row">
-        <span class="sb-product-dot" style="background:${it.color || '#999'};width:8px;height:8px;border-radius:50%;flex-shrink:0"></span>
-        <span>${it.provider || ''} — ${it.trackLabel || it.fundName || ''}</span>
+        <span class="sb-product-dot" style="background:${ghEscapeAttr(it.color || '#999')};width:8px;height:8px;border-radius:50%;flex-shrink:0"></span>
+        <span>${escapeHtml(it.provider || '')} — ${escapeHtml(it.trackLabel || it.fundName || '')}</span>
       </div>`).join('');
     return `
       <div class="sb-compare-col">
-        <div class="sb-compare-col-head">${name}</div>
+        <div class="sb-compare-col-head">${escapeHtml(name)}</div>
         <table class="sb-compare-table"><tbody>${tableRows}</tbody></table>
         <div class="sb-compare-tracks">
           <div class="sb-compare-tracks-head">מסלולים בתיק</div>
@@ -6698,11 +6710,11 @@ const App = (() => {
     }));
     let tracksHtml = '<div class="sbcmp-section"><div class="sbcmp-section-head">מסלולים לפי קטגוריה</div>';
     Object.entries(allCats).forEach(([catId, catLabel]) => {
-      tracksHtml += '<div class="sbcmp-cat-block"><div class="sbcmp-cat-head">' + catLabel + '</div>';
+      tracksHtml += '<div class="sbcmp-cat-block"><div class="sbcmp-cat-head">' + escapeHtml(catLabel) + '</div>';
       tracksHtml += '<div class="sbcmp-cat-cols sbcmp-cat-cols-' + n + '">';
       tracksHtml += '<div class="sbcmp-col-name-row">';
       items.forEach((it, ci) => {
-        tracksHtml += '<div class="sbcmp-col-name sbcmp-col-' + ci + '">' + it.name + '</div>';
+        tracksHtml += '<div class="sbcmp-col-name sbcmp-col-' + ci + '">' + escapeHtml(it.name) + '</div>';
       });
       tracksHtml += '</div><div class="sbcmp-tracks-row">';
       items.forEach((it, ci) => {
@@ -6717,10 +6729,10 @@ const App = (() => {
             const pct    = catTot > 0 && tracks.length > 1 ? ' <strong class="sbcmp-pct">' + Math.round(amt / catTot * 100) + '%</strong>' : '';
             const amtStr = amt > 0 ? '<strong class="sbcmp-amt"><span dir="ltr">₪\u202f' + Math.round(amt).toLocaleString('he-IL') + '</span></strong>' : '';
             tracksHtml += '<div class="sbcmp-track-item">'
-              + '<span class="sbcmp-track-dot" style="background:' + (t.color || '#999') + '"></span>'
+              + '<span class="sbcmp-track-dot" style="background:' + ghEscapeAttr(t.color || '#999') + '"></span>'
               + '<div class="sbcmp-track-info">'
-              + '<div class="sbcmp-track-name">' + (t.provider || '')
-              + (t.trackLabel ? ' — ' + t.trackLabel : (t.fundName ? ' — ' + t.fundName : ''))
+              + '<div class="sbcmp-track-name">' + escapeHtml(t.provider || '')
+              + (t.trackLabel ? ' — ' + escapeHtml(t.trackLabel) : (t.fundName ? ' — ' + escapeHtml(t.fundName) : ''))
               + '</div>'
               + (amtStr || pct ? '<div class="sbcmp-track-meta">' + amtStr + pct + '</div>' : '')
               + '</div></div>';
@@ -6754,12 +6766,12 @@ const App = (() => {
 
     // ── Table builder helper
     const mkTable = (headLabel, rows) => {
-      let t = '<table class="sbcmp-table"><thead><tr><th>' + headLabel + '</th>';
-      items.forEach((it, ci) => { t += '<th class="sbcmp-th-' + ci + '">' + it.name + '</th>'; });
+      let t = '<table class="sbcmp-table"><thead><tr><th>' + escapeHtml(headLabel) + '</th>';
+      items.forEach((it, ci) => { t += '<th class="sbcmp-th-' + ci + '">' + escapeHtml(it.name) + '</th>'; });
       if (n === 2) t += '<th class="sbcmp-diff-head">הפרש</th>';
       t += '</tr></thead><tbody>';
       rows.forEach(row => {
-        t += '<tr><td class="sbcmp-row-label">' + row.label + '</td>';
+        t += '<tr><td class="sbcmp-row-label">' + escapeHtml(row.label) + '</td>';
         const vals = sums.map(s => s[row.key]);
         vals.forEach(v => { t += '<td>' + (v != null ? v.toFixed(row.dec || 2) + '%' : '—') + '</td>'; });
         if (n === 2 && vals[0] != null && vals[1] != null) {
@@ -6845,7 +6857,10 @@ const App = (() => {
     // יש לפתוח את window.open באופן סינכרוני בתוך מאזין הקליק (לא בתוך
     // setTimeout/Promise), אחרת חוסמי פופ-אפ במובייל יחסמו אותו.
     const win = window.open('', '_blank');
-    if (!win) { window.print(); return; }
+    if (!win) {
+      showToast('הדפסת ההשוואה דורשת אישור לפתיחת חלון חדש בדפדפן');
+      return;
+    }
 
     const headLinks = Array.from(document.querySelectorAll(
       'link[rel="stylesheet"][href*="style.css"], link[rel="stylesheet"][href*="fonts.googleapis.com"], link[rel="stylesheet"][href*="fontawesome"]'
@@ -6854,13 +6869,13 @@ const App = (() => {
     const html =
       '<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8">' +
       '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
-      '<title>' + title + '</title>' +
+      '<title>' + escapeHtml(title) + '</title>' +
       headLinks +
       '<style>body{margin:0;padding:0 8px;background:#fff;}</style>' +
       '</head><body>' +
         '<div class="sb-print-report-header">' +
           '<div class="sb-print-logo">Gemel<span>Hub</span> 💰</div>' +
-          '<div class="sb-print-portfolio-title">' + title + '</div>' +
+          '<div class="sb-print-portfolio-title">' + escapeHtml(title) + '</div>' +
           '<div class="sb-print-meta">הופק: ' + dateStr + '<br>רועי רומנו, מתכנן פיננסי וסוכן פנסיוני מורשה | 052-8089808</div>' +
         '</div>' +
         content.innerHTML +
