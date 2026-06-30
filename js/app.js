@@ -6866,7 +6866,7 @@ const App = (() => {
     function _onReturnFromPrint() {
       document.removeEventListener('visibilitychange', _onVisChange);
       window.removeEventListener('focus', _onReturnFromPrint);
-      setTimeout(restoreCompare, 150);
+      restoreCompare();
     }
     function _onVisChange() {
       if (!document.hidden) _onReturnFromPrint();
