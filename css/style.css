@@ -20156,6 +20156,11 @@ html body .sandbox-track-id {
   body.sb-compare-printing > * {
     display: none !important;
   }
+  body.sb-compare-printing.sb-printing > .page-body,
+  body.sb-compare-printing.sb-printing main,
+  body.sb-compare-printing.sb-printing #sandbox-section {
+    display: none !important;
+  }
   body.sb-compare-printing > #sb-compare-print-root {
     display: block !important;
     direction: rtl !important;

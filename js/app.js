@@ -6508,8 +6508,10 @@ const App = (() => {
   let _sbPrintFooter = null;
   let _sbComparePrintRoot = null;
   let _sbComparePrintCleanupTimer = null;
+  let _sbComparePrintInProgress = false;
 
   function _sbInjectPrintState() {
+    if (_sbComparePrintInProgress || document.body.classList.contains('sb-compare-printing')) return false;
     const section = document.getElementById('sandbox-section');
     if (!section || section.style.display === 'none') return false;
     _sbSyncVisibleInputsToState();
@@ -6550,7 +6552,7 @@ const App = (() => {
 
   function setupPrintListeners() {
     window.addEventListener('beforeprint', () => {
-      if (!document.body.classList.contains('sb-compare-printing')) _sbInjectPrintState();
+      if (!_sbComparePrintInProgress && !document.body.classList.contains('sb-compare-printing')) _sbInjectPrintState();
     });
     window.addEventListener('afterprint', _sbCleanupPrintState);
     window.addEventListener('afterprint', _sbCleanupComparePrintState);
@@ -6837,6 +6839,7 @@ const App = (() => {
   }
 
   function _sbCleanupComparePrintState() {
+    _sbComparePrintInProgress = false;
     document.body.classList.remove('sb-compare-printing');
     if (_sbComparePrintCleanupTimer) {
       clearTimeout(_sbComparePrintCleanupTimer);
@@ -6858,7 +6861,10 @@ const App = (() => {
     const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const title = document.getElementById('sb-compare-title')?.textContent || 'השוואת תיקים';
 
+    _sbComparePrintInProgress = true;
     _sbCleanupComparePrintState();
+    _sbComparePrintInProgress = true;
+    _sbCleanupPrintState();
     _sbComparePrintRoot = document.createElement('div');
     _sbComparePrintRoot.id = 'sb-compare-print-root';
     _sbComparePrintRoot.dir = 'rtl';
