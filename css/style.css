@@ -19391,6 +19391,51 @@ html body .sandbox-track-id {
 /* ── print compare dialog ── */
 #sb-compare-print-area { display: none; }
 
+/* Styles for compare print area — applied in normal CSS so mobile print (which may not run @media print) also picks them up */
+#sb-compare-print-area .sb-print-report-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #1a3560;
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+  direction: rtl;
+}
+#sb-compare-print-area .sb-print-logo {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #1a3560;
+  letter-spacing: -.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  overflow: visible;
+  margin-inline-start: 6px;
+}
+#sb-compare-print-area .sb-print-logo span { color: #6c3fc5; }
+#sb-compare-print-area .sb-print-portfolio-title {
+  font-size: .9rem;
+  font-weight: 800;
+  color: #1a3560;
+  text-align: center;
+}
+#sb-compare-print-area .sb-print-meta {
+  font-size: .65rem;
+  color: #64748b;
+  text-align: left;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+#sb-compare-print-area .sb-print-disclaimer {
+  margin-top: 18px;
+  border-top: 1px solid #dde3ea;
+  padding-top: 4px;
+  font-size: .44rem;
+  color: #94a3b8;
+  line-height: 1.5;
+  direction: rtl;
+  text-align: center;
+}
+
 @media print {
   body.sb-compare-printing > *:not(#sb-compare-print-area) { display: none !important; }
   body.sb-compare-printing {
