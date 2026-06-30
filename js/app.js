@@ -6834,6 +6834,7 @@ const App = (() => {
     const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const title = document.getElementById('sb-compare-title')?.textContent || 'השוואת תיקים';
     printArea.innerHTML =
+      '<button type="button" id="sb-compare-print-close" class="sb-compare-print-close-btn">✕ חזרה לאתר</button>' +
       '<div class="sb-print-report-header">' +
         '<div class="sb-print-logo">Gemel<span>Hub</span> 💰</div>' +
         '<div class="sb-print-portfolio-title">' + title + '</div>' +
@@ -6865,28 +6866,43 @@ const App = (() => {
       if (dlg) dlg.hidden = false;
     }
 
-    // Desktop: afterprint fires after the user dismisses the print dialog → restore immediately.
-    // Android: afterprint fires immediately (before capture) → ignore, use polling instead.
+    // Android's "Save as PDF" capture can happen asynchronously, at an
+    // unpredictable point after window.print() returns and even after the
+    // print sheet visually closes — auto-restoring (timers/polling/focus
+    // events) raced with that capture and sometimes grabbed the page mid-
+    // restore. So we no longer auto-restore: the user taps "חזרה לאתר"
+    // when actually done, which is the only signal guaranteed to come
+    // after the capture completed.
+    var closeBtn = document.getElementById('sb-compare-print-close');
+    if (closeBtn) closeBtn.addEventListener('click', restoreCompare);
+
+    // Hide the close button itself while the print/PDF capture is in
+    // flight, so it can't end up baked into the saved PDF on mobile
+    // (which may not honor @media print). Reveal it again once the page
+    // is visible — that doesn't affect content correctness, only when
+    // the button becomes tappable.
+    function showCloseBtn() {
+      document.removeEventListener('visibilitychange', showCloseBtn);
+      if (closeBtn && !_cmpRestored) closeBtn.style.visibility = 'visible';
+    }
+    document.addEventListener('visibilitychange', showCloseBtn);
+
+    // Desktop: afterprint fires reliably only after the user dismisses the
+    // print dialog, so it's safe to restore automatically there.
     var _printCalledAt = 0;
     window.addEventListener('afterprint', function cleanup() {
       window.removeEventListener('afterprint', cleanup);
+      showCloseBtn();
       if (Date.now() - _printCalledAt > 800) {
-        // Desktop: afterprint fired late = user closed dialog
         restoreCompare();
       }
     });
 
-    // Poll every 300ms: as soon as page is visible again after print, restore immediately
-    var _pollRestore = setInterval(function() {
-      if (_cmpRestored) { clearInterval(_pollRestore); return; }
-      // Wait at least 1s after print() before restoring (capture must complete first)
-      if (!document.hidden && _printCalledAt > 0 && Date.now() - _printCalledAt > 1000) {
-        clearInterval(_pollRestore);
-        restoreCompare();
-      }
-    }, 300);
+    // Safety net only (e.g. user navigates away without tapping the button).
+    setTimeout(restoreCompare, 120000);
 
     setTimeout(function() {
+      if (closeBtn) closeBtn.style.visibility = 'hidden';
       _printCalledAt = Date.now();
       window.print();
     }, 80);
