@@ -6509,6 +6509,8 @@ const App = (() => {
   let _sbComparePrintRoot = null;
   let _sbComparePrintCleanupTimer = null;
   let _sbComparePrintInProgress = false;
+  let _sbComparePrintOriginalNodes = null;
+  let _sbComparePrintScrollY = 0;
 
   function _sbInjectPrintState() {
     if (_sbComparePrintInProgress || document.body.classList.contains('sb-compare-printing')) return false;
@@ -6849,6 +6851,11 @@ const App = (() => {
       _sbComparePrintRoot.parentNode.removeChild(_sbComparePrintRoot);
     }
     _sbComparePrintRoot = null;
+    if (_sbComparePrintOriginalNodes) {
+      document.body.replaceChildren(..._sbComparePrintOriginalNodes);
+      _sbComparePrintOriginalNodes = null;
+      window.scrollTo(0, _sbComparePrintScrollY || 0);
+    }
   }
 
   // הדפסת השוואה מתוך המסמך הראשי. במובייל הדפסה מחלון חדש עלולה להיתקע
@@ -6877,7 +6884,9 @@ const App = (() => {
       '</div>' +
       content.innerHTML +
       '<div class="sb-print-disclaimer">המידע נועד לספק תמונת מצב כללית והשוואתית בלבד ואינו מהווה ייעוץ השקעות, שיווק פנסיוני או תחליף לייעוץ אישי המותאם לצרכי הלקוח. הנתונים מבוססים על מקורות פומביים ועשויים להכיל טעויות או אי-דיוקים. אין לראות בתשואות העבר התחייבות לתשואות עתידיות. לפני קבלת החלטה פיננסית מומלץ להתייעץ עם בעל רישיון.</div>';
-    document.body.appendChild(_sbComparePrintRoot);
+    _sbComparePrintScrollY = window.scrollY || 0;
+    _sbComparePrintOriginalNodes = Array.from(document.body.childNodes);
+    document.body.replaceChildren(_sbComparePrintRoot);
     document.body.classList.add('sb-compare-printing');
     void _sbComparePrintRoot.offsetHeight;
     try {
