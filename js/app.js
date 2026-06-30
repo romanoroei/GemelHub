@@ -6863,19 +6863,34 @@ const App = (() => {
       if (dlg) dlg.hidden = false;
     }
 
-    // afterprint works on desktop; visibilitychange works on mobile (fires when user returns from print sheet)
+    // On desktop: afterprint fires AFTER the dialog closes — safe to restore immediately.
+    // On Android Chrome: afterprint fires IMMEDIATELY (before print capture) — must NOT restore here.
+    // We detect this by timing: if afterprint fires within 800ms of window.print(), it's mobile-early.
+    var _printCalledAt = 0;
     window.addEventListener('afterprint', function cleanup() {
       window.removeEventListener('afterprint', cleanup);
-      setTimeout(restoreCompare, 300);
+      if (Date.now() - _printCalledAt > 800) {
+        // Desktop: afterprint fired after user closed the dialog
+        setTimeout(restoreCompare, 200);
+      }
+      // Mobile: afterprint fired immediately — restore will happen via visibilitychange instead
     });
+
+    // Mobile restore: fires when user returns from the Android print sheet
     document.addEventListener('visibilitychange', function onVisible() {
       if (!document.hidden) {
         document.removeEventListener('visibilitychange', onVisible);
-        setTimeout(restoreCompare, 300);
+        setTimeout(restoreCompare, 400);
       }
     });
 
-    setTimeout(function() { window.print(); }, 80);
+    // Long fallback in case neither fires (e.g. browser blocks print)
+    setTimeout(restoreCompare, 30000);
+
+    setTimeout(function() {
+      _printCalledAt = Date.now();
+      window.print();
+    }, 80);
   }
 
   // Mini-encode a portfolio item to compact array (v2 format)
