@@ -6535,14 +6535,8 @@ const App = (() => {
   }
 
   function setupPrintListeners() {
-    window.addEventListener('beforeprint', function() {
-      if (document.body.classList.contains('sb-compare-printing')) return;
-      _sbInjectPrintState();
-    });
-    window.addEventListener('afterprint', function() {
-      if (document.body.classList.contains('sb-compare-printing')) return;
-      _sbCleanupPrintState();
-    });
+    window.addEventListener('beforeprint', _sbInjectPrintState);
+    window.addEventListener('afterprint', _sbCleanupPrintState);
   }
 
   function _sbPrintSummary() {
@@ -6825,77 +6819,53 @@ const App = (() => {
     if (dlg) { dlg.hidden = true; document.body.style.overflow = ''; }
   }
 
+  // ההדפסה נפתחת בחלון/לשונית נפרדים, כדי שהדף המקורי לא ייגע בכלל —
+  // כך אין מה "לשחזר" אחרי ההדפסה ואין סיכון שהאתר הלא-מותאם יבהב
+  // לרגע במובייל בזמן שחוזרים מהדפסה/שיתוף.
   function _sbPrintCompare() {
     const content = document.getElementById('sb-compare-content');
-    const printArea = document.getElementById('sb-compare-print-area');
-    const dlg = document.getElementById('sb-compare-dialog');
-    if (!content || !printArea) return;
+    if (!content) return;
     const now = new Date();
     const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const title = document.getElementById('sb-compare-title')?.textContent || 'השוואת תיקים';
-    printArea.innerHTML =
-      '<div class="sb-print-report-header">' +
-        '<div class="sb-print-logo">Gemel<span>Hub</span> 💰</div>' +
-        '<div class="sb-print-portfolio-title">' + title + '</div>' +
-        '<div class="sb-print-meta">הופק: ' + dateStr + '<br>רועי רומנו, מתכנן פיננסי וסוכן פנסיוני מורשה | 052-8089808</div>' +
-      '</div>' +
-      content.innerHTML +
-      '<div class="sb-print-disclaimer">המידע נועד לספק תמונת מצב כללית והשוואתית בלבד ואינו מהווה ייעוץ השקעות, שיווק פנסיוני או תחליף לייעוץ אישי המותאם לצרכי הלקוח. הנתונים מבוססים על מקורות פומביים ועשויים להכיל טעויות או אי-דיוקים. אין לראות בתשואות העבר התחייבות לתשואות עתידיות. לפני קבלת החלטה פיננסית מומלץ להתייעץ עם בעל רישיון.</div>';
 
-    // Hide all body children except print area — works on mobile even without @media print support
-    var hiddenEls = [];
-    Array.from(document.body.children).forEach(function(el) {
-      if (el.id !== 'sb-compare-print-area' && el.tagName !== 'SCRIPT' && el.tagName !== 'LINK') {
-        hiddenEls.push({ el: el, prev: el.style.display });
-        el.style.display = 'none';
-      }
-    });
-    printArea.style.display = 'block';
-    if (dlg) dlg.hidden = true;
-    document.body.classList.add('sb-compare-printing');
+    // יש לפתוח את window.open באופן סינכרוני בתוך מאזין הקליק (לא בתוך
+    // setTimeout/Promise), אחרת חוסמי פופ-אפ במובייל יחסמו אותו.
+    const win = window.open('', '_blank');
+    if (!win) { window.print(); return; }
 
-    var _cmpRestored = false;
-    function restoreCompare() {
-      if (_cmpRestored) return;
-      _cmpRestored = true;
-      document.body.classList.remove('sb-compare-printing');
-      hiddenEls.forEach(function(o) { o.el.style.display = o.prev; });
-      printArea.style.display = '';
-      printArea.innerHTML = '';
-      if (dlg) dlg.hidden = false;
+    const styleLink = document.querySelector('link[rel="stylesheet"][href*="style.css"]');
+    const cssHref = styleLink ? styleLink.href : 'css/style.css';
+
+    const html =
+      '<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8">' +
+      '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+      '<title>' + title + '</title>' +
+      '<link rel="stylesheet" href="' + cssHref + '">' +
+      '<style>body{margin:0;padding:0 8px;background:#fff;}</style>' +
+      '</head><body>' +
+        '<div class="sb-print-report-header">' +
+          '<div class="sb-print-logo">Gemel<span>Hub</span> 💰</div>' +
+          '<div class="sb-print-portfolio-title">' + title + '</div>' +
+          '<div class="sb-print-meta">הופק: ' + dateStr + '<br>רועי רומנו, מתכנן פיננסי וסוכן פנסיוני מורשה | 052-8089808</div>' +
+        '</div>' +
+        content.innerHTML +
+        '<div class="sb-print-disclaimer">המידע נועד לספק תמונת מצב כללית והשוואתית בלבד ואינו מהווה ייעוץ השקעות, שיווק פנסיוני או תחליף לייעוץ אישי המותאם לצרכי הלקוח. הנתונים מבוססים על מקורות פומביים ועשויים להכיל טעויות או אי-דיוקים. אין לראות בתשואות העבר התחייבות לתשואות עתידיות. לפני קבלת החלטה פיננסית מומלץ להתייעץ עם בעל רישיון.</div>' +
+      '</body></html>';
+
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+
+    function doPrint() {
+      win.focus();
+      win.print();
     }
-
-    // Restore as soon as the print sheet actually closes. On Android the
-    // tab is hidden (document.hidden = true) for the whole time the print/
-    // share sheet is open, including while the PDF is being generated —
-    // visibilitychange back to visible only fires once that sheet is fully
-    // dismissed, by which point the capture is done. This is more reliable
-    // than afterprint, which on Android can fire immediately (before the
-    // capture even starts).
-    var _printCalledAt = 0;
-    document.addEventListener('visibilitychange', function onVis() {
-      if (!document.hidden && _printCalledAt > 0) {
-        document.removeEventListener('visibilitychange', onVis);
-        restoreCompare();
-      }
-    });
-
-    // Desktop: afterprint fires reliably only after the user dismisses the
-    // print dialog, so it's safe to restore automatically there too.
-    window.addEventListener('afterprint', function cleanup() {
-      window.removeEventListener('afterprint', cleanup);
-      if (Date.now() - _printCalledAt > 800) {
-        restoreCompare();
-      }
-    });
-
-    // Safety net only, in case neither event fires.
-    setTimeout(restoreCompare, 120000);
-
-    setTimeout(function() {
-      _printCalledAt = Date.now();
-      window.print();
-    }, 80);
+    if (win.document.readyState === 'complete') {
+      setTimeout(doPrint, 150);
+    } else {
+      win.addEventListener('load', function() { setTimeout(doPrint, 150); });
+    }
   }
 
   // Mini-encode a portfolio item to compact array (v2 format)
