@@ -20151,6 +20151,38 @@ html body .sandbox-track-id {
     min-height: 0 !important;
     height: auto !important;
   }
+
+  /* ── Compare print: print only the temporary compare report in the top-level document ── */
+  body.sb-compare-printing > * {
+    display: none !important;
+  }
+  body.sb-compare-printing > #sb-compare-print-root {
+    display: block !important;
+    direction: rtl !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #fff !important;
+    color: #0c2134 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  body.sb-compare-printing #sb-compare-print-root,
+  body.sb-compare-printing #sb-compare-print-root * {
+    visibility: visible !important;
+  }
+  body.sb-compare-printing #sb-compare-print-root .sb-print-disclaimer {
+    position: static !important;
+    margin-top: 14px !important;
+    border-top: 1px solid #dde3ea !important;
+    padding-top: 4px !important;
+    font-size: .50rem !important;
+    color: #94a3b8 !important;
+    line-height: 1.5 !important;
+    text-align: center !important;
+    background: #fff !important;
+  }
 }
 
 /* ── Mobile table row-height squeeze (overrides "polish pass" at ~12420) ── */

@@ -6506,6 +6506,8 @@ const App = (() => {
   // ── Print ──────────────────────────────────────────────────────────────────
   let _sbPrintHeader = null;
   let _sbPrintFooter = null;
+  let _sbComparePrintRoot = null;
+  let _sbComparePrintCleanupTimer = null;
 
   function _sbInjectPrintState() {
     const section = document.getElementById('sandbox-section');
@@ -6547,11 +6549,11 @@ const App = (() => {
   }
 
   function setupPrintListeners() {
-    // הדפסת ההשוואה (_sbPrintCompare) כבר לא נוגעת בדף הראשי בכלל
-    // (מודפסת מתוך iframe נפרד), אז אין יותר צורך בבדיקות הצולבות
-    // שהיו כאן בעבר בין שני סוגי ההדפסה.
-    window.addEventListener('beforeprint', _sbInjectPrintState);
+    window.addEventListener('beforeprint', () => {
+      if (!document.body.classList.contains('sb-compare-printing')) _sbInjectPrintState();
+    });
     window.addEventListener('afterprint', _sbCleanupPrintState);
+    window.addEventListener('afterprint', _sbCleanupComparePrintState);
   }
 
   function _sbPrintSummary() {
@@ -6834,19 +6836,21 @@ const App = (() => {
     if (dlg) { dlg.hidden = true; document.body.style.overflow = ''; }
   }
 
-  // הדפסת השוואה: בונים iframe נסתר עם מסמך עצמאי משלו (כולל קישור
-  // ל-style.css), ומדפיסים אותו ישירות (iframe.contentWindow.print()).
-  // הדף הראשי לא משתנה כלל — אין class לסגור, אין תוכן להסתיר/להחזיר,
-  // ולכן אין שום מירוץ תזמון אפשרי ואין "הבהוב" של האתר הלא-מותאם.
-  // הדפסת השוואה: חלון/לשונית נפרדים לגמרי (top-level browsing context
-  // אמיתי, לא iframe). התברר ש-iframe לא עבד: דפדפני מובייל רבים לא
-  // מדפיסים בפועל את תוכן ה-iframe אלא נופלים חזרה להדפסת העמוד הראשי
-  // (top-level document) ללא קשר לאיזה contentWindow קראנו ל-print()
-  // עליו — זו מגבלה ידועה שלא ניתן לעקוף. חלון נפרד הוא browsing
-  // context אמיתי, ולכן אין את הבעיה הזו. החלון נסגר אוטומטית אחרי
-  // ההדפסה (afterprint) כדי שהמשתמש לא יצטרך לנווט אחורה בעצמו, וכולל
-  // את כל גיליונות ה-CSS שהאתר טוען (כולל פונט Heebo ו-FontAwesome)
-  // כדי שהפורמט יהיה זהה לחלוטין לדף המקורי.
+  function _sbCleanupComparePrintState() {
+    document.body.classList.remove('sb-compare-printing');
+    if (_sbComparePrintCleanupTimer) {
+      clearTimeout(_sbComparePrintCleanupTimer);
+      _sbComparePrintCleanupTimer = null;
+    }
+    if (_sbComparePrintRoot && _sbComparePrintRoot.parentNode) {
+      _sbComparePrintRoot.parentNode.removeChild(_sbComparePrintRoot);
+    }
+    _sbComparePrintRoot = null;
+  }
+
+  // הדפסת השוואה מתוך המסמך הראשי. במובייל הדפסה מחלון חדש עלולה להיתקע
+  // בשלב "יוצר תצוגה מקדימה", לכן יוצרים אזור הדפסה זמני בדף הנוכחי
+  // ומדפיסים רק אותו באמצעות CSS ייעודי.
   function _sbPrintCompare() {
     const content = document.getElementById('sb-compare-content');
     if (!content) return;
@@ -6854,57 +6858,30 @@ const App = (() => {
     const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const title = document.getElementById('sb-compare-title')?.textContent || 'השוואת תיקים';
 
-    // יש לפתוח את window.open באופן סינכרוני בתוך מאזין הקליק (לא בתוך
-    // setTimeout/Promise), אחרת חוסמי פופ-אפ במובייל יחסמו אותו.
-    const win = window.open('', '_blank');
-    if (!win) {
-      showToast('הדפסת ההשוואה דורשת אישור לפתיחת חלון חדש בדפדפן');
-      return;
+    _sbCleanupComparePrintState();
+    _sbComparePrintRoot = document.createElement('div');
+    _sbComparePrintRoot.id = 'sb-compare-print-root';
+    _sbComparePrintRoot.dir = 'rtl';
+    _sbComparePrintRoot.style.display = 'none';
+    _sbComparePrintRoot.innerHTML =
+      '<div class="sb-print-report-header">' +
+        '<div class="sb-print-logo">Gemel<span>Hub</span> 💰</div>' +
+        '<div class="sb-print-portfolio-title">' + escapeHtml(title) + '</div>' +
+        '<div class="sb-print-meta">הופק: ' + dateStr + '<br>רועי רומנו, מתכנן פיננסי וסוכן פנסיוני מורשה | 052-8089808</div>' +
+      '</div>' +
+      content.innerHTML +
+      '<div class="sb-print-disclaimer">המידע נועד לספק תמונת מצב כללית והשוואתית בלבד ואינו מהווה ייעוץ השקעות, שיווק פנסיוני או תחליף לייעוץ אישי המותאם לצרכי הלקוח. הנתונים מבוססים על מקורות פומביים ועשויים להכיל טעויות או אי-דיוקים. אין לראות בתשואות העבר התחייבות לתשואות עתידיות. לפני קבלת החלטה פיננסית מומלץ להתייעץ עם בעל רישיון.</div>';
+    document.body.appendChild(_sbComparePrintRoot);
+    document.body.classList.add('sb-compare-printing');
+    void _sbComparePrintRoot.offsetHeight;
+    try {
+      window.print();
+      _sbComparePrintCleanupTimer = setTimeout(_sbCleanupComparePrintState, 120000);
+    } catch (error) {
+      console.warn('Compare print failed', error);
+      _sbCleanupComparePrintState();
+      showToast('לא הצלחנו לפתוח את חלון ההדפסה. נסה שוב.');
     }
-
-    const headLinks = Array.from(document.querySelectorAll(
-      'link[rel="stylesheet"][href*="style.css"], link[rel="stylesheet"][href*="fonts.googleapis.com"], link[rel="stylesheet"][href*="fontawesome"]'
-    )).map(function(l) { return '<link rel="stylesheet" href="' + l.href + '">'; }).join('');
-
-    const html =
-      '<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8">' +
-      '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
-      '<title>' + escapeHtml(title) + '</title>' +
-      headLinks +
-      '<style>body{margin:0;padding:0 8px;background:#fff;}</style>' +
-      '</head><body>' +
-        '<div class="sb-print-report-header">' +
-          '<div class="sb-print-logo">Gemel<span>Hub</span> 💰</div>' +
-          '<div class="sb-print-portfolio-title">' + escapeHtml(title) + '</div>' +
-          '<div class="sb-print-meta">הופק: ' + dateStr + '<br>רועי רומנו, מתכנן פיננסי וסוכן פנסיוני מורשה | 052-8089808</div>' +
-        '</div>' +
-        content.innerHTML +
-        '<div class="sb-print-disclaimer">המידע נועד לספק תמונת מצב כללית והשוואתית בלבד ואינו מהווה ייעוץ השקעות, שיווק פנסיוני או תחליף לייעוץ אישי המותאם לצרכי הלקוח. הנתונים מבוססים על מקורות פומביים ועשויים להכיל טעויות או אי-דיוקים. אין לראות בתשואות העבר התחייבות לתשואות עתידיות. לפני קבלת החלטה פיננסית מומלץ להתייעץ עם בעל רישיון.</div>' +
-      '</body></html>';
-
-    win.document.open();
-    win.document.write(html);
-    win.document.close();
-
-    var _printed = false;
-    function doPrint() {
-      if (_printed) return;
-      _printed = true;
-      win.focus();
-      win.print();
-      // סגירה אוטומטית אחרי שהמשתמש סוגר את חלון ההדפסה — כך הוא חוזר
-      // ישר לדף המקורי בלי לנווט אחורה בעצמו.
-      win.addEventListener('afterprint', function() { win.close(); });
-      setTimeout(function() { try { win.close(); } catch (e) {} }, 120000); // רשת ביטחון
-    }
-
-    if (win.document.readyState === 'complete') {
-      setTimeout(doPrint, 200);
-    } else {
-      win.addEventListener('load', function() { setTimeout(doPrint, 200); });
-    }
-    // גיבוי נוסף: לא כל דפדפן מובייל יורה load באמינות אחרי document.write.
-    setTimeout(doPrint, 800);
   }
 
   // Mini-encode a portfolio item to compact array (v2 format)
