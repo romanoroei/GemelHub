@@ -19431,8 +19431,16 @@ html body .sandbox-track-id {
     letter-spacing: -.5px !important;
     white-space: nowrap !important;
     flex-shrink: 0 !important;
+    overflow: visible !important;
+    margin-inline-start: 6px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
-  body.sb-compare-printing .sb-print-logo span { color: #6c3fc5 !important; }
+  body.sb-compare-printing .sb-print-logo span {
+    color: #6c3fc5 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
   body.sb-compare-printing .sb-print-portfolio-title {
     font-size: .9rem !important;
     font-weight: 800 !important;
