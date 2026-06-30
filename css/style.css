@@ -19756,7 +19756,7 @@ html body .sandbox-track-id {
     position: static !important;
     z-index: auto !important;
   }
-  html body #sandbox-section {
+  html body:not(.sb-compare-printing) #sandbox-section {
     padding: 0 !important;
     display: block !important;
   }
