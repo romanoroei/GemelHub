@@ -6853,8 +6853,10 @@ const App = (() => {
 
     const iframe = document.createElement('iframe');
     // ממוקם מחוץ למסך (לא display:none — בחלק מהדפדפנים הדפסה מ-iframe
-    // עם display:none נכשלת בשקט), כך שהוא לעולם לא נראה למשתמש.
-    iframe.style.cssText = 'position:fixed; left:-10000px; top:0; width:1px; height:1px; border:0;';
+    // עם display:none נכשלת בשקט), כך שהוא לעולם לא נראה למשתמש. חשוב:
+    // גודל ממשי (לא 1x1px!) — דפדפנים רבים, בעיקר במובייל, לא מסוגלים
+    // לפרוס/להדפיס תוכן בתוך iframe שגודלו אפסי, גם אם print() נקרא.
+    iframe.style.cssText = 'position:fixed; left:-10000px; top:0; width:800px; height:1130px; border:0;';
     iframe.setAttribute('aria-hidden', 'true');
     document.body.appendChild(iframe);
 
@@ -6862,7 +6864,10 @@ const App = (() => {
       if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
     }
 
-    iframe.onload = function() {
+    var _printed = false;
+    function doPrint() {
+      if (_printed) return;
+      _printed = true;
       try {
         iframe.contentWindow.focus();
         iframe.contentWindow.print();
@@ -6875,7 +6880,11 @@ const App = (() => {
       // בנחת בלי לחשוש מ"הבהוב".
       iframe.contentWindow.addEventListener('afterprint', removeIframe);
       setTimeout(removeIframe, 120000); // רשת ביטחון
-    };
+    }
+
+    iframe.onload = doPrint;
+    // גיבוי: בחלק מדפדפני המובייל load לא תמיד יורה באמינות עבור srcdoc.
+    setTimeout(doPrint, 600);
 
     iframe.srcdoc = html;
   }
