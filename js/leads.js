@@ -111,6 +111,7 @@
       form.reset();
     }
     overlay.style.display = 'flex';
+    history.pushState({ sbDialog: 'leads' }, '');
     setTimeout(function() {
       var f = document.getElementById('consult-name');
       if (f) f.focus();

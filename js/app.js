@@ -6220,6 +6220,7 @@ const App = (() => {
     if (tabs) tabs.hidden = !hasSaved;
     _sbSetSaveMode('new');
     dialog.hidden = false;
+    history.pushState({ sbDialog: 'save' }, '');
     setTimeout(() => document.getElementById('sb-save-name')?.focus(), 60);
   }
 
@@ -6322,6 +6323,7 @@ const App = (() => {
     if (!dialog) return;
     _sbRenderLoadList();
     dialog.hidden = false;
+    history.pushState({ sbDialog: 'load' }, '');
   }
 
   function _sbCloseLoadDialog() {
@@ -6815,7 +6817,7 @@ const App = (() => {
     _sbCloseLoadDialog();
     _sbRenderCompare(items);
     const dlg = document.getElementById('sb-compare-dialog');
-    if (dlg) { dlg.hidden = false; document.body.style.overflow = 'hidden'; }
+    if (dlg) { dlg.hidden = false; document.body.style.overflow = 'hidden'; history.pushState({ sbDialog: 'compare' }, ''); }
   }
 
   function _sbCloseCompareDialog() {
@@ -6966,6 +6968,18 @@ const App = (() => {
     document.getElementById('sb-compare-dialog')?.addEventListener('click', e => { if (e.target === e.currentTarget) _sbCloseCompareDialog(); });
     // Enter key in save dialog
     document.getElementById('sb-save-name')?.addEventListener('keydown', e => { if (e.key === 'Enter') _sbDoSavePortfolio(); });
+
+    // Android back button: close open dialog instead of navigating away
+    window.addEventListener('popstate', function() {
+      const compareDialog = document.getElementById('sb-compare-dialog');
+      const saveDialog    = document.getElementById('sb-save-dialog');
+      const loadDialog    = document.getElementById('sb-load-dialog');
+      const leadsModal    = document.getElementById('modal-overlay');
+      if (compareDialog && !compareDialog.hidden)                        { _sbCloseCompareDialog(); return; }
+      if (saveDialog    && !saveDialog.hidden)                           { _sbCloseSaveDialog();    return; }
+      if (loadDialog    && !loadDialog.hidden)                           { _sbCloseLoadDialog();    return; }
+      if (leadsModal    && leadsModal.style.display !== 'none')          { leadsModal.style.display = 'none'; return; }
+    });
   }
   // ────────────────────────────────────────────────────────────────────────────
 
