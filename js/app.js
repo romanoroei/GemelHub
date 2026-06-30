@@ -6863,16 +6863,31 @@ const App = (() => {
       if (dlg) dlg.hidden = false;
     }
 
-    // Desktop: afterprint fires AFTER the user closes the print dialog (elapsed > 800ms) → restore quickly.
-    // Android: afterprint fires IMMEDIATELY after window.print() (elapsed < 800ms).
-    //   The print sheet captures the page content THEN opens — restoration 2s later is safe:
-    //   the capture already happened, and when the user returns the page is already in normal state.
+    function _onReturnFromPrint() {
+      document.removeEventListener('visibilitychange', _onVisChange);
+      window.removeEventListener('focus', _onReturnFromPrint);
+      setTimeout(restoreCompare, 150);
+    }
+    function _onVisChange() {
+      if (!document.hidden) _onReturnFromPrint();
+    }
+
+    // Desktop: afterprint fires after the user dismisses the print dialog → restore immediately.
+    // Android: afterprint fires immediately (before capture) → ignore it, wait for page-return events.
     var _printCalledAt = 0;
     window.addEventListener('afterprint', function cleanup() {
       window.removeEventListener('afterprint', cleanup);
-      var elapsed = Date.now() - _printCalledAt;
-      setTimeout(restoreCompare, elapsed > 800 ? 200 : 2000);
+      if (Date.now() - _printCalledAt > 800) {
+        // Desktop
+        document.removeEventListener('visibilitychange', _onVisChange);
+        window.removeEventListener('focus', _onReturnFromPrint);
+        setTimeout(restoreCompare, 200);
+      }
     });
+
+    // Mobile: restore when the Android print sheet is dismissed and the page returns to foreground
+    document.addEventListener('visibilitychange', _onVisChange);
+    window.addEventListener('focus', _onReturnFromPrint);
 
     setTimeout(function() {
       _printCalledAt = Date.now();
