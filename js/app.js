@@ -6866,8 +6866,7 @@ const App = (() => {
     function _onVisChange() {
       if (!document.hidden) {
         document.removeEventListener('visibilitychange', _onVisChange);
-        // Double rAF: skip the first "reveal" frame so the restore paint is the first thing shown
-        requestAnimationFrame(function() { requestAnimationFrame(restoreCompare); });
+        setTimeout(restoreCompare, 0);
       }
     }
 
@@ -6885,6 +6884,8 @@ const App = (() => {
 
     // Mobile: restore when the Android print sheet is dismissed (page returns to foreground)
     document.addEventListener('visibilitychange', _onVisChange);
+    // Fallback if visibilitychange never fires
+    setTimeout(function() { document.removeEventListener('visibilitychange', _onVisChange); restoreCompare(); }, 12000);
 
     setTimeout(function() {
       _printCalledAt = Date.now();

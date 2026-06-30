@@ -19407,8 +19407,9 @@ html body .sandbox-track-id {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 0 8px !important;
     overflow: visible !important;
+    box-sizing: border-box !important;
   }
   body.sb-compare-printing #sb-compare-print-area * {
     -webkit-print-color-adjust: exact !important;
