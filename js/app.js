@@ -6826,6 +6826,15 @@ const App = (() => {
   // ל-style.css), ומדפיסים אותו ישירות (iframe.contentWindow.print()).
   // הדף הראשי לא משתנה כלל — אין class לסגור, אין תוכן להסתיר/להחזיר,
   // ולכן אין שום מירוץ תזמון אפשרי ואין "הבהוב" של האתר הלא-מותאם.
+  // הדפסת השוואה: חלון/לשונית נפרדים לגמרי (top-level browsing context
+  // אמיתי, לא iframe). התברר ש-iframe לא עבד: דפדפני מובייל רבים לא
+  // מדפיסים בפועל את תוכן ה-iframe אלא נופלים חזרה להדפסת העמוד הראשי
+  // (top-level document) ללא קשר לאיזה contentWindow קראנו ל-print()
+  // עליו — זו מגבלה ידועה שלא ניתן לעקוף. חלון נפרד הוא browsing
+  // context אמיתי, ולכן אין את הבעיה הזו. החלון נסגר אוטומטית אחרי
+  // ההדפסה (afterprint) כדי שהמשתמש לא יצטרך לנווט אחורה בעצמו, וכולל
+  // את כל גיליונות ה-CSS שהאתר טוען (כולל פונט Heebo ו-FontAwesome)
+  // כדי שהפורמט יהיה זהה לחלוטין לדף המקורי.
   function _sbPrintCompare() {
     const content = document.getElementById('sb-compare-content');
     if (!content) return;
@@ -6833,13 +6842,20 @@ const App = (() => {
     const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const title = document.getElementById('sb-compare-title')?.textContent || 'השוואת תיקים';
 
-    const styleLink = document.querySelector('link[rel="stylesheet"][href*="style.css"]');
-    const cssHref = styleLink ? styleLink.href : 'css/style.css';
+    // יש לפתוח את window.open באופן סינכרוני בתוך מאזין הקליק (לא בתוך
+    // setTimeout/Promise), אחרת חוסמי פופ-אפ במובייל יחסמו אותו.
+    const win = window.open('', '_blank');
+    if (!win) { window.print(); return; }
+
+    const headLinks = Array.from(document.querySelectorAll(
+      'link[rel="stylesheet"][href*="style.css"], link[rel="stylesheet"][href*="fonts.googleapis.com"], link[rel="stylesheet"][href*="fontawesome"]'
+    )).map(function(l) { return '<link rel="stylesheet" href="' + l.href + '">'; }).join('');
 
     const html =
       '<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8">' +
       '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
-      '<link rel="stylesheet" href="' + cssHref + '">' +
+      '<title>' + title + '</title>' +
+      headLinks +
       '<style>body{margin:0;padding:0 8px;background:#fff;}</style>' +
       '</head><body>' +
         '<div class="sb-print-report-header">' +
@@ -6851,42 +6867,29 @@ const App = (() => {
         '<div class="sb-print-disclaimer">המידע נועד לספק תמונת מצב כללית והשוואתית בלבד ואינו מהווה ייעוץ השקעות, שיווק פנסיוני או תחליף לייעוץ אישי המותאם לצרכי הלקוח. הנתונים מבוססים על מקורות פומביים ועשויים להכיל טעויות או אי-דיוקים. אין לראות בתשואות העבר התחייבות לתשואות עתידיות. לפני קבלת החלטה פיננסית מומלץ להתייעץ עם בעל רישיון.</div>' +
       '</body></html>';
 
-    const iframe = document.createElement('iframe');
-    // ממוקם מחוץ למסך (לא display:none — בחלק מהדפדפנים הדפסה מ-iframe
-    // עם display:none נכשלת בשקט), כך שהוא לעולם לא נראה למשתמש. חשוב:
-    // גודל ממשי (לא 1x1px!) — דפדפנים רבים, בעיקר במובייל, לא מסוגלים
-    // לפרוס/להדפיס תוכן בתוך iframe שגודלו אפסי, גם אם print() נקרא.
-    iframe.style.cssText = 'position:fixed; left:-10000px; top:0; width:800px; height:1130px; border:0;';
-    iframe.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(iframe);
-
-    function removeIframe() {
-      if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
-    }
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
 
     var _printed = false;
     function doPrint() {
       if (_printed) return;
       _printed = true;
-      try {
-        iframe.contentWindow.focus();
-        iframe.contentWindow.print();
-      } catch (err) {
-        removeIframe();
-        return;
-      }
-      // מסירים את ה-iframe רק אחרי שהמשתמש סוגר את חלון ההדפסה (אצלו,
-      // לא אצלנו) — אין שום השפעה על הדף הראשי בינתיים, אז אפשר לחכות
-      // בנחת בלי לחשוש מ"הבהוב".
-      iframe.contentWindow.addEventListener('afterprint', removeIframe);
-      setTimeout(removeIframe, 120000); // רשת ביטחון
+      win.focus();
+      win.print();
+      // סגירה אוטומטית אחרי שהמשתמש סוגר את חלון ההדפסה — כך הוא חוזר
+      // ישר לדף המקורי בלי לנווט אחורה בעצמו.
+      win.addEventListener('afterprint', function() { win.close(); });
+      setTimeout(function() { try { win.close(); } catch (e) {} }, 120000); // רשת ביטחון
     }
 
-    iframe.onload = doPrint;
-    // גיבוי: בחלק מדפדפני המובייל load לא תמיד יורה באמינות עבור srcdoc.
-    setTimeout(doPrint, 600);
-
-    iframe.srcdoc = html;
+    if (win.document.readyState === 'complete') {
+      setTimeout(doPrint, 200);
+    } else {
+      win.addEventListener('load', function() { setTimeout(doPrint, 200); });
+    }
+    // גיבוי נוסף: לא כל דפדפן מובייל יורה load באמינות אחרי document.write.
+    setTimeout(doPrint, 800);
   }
 
   // Mini-encode a portfolio item to compact array (v2 format)
