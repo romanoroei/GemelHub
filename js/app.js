@@ -6535,17 +6535,19 @@ const App = (() => {
   }
 
   function setupPrintListeners() {
-    window.addEventListener('beforeprint', function() {
-      if (document.body.classList.contains('sb-compare-printing')) return;
-      _sbInjectPrintState();
-    });
-    window.addEventListener('afterprint', function() {
-      if (document.body.classList.contains('sb-compare-printing')) return;
-      _sbCleanupPrintState();
-    });
+    // אין כאן בדיקה של sb-compare-printing בכוונה: גם אם הדפסת ההשוואה
+    // השאירה את עצמה "תקועה" (כשל בניקוי), הזרקת/ניקוי מצב ההדפסה של
+    // התיק הרגיל חייבים לרוץ תמיד — אחרת ה-header/footer שמוזרקים
+    // לתיק נשארים תקועים בדף החי (לא רק בהדפסה), והכפתורים מעליהם זזים.
+    window.addEventListener('beforeprint', _sbInjectPrintState);
+    window.addEventListener('afterprint', _sbCleanupPrintState);
   }
 
   function _sbPrintSummary() {
+    // ניקוי הגנתי: אם הדפסת השוואה קודמת לא הצליחה לנקות את עצמה
+    // (sb-compare-printing נשאר תקוע), מנקים אותה כאן כדי שהדפסת
+    // התיק הרגיל לא תוצג כריקה/כהשוואה ישנה.
+    _sbForceCleanupComparePrint();
     if (_sbInjectPrintState()) window.print();
   }
 
@@ -6825,11 +6827,26 @@ const App = (() => {
     if (dlg) { dlg.hidden = true; document.body.style.overflow = ''; }
   }
 
+  // אם הדפסת השוואה קודמת נשארה "תקועה" (sb-compare-printing לא הוסר),
+  // כל הדפסה אחרת אחריה (כולל הדפסת תיק רגיל) תיראה שבורה — כי הכלל
+  // ב-CSS שמסתיר את כל הדף חוץ מאזור ההשוואה עדיין פעיל. פונקציה זו
+  // מנקה בכוח, ונקראת גם בתחילת הדפסת השוואה חדשה וגם בתחילת הדפסת תיק.
+  function _sbForceCleanupComparePrint() {
+    document.body.classList.remove('sb-compare-printing');
+    const printArea = document.getElementById('sb-compare-print-area');
+    if (printArea) printArea.innerHTML = '';
+    const dlg = document.getElementById('sb-compare-dialog');
+    if (dlg) dlg.hidden = true;
+  }
+
   function _sbPrintCompare() {
     const content = document.getElementById('sb-compare-content');
     const printArea = document.getElementById('sb-compare-print-area');
     const dlg = document.getElementById('sb-compare-dialog');
     if (!content || !printArea) return;
+
+    _sbForceCleanupComparePrint();
+
     const now = new Date();
     const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const title = document.getElementById('sb-compare-title')?.textContent || 'השוואת תיקים';
@@ -6859,13 +6876,20 @@ const App = (() => {
       if (dlg) dlg.hidden = false;
     }
 
-    // Restore as soon as the print sheet actually closes. On Android the
-    // tab is hidden (document.hidden = true) for the whole time the print/
-    // share sheet is open, including while the PDF is being generated —
-    // visibilitychange back to visible only fires once that sheet is fully
-    // dismissed, by which point the capture is done. This is more reliable
-    // than afterprint, which on Android can fire immediately (before the
-    // capture even starts).
+    // matchMedia('print') הוא האות הכי אמין לכניסה/יציאה ממצב הדפסה —
+    // הוא משקף את מצב הרינדור בפועל, ולא תלוי בכך שהדפדפן מטריד
+    // visibilitychange/afterprint בסדר "נכון" (כפי שקרה במובייל).
+    var mql = window.matchMedia ? window.matchMedia('print') : null;
+    function onMqlChange(e) {
+      if (!e.matches) restoreCompare();
+    }
+    if (mql) {
+      if (mql.addEventListener) mql.addEventListener('change', onMqlChange);
+      else if (mql.addListener) mql.addListener(onMqlChange);
+    }
+
+    // גיבוי: visibilitychange חוזר ל-visible רק אחרי שגיליון ההדפסה/שיתוף
+    // נסגר לגמרי במובייל — לרוב אחרי שהצילום כבר הושלם.
     var _printCalledAt = 0;
     document.addEventListener('visibilitychange', function onVis() {
       if (!document.hidden && _printCalledAt > 0) {
@@ -6874,8 +6898,7 @@ const App = (() => {
       }
     });
 
-    // Desktop: afterprint fires reliably only after the user dismisses the
-    // print dialog, so it's safe to restore automatically there too.
+    // גיבוי נוסף לדסקטופ: afterprint נורה בוודאות אחרי סגירת חלון ההדפסה.
     window.addEventListener('afterprint', function cleanup() {
       window.removeEventListener('afterprint', cleanup);
       if (Date.now() - _printCalledAt > 800) {
@@ -6883,7 +6906,7 @@ const App = (() => {
       }
     });
 
-    // Safety net only, in case neither event fires.
+    // רשת ביטחון אחרונה, למקרה ששום אירוע לא נורה.
     setTimeout(restoreCompare, 120000);
 
     setTimeout(function() {
