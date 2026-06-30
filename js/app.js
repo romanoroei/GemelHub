@@ -6535,28 +6535,14 @@ const App = (() => {
   }
 
   function setupPrintListeners() {
-    // beforeprint: בזמן הדפסת השוואה (sb-compare-printing) אסור להזריק
-    // גם את מצב ההדפסה של "תיק רגיל" — שתי המחלקות גם יחד גורמות
-    // לקונפליקט CSS שבו כללי ה-sb-printing "מנצחים" ומציגים את התיק
-    // במקום ההשוואה.
-    //
-    // afterprint: לעומת זאת, הניקוי תמיד חייב לרוץ ללא תנאי — גם אם
-    // sb-compare-printing עדיין דלוקה (כי הדפסת ההשוואה לא הספיקה
-    // לנקות את עצמה). קריאה ל-_sbCleanupPrintState כשלא הוזרק כלום
-    // היא no-op בטוחה; דילוג עליה הוא מה שגרם בעבר ל-header/footer
-    // להישאר תקועים בדף החי ולדחוף כפתורים למטה.
-    window.addEventListener('beforeprint', function() {
-      if (document.body.classList.contains('sb-compare-printing')) return;
-      _sbInjectPrintState();
-    });
+    // הדפסת ההשוואה (_sbPrintCompare) כבר לא נוגעת בדף הראשי בכלל
+    // (מודפסת מתוך iframe נפרד), אז אין יותר צורך בבדיקות הצולבות
+    // שהיו כאן בעבר בין שני סוגי ההדפסה.
+    window.addEventListener('beforeprint', _sbInjectPrintState);
     window.addEventListener('afterprint', _sbCleanupPrintState);
   }
 
   function _sbPrintSummary() {
-    // ניקוי הגנתי: אם הדפסת השוואה קודמת לא הצליחה לנקות את עצמה
-    // (sb-compare-printing נשאר תקוע), מנקים אותה כאן כדי שהדפסת
-    // התיק הרגיל לא תוצג כריקה/כהשוואה ישנה.
-    _sbForceCleanupComparePrint();
     if (_sbInjectPrintState()) window.print();
   }
 
@@ -6836,97 +6822,62 @@ const App = (() => {
     if (dlg) { dlg.hidden = true; document.body.style.overflow = ''; }
   }
 
-  // אם הדפסת השוואה קודמת נשארה "תקועה" (sb-compare-printing לא הוסר),
-  // כל הדפסה אחרת אחריה (כולל הדפסת תיק רגיל) תיראה שבורה — כי הכלל
-  // ב-CSS שמסתיר את כל הדף חוץ מאזור ההשוואה עדיין פעיל. פונקציה זו
-  // מנקה בכוח, ונקראת גם בתחילת הדפסת השוואה חדשה וגם בתחילת הדפסת תיק.
-  function _sbForceCleanupComparePrint() {
-    document.body.classList.remove('sb-compare-printing');
-    const printArea = document.getElementById('sb-compare-print-area');
-    if (printArea) printArea.innerHTML = '';
-    const dlg = document.getElementById('sb-compare-dialog');
-    if (dlg) dlg.hidden = true;
-  }
-
+  // הדפסת השוואה: בונים iframe נסתר עם מסמך עצמאי משלו (כולל קישור
+  // ל-style.css), ומדפיסים אותו ישירות (iframe.contentWindow.print()).
+  // הדף הראשי לא משתנה כלל — אין class לסגור, אין תוכן להסתיר/להחזיר,
+  // ולכן אין שום מירוץ תזמון אפשרי ואין "הבהוב" של האתר הלא-מותאם.
   function _sbPrintCompare() {
     const content = document.getElementById('sb-compare-content');
-    const printArea = document.getElementById('sb-compare-print-area');
-    const dlg = document.getElementById('sb-compare-dialog');
-    if (!content || !printArea) return;
-
-    _sbForceCleanupComparePrint();
-
+    if (!content) return;
     const now = new Date();
     const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const title = document.getElementById('sb-compare-title')?.textContent || 'השוואת תיקים';
-    printArea.innerHTML =
-      '<div class="sb-print-report-header">' +
-        '<div class="sb-print-logo">Gemel<span>Hub</span> 💰</div>' +
-        '<div class="sb-print-portfolio-title">' + title + '</div>' +
-        '<div class="sb-print-meta">הופק: ' + dateStr + '<br>רועי רומנו, מתכנן פיננסי וסוכן פנסיוני מורשה | 052-8089808</div>' +
-      '</div>' +
-      content.innerHTML +
-      '<div class="sb-print-disclaimer">המידע נועד לספק תמונת מצב כללית והשוואתית בלבד ואינו מהווה ייעוץ השקעות, שיווק פנסיוני או תחליף לייעוץ אישי המותאם לצרכי הלקוח. הנתונים מבוססים על מקורות פומביים ועשויים להכיל טעויות או אי-דיוקים. אין לראות בתשואות העבר התחייבות לתשואות עתידיות. לפני קבלת החלטה פיננסית מומלץ להתייעץ עם בעל רישיון.</div>';
 
-    // חשוב: כל ההסתרה/הצגה של תוכן הדף בזמן הדפסה קורית אך ורק דרך
-    // CSS בתוך @media print (ראו style.css, body.sb-compare-printing).
-    // אין כאן שום שינוי ב-style.display בתצוגת המסך הרגילה — ולכן
-    // אין מה "שיבהב": המסך שהמשתמש רואה בפועל לא משתנה כלל, חוץ
-    // מסגירת חלון ההשוואה עצמו (זה מצופה, כמו לחיצה על סגירה).
-    if (dlg) dlg.hidden = true;
-    document.body.classList.add('sb-compare-printing');
+    const styleLink = document.querySelector('link[rel="stylesheet"][href*="style.css"]');
+    const cssHref = styleLink ? styleLink.href : 'css/style.css';
 
-    var _cmpRestored = false;
-    var _printCalledAt = 0;
-    // הגנה חשובה: כל אות שמגיע פחות מ-800ms אחרי קריאת window.print()
-    // נחשב "מוקדם מדי" ומתעלמים ממנו — בדיוק כמו שקרה בעבר ל-afterprint
-    // במובייל, כל אחד מהאותות האלה עלול לירות לפני שהצילום בפועל הושלם.
-    function restoreCompare() {
-      if (_cmpRestored) return;
-      if (_printCalledAt > 0 && Date.now() - _printCalledAt < 800) return;
-      _cmpRestored = true;
-      document.body.classList.remove('sb-compare-printing');
-      printArea.innerHTML = '';
-      if (dlg) dlg.hidden = false;
+    const html =
+      '<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8">' +
+      '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+      '<link rel="stylesheet" href="' + cssHref + '">' +
+      '<style>body{margin:0;padding:0 8px;background:#fff;}</style>' +
+      '</head><body>' +
+        '<div class="sb-print-report-header">' +
+          '<div class="sb-print-logo">Gemel<span>Hub</span> 💰</div>' +
+          '<div class="sb-print-portfolio-title">' + title + '</div>' +
+          '<div class="sb-print-meta">הופק: ' + dateStr + '<br>רועי רומנו, מתכנן פיננסי וסוכן פנסיוני מורשה | 052-8089808</div>' +
+        '</div>' +
+        content.innerHTML +
+        '<div class="sb-print-disclaimer">המידע נועד לספק תמונת מצב כללית והשוואתית בלבד ואינו מהווה ייעוץ השקעות, שיווק פנסיוני או תחליף לייעוץ אישי המותאם לצרכי הלקוח. הנתונים מבוססים על מקורות פומביים ועשויים להכיל טעויות או אי-דיוקים. אין לראות בתשואות העבר התחייבות לתשואות עתידיות. לפני קבלת החלטה פיננסית מומלץ להתייעץ עם בעל רישיון.</div>' +
+      '</body></html>';
+
+    const iframe = document.createElement('iframe');
+    // ממוקם מחוץ למסך (לא display:none — בחלק מהדפדפנים הדפסה מ-iframe
+    // עם display:none נכשלת בשקט), כך שהוא לעולם לא נראה למשתמש.
+    iframe.style.cssText = 'position:fixed; left:-10000px; top:0; width:1px; height:1px; border:0;';
+    iframe.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(iframe);
+
+    function removeIframe() {
+      if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
     }
 
-    // matchMedia('print') משקף את מצב הרינדור בפועל ולא רק את האירועים
-    // beforeprint/afterprint — אות נוסף ואמין יחסית לכניסה/יציאה ממצב הדפסה.
-    var mql = window.matchMedia ? window.matchMedia('print') : null;
-    function onMqlChange(e) {
-      if (!e.matches) restoreCompare();
-    }
-    if (mql) {
-      if (mql.addEventListener) mql.addEventListener('change', onMqlChange);
-      else if (mql.addListener) mql.addListener(onMqlChange);
-    }
-
-    // גיבוי: visibilitychange חוזר ל-visible רק אחרי שגיליון ההדפסה/שיתוף
-    // נסגר לגמרי במובייל — לרוב אחרי שהצילום כבר הושלם.
-    document.addEventListener('visibilitychange', function onVis() {
-      if (!document.hidden && _printCalledAt > 0) {
-        document.removeEventListener('visibilitychange', onVis);
-        restoreCompare();
+    iframe.onload = function() {
+      try {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+      } catch (err) {
+        removeIframe();
+        return;
       }
-    });
+      // מסירים את ה-iframe רק אחרי שהמשתמש סוגר את חלון ההדפסה (אצלו,
+      // לא אצלנו) — אין שום השפעה על הדף הראשי בינתיים, אז אפשר לחכות
+      // בנחת בלי לחשוש מ"הבהוב".
+      iframe.contentWindow.addEventListener('afterprint', removeIframe);
+      setTimeout(removeIframe, 120000); // רשת ביטחון
+    };
 
-    // גיבוי נוסף לדסקטופ: afterprint נורה בוודאות אחרי סגירת חלון ההדפסה.
-    window.addEventListener('afterprint', function cleanup() {
-      window.removeEventListener('afterprint', cleanup);
-      restoreCompare();
-    });
-
-    // אם אות "מוקדם מדי" נחסם על ידי restoreCompare(), חייבים לנסות שוב
-    // מאוחר יותר — אחרת לא תהיה שחזור בכלל. ניסיון חוזר קבוע אחרי הסף.
-    setTimeout(restoreCompare, 900);
-
-    // רשת ביטחון אחרונה, למקרה ששום אות לא נורה.
-    setTimeout(restoreCompare, 120000);
-
-    setTimeout(function() {
-      _printCalledAt = Date.now();
-      window.print();
-    }, 80);
+    iframe.srcdoc = html;
   }
 
   // Mini-encode a portfolio item to compact array (v2 format)
