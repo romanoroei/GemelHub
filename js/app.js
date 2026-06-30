@@ -6535,11 +6535,20 @@ const App = (() => {
   }
 
   function setupPrintListeners() {
-    // אין כאן בדיקה של sb-compare-printing בכוונה: גם אם הדפסת ההשוואה
-    // השאירה את עצמה "תקועה" (כשל בניקוי), הזרקת/ניקוי מצב ההדפסה של
-    // התיק הרגיל חייבים לרוץ תמיד — אחרת ה-header/footer שמוזרקים
-    // לתיק נשארים תקועים בדף החי (לא רק בהדפסה), והכפתורים מעליהם זזים.
-    window.addEventListener('beforeprint', _sbInjectPrintState);
+    // beforeprint: בזמן הדפסת השוואה (sb-compare-printing) אסור להזריק
+    // גם את מצב ההדפסה של "תיק רגיל" — שתי המחלקות גם יחד גורמות
+    // לקונפליקט CSS שבו כללי ה-sb-printing "מנצחים" ומציגים את התיק
+    // במקום ההשוואה.
+    //
+    // afterprint: לעומת זאת, הניקוי תמיד חייב לרוץ ללא תנאי — גם אם
+    // sb-compare-printing עדיין דלוקה (כי הדפסת ההשוואה לא הספיקה
+    // לנקות את עצמה). קריאה ל-_sbCleanupPrintState כשלא הוזרק כלום
+    // היא no-op בטוחה; דילוג עליה הוא מה שגרם בעבר ל-header/footer
+    // להישאר תקועים בדף החי ולדחוף כפתורים למטה.
+    window.addEventListener('beforeprint', function() {
+      if (document.body.classList.contains('sb-compare-printing')) return;
+      _sbInjectPrintState();
+    });
     window.addEventListener('afterprint', _sbCleanupPrintState);
   }
 
