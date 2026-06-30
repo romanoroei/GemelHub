@@ -6863,29 +6863,26 @@ const App = (() => {
       if (dlg) dlg.hidden = false;
     }
 
-    function _onVisChange() {
-      if (!document.hidden) {
-        document.removeEventListener('visibilitychange', _onVisChange);
-        setTimeout(restoreCompare, 0);
-      }
-    }
-
     // Desktop: afterprint fires after the user dismisses the print dialog → restore immediately.
-    // Android: afterprint fires immediately (before capture) → ignore it, wait for visibilitychange.
+    // Android: afterprint fires immediately (before capture) → ignore, use polling instead.
     var _printCalledAt = 0;
     window.addEventListener('afterprint', function cleanup() {
       window.removeEventListener('afterprint', cleanup);
       if (Date.now() - _printCalledAt > 800) {
-        // Desktop
-        document.removeEventListener('visibilitychange', _onVisChange);
-        setTimeout(restoreCompare, 200);
+        // Desktop: afterprint fired late = user closed dialog
+        restoreCompare();
       }
     });
 
-    // Mobile: restore when the Android print sheet is dismissed (page returns to foreground)
-    document.addEventListener('visibilitychange', _onVisChange);
-    // Fallback if visibilitychange never fires
-    setTimeout(function() { document.removeEventListener('visibilitychange', _onVisChange); restoreCompare(); }, 12000);
+    // Poll every 300ms: as soon as page is visible again after print, restore immediately
+    var _pollRestore = setInterval(function() {
+      if (_cmpRestored) { clearInterval(_pollRestore); return; }
+      // Wait at least 1s after print() before restoring (capture must complete first)
+      if (!document.hidden && _printCalledAt > 0 && Date.now() - _printCalledAt > 1000) {
+        clearInterval(_pollRestore);
+        restoreCompare();
+      }
+    }, 300);
 
     setTimeout(function() {
       _printCalledAt = Date.now();
