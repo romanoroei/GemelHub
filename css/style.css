@@ -19393,12 +19393,22 @@ html body .sandbox-track-id {
 
 @media print {
   body.sb-compare-printing > *:not(#sb-compare-print-area) { display: none !important; }
+  body.sb-compare-printing {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
   body.sb-compare-printing #sb-compare-print-area {
     display: block !important;
     width: 100% !important;
     direction: rtl;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
   }
   body.sb-compare-printing #sb-compare-print-area * {
     -webkit-print-color-adjust: exact !important;
