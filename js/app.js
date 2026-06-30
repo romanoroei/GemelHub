@@ -6877,17 +6877,21 @@ const App = (() => {
     document.body.classList.add('sb-compare-printing');
 
     var _cmpRestored = false;
+    var _printCalledAt = 0;
+    // הגנה חשובה: כל אות שמגיע פחות מ-800ms אחרי קריאת window.print()
+    // נחשב "מוקדם מדי" ומתעלמים ממנו — בדיוק כמו שקרה בעבר ל-afterprint
+    // במובייל, כל אחד מהאותות האלה עלול לירות לפני שהצילום בפועל הושלם.
     function restoreCompare() {
       if (_cmpRestored) return;
+      if (_printCalledAt > 0 && Date.now() - _printCalledAt < 800) return;
       _cmpRestored = true;
       document.body.classList.remove('sb-compare-printing');
       printArea.innerHTML = '';
       if (dlg) dlg.hidden = false;
     }
 
-    // matchMedia('print') הוא האות הכי אמין לכניסה/יציאה ממצב הדפסה —
-    // הוא משקף את מצב הרינדור בפועל, ולא תלוי בכך שהדפדפן מטריד
-    // visibilitychange/afterprint בסדר "נכון" (כפי שקרה במובייל).
+    // matchMedia('print') משקף את מצב הרינדור בפועל ולא רק את האירועים
+    // beforeprint/afterprint — אות נוסף ואמין יחסית לכניסה/יציאה ממצב הדפסה.
     var mql = window.matchMedia ? window.matchMedia('print') : null;
     function onMqlChange(e) {
       if (!e.matches) restoreCompare();
@@ -6899,7 +6903,6 @@ const App = (() => {
 
     // גיבוי: visibilitychange חוזר ל-visible רק אחרי שגיליון ההדפסה/שיתוף
     // נסגר לגמרי במובייל — לרוב אחרי שהצילום כבר הושלם.
-    var _printCalledAt = 0;
     document.addEventListener('visibilitychange', function onVis() {
       if (!document.hidden && _printCalledAt > 0) {
         document.removeEventListener('visibilitychange', onVis);
@@ -6910,12 +6913,14 @@ const App = (() => {
     // גיבוי נוסף לדסקטופ: afterprint נורה בוודאות אחרי סגירת חלון ההדפסה.
     window.addEventListener('afterprint', function cleanup() {
       window.removeEventListener('afterprint', cleanup);
-      if (Date.now() - _printCalledAt > 800) {
-        restoreCompare();
-      }
+      restoreCompare();
     });
 
-    // רשת ביטחון אחרונה, למקרה ששום אירוע לא נורה.
+    // אם אות "מוקדם מדי" נחסם על ידי restoreCompare(), חייבים לנסות שוב
+    // מאוחר יותר — אחרת לא תהיה שחזור בכלל. ניסיון חוזר קבוע אחרי הסף.
+    setTimeout(restoreCompare, 900);
+
+    // רשת ביטחון אחרונה, למקרה ששום אות לא נורה.
     setTimeout(restoreCompare, 120000);
 
     setTimeout(function() {
