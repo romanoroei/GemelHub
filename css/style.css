@@ -19263,7 +19263,7 @@ html body .sandbox-track-id {
 }
 .sbcmp-cat-block { margin-bottom: 14px; }
 .sbcmp-cat-block:last-child { margin-bottom: 0; }
-.sbcmp-cat-head { font-size: .8rem; font-weight: 800; color: #64748b; margin-bottom: 6px; }
+.sbcmp-cat-head { font-size: .88rem; font-weight: 800; color: #0c2134; margin-bottom: 6px; }
 .sbcmp-cat-cols { display: flex; flex-direction: column; }
 .sbcmp-col-name-row { display: grid; gap: 6px; margin-bottom: 4px; }
 .sbcmp-col-name { font-size: .7rem; font-weight: 900; color: #fff; border-radius: 5px; padding: 3px 6px; text-align: center; }
@@ -19293,6 +19293,7 @@ html body .sandbox-track-id {
 .sbcmp-table td:first-child { text-align: right; font-weight: 800; color: #0c2134; }
 .sbcmp-table .pos { color: #16a34a; font-weight: 800; }
 .sbcmp-table .neg { color: #dc2626; font-weight: 800; }
+.sbcmp-table .sbcmp-best { background: #fef08a; border-radius: 4px; }
 .sbcmp-diff-head { background: #fef9ee !important; color: #b45309 !important; }
 .sbcmp-row-label { font-weight: 800 !important; color: #0c2134 !important; }
 
@@ -19451,9 +19452,9 @@ html body .sandbox-track-id {
     margin-bottom: 8px !important;
   }
   .sbcmp-cat-head {
-    font-size: .72rem !important;
+    font-size: .78rem !important;
     font-weight: 800 !important;
-    color: #64748b !important;
+    color: #0c2134 !important;
     margin-bottom: 4px !important;
   }
   .sbcmp-col-name {
@@ -19469,6 +19470,21 @@ html body .sandbox-track-id {
   .sbcmp-table { font-size: .68rem !important; }
   .sbcmp-table th { font-size: .62rem !important; padding: 4px 6px !important; }
   .sbcmp-table td { padding: 4px 6px !important; font-size: .65rem !important; }
+  .sbcmp-table .pos {
+    color: #16a34a !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .sbcmp-table .neg {
+    color: #dc2626 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .sbcmp-table .sbcmp-best {
+    background: #fef08a !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 }
 
 /* ── mobile sandbox track name overflow ── */

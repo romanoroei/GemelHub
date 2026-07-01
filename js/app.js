@@ -6774,6 +6774,8 @@ const App = (() => {
     tracksHtml += '</div>';
 
     // ── Table builder helper
+    // row.isReturn: מסמן שורת תשואה (לא ד"נ, לא חשיפה) — צובעים כל ערך
+    // בירוק/אדום לפי הסימן, ומסמנים את הערך הטוב יותר בין התיקים במרקר צהוב.
     const mkTable = (headLabel, rows) => {
       let t = '<table class="sbcmp-table"><thead><tr><th>' + escapeHtml(headLabel) + '</th>';
       items.forEach((it, ci) => { t += '<th class="sbcmp-th-' + ci + '">' + escapeHtml(it.name) + '</th>'; });
@@ -6782,11 +6784,17 @@ const App = (() => {
       rows.forEach(row => {
         t += '<tr><td class="sbcmp-row-label">' + escapeHtml(row.label) + '</td>';
         const vals = sums.map(s => s[row.key]);
-        vals.forEach(v => { t += '<td>' + (v != null ? v.toFixed(row.dec || 2) + '%' : '—') + '</td>'; });
+        const best = row.isReturn ? Math.max(...vals.filter(v => v != null)) : null;
+        vals.forEach(v => {
+          if (v == null) { t += '<td>—</td>'; return; }
+          const signCls = row.isReturn ? (v > 0.005 ? 'pos' : v < -0.005 ? 'neg' : '') : '';
+          const bestCls = row.isReturn && v === best ? ' sbcmp-best' : '';
+          t += '<td class="' + signCls + bestCls + '">' + v.toFixed(row.dec || 2) + '%</td>';
+        });
         if (n === 2 && vals[0] != null && vals[1] != null) {
           const d = vals[0] - vals[1];
           const cls = d > 0.005 ? 'pos' : d < -0.005 ? 'neg' : '';
-          t += '<td class="' + cls + '">' + (d >= 0 ? '+' : '') + d.toFixed(row.dec || 2) + '%</td>';
+          t += '<td class="' + cls + '"><span dir="ltr">' + (d >= 0 ? '+' : '') + d.toFixed(row.dec || 2) + '%</span></td>';
         } else if (n === 2) { t += '<td>—</td>'; }
         t += '</tr>';
       });
@@ -6801,11 +6809,11 @@ const App = (() => {
     if (hasDeposit) feeRows.push({ label: 'ד"נ מהפקדה', key: 'avgDnDeposit', dec: 2 });
     const returnsHtml = '<div class="sbcmp-section"><div class="sbcmp-section-head">תשואות ודמי ניהול (ממוצע משוקלל)</div>'
       + mkTable('תקופה', [
-        { label: 'חודש אחרון', key: 'avgY1',   dec: 2 },
-        { label: '3 חודשים',   key: 'avgY3m',  dec: 2 },
-        { label: '12 חודשים',  key: 'avgY12',  dec: 2 },
-        { label: '3 שנים',     key: 'avgY3y',  dec: 2 },
-        { label: '5 שנים',     key: 'avgY5yr', dec: 2 },
+        { label: 'חודש אחרון', key: 'avgY1',   dec: 2, isReturn: true },
+        { label: '3 חודשים',   key: 'avgY3m',  dec: 2, isReturn: true },
+        { label: '12 חודשים',  key: 'avgY12',  dec: 2, isReturn: true },
+        { label: '3 שנים',     key: 'avgY3y',  dec: 2, isReturn: true },
+        { label: '5 שנים',     key: 'avgY5yr', dec: 2, isReturn: true },
         ...feeRows,
       ]) + '</div>';
 
