@@ -19293,10 +19293,12 @@ html body .sandbox-track-id {
 .sbcmp-table td:first-child { text-align: right; font-weight: 800; color: #0c2134; }
 .sbcmp-table .pos { color: #16a34a; font-weight: 800; }
 .sbcmp-table .neg { color: #dc2626; font-weight: 800; }
+.sbcmp-val-wrap { position: relative; display: inline-block; }
 .sbcmp-best-icon {
   position: absolute;
   top: 50%;
-  right: 3px;
+  right: 100%;
+  margin-right: 3px;
   transform: translateY(-50%);
   color: #d4a017;
   font-size: .85em;
