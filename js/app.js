@@ -6845,6 +6845,7 @@ const App = (() => {
   }
 
   let _sbComparePrintCalledAt = 0;
+  let _sbComparePrintVisHandler = null;
 
   function _sbCleanupComparePrintState() {
     if (!_sbComparePrintInProgress && !_sbComparePrintOriginalNodes) return; // already cleaned up
@@ -6854,6 +6855,10 @@ const App = (() => {
     if (_sbComparePrintCleanupTimer) {
       clearTimeout(_sbComparePrintCleanupTimer);
       _sbComparePrintCleanupTimer = null;
+    }
+    if (_sbComparePrintVisHandler) {
+      document.removeEventListener('visibilitychange', _sbComparePrintVisHandler);
+      _sbComparePrintVisHandler = null;
     }
     if (_sbComparePrintRoot && _sbComparePrintRoot.parentNode) {
       _sbComparePrintRoot.parentNode.removeChild(_sbComparePrintRoot);
@@ -6920,6 +6925,16 @@ const App = (() => {
         try {
           _sbComparePrintCalledAt = Date.now();
           window.print();
+          // ניסיון להחזרה אוטומטית: ל-visibilitychange (חזרה ל-visible)
+          // יש סיכוי טוב יותר מ-afterprint/matchMedia לירות רק אחרי
+          // שכל ה-overlay של המערכת (כולל שמירת הקובץ בפועל) נסגר —
+          // כי הוא משקף חזרה אמיתית למסמך, לא רק סיום תצוגה מקדימה.
+          // תוספת buffer קטן (700ms) כמרווח ביטחון נוסף. אם זה עדיין
+          // יקדים את השמירה בפועל, "חזרה לתיק" נשאר זמין ידנית.
+          _sbComparePrintVisHandler = function() {
+            if (!document.hidden) setTimeout(_sbCleanupComparePrintState, 700);
+          };
+          document.addEventListener('visibilitychange', _sbComparePrintVisHandler);
           _sbComparePrintCleanupTimer = setTimeout(_sbCleanupComparePrintState, 60000);
         } catch (error) {
           console.warn('Compare print failed', error);
