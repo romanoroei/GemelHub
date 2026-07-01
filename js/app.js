@@ -6916,29 +6916,39 @@ const App = (() => {
     document.body.replaceChildren(_sbComparePrintRoot);
     document.body.classList.add('sb-compare-printing');
     void _sbComparePrintRoot.offsetHeight;
-    try {
-      _sbComparePrintCalledAt = Date.now();
 
-      // אות נוסף לזיהוי סיום הדפסה, פחות תלוי בהתנהגות ה-afterprint
-      // הבלתי-אמינה במובייל: matchMedia('print') חוזר ל-false ברגע
-      // שהרינדור בפועל יוצא ממצב הדפסה.
-      if (window.matchMedia) {
-        _sbComparePrintMql = window.matchMedia('print');
-        _sbComparePrintMqlHandler = function(e) { if (!e.matches) _sbCleanupComparePrintState(); };
-        if (_sbComparePrintMql.addEventListener) _sbComparePrintMql.addEventListener('change', _sbComparePrintMqlHandler);
-        else if (_sbComparePrintMql.addListener) _sbComparePrintMql.addListener(_sbComparePrintMqlHandler);
-      }
-      // אות גיבוי נוסף: חזרה ל-visible אחרי שגיליון ההדפסה/שיתוף נסגר.
-      _sbComparePrintVisHandler = function() { if (!document.hidden) _sbCleanupComparePrintState(); };
-      document.addEventListener('visibilitychange', _sbComparePrintVisHandler);
+    // חשוב: forceReflow (offsetHeight) מבטיח רק שה-layout חושב מחדש,
+    // לא שהמסך בפועל צויר (paint) — window.print() שנקרא מיד עלול
+    // לתפוס את הפריים המצויר הקודם (הדף החי) אם הצביעה של ה-DOM
+    // החדש עוד לא הושלמה. שני requestAnimationFrame רצופים הם הדרך
+    // הסטנדרטית להבטיח שפריים אחד לפחות באמת צויר לפני שממשיכים.
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        try {
+          _sbComparePrintCalledAt = Date.now();
 
-      window.print();
-      _sbComparePrintCleanupTimer = setTimeout(_sbCleanupComparePrintState, 120000);
-    } catch (error) {
-      console.warn('Compare print failed', error);
-      _sbCleanupComparePrintState();
-      showToast('לא הצלחנו לפתוח את חלון ההדפסה. נסה שוב.');
-    }
+          // אות נוסף לזיהוי סיום הדפסה, פחות תלוי בהתנהגות ה-afterprint
+          // הבלתי-אמינה במובייל: matchMedia('print') חוזר ל-false ברגע
+          // שהרינדור בפועל יוצא ממצב הדפסה.
+          if (window.matchMedia) {
+            _sbComparePrintMql = window.matchMedia('print');
+            _sbComparePrintMqlHandler = function(e) { if (!e.matches) _sbCleanupComparePrintState(); };
+            if (_sbComparePrintMql.addEventListener) _sbComparePrintMql.addEventListener('change', _sbComparePrintMqlHandler);
+            else if (_sbComparePrintMql.addListener) _sbComparePrintMql.addListener(_sbComparePrintMqlHandler);
+          }
+          // אות גיבוי נוסף: חזרה ל-visible אחרי שגיליון ההדפסה/שיתוף נסגר.
+          _sbComparePrintVisHandler = function() { if (!document.hidden) _sbCleanupComparePrintState(); };
+          document.addEventListener('visibilitychange', _sbComparePrintVisHandler);
+
+          window.print();
+          _sbComparePrintCleanupTimer = setTimeout(_sbCleanupComparePrintState, 120000);
+        } catch (error) {
+          console.warn('Compare print failed', error);
+          _sbCleanupComparePrintState();
+          showToast('לא הצלחנו לפתוח את חלון ההדפסה. נסה שוב.');
+        }
+      });
+    });
   }
 
   // Mini-encode a portfolio item to compact array (v2 format)
