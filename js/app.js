@@ -6840,12 +6840,36 @@ const App = (() => {
     if (dlg) { dlg.hidden = true; document.body.style.overflow = ''; }
   }
 
+  let _sbComparePrintCalledAt = 0;
+  let _sbComparePrintMql = null;
+  let _sbComparePrintMqlHandler = null;
+  let _sbComparePrintVisHandler = null;
+
   function _sbCleanupComparePrintState() {
+    // הגנה: אות ששרשור מגיע פחות מ-800ms אחרי window.print() נחשב מוקדם
+    // מדי (בדיוק כמו afterprint שיודע לירות מיד במובייל, לפני שהצילום
+    // בפועל הסתיים) — מתעלמים ותוזמן ניסיון חוזר קצר אחרי הסף.
+    if (_sbComparePrintCalledAt > 0 && Date.now() - _sbComparePrintCalledAt < 800) {
+      setTimeout(_sbCleanupComparePrintState, 850);
+      return;
+    }
+    if (!_sbComparePrintInProgress && !_sbComparePrintOriginalNodes) return; // already cleaned up
     _sbComparePrintInProgress = false;
+    _sbComparePrintCalledAt = 0;
     document.body.classList.remove('sb-compare-printing');
     if (_sbComparePrintCleanupTimer) {
       clearTimeout(_sbComparePrintCleanupTimer);
       _sbComparePrintCleanupTimer = null;
+    }
+    if (_sbComparePrintMql && _sbComparePrintMqlHandler) {
+      if (_sbComparePrintMql.removeEventListener) _sbComparePrintMql.removeEventListener('change', _sbComparePrintMqlHandler);
+      else if (_sbComparePrintMql.removeListener) _sbComparePrintMql.removeListener(_sbComparePrintMqlHandler);
+      _sbComparePrintMql = null;
+      _sbComparePrintMqlHandler = null;
+    }
+    if (_sbComparePrintVisHandler) {
+      document.removeEventListener('visibilitychange', _sbComparePrintVisHandler);
+      _sbComparePrintVisHandler = null;
     }
     if (_sbComparePrintRoot && _sbComparePrintRoot.parentNode) {
       _sbComparePrintRoot.parentNode.removeChild(_sbComparePrintRoot);
@@ -6890,6 +6914,21 @@ const App = (() => {
     document.body.classList.add('sb-compare-printing');
     void _sbComparePrintRoot.offsetHeight;
     try {
+      _sbComparePrintCalledAt = Date.now();
+
+      // אות נוסף לזיהוי סיום הדפסה, פחות תלוי בהתנהגות ה-afterprint
+      // הבלתי-אמינה במובייל: matchMedia('print') חוזר ל-false ברגע
+      // שהרינדור בפועל יוצא ממצב הדפסה.
+      if (window.matchMedia) {
+        _sbComparePrintMql = window.matchMedia('print');
+        _sbComparePrintMqlHandler = function(e) { if (!e.matches) _sbCleanupComparePrintState(); };
+        if (_sbComparePrintMql.addEventListener) _sbComparePrintMql.addEventListener('change', _sbComparePrintMqlHandler);
+        else if (_sbComparePrintMql.addListener) _sbComparePrintMql.addListener(_sbComparePrintMqlHandler);
+      }
+      // אות גיבוי נוסף: חזרה ל-visible אחרי שגיליון ההדפסה/שיתוף נסגר.
+      _sbComparePrintVisHandler = function() { if (!document.hidden) _sbCleanupComparePrintState(); };
+      document.addEventListener('visibilitychange', _sbComparePrintVisHandler);
+
       window.print();
       _sbComparePrintCleanupTimer = setTimeout(_sbCleanupComparePrintState, 120000);
     } catch (error) {

@@ -19619,6 +19619,30 @@ html body .sandbox-track-id {
   }
 }
 
+/* ── Compare print root: unconditional fallback (not scoped to @media print).
+   Some mobile browsers don't reliably honor @media print during the actual
+   PDF/print capture, so visibility of the compare report must not depend
+   on it exclusively — this guarantees the root is visible the instant the
+   class is added, regardless of whether @media print applies. Safe on
+   screen too: when this class+root exist, body.replaceChildren() has
+   already removed everything else from the page, so there's nothing else
+   for the user to see anyway. */
+body.sb-compare-printing > * { display: none !important; }
+body.sb-compare-printing > #sb-compare-print-root {
+  display: block !important;
+  visibility: visible !important;
+  direction: rtl !important;
+  width: 100% !important;
+  max-width: none !important;
+  padding: 0 8px !important;
+  margin: 0 !important;
+  background: #fff !important;
+  color: #0c2134 !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !important; }
+
 /* ── Print styles ── */
 @media print {
   @page { size: A4 portrait; margin: 8mm 8mm; }
