@@ -19627,6 +19627,11 @@ html body .sandbox-track-id {
    screen too: when this class+root exist, body.replaceChildren() has
    already removed everything else from the page, so there's nothing else
    for the user to see anyway. */
+html body.sb-compare-printing {
+  min-height: 0 !important;
+  height: auto !important;
+  overflow: visible !important;
+}
 body.sb-compare-printing > * { display: none !important; }
 body.sb-compare-printing > #sb-compare-print-root {
   display: block !important;
@@ -20191,6 +20196,11 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   }
 
   /* ── Compare print: print only the temporary compare report in the top-level document ── */
+  html body.sb-compare-printing {
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
   body.sb-compare-printing > * {
     display: none !important;
   }
