@@ -6846,14 +6846,11 @@ const App = (() => {
 
   let _sbComparePrintCalledAt = 0;
   let _sbComparePrintVisHandler = null;
-  let _sbComparePrintAfterHandler = null;
-  let _sbComparePrintWasHidden = false;
 
   function _sbCleanupComparePrintState() {
     if (!_sbComparePrintInProgress && !_sbComparePrintOriginalNodes) return; // already cleaned up
     _sbComparePrintInProgress = false;
     _sbComparePrintCalledAt = 0;
-    _sbComparePrintWasHidden = false;
     document.body.classList.remove('sb-compare-printing');
     if (_sbComparePrintCleanupTimer) {
       clearTimeout(_sbComparePrintCleanupTimer);
@@ -6862,10 +6859,6 @@ const App = (() => {
     if (_sbComparePrintVisHandler) {
       document.removeEventListener('visibilitychange', _sbComparePrintVisHandler);
       _sbComparePrintVisHandler = null;
-    }
-    if (_sbComparePrintAfterHandler) {
-      window.removeEventListener('afterprint', _sbComparePrintAfterHandler);
-      _sbComparePrintAfterHandler = null;
     }
     if (_sbComparePrintRoot && _sbComparePrintRoot.parentNode) {
       _sbComparePrintRoot.parentNode.removeChild(_sbComparePrintRoot);
@@ -6933,32 +6926,18 @@ const App = (() => {
           _sbComparePrintCalledAt = Date.now();
           window.print();
 
-          // אות עיקרי: visibilitychange חוזר ל-visible רק אחרי שכל
-          // ה-overlay של המערכת (כולל שמירת קובץ בפועל) נסגר — כי הוא
-          // משקף חזרה אמיתית למסמך, לא רק סיום תצוגה מקדימה. buffer
-          // קטן (700ms) כמרווח ביטחון נוסף.
+          // אות יחיד ובטוח: visibilitychange חוזר ל-visible רק אחרי
+          // שכל ה-overlay של המערכת (כולל שמירת קובץ בפועל) נסגר.
+          // ניסיון קודם להוסיף גם afterprint כ"קיצור דרך" למקרה ביטול
+          // התברר כלא בטוח — התאוריה ש-document.hidden מבדיל בין
+          // שמירה לביטול לא התאמתה בפועל, וזה גרם לשמירות אמיתיות
+          // להיתפס מוקדם מדי (PDF שגוי) שוב. buffer קטן (700ms) כמרווח
+          // ביטחון נוסף. מקרה ביטול נשאר תלוי בכפתור הידני / ברשת
+          // הביטחון (60 שניות) — פחות נוח, אבל לא שובר שמירות אמיתיות.
           _sbComparePrintVisHandler = function() {
-            if (document.hidden) {
-              _sbComparePrintWasHidden = true; // סימן שנפתח overlay אמיתי (כנראה שמירה)
-              return;
-            }
-            setTimeout(_sbCleanupComparePrintState, 700);
+            if (!document.hidden) setTimeout(_sbCleanupComparePrintState, 700);
           };
           document.addEventListener('visibilitychange', _sbComparePrintVisHandler);
-
-          // אות משני: אם המשתמש ביטל את ההדפסה (לא שמר), הדף אף פעם
-          // לא הופך ל-hidden כי לא נפתח overlay חיצוני — ולכן
-          // visibilitychange לעיל אף פעם לא יורה, והמשתמש היה נתקע עד
-          // רשת הביטחון (60 שניות). afterprint כן יורה גם על ביטול,
-          // אבל אסור לסמוך עליו אם כן נפתח overlay (יריות מוקדם מדי
-          // ביחס לשמירה בפועל) — לכן פועלים לפיו רק אם מעולם לא הפכנו
-          // ל-hidden, סימן שסביר שזה היה ביטול ולא שמירה.
-          _sbComparePrintAfterHandler = function() {
-            setTimeout(function() {
-              if (!_sbComparePrintWasHidden) _sbCleanupComparePrintState();
-            }, 300);
-          };
-          window.addEventListener('afterprint', _sbComparePrintAfterHandler);
 
           _sbComparePrintCleanupTimer = setTimeout(_sbCleanupComparePrintState, 60000);
         } catch (error) {
