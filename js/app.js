@@ -6739,9 +6739,8 @@ const App = (() => {
             const pct    = catTot > 0 && tracks.length > 1 ? ' <strong class="sbcmp-pct">' + Math.round(amt / catTot * 100) + '%</strong>' : '';
             const amtStr = amt > 0 ? '<strong class="sbcmp-amt"><span dir="ltr">₪\u202f' + Math.round(amt).toLocaleString('he-IL') + '</span></strong>' : '';
             tracksHtml += '<div class="sbcmp-track-item">'
-              + '<span class="sbcmp-track-dot" style="background:' + ghEscapeAttr(t.color || '#999') + '"></span>'
               + '<div class="sbcmp-track-info">'
-              + '<div class="sbcmp-track-name">' + escapeHtml(t.provider || '')
+              + '<div class="sbcmp-track-name" style="color:' + ghEscapeAttr(t.color || '#999') + '">' + escapeHtml(t.provider || '')
               + (t.trackLabel ? ' — ' + escapeHtml(t.trackLabel) : (t.fundName ? ' — ' + escapeHtml(t.fundName) : ''))
               + '</div>'
               + (amtStr || pct ? '<div class="sbcmp-track-meta">' + amtStr + pct + '</div>' : '')
