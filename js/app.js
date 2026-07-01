@@ -6939,11 +6939,10 @@ const App = (() => {
           };
           document.addEventListener('visibilitychange', _sbComparePrintVisHandler);
 
-          // רשת ביטחון: 15 שניות (במקום 60) כדי שביטול לא ישאיר את
-          // המשתמש תקוע יותר מדי זמן. פשרה מכוונת: שמירה איטית שלוקחת
-          // יותר מ-15 שניות עלולה להיתפס שגוי, אבל זה מקרה נדיר יחסית
-          // לעומת התסכול של המתנה ארוכה בכל ביטול.
-          _sbComparePrintCleanupTimer = setTimeout(_sbCleanupComparePrintState, 15000);
+          // רשת ביטחון: 7 שניות. פשרה מכוונת: שמירה איטית שלוקחת יותר
+          // מ-7 שניות עלולה להיתפס שגוי, אבל זה מקרה נדיר יחסית לעומת
+          // התסכול של המתנה ארוכה בכל ביטול.
+          _sbComparePrintCleanupTimer = setTimeout(_sbCleanupComparePrintState, 7000);
         } catch (error) {
           console.warn('Compare print failed', error);
           _sbCleanupComparePrintState();
