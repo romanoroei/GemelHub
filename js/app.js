@@ -6789,8 +6789,8 @@ const App = (() => {
           if (v == null) { t += '<td>—</td>'; return; }
           const signCls = row.isReturn ? (v > 0.005 ? 'pos' : v < -0.005 ? 'neg' : '') : '';
           const isBest = row.isReturn && v === best;
-          const crown = isBest ? '<i class="fas fa-crown sbcmp-best-icon" aria-hidden="true"></i> ' : '';
-          t += '<td class="' + signCls + '">' + crown + v.toFixed(row.dec || 2) + '%</td>';
+          const crown = isBest ? '<i class="fas fa-crown sbcmp-best-icon" aria-hidden="true"></i>' : '';
+          t += '<td class="' + signCls + '">' + crown + '<span>' + v.toFixed(row.dec || 2) + '%</span></td>';
         });
         if (n === 2 && vals[0] != null && vals[1] != null) {
           const d = vals[0] - vals[1];

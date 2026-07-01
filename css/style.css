@@ -19289,11 +19289,18 @@ html body .sandbox-track-id {
 .sbcmp-table { width: 100%; border-collapse: collapse; font-size: .78rem; direction: rtl; }
 .sbcmp-table th { font-size: .7rem; font-weight: 800; color: #0c2134; background: #f8fafc; padding: 6px 8px; text-align: center; border-bottom: 2px solid #e2e8f0; }
 .sbcmp-table th:first-child { text-align: right; }
-.sbcmp-table td { padding: 6px 8px; border-bottom: 1px solid #f1f5f9; text-align: center; color: #324a5e; font-weight: 600; }
+.sbcmp-table td { position: relative; padding: 6px 8px; border-bottom: 1px solid #f1f5f9; text-align: center; color: #324a5e; font-weight: 600; }
 .sbcmp-table td:first-child { text-align: right; font-weight: 800; color: #0c2134; }
 .sbcmp-table .pos { color: #16a34a; font-weight: 800; }
 .sbcmp-table .neg { color: #dc2626; font-weight: 800; }
-.sbcmp-best-icon { color: #d4a017; font-size: .85em; }
+.sbcmp-best-icon {
+  position: absolute;
+  top: 50%;
+  right: 3px;
+  transform: translateY(-50%);
+  color: #d4a017;
+  font-size: .85em;
+}
 .sbcmp-diff-head { background: #fef9ee !important; color: #b45309 !important; }
 .sbcmp-row-label { font-weight: 800 !important; color: #0c2134 !important; }
 
