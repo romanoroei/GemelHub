@@ -19642,6 +19642,20 @@ body.sb-compare-printing > #sb-compare-print-root {
   print-color-adjust: exact !important;
 }
 body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !important; }
+.sb-compare-print-return-btn {
+  display: block;
+  width: 100%;
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  font-size: .85rem;
+  font-weight: 800;
+  font-family: inherit;
+  color: #fff;
+  background: #1a3560;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
 
 /* ── Print styles ── */
 @media print {
@@ -20212,6 +20226,7 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     text-align: center !important;
     background: #fff !important;
   }
+  .sb-compare-print-return-btn { display: none !important; }
 }
 
 /* ── Mobile table row-height squeeze (overrides "polish pass" at ~12420) ── */

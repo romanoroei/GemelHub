@@ -6841,21 +6841,8 @@ const App = (() => {
   }
 
   let _sbComparePrintCalledAt = 0;
-  let _sbComparePrintMql = null;
-  let _sbComparePrintMqlHandler = null;
-  let _sbComparePrintVisHandler = null;
 
   function _sbCleanupComparePrintState() {
-    // הגנה: אות שמגיע מוקדם מדי אחרי window.print() מתעלמים ממנו —
-    // בדיוק כמו afterprint שיודע לירות מיד במובייל, לפני שהצילום בפועל
-    // הסתיים. הסף גדול במתכוון (2.5 שניות, לא 800ms): נמצא שבשימוש
-    // חוזר (הדפסה שנייה) שירות ההדפסה של אנדרואיד "חמים" ומגיב הרבה
-    // יותר מהר מהפעם הראשונה, כך שהאותות יורים מוקדם משמעותית ועדיין
-    // מקדימים את הצילום בפועל — סף קצר יחסית תפס רק את המקרה הראשון.
-    if (_sbComparePrintCalledAt > 0 && Date.now() - _sbComparePrintCalledAt < 2500) {
-      setTimeout(_sbCleanupComparePrintState, 2600);
-      return;
-    }
     if (!_sbComparePrintInProgress && !_sbComparePrintOriginalNodes) return; // already cleaned up
     _sbComparePrintInProgress = false;
     _sbComparePrintCalledAt = 0;
@@ -6863,16 +6850,6 @@ const App = (() => {
     if (_sbComparePrintCleanupTimer) {
       clearTimeout(_sbComparePrintCleanupTimer);
       _sbComparePrintCleanupTimer = null;
-    }
-    if (_sbComparePrintMql && _sbComparePrintMqlHandler) {
-      if (_sbComparePrintMql.removeEventListener) _sbComparePrintMql.removeEventListener('change', _sbComparePrintMqlHandler);
-      else if (_sbComparePrintMql.removeListener) _sbComparePrintMql.removeListener(_sbComparePrintMqlHandler);
-      _sbComparePrintMql = null;
-      _sbComparePrintMqlHandler = null;
-    }
-    if (_sbComparePrintVisHandler) {
-      document.removeEventListener('visibilitychange', _sbComparePrintVisHandler);
-      _sbComparePrintVisHandler = null;
     }
     if (_sbComparePrintRoot && _sbComparePrintRoot.parentNode) {
       _sbComparePrintRoot.parentNode.removeChild(_sbComparePrintRoot);
@@ -6888,6 +6865,16 @@ const App = (() => {
   // הדפסת השוואה מתוך המסמך הראשי. במובייל הדפסה מחלון חדש עלולה להיתקע
   // בשלב "יוצר תצוגה מקדימה", לכן יוצרים אזור הדפסה זמני בדף הנוכחי
   // ומדפיסים רק אותו באמצעות CSS ייעודי.
+  //
+  // חשוב: אין כאן החזרה אוטומטית על בסיס afterprint/matchMedia/
+  // visibilitychange. נמצא (במובייל, "שמירה כ-PDF") שהתצוגה המקדימה
+  // מציגה את התוכן הנכון, אבל השמירה בפועל קורית באופן א-סינכרוני
+  // מאוחר יותר — אחרי שכל האותות האלה כבר יורים ומחזירים את הדף החי,
+  // כך שה-PDF שנשמר בפועל תופס את הדף המוחזר (הישן) ולא את ההשוואה.
+  // אין שום אות אמין שמבטיח שה"שמירה" הסתיימה. לכן המשתמש לוחץ בעצמו
+  // על "חזרה לתיק" כשסיים — וזה גם מסתתר אוטומטית ב-@media print כדי
+  // שלא יופיע בתוך ההדפסה עצמה. רשת ביטחון ארוכה (60 שניות) למקרה
+  // שהמשתמש שוכח.
   function _sbPrintCompare() {
     const content = document.getElementById('sb-compare-content');
     if (!content) return;
@@ -6904,6 +6891,7 @@ const App = (() => {
     _sbComparePrintRoot.dir = 'rtl';
     _sbComparePrintRoot.style.display = 'none';
     _sbComparePrintRoot.innerHTML =
+      '<button type="button" id="sb-compare-print-return-btn" class="sb-compare-print-return-btn">← חזרה לתיק</button>' +
       '<div class="sb-print-report-header">' +
         '<div class="sb-print-logo">Gemel<span>Hub</span> 💰</div>' +
         '<div class="sb-print-portfolio-title">' + escapeHtml(title) + '</div>' +
@@ -6915,6 +6903,7 @@ const App = (() => {
     _sbComparePrintOriginalNodes = Array.from(document.body.childNodes);
     document.body.replaceChildren(_sbComparePrintRoot);
     document.body.classList.add('sb-compare-printing');
+    document.getElementById('sb-compare-print-return-btn')?.addEventListener('click', _sbCleanupComparePrintState);
     void _sbComparePrintRoot.offsetHeight;
 
     // חשוב: forceReflow (offsetHeight) מבטיח רק שה-layout חושב מחדש,
@@ -6926,22 +6915,8 @@ const App = (() => {
       requestAnimationFrame(function() {
         try {
           _sbComparePrintCalledAt = Date.now();
-
-          // אות נוסף לזיהוי סיום הדפסה, פחות תלוי בהתנהגות ה-afterprint
-          // הבלתי-אמינה במובייל: matchMedia('print') חוזר ל-false ברגע
-          // שהרינדור בפועל יוצא ממצב הדפסה.
-          if (window.matchMedia) {
-            _sbComparePrintMql = window.matchMedia('print');
-            _sbComparePrintMqlHandler = function(e) { if (!e.matches) _sbCleanupComparePrintState(); };
-            if (_sbComparePrintMql.addEventListener) _sbComparePrintMql.addEventListener('change', _sbComparePrintMqlHandler);
-            else if (_sbComparePrintMql.addListener) _sbComparePrintMql.addListener(_sbComparePrintMqlHandler);
-          }
-          // אות גיבוי נוסף: חזרה ל-visible אחרי שגיליון ההדפסה/שיתוף נסגר.
-          _sbComparePrintVisHandler = function() { if (!document.hidden) _sbCleanupComparePrintState(); };
-          document.addEventListener('visibilitychange', _sbComparePrintVisHandler);
-
           window.print();
-          _sbComparePrintCleanupTimer = setTimeout(_sbCleanupComparePrintState, 120000);
+          _sbComparePrintCleanupTimer = setTimeout(_sbCleanupComparePrintState, 60000);
         } catch (error) {
           console.warn('Compare print failed', error);
           _sbCleanupComparePrintState();
