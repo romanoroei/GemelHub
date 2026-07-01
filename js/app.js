@@ -6933,13 +6933,17 @@ const App = (() => {
           // שמירה לביטול לא התאמתה בפועל, וזה גרם לשמירות אמיתיות
           // להיתפס מוקדם מדי (PDF שגוי) שוב. buffer קטן (700ms) כמרווח
           // ביטחון נוסף. מקרה ביטול נשאר תלוי בכפתור הידני / ברשת
-          // הביטחון (60 שניות) — פחות נוח, אבל לא שובר שמירות אמיתיות.
+          // הביטחון — פחות נוח, אבל לא שובר שמירות אמיתיות.
           _sbComparePrintVisHandler = function() {
             if (!document.hidden) setTimeout(_sbCleanupComparePrintState, 700);
           };
           document.addEventListener('visibilitychange', _sbComparePrintVisHandler);
 
-          _sbComparePrintCleanupTimer = setTimeout(_sbCleanupComparePrintState, 60000);
+          // רשת ביטחון: 15 שניות (במקום 60) כדי שביטול לא ישאיר את
+          // המשתמש תקוע יותר מדי זמן. פשרה מכוונת: שמירה איטית שלוקחת
+          // יותר מ-15 שניות עלולה להיתפס שגוי, אבל זה מקרה נדיר יחסית
+          // לעומת התסכול של המתנה ארוכה בכל ביטול.
+          _sbComparePrintCleanupTimer = setTimeout(_sbCleanupComparePrintState, 15000);
         } catch (error) {
           console.warn('Compare print failed', error);
           _sbCleanupComparePrintState();
