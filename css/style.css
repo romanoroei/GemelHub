@@ -19293,7 +19293,7 @@ html body .sandbox-track-id {
 .sbcmp-table td:first-child { text-align: right; font-weight: 800; color: #0c2134; }
 .sbcmp-table .pos { color: #16a34a; font-weight: 800; }
 .sbcmp-table .neg { color: #dc2626; font-weight: 800; }
-.sbcmp-table .sbcmp-best { background: #fef08a; border-radius: 4px; }
+.sbcmp-best-icon { color: #d4a017; font-size: .85em; }
 .sbcmp-diff-head { background: #fef9ee !important; color: #b45309 !important; }
 .sbcmp-row-label { font-weight: 800 !important; color: #0c2134 !important; }
 
@@ -19480,8 +19480,8 @@ html body .sandbox-track-id {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-  .sbcmp-table .sbcmp-best {
-    background: #fef08a !important;
+  .sbcmp-best-icon {
+    color: #d4a017 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
