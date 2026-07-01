@@ -6846,11 +6846,14 @@ const App = (() => {
   let _sbComparePrintVisHandler = null;
 
   function _sbCleanupComparePrintState() {
-    // הגנה: אות ששרשור מגיע פחות מ-800ms אחרי window.print() נחשב מוקדם
-    // מדי (בדיוק כמו afterprint שיודע לירות מיד במובייל, לפני שהצילום
-    // בפועל הסתיים) — מתעלמים ותוזמן ניסיון חוזר קצר אחרי הסף.
-    if (_sbComparePrintCalledAt > 0 && Date.now() - _sbComparePrintCalledAt < 800) {
-      setTimeout(_sbCleanupComparePrintState, 850);
+    // הגנה: אות שמגיע מוקדם מדי אחרי window.print() מתעלמים ממנו —
+    // בדיוק כמו afterprint שיודע לירות מיד במובייל, לפני שהצילום בפועל
+    // הסתיים. הסף גדול במתכוון (2.5 שניות, לא 800ms): נמצא שבשימוש
+    // חוזר (הדפסה שנייה) שירות ההדפסה של אנדרואיד "חמים" ומגיב הרבה
+    // יותר מהר מהפעם הראשונה, כך שהאותות יורים מוקדם משמעותית ועדיין
+    // מקדימים את הצילום בפועל — סף קצר יחסית תפס רק את המקרה הראשון.
+    if (_sbComparePrintCalledAt > 0 && Date.now() - _sbComparePrintCalledAt < 2500) {
+      setTimeout(_sbCleanupComparePrintState, 2600);
       return;
     }
     if (!_sbComparePrintInProgress && !_sbComparePrintOriginalNodes) return; // already cleaned up
