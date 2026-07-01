@@ -6557,7 +6557,11 @@ const App = (() => {
       if (!_sbComparePrintInProgress && !document.body.classList.contains('sb-compare-printing')) _sbInjectPrintState();
     });
     window.addEventListener('afterprint', _sbCleanupPrintState);
-    window.addEventListener('afterprint', _sbCleanupComparePrintState);
+    // אין קריאה אוטומטית ל-_sbCleanupComparePrintState כאן בכוונה:
+    // afterprint יודע לירות מיד במובייל (לפני שהצילום/השמירה בפועל
+    // הסתיימו), מה שהיה מוחק את דוח ההשוואה עוד לפני שהתצוגה המקדימה
+    // הספיקה להיפתח. שחזור הדף קורה רק בלחיצה על "חזרה לתיק" או
+    // ברשת הביטחון (60 שניות) בתוך _sbPrintCompare עצמה.
   }
 
   function _sbPrintSummary() {
