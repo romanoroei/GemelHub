@@ -1,4 +1,4 @@
-const DEFAULT_TTL_SECONDS = 60 * 60 * 24 * 90;
+const DEFAULT_TTL_SECONDS = 60 * 60 * 24 * 7;
 const ID_ALPHABET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 
 function corsHeaders(request) {

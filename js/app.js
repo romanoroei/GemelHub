@@ -6788,8 +6788,8 @@ const App = (() => {
     return result && result.payload ? result : { payload: result };
   }
 
-  function _sbOpenWhatsAppShare(text, link) {
-    window.open('https://wa.me/?text=' + encodeURIComponent(text + link), '_blank');
+  function _sbOpenWhatsAppShare(text, link, suffix) {
+    window.open('https://wa.me/?text=' + encodeURIComponent(text + link + (suffix || '')), '_blank');
   }
 
   function _sbShortenFallbackUrl(url) {
@@ -6853,12 +6853,13 @@ const App = (() => {
       n: state.sandbox.portfolioName || ''
     };
     const fallbackUrl = _sbHashPortfolioUrl(data);
-    const text = 'רציתי לשתף אותך בתיק הפיננסי שבניתי במעבדה של מערכת ה-GemelHub של רועי רומנו. לצפייה בתיק שלי:\n';
+    const text = 'רציתי לשתף אותך בתיק הפיננסי שבניתי *במעבדה של מערכת ה-GemelHub של רועי רומנו*.\nלצפיה בתיק :\n';
+    const suffix = '\nהקישור פעיל ל-7 ימים בלבד.';
     try {
       const sharedUrl = await _sbCreateSharedPortfolioLink('portfolio', data);
-      _sbOpenWhatsAppShare(text, sharedUrl || await _sbShortenFallbackUrl(fallbackUrl));
+      _sbOpenWhatsAppShare(text, sharedUrl || await _sbShortenFallbackUrl(fallbackUrl), suffix);
     } catch(e) {
-      _sbOpenWhatsAppShare(text, await _sbShortenFallbackUrl(fallbackUrl));
+      _sbOpenWhatsAppShare(text, await _sbShortenFallbackUrl(fallbackUrl), suffix);
     }
   }
 
