@@ -10308,6 +10308,11 @@ body.h2h-active,
   to   { transform: scale(1);   opacity: 1; }
 }
 .sb-save-appear { animation: sbSaveAppear .38s cubic-bezier(.34,1.56,.64,1) both; }
+@keyframes sbSavePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(22,163,74,.45); }
+  50%      { box-shadow: 0 0 0 7px rgba(22,163,74,0); }
+}
+.sb-save-pulse { animation: sbSavePulse 1.5s ease-out infinite; }
 .svb-total-label {
   font-size: .92rem;
   font-weight: 900;

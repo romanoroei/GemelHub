@@ -38,7 +38,7 @@ const App = (() => {
       selections: [],  // pending selections (up to 6), not yet in portfolio
       portfolio: [],   // saved portfolio items (persisted in localStorage)
       portfolioName: '',
-      hadSavedName: false, // true once this working portfolio was named via save/load/share — survives the name being cleared by an edit
+      isDirty: false, // true when a named portfolio has unsaved edits — name stays put, save button pulses instead
       autoSaveId: null, // id of the saved-portfolios list entry mirroring the current working portfolio, if any
       compareItems: null,
       returnsMenuOpen: false,
@@ -52,7 +52,7 @@ const App = (() => {
   const SANDBOX_STORAGE_KEY = 'gemelhub_sandbox_portfolio_v1';
   const SANDBOX_SELECTIONS_KEY = 'gemelhub_sandbox_selections_v1';
   const SANDBOX_NAME_KEY = 'gemelhub_sandbox_portfolio_name_v1';
-  const SANDBOX_HAD_NAME_KEY = 'gemelhub_sandbox_had_name_v1';
+  const SANDBOX_DIRTY_KEY = 'gemelhub_sandbox_dirty_v1';
   const SANDBOX_AUTOSAVE_ID_KEY = 'gemelhub_sandbox_autosave_id_v1';
   const SANDBOX_LAST_MOD_KEY = 'gemelhub_sandbox_last_modified_v1';
   const SANDBOX_RETURNS_FIELDS_KEY = 'gemelhub_sandbox_return_fields_v1';
@@ -5367,7 +5367,7 @@ const App = (() => {
       if (savedSel) state.sandbox.selections = JSON.parse(savedSel);
     } catch(e) { state.sandbox.selections = []; }
     state.sandbox.portfolioName = localStorage.getItem(SANDBOX_NAME_KEY) || '';
-    state.sandbox.hadSavedName  = localStorage.getItem(SANDBOX_HAD_NAME_KEY) === '1';
+    state.sandbox.isDirty       = localStorage.getItem(SANDBOX_DIRTY_KEY) === '1';
     state.sandbox.autoSaveId    = localStorage.getItem(SANDBOX_AUTOSAVE_ID_KEY) || null;
     state.sandbox.lastModified  = localStorage.getItem(SANDBOX_LAST_MOD_KEY) || '';
     // On load: auto-merge any pending selections into portfolio so the bar
@@ -5806,8 +5806,8 @@ const App = (() => {
         <button type="button" class="sandbox-add-btn" id="sandbox-add-more-btn">
           <i class="fas fa-plus" aria-hidden="true"></i> <span class="sb-btn-label">הוסף</span>
         </button>
-        ${!state.sandbox.portfolioName && portfolio.length > 0
-          ? `<button type="button" class="sandbox-save-btn sb-save-appear" id="sandbox-save-portfolio-btn" title="שמור תיק"><i class="fas fa-floppy-disk" aria-hidden="true"></i> <span class="sb-btn-label">${state.sandbox.hadSavedName ? 'שמור/עדכן' : 'שמור בשם'}</span></button>`
+        ${portfolio.length > 0 && (!state.sandbox.portfolioName || state.sandbox.isDirty)
+          ? `<button type="button" class="sandbox-save-btn sb-save-appear${state.sandbox.isDirty ? ' sb-save-pulse' : ''}" id="sandbox-save-portfolio-btn" title="שמור תיק"><i class="fas fa-floppy-disk" aria-hidden="true"></i> <span class="sb-btn-label">${state.sandbox.portfolioName ? 'שמור/עדכן' : 'שמור בשם'}</span></button>`
           : '<button type="button" class="sandbox-save-btn sb-save-hidden" id="sandbox-save-portfolio-btn" title="שמור תיק" aria-hidden="true"></button>'}
         <button type="button" class="sandbox-load-btn" id="sandbox-load-portfolio-btn" title="טען תיק שמור">
           <i class="fas fa-folder-open" aria-hidden="true"></i> <span class="sb-btn-label">פתח/השווה</span>
@@ -6207,10 +6207,30 @@ const App = (() => {
     return `תיק השקעות ${dd}.${mm}.${d.getFullYear()}`;
   }
 
-  function _sbSetHadSavedName(val) {
-    state.sandbox.hadSavedName = val;
-    if (val) localStorage.setItem(SANDBOX_HAD_NAME_KEY, '1');
-    else localStorage.removeItem(SANDBOX_HAD_NAME_KEY);
+  function _sbSetDirty(val) {
+    state.sandbox.isDirty = val;
+    if (val) localStorage.setItem(SANDBOX_DIRTY_KEY, '1');
+    else localStorage.removeItem(SANDBOX_DIRTY_KEY);
+  }
+
+  // Immediately hide/quiet the save button after an explicit save/update, without
+  // waiting for the next full renderSandboxPage() re-render.
+  function _sbResetSaveButtonUI() {
+    const btn = document.getElementById('sandbox-save-portfolio-btn');
+    if (!btn) return;
+    btn.classList.add('sb-save-hidden');
+    btn.setAttribute('aria-hidden', 'true');
+    btn.classList.remove('sb-save-pulse', 'sb-save-appear');
+  }
+
+  // Hidden routes don't count toward a saved portfolio's displayed value or count suffix
+  function _sbHiddenCountSuffix(portfolio) {
+    const hidden = portfolio.filter(it => it.hidden).length;
+    return hidden ? ` (${hidden} ${hidden === 1 ? 'מוסתר' : 'מוסתרים'})` : '';
+  }
+
+  function _sbVisibleAmountTotal(portfolio) {
+    return portfolio.filter(it => !it.hidden).reduce((s, it) => s + (parseFloat(it.investAmount) || 0), 0);
   }
 
   function _sbSetAutoSaveId(id) {
@@ -6254,7 +6274,7 @@ const App = (() => {
       state.sandbox.portfolioName = name;
       localStorage.setItem(SANDBOX_NAME_KEY, name);
     }
-    _sbSetHadSavedName(true);
+    _sbSetDirty(false);
   }
 
   function _sbFormatTime(isoStr) {
@@ -6317,16 +6337,20 @@ const App = (() => {
       container.innerHTML = '<p class="sb-load-empty">אין תיקים שמורים עדיין.</p>';
       return;
     }
+    const currentId = state.sandbox.autoSaveId
+      || (state.sandbox.portfolioName ? list.find(p => p.name === state.sandbox.portfolioName)?.id : null);
     container.innerHTML = list.map(item => {
-      const tot = item.portfolio.reduce((s, it) => s + (parseFloat(it.investAmount) || 0), 0);
+      const tot = _sbVisibleAmountTotal(item.portfolio);
       const totStr = tot > 0 ? `<span dir="ltr">₪ ${Math.round(tot).toLocaleString('he-IL')}</span>` : '';
       const itemIdAttr = ghEscapeAttr(item.id);
       const itemNameHtml = escapeHtml(item.name);
       const dateHtml = escapeHtml(_sbFormatSavedDate(item.date));
       const timeHtml = escapeHtml(_sbFormatTime(item.savedAt));
-      return `<button type="button" class="sb-update-item" data-update-id="${itemIdAttr}">
-        <span class="sb-update-item-name">${itemNameHtml}</span>
-        <span class="sb-saved-meta">${dateHtml}${item.savedAt ? ' · ' + timeHtml : ''} · ${item.portfolio.length} מסלולים${totStr ? ' · ' + totStr : ''}</span>
+      const isCurrent = item.id === currentId;
+      const badge = isCurrent ? ' <span class="sb-saved-current-badge">תיק נוכחי</span>' : '';
+      return `<button type="button" class="sb-update-item${isCurrent ? ' is-current' : ''}" data-update-id="${itemIdAttr}">
+        <span class="sb-update-item-name">${itemNameHtml}${badge}</span>
+        <span class="sb-saved-meta">${dateHtml}${item.savedAt ? ' · ' + timeHtml : ''} · ${item.portfolio.length} מסלולים${_sbHiddenCountSuffix(item.portfolio)}${totStr ? ' · ' + totStr : ''}</span>
       </button>`;
     }).join('');
     container.querySelectorAll('.sb-update-item').forEach(btn => {
@@ -6336,6 +6360,14 @@ const App = (() => {
         btn.classList.add('is-selected');
       });
     });
+    // Pre-select the current portfolio by default — one click away from "עדכן"
+    if (currentId) {
+      const currentBtn = [...container.querySelectorAll('.sb-update-item')].find(b => b.dataset.updateId === currentId);
+      if (currentBtn) {
+        _sbUpdateSelectedId = currentId;
+        currentBtn.classList.add('is-selected');
+      }
+    }
   }
 
   function _sbCloseSaveDialog() {
@@ -6365,7 +6397,8 @@ const App = (() => {
     list.push({ id, name, date, notes, portfolio, savedAt: new Date().toISOString() });
     _sbPutSavedPortfolios(list);
     state.sandbox.portfolioName = name;
-    _sbSetHadSavedName(true);
+    _sbSetDirty(false);
+    _sbResetSaveButtonUI();
     _sbSetAutoSaveId(id);
     saveSandboxPortfolio();
     _sbCloseSaveDialog();
@@ -6394,7 +6427,8 @@ const App = (() => {
     }
     _sbPutSavedPortfolios(list);
     state.sandbox.portfolioName = target.name;
-    _sbSetHadSavedName(true);
+    _sbSetDirty(false);
+    _sbResetSaveButtonUI();
     _sbSetAutoSaveId(target.id);
     saveSandboxPortfolio();
     _sbCloseSaveDialog();
@@ -6432,7 +6466,7 @@ const App = (() => {
     if (hasCurrent) {
       const curName   = currentName || 'תיק נוכחי';
       const curNameHtml = escapeHtml(curName);
-      const curTot    = state.sandbox.portfolio.reduce((s, it) => s + (parseFloat(it.investAmount) || 0), 0);
+      const curTot    = _sbVisibleAmountTotal(state.sandbox.portfolio);
       const curTotStr = curTot > 0 ? '<span dir="ltr">₪\u202f' + Math.round(curTot).toLocaleString('he-IL') + '</span>' : '';
       const chk = canCompare
         ? '<label class="sb-compare-check-wrap"><input type="checkbox" class="sb-compare-check" data-compare-id="__current__" /></label>'
@@ -6450,7 +6484,7 @@ const App = (() => {
            + (curTotStr ? ' <span class="sb-saved-value-badge">' + curTotStr + '</span>' : '')
            + '<span class="sb-saved-meta">'
            + (curModStr ? 'עדכון אחרון: ' + curModHtml + ' · ' : '')
-           + state.sandbox.portfolio.length + ' מסלולים</span>'
+           + state.sandbox.portfolio.length + ' מסלולים' + _sbHiddenCountSuffix(state.sandbox.portfolio) + '</span>'
            + '</div></div>'
            + '<div class="sb-saved-actions">'
            + '<button type="button" class="sb-delete-current-btn" id="sb-delete-current-btn" title="נקה תיק נוכחי"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>'
@@ -6462,7 +6496,7 @@ const App = (() => {
     let colorIdx = 0;
     list.forEach(item => {
       const isCurrent = !!(currentName && item.name === currentName);
-      const tot    = item.portfolio.reduce((s, it) => s + (parseFloat(it.investAmount) || 0), 0);
+      const tot    = _sbVisibleAmountTotal(item.portfolio);
       const totStr = tot > 0 ? '<span dir="ltr">₪\u202f' + Math.round(tot).toLocaleString('he-IL') + '</span>' : '';
       if (isCurrent) return; // already shown at top as __current__
       const colorCls = ITEM_COLORS[colorIdx % ITEM_COLORS.length];
@@ -6481,7 +6515,7 @@ const App = (() => {
            + '<div class="sb-saved-item-text sb-load-area" data-load-id="' + itemIdAttr + '" role="button" tabindex="0" aria-label="טען תיק ' + itemNameAttr + '">'
            + '<strong class="sb-saved-name">' + itemNameHtml + '</strong>'
            + (totStr ? ' <span class="sb-saved-value-badge">' + totStr + '</span>' : '')
-           + '<span class="sb-saved-meta">' + itemDateHtml + (item.savedAt ? ' · ' + itemTimeHtml : '') + ' · ' + item.portfolio.length + ' מסלולים</span>'
+           + '<span class="sb-saved-meta">' + itemDateHtml + (item.savedAt ? ' · ' + itemTimeHtml : '') + ' · ' + item.portfolio.length + ' מסלולים' + _sbHiddenCountSuffix(item.portfolio) + '</span>'
            + (item.notes ? '<span class="sb-saved-notes">' + itemNotesHtml + '</span>' : '')
            + '</div></div>'
            + '<div class="sb-saved-actions">'
@@ -6533,7 +6567,7 @@ const App = (() => {
       _sbDiscardAutoSavedDraft();
       state.sandbox.portfolio = [];
       state.sandbox.portfolioName = '';
-      _sbSetHadSavedName(false);
+      _sbSetDirty(false);
       _sbSetAutoSaveId(null);
       localStorage.removeItem(SANDBOX_NAME_KEY);
       _sbHideValueBar();
@@ -6555,7 +6589,7 @@ const App = (() => {
     _sbCloseLoadDialog();
     state.sandbox.portfolio = JSON.parse(JSON.stringify(item.portfolio));
     state.sandbox.portfolioName = item.name;
-    _sbSetHadSavedName(true);
+    _sbSetDirty(false);
     _sbSetAutoSaveId(item.id);
     saveSandboxPortfolio();
     document.querySelectorAll('.sandbox-check').forEach(cb => {
@@ -6580,20 +6614,20 @@ const App = (() => {
 
   // ── Mark modified ────────────────────────────────────────────────────────
   // Only fires when the portfolio already had a saved name and the user then
-  // edited the data — clears the name and flips the save button to "שמור/עדכן"
-  // since hadSavedName stays true (there's an existing saved entry to update).
+  // edited the data. The name stays put — we just flag the portfolio dirty and
+  // pulse the save button so it's clear there's something to update.
   function _sbMarkPortfolioModified() {
     if (!state.sandbox.portfolioName) return;
-    state.sandbox.portfolioName = '';
-    localStorage.removeItem(SANDBOX_NAME_KEY);
-    _sbUpdateValueBar();
+    const wasDirty = state.sandbox.isDirty;
+    _sbSetDirty(true);
+    if (wasDirty) return;
     const btn = document.getElementById('sandbox-save-portfolio-btn');
     if (btn) {
       btn.classList.remove('sb-save-hidden');
       btn.removeAttribute('aria-hidden');
       btn.innerHTML = '<i class="fas fa-floppy-disk" aria-hidden="true"></i> <span class="sb-btn-label">שמור/עדכן</span>';
       void btn.offsetWidth;
-      btn.classList.add('sb-save-appear');
+      btn.classList.add('sb-save-appear', 'sb-save-pulse');
     }
   }
 
@@ -6687,7 +6721,7 @@ const App = (() => {
         if (data.p && Array.isArray(data.p) && data.p.length) {
           state.sandbox.portfolio = data.p;
           state.sandbox.portfolioName = data.n || 'תיק משותף';
-          _sbSetHadSavedName(true);
+          _sbSetDirty(false);
           _sbSetAutoSaveId(null);
           saveSandboxPortfolio();
           history.replaceState(null, '', location.pathname + location.search);
@@ -7650,7 +7684,7 @@ const App = (() => {
       _sbDiscardAutoSavedDraft();
       state.sandbox.portfolio = [];
       state.sandbox.portfolioName = '';
-      _sbSetHadSavedName(false);
+      _sbSetDirty(false);
       _sbSetAutoSaveId(null);
       _sbHideValueBar();
       saveSandboxPortfolio();
