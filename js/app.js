@@ -38,7 +38,7 @@ const App = (() => {
       selections: [],  // pending selections (up to 6), not yet in portfolio
       portfolio: [],   // saved portfolio items (persisted in localStorage)
       portfolioName: '',
-      portfolioColorIdx: -1,
+      hadSavedName: false, // true once this working portfolio was named via save/load/share — survives the name being cleared by an edit
       compareItems: null,
       returnsMenuOpen: false,
       selectedReturnFields: ['monthly', 'ytd', '12m', '3y']
@@ -51,6 +51,7 @@ const App = (() => {
   const SANDBOX_STORAGE_KEY = 'gemelhub_sandbox_portfolio_v1';
   const SANDBOX_SELECTIONS_KEY = 'gemelhub_sandbox_selections_v1';
   const SANDBOX_NAME_KEY = 'gemelhub_sandbox_portfolio_name_v1';
+  const SANDBOX_HAD_NAME_KEY = 'gemelhub_sandbox_had_name_v1';
   const SANDBOX_LAST_MOD_KEY = 'gemelhub_sandbox_last_modified_v1';
   const SANDBOX_RETURNS_FIELDS_KEY = 'gemelhub_sandbox_return_fields_v1';
   const ADVANCED_OPTIONS_AUTO_CLOSE_DELAY = 13000;
@@ -5364,6 +5365,7 @@ const App = (() => {
       if (savedSel) state.sandbox.selections = JSON.parse(savedSel);
     } catch(e) { state.sandbox.selections = []; }
     state.sandbox.portfolioName = localStorage.getItem(SANDBOX_NAME_KEY) || '';
+    state.sandbox.hadSavedName  = localStorage.getItem(SANDBOX_HAD_NAME_KEY) === '1';
     state.sandbox.lastModified  = localStorage.getItem(SANDBOX_LAST_MOD_KEY) || '';
     // On load: auto-merge any pending selections into portfolio so the bar
     // never reappears for items the user already "added" in a prior session.
@@ -5516,7 +5518,7 @@ const App = (() => {
       if (!btn) return;
       const nameSpan = btn.closest('.svb-portfolio-name');
       if (!nameSpan || nameSpan.querySelector('.svb-rename-input')) return;
-      const currentName = state.sandbox.portfolioName || '';
+      const currentName = state.sandbox.portfolioName || _sbDefaultPortfolioName();
       const input = document.createElement('input');
       input.type = 'text';
       input.className = 'svb-rename-input';
@@ -5802,7 +5804,7 @@ const App = (() => {
           <i class="fas fa-plus" aria-hidden="true"></i> <span class="sb-btn-label">הוסף</span>
         </button>
         ${!state.sandbox.portfolioName && portfolio.length > 0
-          ? '<button type="button" class="sandbox-save-btn sb-save-appear" id="sandbox-save-portfolio-btn" title="שמור תיק"><i class="fas fa-floppy-disk" aria-hidden="true"></i> <span class="sb-btn-label">שמור בשם</span></button>'
+          ? `<button type="button" class="sandbox-save-btn sb-save-appear" id="sandbox-save-portfolio-btn" title="שמור תיק"><i class="fas fa-floppy-disk" aria-hidden="true"></i> <span class="sb-btn-label">${state.sandbox.hadSavedName ? 'שמור/עדכן' : 'שמור בשם'}</span></button>`
           : '<button type="button" class="sandbox-save-btn sb-save-hidden" id="sandbox-save-portfolio-btn" title="שמור תיק" aria-hidden="true"></button>'}
         <button type="button" class="sandbox-load-btn" id="sandbox-load-portfolio-btn" title="טען תיק שמור">
           <i class="fas fa-folder-open" aria-hidden="true"></i> <span class="sb-btn-label">פתח/השווה</span>
@@ -6150,16 +6152,13 @@ const App = (() => {
     const totalAmount = allInvestedAsAmount
       ? portfolio.reduce((sum, item) => sum + (parseFloat(String(item.investAmount).replace(/,/g, '')) || 0), 0)
       : 0;
-    const _pci = state.sandbox.portfolioColorIdx;
-    const _pColorCls = (_pci >= 0) ? ' svb-pname-c' + _pci : '';
-    const portfolioNameLabel = state.sandbox.portfolioName
-      ? `<span class="svb-portfolio-name${_pColorCls}">${state.sandbox.portfolioName}<button type="button" class="svb-rename-btn" title="שנה שם תיק"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="13" height="13"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg></button></span>`
-      : '';
+    // Always show a name — the real saved name, or a "תיק השקעות <date>" placeholder — so
+    // there's always something to rename, even for a brand-new/unsaved/empty-of-amounts portfolio.
+    const displayName = escapeHtml(state.sandbox.portfolioName || _sbDefaultPortfolioName());
+    const portfolioNameLabel = `<span class="svb-portfolio-name">${displayName}<button type="button" class="svb-rename-btn" title="שנה שם תיק"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="13" height="13"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg></button></span>`;
     const totalLine = allInvestedAsAmount && totalAmount > 0
       ? `<span class="svb-total-row">${portfolioNameLabel}<span class="svb-total-label">שווי התיק שלי</span><span class="svb-total-amount">${Math.round(totalAmount).toLocaleString('he-IL')} ש"ח</span></span>`
-      : portfolioNameLabel
-        ? `<span class="svb-total-row">${portfolioNameLabel}</span>`
-        : '';
+      : `<span class="svb-total-row">${portfolioNameLabel}</span>`;
     bar.innerHTML = catRows.length
       ? `<span class="svb-category-list">${totalLine}${catRows.join('')}</span>`
       : `<span class="svb-label">המעבדה שלי</span><span class="svb-meta">${portfolio.length} מסלולים · ${Object.keys(catMap).length} קטגוריות</span>`;
@@ -6196,6 +6195,19 @@ const App = (() => {
   function _sbFormatSavedDate(dateStr) {
     if (!dateStr) return '';
     try { const [y, m, d] = dateStr.split('-'); return `${d}.${m}.${y}`; } catch { return dateStr; }
+  }
+
+  function _sbDefaultPortfolioName() {
+    const d = new Date();
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    return `תיק השקעות ${dd}.${mm}.${d.getFullYear()}`;
+  }
+
+  function _sbSetHadSavedName(val) {
+    state.sandbox.hadSavedName = val;
+    if (val) localStorage.setItem(SANDBOX_HAD_NAME_KEY, '1');
+    else localStorage.removeItem(SANDBOX_HAD_NAME_KEY);
   }
 
   function _sbFormatTime(isoStr) {
@@ -6300,6 +6312,7 @@ const App = (() => {
     list.push({ id: Date.now().toString(), name, date, notes, portfolio, savedAt: new Date().toISOString() });
     _sbPutSavedPortfolios(list);
     state.sandbox.portfolioName = name;
+    _sbSetHadSavedName(true);
     saveSandboxPortfolio();
     _sbCloseSaveDialog();
     _sbUpdateValueBar(state.sandbox.portfolio);
@@ -6319,6 +6332,7 @@ const App = (() => {
     list[idx].savedAt = new Date().toISOString();
     _sbPutSavedPortfolios(list);
     state.sandbox.portfolioName = list[idx].name;
+    _sbSetHadSavedName(true);
     saveSandboxPortfolio();
     _sbCloseSaveDialog();
     _sbUpdateValueBar(state.sandbox.portfolio);
@@ -6454,6 +6468,7 @@ const App = (() => {
       if (!confirm('לנקות את התיק הנוכחי מהמסך?')) return;
       state.sandbox.portfolio = [];
       state.sandbox.portfolioName = '';
+      _sbSetHadSavedName(false);
       localStorage.removeItem(SANDBOX_NAME_KEY);
       _sbHideValueBar();
       saveSandboxPortfolio();
@@ -6471,10 +6486,9 @@ const App = (() => {
     if (!item) return;
     if (!confirm(`לטעון את התיק "${item.name}"?\nהתיק הנוכחי יוחלף.`)) return;
     _sbCloseLoadDialog();
-    const _loadedIdx = list.findIndex(p => p.id === id);
     state.sandbox.portfolio = JSON.parse(JSON.stringify(item.portfolio));
     state.sandbox.portfolioName = item.name;
-    state.sandbox.portfolioColorIdx = _loadedIdx >= 0 ? _loadedIdx % 4 : 0;
+    _sbSetHadSavedName(true);
     saveSandboxPortfolio();
     document.querySelectorAll('.sandbox-check').forEach(cb => {
       cb.checked = false; cb.classList.remove('is-in-portfolio');
@@ -6497,17 +6511,19 @@ const App = (() => {
   }
 
   // ── Mark modified ────────────────────────────────────────────────────────
+  // Only fires when the portfolio already had a saved name and the user then
+  // edited the data — clears the name and flips the save button to "שמור/עדכן"
+  // since hadSavedName stays true (there's an existing saved entry to update).
   function _sbMarkPortfolioModified() {
     if (!state.sandbox.portfolioName) return;
     state.sandbox.portfolioName = '';
-    state.sandbox.portfolioColorIdx = -1;
     localStorage.removeItem(SANDBOX_NAME_KEY);
     _sbUpdateValueBar();
     const btn = document.getElementById('sandbox-save-portfolio-btn');
     if (btn) {
       btn.classList.remove('sb-save-hidden');
       btn.removeAttribute('aria-hidden');
-      btn.innerHTML = '<i class="fas fa-floppy-disk" aria-hidden="true"></i> <span class="sb-btn-label">שמור בשם</span>';
+      btn.innerHTML = '<i class="fas fa-floppy-disk" aria-hidden="true"></i> <span class="sb-btn-label">שמור/עדכן</span>';
       void btn.offsetWidth;
       btn.classList.add('sb-save-appear');
     }
@@ -6530,7 +6546,7 @@ const App = (() => {
     if (!_sbPrintHeader) {
       const now = new Date();
       const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
-      const portfolioName = escapeHtml(state.sandbox.portfolioName || 'תיק השקעות');
+      const portfolioName = escapeHtml(state.sandbox.portfolioName || _sbDefaultPortfolioName());
       _sbPrintHeader = document.createElement('div');
       _sbPrintHeader.className = 'sb-print-report-header';
       _sbPrintHeader.innerHTML = `
@@ -6603,6 +6619,7 @@ const App = (() => {
         if (data.p && Array.isArray(data.p) && data.p.length) {
           state.sandbox.portfolio = data.p;
           state.sandbox.portfolioName = data.n || 'תיק משותף';
+          _sbSetHadSavedName(true);
           saveSandboxPortfolio();
           history.replaceState(null, '', location.pathname + location.search);
           if (state.activeCategoryId !== 'sandbox') switchCategory('sandbox');
@@ -7563,6 +7580,7 @@ const App = (() => {
       if (!confirm('לנקות את התיק מהמסך?\n\nהתיק השמור לא יימחק — ניתן לטעון אותו שוב דרך כפתור "טען תיק".')) return;
       state.sandbox.portfolio = [];
       state.sandbox.portfolioName = '';
+      _sbSetHadSavedName(false);
       _sbHideValueBar();
       saveSandboxPortfolio();
       // uncheck all checkboxes in tables

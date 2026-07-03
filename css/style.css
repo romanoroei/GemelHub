@@ -10300,11 +10300,6 @@ body.h2h-active,
   padding: 1px 6px;
   width: 140px;
 }
-.svb-pname-c0 { background: rgba(99,102,241,.45);  border: 1.5px solid #818cf8; color: #e0e7ff; }
-.svb-pname-c1 { background: rgba(8,145,178,.45);   border: 1.5px solid #67e8f9; color: #cffafe; }
-.svb-pname-c2 { background: rgba(22,163,74,.45);   border: 1.5px solid #86efac; color: #dcfce7; }
-.svb-pname-c3 { background: rgba(234,88,12,.45);   border: 1.5px solid #fdba74; color: #ffedd5; }
-
 /* ── Save button animation ── */
 .sb-save-hidden { display: none !important; }
 @keyframes sbSaveAppear {
