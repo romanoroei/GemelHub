@@ -5534,12 +5534,18 @@ const App = (() => {
       const commit = () => {
         const newName = input.value.trim();
         if (newName && newName !== currentName) {
+          // Rename the mirrored saved entry (by id) before touching state, then fall
+          // back to a name match for portfolios saved before the mirror-id existed.
+          const loaded = _sbGetSavedPortfolios();
+          const entry = _sbFindMirrorEntry(loaded) || loaded.find(p => p.name === currentName);
+          if (entry) {
+            entry.name = newName;
+            delete entry.autoNamed; // user gave it a real name — no longer a discardable draft
+            _sbPutSavedPortfolios(loaded);
+            _sbSetAutoSaveId(entry.id);
+          }
           state.sandbox.portfolioName = newName;
           localStorage.setItem(SANDBOX_NAME_KEY, newName);
-          // also update saved portfolio if one is loaded
-          const loaded = _sbGetSavedPortfolios();
-          const idx = loaded.findIndex(p => p.name === currentName);
-          if (idx >= 0) { loaded[idx].name = newName; _sbPutSavedPortfolios(loaded); }
         }
         _sbUpdateValueBar(state.sandbox.portfolio);
       };
@@ -6200,11 +6206,16 @@ const App = (() => {
     try { const [y, m, d] = dateStr.split('-'); return `${d}.${m}.${y}`; } catch { return dateStr; }
   }
 
+  // Next free serial: scans saved names (and the current name) for "תיק השקעות N"
   function _sbDefaultPortfolioName() {
-    const d = new Date();
-    const dd = String(d.getDate()).padStart(2, '0');
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    return `תיק השקעות ${dd}.${mm}.${d.getFullYear()}`;
+    let max = 0;
+    const scan = (name) => {
+      const m = /^תיק השקעות (\d+)$/.exec(String(name || '').trim());
+      if (m) max = Math.max(max, parseInt(m[1], 10));
+    };
+    _sbGetSavedPortfolios().forEach(p => scan(p.name));
+    scan(state.sandbox.portfolioName);
+    return `תיק השקעות ${max + 1}`;
   }
 
   function _sbSetDirty(val) {
@@ -6249,6 +6260,19 @@ const App = (() => {
     if (entry && entry.autoNamed) _sbPutSavedPortfolios(list.filter(p => p.id !== id));
   }
 
+  // The saved-list entry that truly mirrors the current working portfolio.
+  // A stale autoSaveId left over from a previous portfolio must never let us
+  // rename or overwrite an unrelated saved portfolio, so the id match counts
+  // only if the entry is the auto-created draft or still carries the current name.
+  function _sbFindMirrorEntry(list) {
+    const id = state.sandbox.autoSaveId;
+    if (!id) return null;
+    const entry = list.find(p => p.id === id);
+    if (!entry) return null;
+    if (entry.autoNamed || (state.sandbox.portfolioName && entry.name === state.sandbox.portfolioName)) return entry;
+    return null;
+  }
+
   // Makes sure the current working portfolio has a real, up-to-date entry in the
   // saved-portfolios list — auto-creating one under the default name if it doesn't
   // have a name yet — so nothing is lost when browsing/loading a different portfolio.
@@ -6256,23 +6280,26 @@ const App = (() => {
     if (!state.sandbox.portfolio.length) return;
     _sbSyncVisibleInputsToState();
     const list = _sbGetSavedPortfolios();
-    const name = state.sandbox.portfolioName || _sbDefaultPortfolioName();
     const portfolioCopy = JSON.parse(JSON.stringify(state.sandbox.portfolio));
-    const idx = state.sandbox.autoSaveId ? list.findIndex(p => p.id === state.sandbox.autoSaveId) : -1;
-    if (idx >= 0) {
-      list[idx].name = name;
-      list[idx].portfolio = portfolioCopy;
-      list[idx].savedAt = new Date().toISOString();
+    const mirror = _sbFindMirrorEntry(list);
+    if (mirror) {
+      mirror.portfolio = portfolioCopy;
+      mirror.savedAt = new Date().toISOString();
       _sbPutSavedPortfolios(list);
+      if (!state.sandbox.portfolioName) {
+        state.sandbox.portfolioName = mirror.name;
+        localStorage.setItem(SANDBOX_NAME_KEY, mirror.name);
+      }
     } else {
+      const name = state.sandbox.portfolioName || _sbDefaultPortfolioName();
       const id = Date.now().toString();
       list.push({ id, name, date: new Date().toISOString().split('T')[0], notes: '', portfolio: portfolioCopy, savedAt: new Date().toISOString(), autoNamed: !state.sandbox.portfolioName });
       _sbPutSavedPortfolios(list);
       _sbSetAutoSaveId(id);
-    }
-    if (!state.sandbox.portfolioName) {
-      state.sandbox.portfolioName = name;
-      localStorage.setItem(SANDBOX_NAME_KEY, name);
+      if (!state.sandbox.portfolioName) {
+        state.sandbox.portfolioName = name;
+        localStorage.setItem(SANDBOX_NAME_KEY, name);
+      }
     }
     _sbSetDirty(false);
   }
@@ -6337,7 +6364,7 @@ const App = (() => {
       container.innerHTML = '<p class="sb-load-empty">אין תיקים שמורים עדיין.</p>';
       return;
     }
-    const currentId = state.sandbox.autoSaveId
+    const currentId = _sbFindMirrorEntry(list)?.id
       || (state.sandbox.portfolioName ? list.find(p => p.name === state.sandbox.portfolioName)?.id : null);
     container.innerHTML = list.map(item => {
       const tot = _sbVisibleAmountTotal(item.portfolio);
@@ -6494,11 +6521,13 @@ const App = (() => {
 
     const ITEM_COLORS = ['sb-item-c0', 'sb-item-c1', 'sb-item-c2', 'sb-item-c3'];
     let colorIdx = 0;
+    const mirrorEntry = hasCurrent ? _sbFindMirrorEntry(list) : null;
     list.forEach(item => {
-      const isCurrent = !!(currentName && item.name === currentName);
       const tot    = _sbVisibleAmountTotal(item.portfolio);
       const totStr = tot > 0 ? '<span dir="ltr">₪\u202f' + Math.round(tot).toLocaleString('he-IL') + '</span>' : '';
-      if (isCurrent) return; // already shown at top as __current__
+      // Skip only the exact entry mirroring the working portfolio (shown at top as __current__).
+      // Matching by name here used to hide unrelated same-named portfolios from the list.
+      if (mirrorEntry && item.id === mirrorEntry.id) return;
       const colorCls = ITEM_COLORS[colorIdx % ITEM_COLORS.length];
       colorIdx++;
       const itemIdAttr = ghEscapeAttr(item.id);
@@ -7707,6 +7736,15 @@ const App = (() => {
           const cb = document.querySelector(`.sandbox-check[data-fundid="${removed.fundId}"][data-trackid="${removed.trackId}"][data-categoryid="${removed.categoryId}"]`);
           if (cb) { cb.checked = false; cb.classList.remove('is-in-portfolio'); }
           _sbMarkPortfolioModified();
+        }
+        // Emptying the screen ends this portfolio's identity — otherwise the stale
+        // name/autoSaveId would leak into the next portfolio the user builds and
+        // corrupt the old saved entry on the next auto-persist.
+        if (state.sandbox.portfolio.length === 0) {
+          state.sandbox.portfolioName = '';
+          localStorage.removeItem(SANDBOX_NAME_KEY);
+          _sbSetDirty(false);
+          _sbSetAutoSaveId(null);
         }
         saveSandboxPortfolio();
         renderSandboxPage();
