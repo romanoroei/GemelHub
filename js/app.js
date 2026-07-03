@@ -439,7 +439,15 @@ const App = (() => {
     const heroTitleEl = document.getElementById('hero-main-title');
     const heroSubEl = document.getElementById('hero-sub-title');
     const hero = HERO_COPY[catId] || HERO_COPY.home;
-    if (heroTitleEl) heroTitleEl.textContent = hero.title;
+    if (heroTitleEl) {
+      if (catId === 'home') {
+        heroTitleEl.classList.add('hero-logo-title');
+        heroTitleEl.innerHTML = '<img src="assets/gemelhub-logo.svg" alt="GemelHub - חיסכון פנסיוני בלחיצת כפתור" class="hero-brand-logo" />';
+      } else {
+        heroTitleEl.classList.remove('hero-logo-title');
+        heroTitleEl.textContent = hero.title;
+      }
+    }
     if (heroSubEl) heroSubEl.textContent = hero.sub;
 
     const heroEl = document.getElementById('hero-banner');
