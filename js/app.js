@@ -6128,6 +6128,9 @@ const App = (() => {
       setValueBarSpace();
       return;
     }
+    // Hidden routes never count toward the displayed totals, regardless of which
+    // caller passed the portfolio in (some callers pass it unfiltered).
+    portfolio = portfolio.filter(it => !it.hidden);
     const grouped = {};
     portfolio.forEach(item => {
       if (!grouped[item.categoryId]) grouped[item.categoryId] = [];
@@ -6170,7 +6173,7 @@ const App = (() => {
       : `<span class="svb-total-row">${portfolioNameLabel}</span>`;
     bar.innerHTML = catRows.length
       ? `<span class="svb-category-list">${totalLine}${catRows.join('')}</span>`
-      : `<span class="svb-label">המעבדה שלי</span><span class="svb-meta">${portfolio.length} מסלולים · ${Object.keys(catMap).length} קטגוריות</span>`;
+      : `<span class="svb-label">המעבדה שלי</span><span class="svb-meta">${portfolio.length} מסלולים · ${Object.keys(catMap || {}).length} קטגוריות</span>`;
     // set initial centered position if not yet positioned
     if (!bar.style.left) {
       bar.style.left   = (window.innerWidth / 2 - 120) + 'px';
