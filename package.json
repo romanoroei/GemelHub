@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "worker:kv:create": "wrangler kv namespace create GEMELHUB_SHARED_PORTFOLIOS",
+    "worker:kv:preview": "wrangler kv namespace create GEMELHUB_SHARED_PORTFOLIOS --preview",
+    "worker:deploy": "wrangler deploy",
+    "worker:dev": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^4.24.0"
+  }
+}

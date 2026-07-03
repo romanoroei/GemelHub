@@ -1,0 +1,13 @@
+name = "gemelhub-share"
+main = "workers/shared-portfolios-worker.js"
+compatibility_date = "2026-07-03"
+workers_dev = true
+preview_urls = false
+
+[[kv_namespaces]]
+binding = "GEMELHUB_SHARED_PORTFOLIOS"
+id = "055e037b8fa24b469544adc4ff14ee14"
+preview_id = "59f9cfa00476417bb1d3ca7388d48233"
+
+[vars]
+SHARED_PORTFOLIO_TTL_SECONDS = "7776000"

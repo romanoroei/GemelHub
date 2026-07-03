@@ -1,6 +1,14 @@
 # Archives
 *.zip
 
+# Node / deployment tooling
+node_modules/
+package-lock.json
+.wrangler/
+.dev.vars
+.env
+.env.*
+
 # Temporary screenshots / recordings
 recording-*.png
 whatsapp-*.png

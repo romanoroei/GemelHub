@@ -15,7 +15,14 @@ const CONFIG = {
     POLISA_2023_RESOURCE_ID: '672090ba-7893-4496-a07c-dc7e822cbf18',
     POLISA_1999_2022_RESOURCE_ID: '584e6b69-174f-46c9-b8db-03925b4c68c6',
     LIMIT: 32000,
-    LEADS_ENDPOINT: 'https://formspree.io/f/xdapqnyr'
+    LEADS_ENDPOINT: 'https://formspree.io/f/xdapqnyr',
+
+    // Optional branded short-link backend for shared lab portfolios.
+    // Expected contract:
+    // POST { type: 'portfolio'|'compare', payload: {...} } -> { id: 'Ab7k2', url?: 'https://...' }
+    // GET  /:id or ?id=Ab7k2 -> { type, payload } or { payload }
+    // Leave empty to keep using the current hash + is.gd fallback.
+    SHARED_PORTFOLIO_ENDPOINT: 'https://gemelhub-share.gemelhub-roei.workers.dev'
   },
 
   FEATURES: {

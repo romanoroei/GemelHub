@@ -653,7 +653,7 @@ const App = (() => {
     setupMobileStickyThead();
     updateMobileStickyHeader();
     loadSandboxPortfolio();
-    _sbCheckUrlHash();
+    const handledSharedPortfolioUrl = await _sbCheckUrlHash();
     setupSandboxCheckboxes();
     setupSandboxBarActions();
     setupValueBarRename();
@@ -719,7 +719,9 @@ const App = (() => {
     state.pendingActuarialCompanyName = urlView === 'actuarial' ? (urlProvider || null) : null;
     state.pendingActuarialHighlightDone = false;
     state.pendingInitialTableTopScroll = !!shouldStartAtFirstTable;
-    if (urlApp === 'h2h') {
+    if (handledSharedPortfolioUrl) {
+      // Shared portfolio links handle their own navigation after loading.
+    } else if (urlApp === 'h2h') {
       switchToH2H();
     } else if (urlApp === 'sandbox') {
       switchToSandbox();
@@ -6728,75 +6730,184 @@ const App = (() => {
     if (_sbInjectPrintState()) window.print();
   }
 
-  // ── Share via URL hash ─────────────────────────────────────────────────────
-  function _sbSharePortfolio() {
-    if (!state.sandbox.portfolio.length) { showToast('אין מסלולים לשיתוף'); return; }
-    const data    = { p: state.sandbox.portfolio, n: state.sandbox.portfolioName || '' };
-    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
-    const url     = location.origin + location.pathname + '#portfolio=' + encoded;
-    const text    = 'רציתי לשתף אותך בתיק הפיננסי שבניתי במעבדה של מערכת ה-GemelHub של רועי רומנו. לצפייה בתיק שלי:\n';
-    const openWA  = (link) => { window.open('https://wa.me/?text=' + encodeURIComponent(text + link), '_blank'); };
-    try {
-      fetch('https://is.gd/create.php?format=simple&url=' + encodeURIComponent(url))
-        .then(r => r.text())
-        .then(s => { openWA(s && s.startsWith('http') ? s.trim() : url); })
-        .catch(() => openWA(url));
-    } catch(e) { openWA(url); }
+  // ── Share via branded short links, with URL-hash fallback ──────────────────
+  function _sbSharedPortfolioEndpoint() {
+    return (typeof CONFIG !== 'undefined' && CONFIG.API && CONFIG.API.SHARED_PORTFOLIO_ENDPOINT || '').trim();
   }
 
-  function _sbCheckUrlHash() {
+  function _sbSharedPortfolioGetUrl(id) {
+    const endpoint = _sbSharedPortfolioEndpoint();
+    if (!endpoint || !id) return '';
+    if (endpoint.includes('{id}')) return endpoint.replace('{id}', encodeURIComponent(id));
+    return endpoint.replace(/\/$/, '') + '/' + encodeURIComponent(id);
+  }
+
+  function _sbSharedPortfolioPageUrl(id, type) {
+    const url = new URL(location.origin + location.pathname);
+    url.searchParams.set(type === 'compare' ? 'c' : 'p', id);
+    return url.toString();
+  }
+
+  function _sbHashPortfolioUrl(payload) {
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+    return location.origin + location.pathname + '#portfolio=' + encoded;
+  }
+
+  function _sbHashCompareUrl(payload) {
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+    return location.origin + location.pathname + '#compare=' + encoded;
+  }
+
+  async function _sbCreateSharedPortfolioLink(type, payload) {
+    const endpoint = _sbSharedPortfolioEndpoint();
+    if (!endpoint) return '';
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: type, payload: payload, createdAt: new Date().toISOString() })
+    });
+    if (!response.ok) throw new Error('Shared portfolio save failed');
+    const result = await response.json();
+    const id = result && (result.id || result.key || result.slug);
+    if (result && result.url) return result.url;
+    return id ? _sbSharedPortfolioPageUrl(id, type) : '';
+  }
+
+  async function _sbLoadSharedPortfolioPayload(id) {
+    const endpoint = _sbSharedPortfolioEndpoint();
+    if (!endpoint || !id) return null;
+    const getUrl = _sbSharedPortfolioGetUrl(id);
+    let response = await fetch(getUrl);
+    if (!response.ok && !endpoint.includes('{id}')) {
+      const url = new URL(endpoint, location.href);
+      url.searchParams.set('id', id);
+      response = await fetch(url.toString());
+    }
+    if (!response.ok) throw new Error('Shared portfolio load failed');
+    const result = await response.json();
+    return result && result.payload ? result : { payload: result };
+  }
+
+  function _sbOpenWhatsAppShare(text, link) {
+    window.open('https://wa.me/?text=' + encodeURIComponent(text + link), '_blank');
+  }
+
+  function _sbShortenFallbackUrl(url) {
+    return fetch('https://is.gd/create.php?format=simple&url=' + encodeURIComponent(url))
+      .then(function(r) { return r.text(); })
+      .then(function(s) { return s && s.startsWith('http') ? s.trim() : url; })
+      .catch(function() { return url; });
+  }
+
+  function _sbApplySharedPortfolioPayload(payload) {
+    const isV2 = payload && payload.v === 2;
+    const portfolio = isV2 && Array.isArray(payload.p)
+      ? payload.p.map(_sbExpandMiniItem)
+      : payload && Array.isArray(payload.p)
+        ? payload.p
+        : null;
+    if (!portfolio || !portfolio.length) return false;
+    state.sandbox.portfolio = portfolio;
+    state.sandbox.portfolioName = payload.n || 'תיק משותף';
+    _sbSetDirty(false);
+    _sbSetAutoSaveId(null);
+    saveSandboxPortfolio();
+    if (state.activeCategoryId !== 'sandbox') switchCategory('sandbox');
+    else renderSandboxPage();
+    showToast('התיק "' + state.sandbox.portfolioName + '" נטען מקישור');
+    return true;
+  }
+
+  function _sbApplySharedComparePayload(payload) {
+    if (!payload || !payload.portfolios || !Array.isArray(payload.portfolios) || !payload.portfolios.length) return false;
+    const isV2 = payload.v === 2;
+    const list = _sbGetSavedPortfolios();
+    const newIds = [];
+    const now = new Date();
+    const baseTs = now.getTime();
+    payload.portfolios.forEach(function(port, idx) {
+      if (!port.p || !port.p.length) return;
+      const portfolio = isV2 ? port.p.map(_sbExpandMiniItem) : port.p;
+      const name = port.n || ('תיק מקושר ' + (idx + 1));
+      const id = 'shared_' + (baseTs + idx);
+      list.push({ id: id, name: name, date: now.toISOString().split('T')[0], savedAt: now.toISOString(), notes: 'נטען מקישור', portfolio: portfolio });
+      newIds.push(id);
+    });
+    if (!newIds.length) return false;
+    localStorage.setItem(SB_PORTFOLIOS_KEY, JSON.stringify(list));
+    if (state.activeCategoryId !== 'sandbox') switchCategory('sandbox');
+    else renderSandboxPage();
+    setTimeout(function() {
+      if (newIds.length >= 2) _sbOpenCompareDialogMulti(newIds);
+      else if (newIds.length === 1) _sbDoLoadPortfolio(newIds[0]);
+    }, 500);
+    showToast('נטענו ' + newIds.length + ' תיקים מקישור — ההשוואה נפתחת');
+    return true;
+  }
+
+  async function _sbSharePortfolio() {
+    if (!state.sandbox.portfolio.length) { showToast('אין מסלולים לשיתוף'); return; }
+    const data = {
+      v: 2,
+      p: state.sandbox.portfolio.map(_sbMiniItem),
+      n: state.sandbox.portfolioName || ''
+    };
+    const fallbackUrl = _sbHashPortfolioUrl(data);
+    const text = 'רציתי לשתף אותך בתיק הפיננסי שבניתי במעבדה של מערכת ה-GemelHub של רועי רומנו. לצפייה בתיק שלי:\n';
+    try {
+      const sharedUrl = await _sbCreateSharedPortfolioLink('portfolio', data);
+      _sbOpenWhatsAppShare(text, sharedUrl || await _sbShortenFallbackUrl(fallbackUrl));
+    } catch(e) {
+      _sbOpenWhatsAppShare(text, await _sbShortenFallbackUrl(fallbackUrl));
+    }
+  }
+
+  async function _sbCheckUrlHash() {
+    const params = new URLSearchParams(location.search);
+    const sharedPortfolioId = params.get('p');
+    const sharedCompareId = params.get('c');
+    if (sharedPortfolioId || sharedCompareId) {
+      try {
+        const loaded = await _sbLoadSharedPortfolioPayload(sharedPortfolioId || sharedCompareId);
+        const handled = sharedCompareId
+          ? _sbApplySharedComparePayload(loaded && loaded.payload)
+          : _sbApplySharedPortfolioPayload(loaded && loaded.payload);
+        if (handled) {
+          const cleanUrl = new URL(location.href);
+          cleanUrl.searchParams.delete('p');
+          cleanUrl.searchParams.delete('c');
+          history.replaceState(null, '', cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
+          return true;
+        }
+      } catch(e) {
+        showToast('לא הצלחנו לטעון את הקישור המקוצר. נסה לבקש קישור חדש.');
+        return false;
+      }
+    }
+
     const hash = location.hash;
     // Single portfolio share
     if (hash.startsWith('#portfolio=')) {
       try {
         const data = JSON.parse(decodeURIComponent(escape(atob(hash.slice('#portfolio='.length)))));
-        if (data.p && Array.isArray(data.p) && data.p.length) {
-          state.sandbox.portfolio = data.p;
-          state.sandbox.portfolioName = data.n || 'תיק משותף';
-          _sbSetDirty(false);
-          _sbSetAutoSaveId(null);
-          saveSandboxPortfolio();
+        if (_sbApplySharedPortfolioPayload(data)) {
           history.replaceState(null, '', location.pathname + location.search);
-          if (state.activeCategoryId !== 'sandbox') switchCategory('sandbox');
-          else renderSandboxPage();
-          showToast('התיק "' + state.sandbox.portfolioName + '" נטען מקישור');
+          return true;
         }
       } catch(e) {}
-      return;
+      return false;
     }
     // Multi-portfolio compare share
     if (hash.startsWith('#compare=')) {
       try {
         const data = JSON.parse(decodeURIComponent(escape(atob(hash.slice('#compare='.length)))));
-        const isV2 = data.v === 2;
-        if (data.portfolios && Array.isArray(data.portfolios) && data.portfolios.length) {
+        if (_sbApplySharedComparePayload(data)) {
           history.replaceState(null, '', location.pathname + location.search);
-          const list = _sbGetSavedPortfolios();
-          const newIds = [];
-          const now = new Date();
-          const baseTs = now.getTime();
-          data.portfolios.forEach(function(port, idx) {
-            if (!port.p || !port.p.length) return;
-            // Expand v2 mini-arrays back to full portfolio items
-            const portfolio = isV2
-              ? port.p.map(_sbExpandMiniItem)
-              : port.p;
-            const name = port.n || ('תיק מקושר ' + (idx + 1));
-            const id   = 'shared_' + (baseTs + idx);
-            list.push({ id: id, name: name, date: now.toISOString().split('T')[0], savedAt: now.toISOString(), notes: 'נטען מקישור', portfolio: portfolio });
-            newIds.push(id);
-          });
-          localStorage.setItem(SB_PORTFOLIOS_KEY, JSON.stringify(list));
-          if (state.activeCategoryId !== 'sandbox') switchCategory('sandbox');
-          else renderSandboxPage();
-          setTimeout(function() {
-            if (newIds.length >= 2) _sbOpenCompareDialogMulti(newIds);
-            else if (newIds.length === 1) _sbDoLoadPortfolio(newIds[0]);
-          }, 500);
-          showToast('נטענו ' + newIds.length + ' תיקים מקישור — ההשוואה נפתחת');
+          return true;
         }
       } catch(e) {}
     }
+    return false;
   }
 
   // ── Compare ────────────────────────────────────────────────────────────────
@@ -7135,7 +7246,8 @@ const App = (() => {
       r2(it.stock), r2(it.abroad), r2(it.fx),
       Math.round((+it.dnCumulative||0)*10000)/10000,
       Math.round((+it.dnDeposit||0)*10000)/10000,
-      it.investAmount||0, it.investMode||'amount', it.investPct||''
+      it.investAmount||0, it.investMode||'amount', it.investPct||'',
+      it.hidden ? 1 : 0, it.color || ''
     ];
   }
   // Expand v2 mini-array back to full portfolio item
@@ -7148,39 +7260,37 @@ const App = (() => {
       y5: String(a[10]), y5yr: String(a[11]),
       stock: String(a[12]), abroad: String(a[13]), fx: String(a[14]),
       dnCumulative: String(a[15]), dnDeposit: String(a[16]),
-      investAmount: String(a[17]||0), investMode: a[18]||'amount', investPct: String(a[19]||'')
+      investAmount: String(a[17]||0), investMode: a[18]||'amount', investPct: String(a[19]||''),
+      hidden: !!a[20], color: a[21] || ''
     };
   }
 
-  function _sbShareCompareWhatsApp() {
+  async function _sbShareCompareWhatsApp() {
     const titleEl = document.getElementById('sb-compare-title');
     const title   = titleEl ? titleEl.textContent : 'השוואת תיקים';
     const items   = state.sandbox.compareItems || [];
-    let   compareUrl = location.origin + location.pathname;
+    let payload = null;
+    let compareUrl = location.origin + location.pathname;
     if (items.length > 0) {
       try {
         const portfolios = items
           .filter(function(it) { return it && it.portfolio && it.portfolio.length; })
           .map(function(it) { return { n: it.name || '', p: it.portfolio.map(_sbMiniItem) }; });
         if (portfolios.length > 0) {
-          const enc = btoa(unescape(encodeURIComponent(JSON.stringify({ v: 2, portfolios: portfolios }))));
-          compareUrl = location.origin + location.pathname + '#compare=' + enc;
+          payload = { v: 2, portfolios: portfolios };
+          compareUrl = _sbHashCompareUrl(payload);
         }
       } catch(e) {}
     }
     const text = '📊 ' + title + ', נעשה במעבדה של GemelHub — '
               + 'המערכת להשוואת נתונים פיננסיים של רועי רומנו.\n'
               + 'לטעינת ההשוואה למעבדה שלך 👇\n';
-    const openWA = function(link) { window.open('https://wa.me/?text=' + encodeURIComponent(text + link), '_blank'); };
     try {
-      fetch('https://is.gd/create.php?format=simple&url=' + encodeURIComponent(compareUrl))
-        .then(function(r) { return r.text(); })
-        .then(function(s) {
-          if (s && s.startsWith('http')) { openWA(s.trim()); }
-          else { openWA(compareUrl); }
-        })
-        .catch(function() { openWA(compareUrl); });
-    } catch(e) { openWA(compareUrl); }
+      const sharedUrl = payload ? await _sbCreateSharedPortfolioLink('compare', payload) : '';
+      _sbOpenWhatsAppShare(text, sharedUrl || await _sbShortenFallbackUrl(compareUrl));
+    } catch(e) {
+      _sbOpenWhatsAppShare(text, await _sbShortenFallbackUrl(compareUrl));
+    }
   }
 
   function setupSandboxPortfolioDialogs() {
