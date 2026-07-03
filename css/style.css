@@ -10687,9 +10687,19 @@ body.h2h-active,
 .sb-compare-check-placeholder { width: 16px; flex-shrink: 0; }
 .sb-compare-multi-footer {
   display: flex; align-items: center; justify-content: space-between;
-  gap: 10px; margin-top: 12px; padding: 10px 12px;
+  gap: 10px; margin: 0 20px 16px; padding: 10px 12px;
   background: #f0f4ff; border-radius: 10px; border: 1.5px solid #a5b4fc;
   direction: rtl;
+  flex-shrink: 0;
+}
+.sb-compare-multi-footer[hidden] { display: none !important; }
+@keyframes sb-pop-in {
+  0%   { transform: scale(.85); opacity: 0; }
+  60%  { transform: scale(1.03); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.sb-compare-multi-footer.sb-pop-in {
+  animation: sb-pop-in .32s cubic-bezier(.34,1.56,.64,1);
 }
 .sb-compare-multi-go-btn {
   -webkit-appearance: none; appearance: none;
@@ -18430,6 +18440,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
 
   html body .sandbox-provider-cell {
     gap: 5px !important;
+    align-items: flex-start !important;
   }
 
   html body .sandbox-cat-table th:nth-child(3),
@@ -18611,6 +18622,20 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     align-self: flex-start !important;
   }
 
+  html body .sandbox-hide-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    margin-top: 0 !important;
+    align-self: flex-start !important;
+  }
+
   html body .sandbox-cat-table td:first-child {
     vertical-align: top !important;
     padding-top: 11px !important;
@@ -18619,7 +18644,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
 
   html body .sandbox-cat-table td:nth-child(2) {
     vertical-align: top !important;
-    padding-top: 13px !important;
+    padding-top: 11px !important;
   }
 
   html body .sandbox-cat-table td:nth-child(3) {

@@ -6412,31 +6412,38 @@ const App = (() => {
     });
     container.innerHTML = html;
 
+    // The compare footer lives outside #sb-load-list (in the static markup) so it
+    // stays pinned below the scrollable saved-portfolios list instead of requiring
+    // a scroll to reach it once there are many saved portfolios.
+    const footer = document.getElementById('sb-compare-multi-footer');
+    if (footer) footer.hidden = true;
+
     if (canCompare) {
-      const footer = document.createElement('div');
-      footer.className = 'sb-compare-multi-footer';
-      footer.id = 'sb-compare-multi-footer';
-      footer.hidden = true;
-      footer.innerHTML = '<span id="sb-compare-multi-count"></span>'
-        + '<button type="button" id="sb-compare-multi-btn" class="sb-compare-multi-go-btn">'
-        + '<i class="fas fa-code-compare" aria-hidden="true"></i> השווה נבחרים</button>';
-      container.appendChild(footer);
+      const _updateMultiFooter = () => {
+        const checked = [...container.querySelectorAll('.sb-compare-check:checked')];
+        const countEl = document.getElementById('sb-compare-multi-count');
+        if (!footer) return;
+        const wasHidden = footer.hidden;
+        footer.hidden = checked.length < 2;
+        if (!footer.hidden && wasHidden) {
+          footer.classList.remove('sb-pop-in');
+          void footer.offsetWidth;
+          footer.classList.add('sb-pop-in');
+        }
+        if (countEl) countEl.textContent = checked.length + ' תיקים נבחרו';
+        container.querySelectorAll('.sb-compare-check:not(:checked)').forEach(cb => { cb.disabled = checked.length >= 3; });
+      };
+      container.querySelectorAll('.sb-compare-check').forEach(cb => cb.addEventListener('change', _updateMultiFooter));
+      const multiBtn = document.getElementById('sb-compare-multi-btn');
+      if (multiBtn && !multiBtn.dataset.bound) {
+        multiBtn.dataset.bound = '1';
+        multiBtn.addEventListener('click', () => {
+          const ids = [...document.querySelectorAll('#sb-load-list .sb-compare-check:checked')].map(cb => cb.dataset.compareId);
+          if (ids.length >= 2) _sbOpenCompareDialogMulti(ids);
+        });
+      }
     }
 
-    const _updateMultiFooter = () => {
-      const checked = [...container.querySelectorAll('.sb-compare-check:checked')];
-      const footer  = document.getElementById('sb-compare-multi-footer');
-      const countEl = document.getElementById('sb-compare-multi-count');
-      if (!footer) return;
-      footer.hidden = checked.length < 2;
-      if (countEl) countEl.textContent = checked.length + ' תיקים נבחרו';
-      container.querySelectorAll('.sb-compare-check:not(:checked)').forEach(cb => { cb.disabled = checked.length >= 3; });
-    };
-    container.querySelectorAll('.sb-compare-check').forEach(cb => cb.addEventListener('change', _updateMultiFooter));
-    document.getElementById('sb-compare-multi-btn')?.addEventListener('click', () => {
-      const ids = [...container.querySelectorAll('.sb-compare-check:checked')].map(cb => cb.dataset.compareId);
-      if (ids.length >= 2) _sbOpenCompareDialogMulti(ids);
-    });
     container.querySelectorAll('.sb-load-area').forEach(area => {
       area.addEventListener('click',   () => _sbDoLoadPortfolio(area.dataset.loadId));
       area.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') _sbDoLoadPortfolio(area.dataset.loadId); });
@@ -6714,6 +6721,8 @@ const App = (() => {
 
   function _sbRenderCompare(items) {
     const n    = items.length;
+    // Hidden routes are excluded from the comparison — same "what if" simulation as the lab table
+    items = items.map(it => ({ ...it, portfolio: (it.portfolio || []).filter(t => !t.hidden) }));
     const sums = items.map(it => _sbBuildExtendedSummary(it.portfolio));
 
     // ── Section 1: Tracks per category
