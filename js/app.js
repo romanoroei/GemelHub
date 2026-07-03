@@ -39,6 +39,7 @@ const App = (() => {
       portfolio: [],   // saved portfolio items (persisted in localStorage)
       portfolioName: '',
       hadSavedName: false, // true once this working portfolio was named via save/load/share — survives the name being cleared by an edit
+      autoSaveId: null, // id of the saved-portfolios list entry mirroring the current working portfolio, if any
       compareItems: null,
       returnsMenuOpen: false,
       selectedReturnFields: ['monthly', 'ytd', '12m', '3y']
@@ -52,6 +53,7 @@ const App = (() => {
   const SANDBOX_SELECTIONS_KEY = 'gemelhub_sandbox_selections_v1';
   const SANDBOX_NAME_KEY = 'gemelhub_sandbox_portfolio_name_v1';
   const SANDBOX_HAD_NAME_KEY = 'gemelhub_sandbox_had_name_v1';
+  const SANDBOX_AUTOSAVE_ID_KEY = 'gemelhub_sandbox_autosave_id_v1';
   const SANDBOX_LAST_MOD_KEY = 'gemelhub_sandbox_last_modified_v1';
   const SANDBOX_RETURNS_FIELDS_KEY = 'gemelhub_sandbox_return_fields_v1';
   const ADVANCED_OPTIONS_AUTO_CLOSE_DELAY = 13000;
@@ -5366,6 +5368,7 @@ const App = (() => {
     } catch(e) { state.sandbox.selections = []; }
     state.sandbox.portfolioName = localStorage.getItem(SANDBOX_NAME_KEY) || '';
     state.sandbox.hadSavedName  = localStorage.getItem(SANDBOX_HAD_NAME_KEY) === '1';
+    state.sandbox.autoSaveId    = localStorage.getItem(SANDBOX_AUTOSAVE_ID_KEY) || null;
     state.sandbox.lastModified  = localStorage.getItem(SANDBOX_LAST_MOD_KEY) || '';
     // On load: auto-merge any pending selections into portfolio so the bar
     // never reappears for items the user already "added" in a prior session.
@@ -6210,6 +6213,50 @@ const App = (() => {
     else localStorage.removeItem(SANDBOX_HAD_NAME_KEY);
   }
 
+  function _sbSetAutoSaveId(id) {
+    state.sandbox.autoSaveId = id;
+    if (id) localStorage.setItem(SANDBOX_AUTOSAVE_ID_KEY, id);
+    else localStorage.removeItem(SANDBOX_AUTOSAVE_ID_KEY);
+  }
+
+  // Discard the auto-saved default-named draft entry (if any) when the user
+  // intentionally clears the working portfolio — no point keeping an unnamed draft around.
+  function _sbDiscardAutoSavedDraft() {
+    const id = state.sandbox.autoSaveId;
+    if (!id) return;
+    const list = _sbGetSavedPortfolios();
+    const entry = list.find(p => p.id === id);
+    if (entry && entry.autoNamed) _sbPutSavedPortfolios(list.filter(p => p.id !== id));
+  }
+
+  // Makes sure the current working portfolio has a real, up-to-date entry in the
+  // saved-portfolios list — auto-creating one under the default name if it doesn't
+  // have a name yet — so nothing is lost when browsing/loading a different portfolio.
+  function _sbEnsureCurrentPortfolioPersisted() {
+    if (!state.sandbox.portfolio.length) return;
+    _sbSyncVisibleInputsToState();
+    const list = _sbGetSavedPortfolios();
+    const name = state.sandbox.portfolioName || _sbDefaultPortfolioName();
+    const portfolioCopy = JSON.parse(JSON.stringify(state.sandbox.portfolio));
+    const idx = state.sandbox.autoSaveId ? list.findIndex(p => p.id === state.sandbox.autoSaveId) : -1;
+    if (idx >= 0) {
+      list[idx].name = name;
+      list[idx].portfolio = portfolioCopy;
+      list[idx].savedAt = new Date().toISOString();
+      _sbPutSavedPortfolios(list);
+    } else {
+      const id = Date.now().toString();
+      list.push({ id, name, date: new Date().toISOString().split('T')[0], notes: '', portfolio: portfolioCopy, savedAt: new Date().toISOString(), autoNamed: !state.sandbox.portfolioName });
+      _sbPutSavedPortfolios(list);
+      _sbSetAutoSaveId(id);
+    }
+    if (!state.sandbox.portfolioName) {
+      state.sandbox.portfolioName = name;
+      localStorage.setItem(SANDBOX_NAME_KEY, name);
+    }
+    _sbSetHadSavedName(true);
+  }
+
   function _sbFormatTime(isoStr) {
     if (!isoStr) return '';
     const d = new Date(isoStr);
@@ -6308,11 +6355,18 @@ const App = (() => {
     const notes = (document.getElementById('sb-save-notes')?.value || '').trim();
     _sbSyncVisibleInputsToState();
     const portfolio = JSON.parse(JSON.stringify(state.sandbox.portfolio));
-    const list = _sbGetSavedPortfolios();
-    list.push({ id: Date.now().toString(), name, date, notes, portfolio, savedAt: new Date().toISOString() });
+    // If the working portfolio was only auto-saved under the default name so far,
+    // drop that draft entry — this explicit save replaces it, not adds to it.
+    const oldAutoSaveId = state.sandbox.autoSaveId;
+    const existingList = _sbGetSavedPortfolios();
+    const oldEntry = oldAutoSaveId ? existingList.find(p => p.id === oldAutoSaveId) : null;
+    const list = (oldEntry && oldEntry.autoNamed) ? existingList.filter(p => p.id !== oldAutoSaveId) : existingList;
+    const id = Date.now().toString();
+    list.push({ id, name, date, notes, portfolio, savedAt: new Date().toISOString() });
     _sbPutSavedPortfolios(list);
     state.sandbox.portfolioName = name;
     _sbSetHadSavedName(true);
+    _sbSetAutoSaveId(id);
     saveSandboxPortfolio();
     _sbCloseSaveDialog();
     _sbUpdateValueBar(state.sandbox.portfolio);
@@ -6324,15 +6378,24 @@ const App = (() => {
       showToast('יש לבחור תיק לעדכון', 'warn');
       return;
     }
-    const list = _sbGetSavedPortfolios();
+    const oldAutoSaveId = state.sandbox.autoSaveId;
+    let list = _sbGetSavedPortfolios();
     const idx = list.findIndex(p => p.id === _sbUpdateSelectedId);
     if (idx === -1) return;
     _sbSyncVisibleInputsToState();
-    list[idx].portfolio = JSON.parse(JSON.stringify(state.sandbox.portfolio));
-    list[idx].savedAt = new Date().toISOString();
+    const target = list[idx];
+    target.portfolio = JSON.parse(JSON.stringify(state.sandbox.portfolio));
+    target.savedAt = new Date().toISOString();
+    delete target.autoNamed;
+    // Drop a leftover auto-saved draft entry now that the user explicitly picked a target to update
+    const oldAutoEntry = oldAutoSaveId ? list.find(p => p.id === oldAutoSaveId) : null;
+    if (oldAutoEntry && oldAutoEntry.autoNamed && oldAutoSaveId !== target.id) {
+      list = list.filter(p => p.id !== oldAutoSaveId);
+    }
     _sbPutSavedPortfolios(list);
-    state.sandbox.portfolioName = list[idx].name;
+    state.sandbox.portfolioName = target.name;
     _sbSetHadSavedName(true);
+    _sbSetAutoSaveId(target.id);
     saveSandboxPortfolio();
     _sbCloseSaveDialog();
     _sbUpdateValueBar(state.sandbox.portfolio);
@@ -6342,6 +6405,7 @@ const App = (() => {
   function _sbOpenLoadDialog() {
     const dialog = document.getElementById('sb-load-dialog');
     if (!dialog) return;
+    _sbEnsureCurrentPortfolioPersisted();
     _sbRenderLoadList();
     dialog.hidden = false;
     history.pushState({ sbDialog: 'load' }, '');
@@ -6466,9 +6530,11 @@ const App = (() => {
       btn.addEventListener('click', () => _sbDoDeletePortfolio(btn.dataset.deleteId)));
     document.getElementById('sb-delete-current-btn')?.addEventListener('click', () => {
       if (!confirm('לנקות את התיק הנוכחי מהמסך?')) return;
+      _sbDiscardAutoSavedDraft();
       state.sandbox.portfolio = [];
       state.sandbox.portfolioName = '';
       _sbSetHadSavedName(false);
+      _sbSetAutoSaveId(null);
       localStorage.removeItem(SANDBOX_NAME_KEY);
       _sbHideValueBar();
       saveSandboxPortfolio();
@@ -6484,11 +6550,13 @@ const App = (() => {
     const list = _sbGetSavedPortfolios();
     const item = list.find(p => p.id === id);
     if (!item) return;
-    if (!confirm(`לטעון את התיק "${item.name}"?\nהתיק הנוכחי יוחלף.`)) return;
+    if (!confirm(`לטעון את התיק "${item.name}"?\nהתיק הנוכחי יישמר ברשימה ויוחלף במסך.`)) return;
+    _sbEnsureCurrentPortfolioPersisted();
     _sbCloseLoadDialog();
     state.sandbox.portfolio = JSON.parse(JSON.stringify(item.portfolio));
     state.sandbox.portfolioName = item.name;
     _sbSetHadSavedName(true);
+    _sbSetAutoSaveId(item.id);
     saveSandboxPortfolio();
     document.querySelectorAll('.sandbox-check').forEach(cb => {
       cb.checked = false; cb.classList.remove('is-in-portfolio');
@@ -6620,6 +6688,7 @@ const App = (() => {
           state.sandbox.portfolio = data.p;
           state.sandbox.portfolioName = data.n || 'תיק משותף';
           _sbSetHadSavedName(true);
+          _sbSetAutoSaveId(null);
           saveSandboxPortfolio();
           history.replaceState(null, '', location.pathname + location.search);
           if (state.activeCategoryId !== 'sandbox') switchCategory('sandbox');
@@ -7578,9 +7647,11 @@ const App = (() => {
     // Clear portfolio button
     section.querySelector('#sandbox-clear-portfolio-btn')?.addEventListener('click', () => {
       if (!confirm('לנקות את התיק מהמסך?\n\nהתיק השמור לא יימחק — ניתן לטעון אותו שוב דרך כפתור "טען תיק".')) return;
+      _sbDiscardAutoSavedDraft();
       state.sandbox.portfolio = [];
       state.sandbox.portfolioName = '';
       _sbSetHadSavedName(false);
+      _sbSetAutoSaveId(null);
       _sbHideValueBar();
       saveSandboxPortfolio();
       // uncheck all checkboxes in tables
