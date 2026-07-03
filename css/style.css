@@ -11222,6 +11222,40 @@ body.h2h-active,
 }
 .sandbox-remove-btn:hover { color: #dc2626; background: #fee2e2; }
 
+.sandbox-hide-btn {
+  -webkit-appearance: none;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--gray-300);
+  cursor: pointer;
+  font-size: .8rem;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border-radius: 6px;
+  transition: color .12s, background .12s;
+}
+.sandbox-hide-btn:hover { color: var(--blue); background: #eff6ff; }
+.sandbox-hide-btn.is-hidden { color: #dc2626; }
+.sandbox-hide-btn.is-hidden:hover { background: #fee2e2; }
+
+/* Row hidden by user — simulate portfolio without this track; excluded from all calculations */
+tr.sb-row-hidden {
+  opacity: .4;
+  filter: grayscale(1);
+}
+tr.sb-row-hidden .sandbox-track-link,
+tr.sb-row-hidden .sandbox-provider-link,
+tr.sb-row-hidden .sandbox-fee-input,
+tr.sb-row-hidden .sandbox-invest-input {
+  pointer-events: none;
+}
+
 /* ── Summary section ── */
 .sandbox-summary {
   background: #fff;
@@ -19710,6 +19744,8 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   html body .sandbox-page-actions,
   html body .sandbox-page-header,
   html body .sandbox-remove-btn,
+  html body .sandbox-hide-btn,
+  html body tr.sb-row-hidden,
   html body .sandbox-cat-add-btn,
   html body .sandbox-invest-toggle,
   html body .sandbox-cat-mode-toggle,
@@ -19800,6 +19836,8 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   html body.sb-printing .sandbox-page-actions,
   html body.sb-printing .sandbox-page-header,
   html body.sb-printing .sandbox-remove-btn,
+  html body.sb-printing .sandbox-hide-btn,
+  html body.sb-printing tr.sb-row-hidden,
   html body.sb-printing .sandbox-cat-add-btn,
   html body.sb-printing .sandbox-invest-toggle,
   html body.sb-printing .sandbox-cat-mode-toggle,

@@ -5875,11 +5875,14 @@ const App = (() => {
           const allocationIcon = item.fundIdTagIcons || ghAllocationProfileIcons(allocationProfile, item.trackLabel || '');
           const fundUrl = `fund.html?id=${encodeURIComponent(item.fundId || '')}&cat=${encodeURIComponent(item.categoryId || '')}`;
           const returnCells = returnFields.map(field => _sbReturnCell(item, field)).join('');
-          return `<tr data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}">
+          const isHidden = !!item.hidden;
+          return `<tr data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}"${isHidden ? ' class="sb-row-hidden"' : ''}>
             <td><button type="button" class="sandbox-remove-btn" data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" aria-label="הסר מסלול">
               <i class="fas fa-times" aria-hidden="true"></i></button></td>
             <td><div class="sandbox-provider-cell">
-              <span class="prov-dot" style="background:${itemProviderColor}"></span>
+              <button type="button" class="sandbox-hide-btn${isHidden ? ' is-hidden' : ''}" data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" aria-label="${isHidden ? 'הצג מסלול' : 'הסתר מסלול מהתיק'}" title="${isHidden ? 'הצג מסלול' : 'הסתר מסלול מהתיק (לצורך סימולציה)'}">
+                <i class="fas ${isHidden ? 'fa-eye-slash' : 'fa-eye'}" aria-hidden="true"></i>
+              </button>
               <a class="sandbox-provider-link" href="${fundUrl}" style="color:${itemProviderColor};">${item.provider}</a>
             </div></td>
             <td>
@@ -5953,8 +5956,8 @@ const App = (() => {
         </div>`;
       }
 
-      // Dashboard
-      html += _sbDashboardHtml(portfolio);
+      // Dashboard — exclude routes hidden by the user for the "what if" simulation
+      html += _sbDashboardHtml(portfolio.filter(it => !it.hidden));
     }
 
     // Rescue value bar before innerHTML wipe (it may have been moved inside section)
@@ -7579,6 +7582,17 @@ const App = (() => {
       });
     });
 
+    // Hide/show individual item (simulate portfolio without this track)
+    section.querySelectorAll('.sandbox-hide-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = _sbFindPortfolioItemFromElement(btn);
+        if (!item) return;
+        item.hidden = !item.hidden;
+        saveSandboxPortfolio();
+        renderSandboxPage();
+      });
+    });
+
     // category invest mode toggle
     section.querySelectorAll('[data-sandbox-cat-mode]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -7764,7 +7778,7 @@ const App = (() => {
     // Update dashboard section
     const dashEl = section.querySelector('.sb-dashboard');
     if (dashEl) {
-      dashEl.outerHTML = _sbDashboardHtml(portfolio);
+      dashEl.outerHTML = _sbDashboardHtml(portfolio.filter(it => !it.hidden));
       _sbAttachDistributionDonutEvents(section);
     _sbAttachReturnsHeroEvents(section);
     }
