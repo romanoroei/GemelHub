@@ -5809,7 +5809,10 @@ const App = (() => {
     const portfolio = state.sandbox.portfolio;
 
     let html = `<div class="sandbox-page-header">
-      <div class="sandbox-page-title">🧪 המעבדה שלי<span id="sb-autosave-status" class="sb-autosave-status" aria-live="polite"></span></div>
+      <div class="sandbox-page-title">
+        <span class="sandbox-page-title-text">🧪 המעבדה שלי</span><span id="sb-autosave-status" class="sb-autosave-status" aria-live="polite"></span>
+        <img src="assets/gemelhub-logo-light.svg?v=sandbox-title-20260705" alt="GemelHub" class="sandbox-title-logo" />
+      </div>
       <div class="sandbox-page-actions">
         <button type="button" class="sandbox-add-btn" id="sandbox-add-more-btn">
           <i class="fas fa-plus" aria-hidden="true"></i> <span class="sb-btn-label">הוסף</span>
@@ -5820,14 +5823,14 @@ const App = (() => {
         <button type="button" class="sandbox-load-btn" id="sandbox-load-portfolio-btn" title="טען תיק שמור">
           <i class="fas fa-folder-open" aria-hidden="true"></i> <span class="sb-btn-label">פתח/השווה</span>
         </button>
-        ${portfolio.length > 0 ? `<button type="button" class="sandbox-clear-btn" id="sandbox-clear-portfolio-btn">
-          <i class="fas fa-trash-alt" aria-hidden="true"></i></button>
-        <button type="button" class="sandbox-print-btn" id="sandbox-print-btn" title="הדפס תיק">
+        ${portfolio.length > 0 ? `<button type="button" class="sandbox-print-btn" id="sandbox-print-btn" title="הדפס תיק">
           <i class="fas fa-print" aria-hidden="true"></i>
         </button>
         <button type="button" class="sandbox-share-btn sb-share-pulse" id="sandbox-share-btn" title="שתף את התיק עם מישהו">
           <i class="fab fa-whatsapp" aria-hidden="true"></i> <span class="sb-btn-label">שתף תיק</span>
-        </button>` : ''}
+        </button>
+        <button type="button" class="sandbox-clear-btn" id="sandbox-clear-portfolio-btn">
+          <i class="fas fa-trash-alt" aria-hidden="true"></i></button>` : ''}
       </div>
     </div>`;
 
@@ -6120,7 +6123,7 @@ const App = (() => {
       document.documentElement.style.setProperty('--sandbox-mobile-value-bar-space', `${reserve}px`);
       const actions = document.querySelector('.sandbox-page-actions');
       if (actions && bar.classList.contains('is-visible')) {
-        const top = Math.ceil(actions.getBoundingClientRect().bottom + 8);
+        const top = Math.ceil(actions.getBoundingClientRect().bottom + 16);
         document.documentElement.style.setProperty('--sandbox-mobile-value-bar-top', `${top}px`);
       }
     };

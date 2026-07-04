@@ -10479,6 +10479,14 @@ body.h2h-active,
   font-weight: 800;
   color: var(--blue);
   flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Shown only on mobile (see media query below) — proportional wordmark to
+   the visual left of the title, on the header's own line. */
+.sandbox-title-logo {
+  display: none;
 }
 .sandbox-add-btn {
   -webkit-appearance: none;
@@ -12053,7 +12061,7 @@ tr.sb-row-hidden .sandbox-invest-input {
   .sandbox-value-bar {
     right: 10px !important;
     left: 10px !important;
-    bottom: 12px;
+    bottom: 12px !important;
     width: auto !important;
     max-width: none;
     transform: none !important;
@@ -18379,7 +18387,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     align-items: stretch !important;
     gap: 6px !important;
     margin: 0 -10px 12px !important;
-    padding: 6px 10px 10px !important;
+    padding: 12px 10px 10px !important;
     background: rgba(255, 255, 255, .96) !important;
     border-bottom: 1px solid rgba(226, 232, 240, .9) !important;
     box-shadow: 0 8px 18px rgba(15, 23, 42, .05) !important;
@@ -19220,8 +19228,7 @@ html body .sandbox-track-id {
 
   /* Mobile: sandbox action buttons */
   .sandbox-add-btn,
-  .sandbox-fields-btn,
-  .sandbox-save-btn {
+  .sandbox-fields-btn {
     flex: 1 1 0 !important;
     width: auto !important;
     min-width: 0 !important;
@@ -19245,9 +19252,11 @@ html body .sandbox-track-id {
     overflow: visible !important;
     flex-shrink: 0 !important;
   }
-  /* Icon-only buttons on mobile */
+  /* Icon-only buttons on mobile — save included: button row is tight on
+     mobile, so it drops its label there and shows just the floppy-disk icon. */
   .sandbox-clear-btn,
-  .sandbox-print-btn {
+  .sandbox-print-btn,
+  .sandbox-save-btn {
     flex: 0 0 36px !important;
     width: 36px !important;
     min-width: 36px !important;
@@ -19258,6 +19267,7 @@ html body .sandbox-track-id {
     overflow: visible !important;
     flex-shrink: 0 !important;
   }
+  .sandbox-save-btn .sb-btn-label { display: none !important; }
   /* Share button: keeps its label on mobile too — it's the one action meant
      to stand out, not blend in with the neutral icon-only utility buttons. */
   .sandbox-share-btn {
@@ -19276,9 +19286,21 @@ html body .sandbox-track-id {
     white-space: nowrap !important;
     font-size: .7rem !important;
   }
+  /* Wordmark on the title's own line, pushed to the visual left (RTL) via
+     the auto margin — proportional to the title's text height. */
+  .sandbox-title-logo {
+    display: block !important;
+    height: 22px !important;
+    width: auto !important;
+    margin-inline-start: auto !important;
+  }
+  /* A little breathing room below the sticky chrome above, so the title/
+     button row and the value bar don't feel jammed against it. */
+  .sandbox-page-header {
+    margin-top: 8px !important;
+  }
   .sandbox-add-btn .sb-btn-label,
-  .sandbox-fields-btn .sb-btn-label,
-  .sandbox-save-btn .sb-btn-label {
+  .sandbox-fields-btn .sb-btn-label {
     display: inline !important;
     white-space: nowrap !important;
     overflow: hidden !important;
