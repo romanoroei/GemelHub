@@ -19501,13 +19501,13 @@ html body .sandbox-track-id {
   align-items: center;
   justify-content: flex-start;
   flex-shrink: 0;
-  margin-inline-start: 6px;
+  margin-inline-start: 16px;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
 .sb-print-logo-mark {
   display: block;
-  width: 118px;
+  width: 108px;
   direction: ltr;
   line-height: 1;
   text-align: center;
@@ -19521,14 +19521,14 @@ html body .sandbox-track-id {
 }
 .sb-print-logo-bag {
   font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", Arial, sans-serif;
-  font-size: 19px;
+  font-size: 17px;
   line-height: 1;
   margin-inline-end: 2px;
 }
 .sb-print-logo-gemel,
 .sb-print-logo-hub {
   font-family: Heebo, Arial, Helvetica, sans-serif;
-  font-size: 23px;
+  font-size: 21px;
   font-weight: 700;
   letter-spacing: -0.5px;
 }
@@ -19538,7 +19538,7 @@ html body .sandbox-track-id {
   margin-top: 2px;
   direction: rtl;
   font-family: Heebo, Arial, Helvetica, sans-serif;
-  font-size: 6.5px;
+  font-size: 6px;
   font-weight: 600;
   line-height: 1.1;
   color: #C7A247;
@@ -19896,11 +19896,11 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     align-items: center !important;
     justify-content: flex-start !important;
     flex-shrink: 0 !important;
-    margin-inline-start: 6px !important;
+    margin-inline-start: 16px !important;
   }
   body.sb-printing .sb-print-logo-mark {
     display: block !important;
-    width: 118px !important;
+    width: 108px !important;
     direction: ltr !important;
     line-height: 1 !important;
     text-align: center !important;
@@ -19913,13 +19913,13 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     white-space: nowrap !important;
   }
   body.sb-printing .sb-print-logo-bag {
-    font-size: 19px !important;
+    font-size: 17px !important;
     line-height: 1 !important;
     margin-inline-end: 2px !important;
   }
   body.sb-printing .sb-print-logo-gemel,
   body.sb-printing .sb-print-logo-hub {
-    font-size: 23px !important;
+    font-size: 21px !important;
     font-weight: 700 !important;
     letter-spacing: -0.5px !important;
   }
@@ -19928,7 +19928,7 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   body.sb-printing .sb-print-logo-tagline {
     margin-top: 2px !important;
     direction: rtl !important;
-    font-size: 6.5px !important;
+    font-size: 6px !important;
     font-weight: 600 !important;
     line-height: 1.1 !important;
     color: #C7A247 !important;
