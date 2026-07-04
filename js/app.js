@@ -6673,37 +6673,10 @@ const App = (() => {
   let _sbComparePrintInProgress = false;
   let _sbComparePrintOriginalNodes = null;
   let _sbComparePrintScrollY = 0;
-  const SB_PRINT_LOGO_HTML = `
-    <svg class="sb-print-logo-svg" xmlns="http://www.w3.org/2000/svg" width="720" height="184" viewBox="120 42 720 184" role="img" aria-label="GemelHub">
-      <defs>
-        <linearGradient id="sbPrintLogoGold" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#E7C965"/>
-          <stop offset="1" stop-color="#C7A247"/>
-        </linearGradient>
-      </defs>
-      <text x="190" y="140"
-            text-anchor="middle"
-            dominant-baseline="alphabetic"
-            font-family="Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, Arial, sans-serif"
-            font-size="96">&#x1F4B0;</text>
-      <text x="535" y="150"
-            text-anchor="middle"
-            font-family="Heebo, Arial, Helvetica, sans-serif"
-            font-size="118"
-            font-weight="600"
-            letter-spacing="-1">
-        <tspan fill="#183A66">Gemel</tspan><tspan fill="url(#sbPrintLogoGold)">Hub</tspan>
-      </text>
-      <text x="535" y="205"
-            text-anchor="middle"
-            direction="rtl"
-            unicode-bidi="plaintext"
-            font-family="Heebo, Arial, Helvetica, sans-serif"
-            font-size="36"
-            font-weight="500"
-            fill="url(#sbPrintLogoGold)">&#1495;&#1497;&#1505;&#1499;&#1493;&#1503; &#1508;&#1504;&#1505;&#1497;&#1493;&#1504;&#1497; &#1489;&#1500;&#1495;&#1497;&#1510;&#1514; &#1499;&#1508;&#1514;&#1493;&#1512;</text>
-    </svg>
-  `;
+  const SB_PRINT_LOGO_HTML = '<div class="sb-print-logo-mark" role="img" aria-label="GemelHub">' +
+    '<div class="sb-print-logo-row"><span class="sb-print-logo-bag">&#x1F4B0;</span><span class="sb-print-logo-gemel">Gemel</span><span class="sb-print-logo-hub">Hub</span></div>' +
+    '<div class="sb-print-logo-tagline">&#1495;&#1497;&#1505;&#1499;&#1493;&#1503; &#1508;&#1504;&#1505;&#1497;&#1493;&#1504;&#1497; &#1489;&#1500;&#1495;&#1497;&#1510;&#1514; &#1499;&#1508;&#1514;&#1493;&#1512;</div>' +
+    '</div>';
 
   function _sbInjectPrintState() {
     if (_sbComparePrintInProgress || document.body.classList.contains('sb-compare-printing')) return false;
