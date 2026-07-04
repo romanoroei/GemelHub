@@ -629,6 +629,7 @@ const App = (() => {
   // ─── INIT ─────────────────────────────────────────────────────
   async function init() {
     APIModule.loadCachesFromLocalStorage();
+    _sbRestoreMobileZoom();
     loadDisplayOptions();
     state.advancedOptionsOpen = false;
     localStorage.removeItem(ADVANCED_OPTIONS_STORAGE_KEY);
@@ -1475,9 +1476,31 @@ const App = (() => {
           <span class="mobile-category-option-label">חיפוש קופה</span>
         </button>
       </div>
+      <div class="mob-opts-zoom">
+        <div class="mob-opts-zoom-label-row">
+          <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+          <span>התאמת גודל תצוגה</span>
+          <span class="mob-opts-zoom-value" id="mob-opts-zoom-value">100%</span>
+        </div>
+        <input type="range" id="mob-opts-zoom-slider" class="mob-opts-zoom-slider"
+               min="${MOBILE_ZOOM_MIN}" max="${MOBILE_ZOOM_MAX}" step="1" value="100"
+               aria-label="התאמת גודל תצוגה במובייל" />
+      </div>
     `;
     document.body.appendChild(sheet);
     sheet.querySelector('.mobile-category-sheet-close')?.addEventListener('click', closeMobileCategorySheet);
+
+    const zoomSlider = sheet.querySelector('#mob-opts-zoom-slider');
+    const zoomValueEl = sheet.querySelector('#mob-opts-zoom-value');
+    zoomSlider.value = String(_sbGetMobileZoomPct());
+    zoomValueEl.textContent = zoomSlider.value + '%';
+    zoomSlider.addEventListener('input', () => {
+      const pct = _sbApplyMobileZoom(parseInt(zoomSlider.value, 10));
+      zoomValueEl.textContent = pct + '%';
+    });
+    zoomSlider.addEventListener('change', () => {
+      _sbSaveMobileZoomPct(parseInt(zoomSlider.value, 10));
+    });
 
     sheet.querySelectorAll('[data-mobile-cat]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -1692,6 +1715,38 @@ const App = (() => {
         closeMobileFilterDrawer();
       }
     });
+  }
+
+  // ── Mobile display zoom (options sheet slider) ──────────────────────────
+  // Uses the CSS `zoom` property (not transform:scale) specifically because
+  // it triggers a real layout recalculation — media queries and column
+  // wrapping respond to it, so dragging the slider actually reflows tables
+  // to fit more columns/rows, not just a cosmetic shrink with empty margins.
+  // Range kept intentionally narrow (85–115%) per explicit request: enough
+  // to matter, not enough to break the mobile responsive layout.
+  const MOBILE_ZOOM_KEY = 'gemelhub_mobile_zoom_v1';
+  const MOBILE_ZOOM_MIN = 85;
+  const MOBILE_ZOOM_MAX = 115;
+  const MOBILE_ZOOM_DEFAULT = 100;
+
+  function _sbGetMobileZoomPct() {
+    const saved = parseInt(localStorage.getItem(MOBILE_ZOOM_KEY), 10);
+    if (isNaN(saved)) return MOBILE_ZOOM_DEFAULT;
+    return Math.max(MOBILE_ZOOM_MIN, Math.min(MOBILE_ZOOM_MAX, saved));
+  }
+
+  function _sbApplyMobileZoom(pct) {
+    const clamped = Math.max(MOBILE_ZOOM_MIN, Math.min(MOBILE_ZOOM_MAX, pct || MOBILE_ZOOM_DEFAULT));
+    document.documentElement.style.zoom = (clamped / 100);
+    return clamped;
+  }
+
+  function _sbSaveMobileZoomPct(pct) {
+    try { localStorage.setItem(MOBILE_ZOOM_KEY, String(pct)); } catch (e) { /* storage unavailable */ }
+  }
+
+  function _sbRestoreMobileZoom() {
+    _sbApplyMobileZoom(_sbGetMobileZoomPct());
   }
 
   function ensureMobileOptionsSheet() {
@@ -6123,7 +6178,7 @@ const App = (() => {
       document.documentElement.style.setProperty('--sandbox-mobile-value-bar-space', `${reserve}px`);
       const actions = document.querySelector('.sandbox-page-actions');
       if (actions && bar.classList.contains('is-visible')) {
-        const top = Math.ceil(actions.getBoundingClientRect().bottom + 16);
+        const top = Math.ceil(actions.getBoundingClientRect().bottom + 24);
         document.documentElement.style.setProperty('--sandbox-mobile-value-bar-top', `${top}px`);
       }
     };
@@ -6504,6 +6559,9 @@ const App = (() => {
     target.portfolio = JSON.parse(JSON.stringify(state.sandbox.portfolio));
     target.savedAt = new Date().toISOString();
     delete target.autoNamed;
+    // Explicit save = the customer has taken ownership of this portfolio —
+    // it's no longer just "whatever came in on the shared link".
+    delete target.sharedSourceId;
     // Drop a leftover auto-saved draft entry now that the user explicitly picked a target to update
     const oldAutoEntry = oldAutoSaveId ? list.find(p => p.id === oldAutoSaveId) : null;
     if (oldAutoEntry && oldAutoEntry.autoNamed && oldAutoSaveId !== target.id) {
@@ -6560,11 +6618,14 @@ const App = (() => {
         ? _sbFormatSavedDate(curLastMod.split('T')[0]) + ' · ' + _sbFormatTime(curLastMod)
         : '';
       const curModHtml = escapeHtml(curModStr);
+      const curMirror = _sbFindMirrorEntry(list);
+      const curFromLink = curMirror && curMirror.sharedSourceId;
       html += '<div class="sb-saved-item sb-saved-item--current">'
            + '<div class="sb-saved-item-info">' + chk
            + '<div class="sb-saved-item-text">'
            + '<strong class="sb-saved-name">' + curNameHtml + '</strong>'
            + ' <span class="sb-saved-current-badge">תיק פעיל</span>'
+           + (curFromLink ? ' <span class="sb-saved-link-badge" title="התיק נטען מקישור ששותף">🔗 נטען מקישור</span>' : '')
            + (curTotStr ? ' <span class="sb-saved-value-badge">' + curTotStr + '</span>' : '')
            + '<span class="sb-saved-meta">'
            + (curModStr ? 'עדכון אחרון: ' + curModHtml + ' · ' : '')
@@ -6600,6 +6661,7 @@ const App = (() => {
            + '<div class="sb-saved-item-info">' + chk
            + '<div class="sb-saved-item-text sb-load-area" data-load-id="' + itemIdAttr + '" role="button" tabindex="0" aria-label="טען תיק ' + itemNameAttr + '">'
            + '<strong class="sb-saved-name">' + itemNameHtml + '</strong>'
+           + (item.sharedSourceId ? ' <span class="sb-saved-link-badge" title="התיק נטען מקישור ששותף">🔗 נטען מקישור</span>' : '')
            + (totStr ? ' <span class="sb-saved-value-badge">' + totStr + '</span>' : '')
            + '<span class="sb-saved-meta">' + itemDateHtml + (item.savedAt ? ' · ' + itemTimeHtml : '') + ' · ' + item.portfolio.length + ' מסלולים' + _sbHiddenCountSuffix(item.portfolio) + '</span>'
            + (item.notes ? '<span class="sb-saved-notes">' + itemNotesHtml + '</span>' : '')

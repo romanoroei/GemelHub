@@ -43,7 +43,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=header-polish-20260705" />
+  <link rel="stylesheet" href="css/style.css?v=zoom-link-badge-20260705" />
   <style>
     @media (max-width: 760px) {
       .advanced-search-overlay { z-index: 9500 !important; }
@@ -123,6 +123,40 @@
       }
       .mob-opts-btn:active { background: #edf2f7; }
       .mob-opts-btn i { color: #c9a227; font-size: 1.05rem; min-width: 18px; text-align: center; }
+      .mob-opts-zoom {
+        width: 100%; background: #f8f9fc;
+        border: 1px solid #e2e8f0; border-radius: 12px;
+        padding: 12px 14px 14px; margin-bottom: 8px;
+        font-family: 'Heebo', sans-serif;
+      }
+      .mob-opts-zoom-label-row {
+        display: flex; align-items: center; gap: 8px;
+        font-size: .85rem; font-weight: 600; color: #0f2744;
+        margin-bottom: 8px; direction: rtl;
+      }
+      .mob-opts-zoom-label-row i { color: #c9a227; font-size: 1rem; }
+      .mob-opts-zoom-label-row span:nth-child(2) { flex: 1; text-align: right; }
+      .mob-opts-zoom-value {
+        font-size: .78rem; font-weight: 700; color: #64748b;
+        min-width: 34px; text-align: left; direction: ltr;
+      }
+      .mob-opts-zoom-slider {
+        -webkit-appearance: none; appearance: none;
+        width: 100%; height: 6px; border-radius: 999px;
+        background: linear-gradient(90deg, #e2e8f0, #c9a227, #e2e8f0);
+        outline: none; margin: 0;
+      }
+      .mob-opts-zoom-slider::-webkit-slider-thumb {
+        -webkit-appearance: none; appearance: none;
+        width: 22px; height: 22px; border-radius: 50%;
+        background: #fff; border: 2.5px solid #c9a227;
+        box-shadow: 0 2px 6px rgba(15,23,42,.25); cursor: pointer;
+      }
+      .mob-opts-zoom-slider::-moz-range-thumb {
+        width: 22px; height: 22px; border-radius: 50%;
+        background: #fff; border: 2.5px solid #c9a227;
+        box-shadow: 0 2px 6px rgba(15,23,42,.25); cursor: pointer;
+      }
       .mob-opts-close {
         display: block; width: 100%; background: none; border: none;
         color: #94a3b8; font-size: .8rem; cursor: pointer;
@@ -652,6 +686,6 @@
 
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
-  <script src="js/app.js?v=header-polish-20260705"></script>
+  <script src="js/app.js?v=zoom-link-badge-20260705"></script>
 </body>
 </html>

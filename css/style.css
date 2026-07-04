@@ -10709,6 +10709,12 @@ body.h2h-active,
   border-radius: 4px; padding: 1px 5px; vertical-align: middle;
   align-self: flex-start; display: inline-block;
 }
+.sb-saved-link-badge {
+  font-size: .65rem; font-weight: 700; background: #e0f2fe; color: #0369a1;
+  border: 1px solid #7dd3fc;
+  border-radius: 4px; padding: 1px 5px; vertical-align: middle;
+  align-self: flex-start; display: inline-block;
+}
 .sb-saved-actions { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
 .sb-compare-check-wrap {
   display: flex; align-items: flex-start; padding-top: 3px; flex-shrink: 0; cursor: pointer;
@@ -18387,7 +18393,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     align-items: stretch !important;
     gap: 6px !important;
     margin: 0 -10px 12px !important;
-    padding: 12px 10px 10px !important;
+    padding: 18px 10px 10px !important;
     background: rgba(255, 255, 255, .96) !important;
     border-bottom: 1px solid rgba(226, 232, 240, .9) !important;
     box-shadow: 0 8px 18px rgba(15, 23, 42, .05) !important;
@@ -19290,7 +19296,7 @@ html body .sandbox-track-id {
      the auto margin — proportional to the title's text height. */
   .sandbox-title-logo {
     display: block !important;
-    height: 22px !important;
+    height: 30px !important;
     width: auto !important;
     margin-inline-start: auto !important;
   }
