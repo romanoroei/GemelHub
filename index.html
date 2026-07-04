@@ -631,6 +631,13 @@
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- PDF export engine (js/pdf-export.js) — pdf-lib builds the PDF, fontkit embeds
+     the Hebrew font, bidi-js reorders RTL text. Loaded before app.js so the
+     "export PDF" buttons can use window.GemelHubPdfExport on click. -->
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bidi-js@1.0.3/dist/bidi.min.js"></script>
+<script src="js/pdf-export.js?v=20260704"></script>
 <script src="js/config.js?v=minus-format-20260627"></script>
 <script src="js/api.js?v=sharpe-source-20260627"></script>
 <!-- Mobile fund search overlay -->
