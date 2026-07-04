@@ -6787,6 +6787,24 @@ const App = (() => {
     return true;
   }
 
+  function _sbPositionPrintDisclaimer() {
+    if (!_sbPrintFooter) return;
+    const section = document.getElementById('sandbox-section');
+    if (!section) return;
+    _sbPrintFooter.style.setProperty('--sb-print-disclaimer-offset', '10mm');
+    const pageHeightPx = (297 - 16) * 96 / 25.4; // A4 height minus @page top/bottom margins.
+    const sectionTop = section.getBoundingClientRect().top;
+    const footerTop = _sbPrintFooter.getBoundingClientRect().top;
+    const footerHeight = _sbPrintFooter.getBoundingClientRect().height;
+    const contentBeforeFooter = Math.max(0, footerTop - sectionTop);
+    const pageRemainder = contentBeforeFooter % pageHeightPx;
+    const remainingOnPage = pageHeightPx - pageRemainder - footerHeight;
+    const minGap = 18;
+    if (remainingOnPage > minGap) {
+      _sbPrintFooter.style.setProperty('--sb-print-disclaimer-offset', `${Math.floor(remainingOnPage)}px`);
+    }
+  }
+
   function _sbCleanupPrintState() {
     document.body.classList.remove('sb-printing');
     if (_sbPrintHeader && _sbPrintHeader.parentNode) {
@@ -6798,6 +6816,7 @@ const App = (() => {
     }
     _sbPrintValueSummary = null;
     if (_sbPrintFooter && _sbPrintFooter.parentNode) {
+      _sbPrintFooter.style.removeProperty('--sb-print-disclaimer-offset');
       _sbPrintFooter.parentNode.removeChild(_sbPrintFooter);
     }
     _sbPrintFooter = null;
@@ -6805,7 +6824,9 @@ const App = (() => {
 
   function setupPrintListeners() {
     window.addEventListener('beforeprint', () => {
-      if (!_sbComparePrintInProgress && !document.body.classList.contains('sb-compare-printing')) _sbInjectPrintState();
+      if (!_sbComparePrintInProgress && !document.body.classList.contains('sb-compare-printing') && _sbInjectPrintState()) {
+        _sbPositionPrintDisclaimer();
+      }
     });
     window.addEventListener('afterprint', _sbCleanupPrintState);
     // אין קריאה אוטומטית ל-_sbCleanupComparePrintState כאן בכוונה:
@@ -6820,6 +6841,7 @@ const App = (() => {
     _sbWaitForPrintAssets(document).then(function() {
       requestAnimationFrame(function() {
         requestAnimationFrame(function() {
+          _sbPositionPrintDisclaimer();
           window.print();
         });
       });

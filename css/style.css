@@ -20543,8 +20543,6 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   /* ── Print disclaimer — final report block, never over table content ── */
   body.sb-printing .sb-print-disclaimer {
     position: static !important;
-    break-before: page !important;
-    page-break-before: always !important;
     break-inside: avoid !important;
     page-break-inside: avoid !important;
     border-top: 1px solid #dde3ea !important;
@@ -20555,7 +20553,7 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     direction: rtl !important;
     text-align: center !important;
     background: #fff !important;
-    margin: 0 !important;
+    margin: var(--sb-print-disclaimer-offset, 10mm) 0 0 !important;
   }
 
   /* ── Prevent blank second page ── */
