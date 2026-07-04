@@ -6686,7 +6686,7 @@ const App = (() => {
       _sbPrintHeader = document.createElement('div');
       _sbPrintHeader.className = 'sb-print-report-header';
       _sbPrintHeader.innerHTML = `
-        <div class="sb-print-logo">Gemel<span>Hub</span> 💰</div>
+        <div class="sb-print-logo"><img src="assets/gemelhub-logo-light.svg?v=print-20260704-1" alt="GemelHub"></div>
         <div class="sb-print-portfolio-title">${portfolioName}</div>
         <div class="sb-print-meta">הופק: ${dateStr}<br>רועי רומנו, מתכנן פיננסי וסוכן פנסיוני מורשה | 052-8089808</div>
       `;
@@ -7186,7 +7186,7 @@ const App = (() => {
     _sbComparePrintRoot.innerHTML =
       '<button type="button" id="sb-compare-print-return-btn" class="sb-compare-print-return-btn">← חזרה לתיק</button>' +
       '<div class="sb-print-report-header">' +
-        '<div class="sb-print-logo">Gemel<span>Hub</span> 💰</div>' +
+        '<div class="sb-print-logo"><img src="assets/gemelhub-logo-light.svg?v=print-20260704-1" alt="GemelHub"></div>' +
         '<div class="sb-print-portfolio-title">' + escapeHtml(title) + '</div>' +
         '<div class="sb-print-meta">הופק: ' + dateStr + '<br>רועי רומנו, מתכנן פיננסי וסוכן פנסיוני מורשה | 052-8089808</div>' +
       '</div>' +

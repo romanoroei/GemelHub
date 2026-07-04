@@ -19497,18 +19497,19 @@ html body .sandbox-track-id {
   print-color-adjust: exact;
 }
 .sb-print-logo {
-  font-size: 1.1rem;
-  font-weight: 900;
-  color: #1a3560;
-  letter-spacing: -.5px;
-  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
   flex-shrink: 0;
-  overflow: visible;
   margin-inline-start: 6px;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
-.sb-print-logo span { color: #6c3fc5; }
+.sb-print-logo img {
+  display: block;
+  width: 118px;
+  height: auto;
+}
 .sb-print-portfolio-title {
   font-size: .9rem;
   font-weight: 800;
@@ -19857,16 +19858,17 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     page-break-after: avoid !important;
   }
   body.sb-printing .sb-print-logo {
-    font-size: 1.1rem !important;
-    font-weight: 900 !important;
-    color: #1a3560 !important;
-    letter-spacing: -.5px !important;
-    white-space: nowrap !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
     flex-shrink: 0 !important;
-    overflow: visible !important;
     margin-inline-start: 6px !important;
   }
-  body.sb-printing .sb-print-logo span { color: #6c3fc5 !important; }
+  body.sb-printing .sb-print-logo img {
+    display: block !important;
+    width: 118px !important;
+    height: auto !important;
+  }
   body.sb-printing .sb-print-portfolio-title {
     font-size: 1rem !important;
     font-weight: 800 !important;
