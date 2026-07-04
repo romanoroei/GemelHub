@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=mobile-row-bars-20260627" />
+  <link rel="stylesheet" href="css/style.css?v=fund-logo-20260704" />
   <link rel="stylesheet" href="css/fund.css?v=mobile-fixes19-20260626" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -210,7 +210,9 @@
 <!-- ════════ FOOTER ════════ -->
 <footer class="site-footer">
   <div class="footer-inner">
-    <div class="footer-logo">GemelHub 💰</div>
+    <div class="footer-logo">
+      <img src="assets/gemelhub-logo-transparent.svg?v=footer-20260704-4" alt="GemelHub - חיסכון פנסיוני בלחיצת כפתור" class="footer-brand-logo" />
+    </div>
       <p class="footer-disclaimer">
         המידע באתר נועד לספק תמונת מצב כללית והשוואתית בלבד ואינו מהווה ייעוץ השקעות, שיווק פנסיוני או תחליף לייעוץ אישי המותאם לצרכי הלקוח. הנתונים מבוססים על מקורות פומביים ועשויים להכיל טעויות או אי-דיוקים. אין לראות בתשואות העבר התחייבות לתשואות עתידיות. לפני קבלת החלטה פיננסית מומלץ להתייעץ עם בעל רישיון.
       </p>
@@ -2713,7 +2715,7 @@ function buildFundPageHeader() {
   const brandLink = document.createElement('a');
   brandLink.href = 'index.html';
   brandLink.className = 'fund-nav-brand';
-  brandLink.innerHTML = '<span class="fund-nav-logo-text">GemelHub</span><span class="fund-nav-logo-icon">💰</span>';
+  brandLink.innerHTML = '<img src="assets/gemelhub-logo-light.svg?v=fund-nav-20260704-1" alt="GemelHub" class="fund-nav-logo-img" />';
   brandLink.addEventListener('click', () => { sessionStorage.setItem('gemelhubScrollTop', '1'); });
   bar.appendChild(brandLink);
 
