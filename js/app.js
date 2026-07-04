@@ -5825,8 +5825,8 @@ const App = (() => {
         <button type="button" class="sandbox-print-btn" id="sandbox-print-btn" title="הדפס תיק">
           <i class="fas fa-print" aria-hidden="true"></i>
         </button>
-        <button type="button" class="sandbox-share-btn" id="sandbox-share-btn" title="שלח בווטסאפ">
-          <i class="fas fa-share-nodes" aria-hidden="true"></i>
+        <button type="button" class="sandbox-share-btn sb-share-pulse" id="sandbox-share-btn" title="שתף את התיק עם מישהו">
+          <i class="fab fa-whatsapp" aria-hidden="true"></i> <span class="sb-btn-label">שתף תיק</span>
         </button>` : ''}
       </div>
     </div>`;

@@ -10339,6 +10339,11 @@ body.h2h-active,
   50%      { box-shadow: 0 0 0 7px rgba(22,163,74,0); }
 }
 .sb-save-pulse { animation: sbSavePulse 1.5s ease-out infinite; }
+@keyframes sbSharePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37,211,102,.55); }
+  50%      { box-shadow: 0 0 0 7px rgba(37,211,102,0); }
+}
+.sb-share-pulse { animation: sbSharePulse 2s ease-out infinite; }
 .svb-total-label {
   font-size: .92rem;
   font-weight: 900;
@@ -19242,8 +19247,7 @@ html body .sandbox-track-id {
   }
   /* Icon-only buttons on mobile */
   .sandbox-clear-btn,
-  .sandbox-print-btn,
-  .sandbox-share-btn {
+  .sandbox-print-btn {
     flex: 0 0 36px !important;
     width: 36px !important;
     min-width: 36px !important;
@@ -19253,6 +19257,24 @@ html body .sandbox-track-id {
     justify-content: center !important;
     overflow: visible !important;
     flex-shrink: 0 !important;
+  }
+  /* Share button: keeps its label on mobile too — it's the one action meant
+     to stand out, not blend in with the neutral icon-only utility buttons. */
+  .sandbox-share-btn {
+    flex: 0 0 auto !important;
+    height: 36px !important;
+    padding: 0 10px !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    font-size: .7rem !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    flex-shrink: 0 !important;
+  }
+  .sandbox-share-btn .sb-btn-label {
+    display: inline !important;
+    white-space: nowrap !important;
+    font-size: .7rem !important;
   }
   .sandbox-add-btn .sb-btn-label,
   .sandbox-fields-btn .sb-btn-label,
@@ -19336,13 +19358,14 @@ html body .sandbox-track-id {
 .sandbox-print-btn:hover { background: #e0f2fe; }
 .sandbox-share-btn {
   -webkit-appearance: none; appearance: none;
-  background: #fdf4ff; border: 1.5px solid #d8b4fe;
-  border-radius: 8px; color: #7c3aed;
+  background: #25d366; border: 1.5px solid #1da851;
+  border-radius: 8px; color: #fff;
   cursor: pointer; font-family: inherit; font-size: .83rem; font-weight: 700;
   padding: 8px 14px; transition: background .15s;
   display: flex; align-items: center; gap: 6px;
 }
-.sandbox-share-btn:hover { background: #f5e8ff; }
+.sandbox-share-btn:hover { background: #1fb959; }
+.sandbox-share-btn i { color: #fff; }
 
 /* ── Compare dialog ── */
 .sb-compare-box { max-width: 860px; }
