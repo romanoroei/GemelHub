@@ -416,6 +416,23 @@ body.sticky-gap-mask-active:not(.fund-page)::before {
   white-space: nowrap;
   flex-shrink: 0;
 }
+.site-brand-link {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  line-height: 0;
+  text-decoration: none;
+}
+.site-brand-logo {
+  display: block;
+  width: 152px;
+  height: auto;
+}
+@media (max-width: 760px) {
+  .site-brand-logo {
+    width: 128px;
+  }
+}
 /* search inside tsb — task 4: גבול עבה יותר */
 .tsb-inner .hero-search {
   flex: 1;
@@ -452,6 +469,9 @@ body.sticky-gap-mask-active:not(.fund-page)::before {
 }
 .tsb-page-title {
   order: 1;
+}
+.site-brand-link {
+  order: 0;
 }
 .custom-range-entry {
   order: 4;
