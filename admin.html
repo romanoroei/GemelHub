@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>ניהול GemelHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="css/admin.css?v=admin-20260704-1" />
+</head>
+<body>
+  <main class="admin-shell">
+    <header class="admin-topbar">
+      <div class="admin-brand">
+        <img src="assets/gemelhub-logo-transparent.svg" alt="GemelHub" class="admin-logo" />
+        <div>
+          <h1>מרכז ניהול GemelHub</h1>
+          <p>בקרה על שיתופים, שימוש במעבדה וסטטוס השירותים</p>
+        </div>
+      </div>
+      <div class="admin-actions">
+        <button type="button" class="admin-btn ghost" id="admin-refresh-btn">
+          <i class="fas fa-rotate-right" aria-hidden="true"></i>
+          רענן
+        </button>
+        <a class="admin-btn ghost" href="index.html">
+          <i class="fas fa-arrow-right" aria-hidden="true"></i>
+          חזרה לאתר
+        </a>
+      </div>
+    </header>
+
+    <section class="admin-login" id="admin-login-panel">
+      <div>
+        <h2>כניסה לניהול</h2>
+        <p>הכנס token ניהולי כדי לקרוא נתונים מה-Worker. ה-token נשמר בדפדפן שלך בלבד.</p>
+      </div>
+      <form id="admin-token-form" class="admin-token-form">
+        <input id="admin-token-input" type="password" autocomplete="current-password" placeholder="Admin token" />
+        <button type="submit" class="admin-btn primary">
+          <i class="fas fa-lock-open" aria-hidden="true"></i>
+          התחבר
+        </button>
+      </form>
+    </section>
+
+    <section class="admin-status-band">
+      <div class="admin-status-item" data-status="unknown" id="worker-status">
+        <span class="status-dot"></span>
+        <div>
+          <strong>Worker</strong>
+          <small id="worker-status-text">ממתין לבדיקה</small>
+        </div>
+      </div>
+      <div class="admin-status-item" data-status="unknown" id="kv-status">
+        <span class="status-dot"></span>
+        <div>
+          <strong>KV שיתופים</strong>
+          <small id="kv-status-text">ממתין לנתונים</small>
+        </div>
+      </div>
+      <div class="admin-status-item" data-status="muted">
+        <span class="status-dot"></span>
+        <div>
+          <strong>Analytics אתר</strong>
+          <small>מוכן לחיבור GA4 / Cloudflare</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="admin-kpis" aria-label="מדדים מרכזיים">
+      <article class="admin-kpi">
+        <span class="kpi-label">קישורים פעילים</span>
+        <strong id="kpi-active-links">--</strong>
+        <small>קישורי שיתוף שעדיין קיימים ב-KV</small>
+      </article>
+      <article class="admin-kpi">
+        <span class="kpi-label">נוצרו ב-24 שעות</span>
+        <strong id="kpi-created-24h">--</strong>
+        <small>שיתופים חדשים מהיממה האחרונה</small>
+      </article>
+      <article class="admin-kpi">
+        <span class="kpi-label">נוצרו ב-7 ימים</span>
+        <strong id="kpi-created-7d">--</strong>
+        <small>חלון פעילות זהה לאורך חיי הקישור</small>
+      </article>
+      <article class="admin-kpi">
+        <span class="kpi-label">פתיחות קישורים</span>
+        <strong id="kpi-total-opens">--</strong>
+        <small>נספר מרגע העדכון הנוכחי של ה-Worker</small>
+      </article>
+    </section>
+
+    <section class="admin-grid">
+      <article class="admin-panel">
+        <div class="admin-panel-head">
+          <div>
+            <h2>שיתופים אחרונים</h2>
+            <p>תצוגה ניהולית ללא פרטי תיק מלאים כברירת מחדל.</p>
+          </div>
+          <button type="button" class="admin-btn danger ghost" id="admin-clear-token-btn">
+            <i class="fas fa-key" aria-hidden="true"></i>
+            נתק token
+          </button>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>מזהה</th>
+                <th>סוג</th>
+                <th>נוצר</th>
+                <th>תפוגה</th>
+                <th>פתיחות</th>
+                <th>סיכום</th>
+                <th>פעולה</th>
+              </tr>
+            </thead>
+            <tbody id="shares-table-body">
+              <tr>
+                <td colspan="7" class="admin-empty">אין נתונים להצגה עדיין</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <aside class="admin-side">
+        <article class="admin-panel compact">
+          <h2>סטטיסטיקות אתר</h2>
+          <div class="admin-roadmap">
+            <div>
+              <strong>כניסות ומקורות תנועה</strong>
+              <span>מיועד לחיבור GA4 או Cloudflare Web Analytics.</span>
+            </div>
+            <div>
+              <strong>פעולות במעבדה</strong>
+              <span>בניית תיק, הדפסה, השוואה ושיתוף.</span>
+            </div>
+            <div>
+              <strong>שימוש לפי קטגוריה</strong>
+              <span>גמל, השתלמות, פנסיה, פוליסות וחיסכון לכל ילד.</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="admin-panel compact">
+          <h2>התראות</h2>
+          <ul class="admin-alerts" id="admin-alerts">
+            <li>לא נטען token ניהולי.</li>
+          </ul>
+        </article>
+      </aside>
+    </section>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/admin.js?v=admin-20260704-1"></script>
+</body>
+</html>

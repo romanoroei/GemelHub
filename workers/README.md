@@ -56,3 +56,22 @@ Load a shared payload:
 ```http
 GET /Ab7k2Q
 ```
+## Admin dashboard
+
+The admin dashboard at `admin.html` uses protected Worker endpoints:
+
+- `GET /admin/health`
+- `GET /admin/summary?limit=40`
+- `DELETE /admin/share/:id`
+
+Before using it in production, configure an admin secret in Cloudflare:
+
+```bash
+npx wrangler secret put GEMELHUB_ADMIN_TOKEN
+```
+
+Use the same token in the `admin.html` login field. The token is stored only in
+the browser local storage on the admin machine.
+
+The dashboard shows anonymous operational summaries by default. It does not show
+full portfolio payloads in the table.
