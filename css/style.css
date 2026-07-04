@@ -20540,12 +20540,13 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   body.sb-printing .sb-dn-label { font-size: .64rem !important; color: #111 !important; }
   body.sb-printing .sb-dn-value { font-size: .79rem !important; }
 
-  /* ── Print disclaimer — fixed footer at bottom of every page ── */
+  /* ── Print disclaimer — final report block, never over table content ── */
   body.sb-printing .sb-print-disclaimer {
-    position: fixed !important;
-    bottom: 6mm !important;
-    left: 8mm !important;
-    right: 8mm !important;
+    position: static !important;
+    break-before: page !important;
+    page-break-before: always !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
     border-top: 1px solid #dde3ea !important;
     padding-top: 4px !important;
     font-size: .50rem !important;
@@ -20554,6 +20555,7 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     direction: rtl !important;
     text-align: center !important;
     background: #fff !important;
+    margin: 0 !important;
   }
 
   /* ── Prevent blank second page ── */
