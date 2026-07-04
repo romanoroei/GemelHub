@@ -20544,16 +20544,19 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   body.sb-printing .sb-print-disclaimer {
     position: static !important;
     break-inside: avoid !important;
+    break-after: avoid !important;
     page-break-inside: avoid !important;
+    page-break-after: avoid !important;
     border-top: 1px solid #dde3ea !important;
     padding-top: 4px !important;
+    padding-bottom: 0 !important;
     font-size: .50rem !important;
     color: #94a3b8 !important;
     line-height: 1.5 !important;
     direction: rtl !important;
     text-align: center !important;
     background: #fff !important;
-    margin: 8mm 0 0 !important;
+    margin: 4mm 0 0 !important;
   }
 
   /* ── Prevent blank second page ── */
@@ -20573,12 +20576,20 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     margin-bottom: 0 !important;
     min-height: 0 !important;
     height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
   }
   html body.sb-printing .sb-dashboard {
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
     min-height: 0 !important;
     height: auto !important;
+  }
+  html body.sb-printing #sandbox-section > :last-child,
+  html body.sb-printing .sb-dashboard > :last-child {
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+    margin-bottom: 0 !important;
   }
 
   /* ── Compare print: print only the temporary compare report in the top-level document ── */
