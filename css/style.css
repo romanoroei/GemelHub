@@ -3931,7 +3931,7 @@ table.track-table tr.average-row td.exp-col:nth-last-child(3) {
 .footer-logo { margin-bottom: 10px; }
 .footer-brand-logo {
   display: block;
-  width: min(360px, 78vw);
+  width: min(190px, 54vw);
   height: auto;
   margin: 0 auto;
 }
