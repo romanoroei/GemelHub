@@ -34,16 +34,22 @@
   const FONT_REGULAR_URL = 'fonts/Heebo-Regular.ttf';
   const FONT_BOLD_URL = 'fonts/Heebo-Bold.ttf';
 
+  // Matches the site's own @media print palette (css/style.css, ~line 19581+
+  // and ~20006+) — navy + gold, not the app's everyday working-UI blue —
+  // so the PDF reads as the same "report" the old window.print() produced.
   const DEFAULT_THEME = {
-    brand: '#0f172a',
-    brandText: '#ffffff',
+    brand: '#1a3560',      // headings, header rule
+    brandDark: '#0c2134',  // section-chip text, card text
+    gold: '#d4a017',       // brand accent — total values, best-in-compare marker
+    accentBg: '#f0f4ff',   // section-chip / table header background
     gray: '#64748b',
     lightGray: '#94a3b8',
-    border: '#e2e8f0',
+    border: '#dbe3ee',
+    tableBorder: '#e8ecf0',
     zebra: '#f8fafc',
     positive: '#16a34a',
     negative: '#dc2626',
-    text: '#0f172a',
+    text: '#0c2134',
   };
 
   // ── small utils ──────────────────────────────────────────────────────────
@@ -201,6 +207,21 @@
       return this.ctx.rgb(r, g, b);
     }
 
+    // Rounded rectangle via an SVG path (pdf-lib has no native roundRect).
+    // x/yTop are the box's top-left in normal PDF coords (y grows upward);
+    // drawSvgPath itself works in a local y-down space anchored at (x, yTop).
+    drawRoundedRect(x, yTop, w, h, r, { fill, border, borderWidth = 1 } = {}) {
+      r = Math.min(r, w / 2, h / 2);
+      const path = `M${r},0 H${w - r} Q${w},0 ${w},${r} V${h - r} Q${w},${h} ${w - r},${h} `
+        + `H${r} Q0,${h} 0,${h - r} V${r} Q0,0 ${r},0 Z`;
+      this.page.drawSvgPath(path, {
+        x, y: yTop,
+        color: fill ? this.color(fill) : undefined,
+        borderColor: border ? this.color(border) : undefined,
+        borderWidth: border ? borderWidth : undefined,
+      });
+    }
+
     // Measures a *logical order* string (order-independent — width is just
     // the sum of glyph advances) then draws it reordered to visual order.
     //
@@ -279,18 +300,33 @@
       this.page.drawLine({
         start: { x: MARGIN, y: this.y },
         end: { x: PAGE_W - MARGIN, y: this.y },
-        thickness: 1,
-        color: this.color(theme.border),
+        thickness: 2,
+        color: this.color(theme.brand),
       });
       this.y -= 16;
     }
 
+    // Rendered as a rounded "chip" (bg + bold navy text), matching the site's
+    // .sbcmp-section-head / @media print section-head look, instead of plain text.
     drawSectionTitle(text, color) {
-      this.ensureSpace(24);
-      this.drawLine(text, { x: MARGIN, width: CONTENT_W, font: this.fontBold, size: 11.5, color: color || this.theme.text, align: 'right' });
-      this.y -= 18;
+      const theme = this.theme;
+      const chipH = 22;
+      this.ensureSpace(chipH + 10);
+      const topY = this.y;
+      const font = this.fontBold;
+      const size = 10.5;
+      const visual = this.ctx.toVisualOrder(text);
+      const textW = Array.from(visual).reduce((s, ch) => s + font.widthOfTextAtSize(ch, size), 0);
+      const chipW = Math.min(CONTENT_W, textW + 20);
+      this.drawRoundedRect(PAGE_W - MARGIN - chipW, topY, chipW, chipH, 5, { fill: theme.accentBg });
+      const savedY = this.y;
+      this.y = topY - chipH / 2 - 3.5;
+      this.drawLine(text, { x: PAGE_W - MARGIN - chipW, width: chipW, font, size, color: color || theme.brandDark, align: 'center' });
+      this.y = savedY - chipH - 10;
     }
 
+    // Rounded white card, centered content, gold total value — matches
+    // .sb-print-value-summary / .sbcmp-value-card in css/style.css.
     drawValueCards(cards) {
       if (!cards || !cards.length) return;
       const theme = this.theme;
@@ -303,7 +339,7 @@
 
       cards.forEach((card, idx) => {
         const rowsHeight = (card.rows || []).reduce((s, r) => s + (r.sub ? 21 : 11), 0);
-        const rowHeight = 46 + rowsHeight;
+        const rowHeight = 44 + rowsHeight;
         if (col === 0) {
           this.ensureSpace(rowHeight);
           rowStartY = this.y;
@@ -311,27 +347,27 @@
         }
         const x = MARGIN + col * (cardW + gap);
         const cardTop = rowStartY;
-        this.page.drawRectangle({
-          x, y: cardTop - rowHeight, width: cardW, height: rowHeight,
-          borderColor: this.color(theme.border), borderWidth: 1, color: this.color('#ffffff'),
-        });
+        this.drawRoundedRect(x, cardTop, cardW, rowHeight, 8, { fill: '#ffffff', border: theme.border, borderWidth: 1 });
         const savedY = this.y;
-        this.y = cardTop - 16;
+        this.y = cardTop - 15;
         if (card.name) {
-          this.drawLine(card.name, { x: x + 10, width: cardW - 20, font: this.fontBold, size: 10, color: theme.text, align: 'right' });
-          this.y -= 15;
+          this.drawLine(card.name, { x: x + 10, width: cardW - 20, font: this.fontBold, size: 9.5, color: theme.text, align: 'center' });
+          this.y -= 13;
         }
-        this.drawLine(card.totalLabel || '', { x: x + 10, width: (cardW - 20) / 2, font: this.fontRegular, size: 9, color: theme.gray, align: 'right' });
-        this.drawLine(card.total || '', { x: x + 10, width: cardW - 20, font: this.fontBold, size: 11.5, color: theme.brand, align: 'left' });
-        this.y -= 15;
-        this.page.drawLine({ start: { x: x + 10, y: this.y + 4 }, end: { x: x + cardW - 10, y: this.y + 4 }, thickness: 0.75, color: this.color(theme.border) });
+        if (card.totalLabel) {
+          this.drawLine(card.totalLabel, { x: x + 10, width: cardW - 20, font: this.fontRegular, size: 8.5, color: theme.gray, align: 'center' });
+          this.y -= 12;
+        }
+        this.drawLine(card.total || '', { x: x + 10, width: cardW - 20, font: this.fontBold, size: 13, color: theme.gold, align: 'center' });
+        this.y -= 14;
+        this.page.drawLine({ start: { x: x + cardW * 0.15, y: this.y + 4 }, end: { x: x + cardW * 0.85, y: this.y + 4 }, thickness: 0.75, color: this.color(theme.border) });
         this.y -= 8;
         (card.rows || []).forEach(row => {
-          this.drawLine(row.label || '', { x: x + 10, width: (cardW - 20) * 0.55, font: this.fontRegular, size: 8.5, color: theme.gray, align: 'right' });
-          this.drawLine(row.value || '', { x: x + 10, width: cardW - 20, font: this.fontBold, size: 8.5, color: theme.text, align: 'left' });
+          const line = (row.label || '') + (row.value ? '   ' + row.value : '');
+          this.drawLine(line, { x: x + 10, width: cardW - 20, font: this.fontBold, size: 8.5, color: theme.text, align: 'center' });
           this.y -= 11;
           if (row.sub) {
-            this.drawLine(row.sub, { x: x + 10, width: cardW - 20, font: this.fontRegular, size: 7.5, color: theme.lightGray, align: 'right' });
+            this.drawLine(row.sub, { x: x + 10, width: cardW - 20, font: this.fontRegular, size: 7.5, color: theme.gray, align: 'center' });
             this.y -= 10;
           }
         });
@@ -360,11 +396,12 @@
       const drawHeaderRow = () => {
         this.ensureSpace(headerH + 4);
         const topY = this.y;
-        this.page.drawRectangle({ x: MARGIN, y: topY - headerH, width: CONTENT_W, height: headerH, color: this.color(theme.brand) });
+        this.page.drawRectangle({ x: MARGIN, y: topY - headerH, width: CONTENT_W, height: headerH, color: this.color(theme.accentBg) });
+        this.page.drawLine({ start: { x: MARGIN, y: topY - headerH }, end: { x: PAGE_W - MARGIN, y: topY - headerH }, thickness: 1.5, color: this.color(theme.brand) });
         columns.forEach((c, i) => {
           const savedY = this.y;
           this.y = topY - headerH / 2 - 3.5;
-          this.drawLine(c.header || '', { x: xs[i] + 4, width: widths[i] - 8, font: this.fontBold, size: 8.5, color: '#ffffff', align: c.align || 'right' });
+          this.drawLine(c.header || '', { x: xs[i] + 4, width: widths[i] - 8, font: this.fontBold, size: 8.5, color: theme.brandDark, align: c.align || 'right' });
           this.y = savedY;
         });
         this.y = topY - headerH;
@@ -405,7 +442,7 @@
           this.y = savedY;
         });
         this.y = topY - rowH;
-        this.page.drawLine({ start: { x: MARGIN, y: this.y }, end: { x: PAGE_W - MARGIN, y: this.y }, thickness: 0.5, color: this.color(theme.border) });
+        this.page.drawLine({ start: { x: MARGIN, y: this.y }, end: { x: PAGE_W - MARGIN, y: this.y }, thickness: 0.5, color: this.color(theme.tableBorder) });
       });
       this.y -= 14;
     }
@@ -415,7 +452,7 @@
       this.ensureSpace(30);
       this.page.drawLine({ start: { x: MARGIN, y: this.y }, end: { x: PAGE_W - MARGIN, y: this.y }, thickness: 0.5, color: this.color(this.theme.border) });
       this.y -= 12;
-      this.drawParagraph(text, { x: MARGIN, width: CONTENT_W, font: this.fontRegular, size: 7, color: this.theme.lightGray, align: 'right', lineHeight: 9.5 });
+      this.drawParagraph(text, { x: MARGIN, width: CONTENT_W, font: this.fontRegular, size: 7, color: this.theme.lightGray, align: 'center', lineHeight: 9.5 });
     }
 
     async save() {
