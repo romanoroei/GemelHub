@@ -16,6 +16,7 @@ const CONFIG = {
     POLISA_1999_2022_RESOURCE_ID: '584e6b69-174f-46c9-b8db-03925b4c68c6',
     LIMIT: 32000,
     LEADS_ENDPOINT: 'https://formspree.io/f/xdapqnyr',
+    GA_MEASUREMENT_ID: 'G-TG8WWG078M',
 
     // Optional branded short-link backend for shared lab portfolios.
     // Expected contract:

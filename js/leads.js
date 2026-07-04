@@ -8,6 +8,14 @@
 
   var WA_NUMBER = '972528089808';
 
+  function trackLeadEvent(name, params) {
+    try {
+      if (window.GemelHubAnalytics && typeof window.GemelHubAnalytics.track === 'function') {
+        window.GemelHubAnalytics.track(name, params || {});
+      }
+    } catch (e) {}
+  }
+
   // ─── זיהוי הקשר הנוכחי מה-DOM ────────────────────────────────
   function getLeadContext() {
     var pageUrl = window.location.href;
@@ -111,6 +119,9 @@
       form.reset();
     }
     overlay.style.display = 'flex';
+    trackLeadEvent('lead_form_open', {
+      source: source || 'general'
+    });
     history.pushState({ sbDialog: 'leads' }, '');
     setTimeout(function() {
       var f = document.getElementById('consult-name');
@@ -175,6 +186,10 @@
       var msg   = buildWhatsappMessage(name, phone, email, ctx);
       var waUrl = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(msg);
       window.open(waUrl, '_blank', 'noopener,noreferrer');
+      trackLeadEvent('lead_whatsapp_submit', {
+        category: ctx.category || '',
+        source: form.dataset.source || 'general'
+      });
 
       closeLeadsModal();
       form.reset();

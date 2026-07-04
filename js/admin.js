@@ -14,6 +14,8 @@
     workerStatusText: document.getElementById('worker-status-text'),
     kvStatus: document.getElementById('kv-status'),
     kvStatusText: document.getElementById('kv-status-text'),
+    analyticsStatus: document.getElementById('analytics-status'),
+    analyticsStatusText: document.getElementById('analytics-status-text'),
     activeLinks: document.getElementById('kpi-active-links'),
     created24h: document.getElementById('kpi-created-24h'),
     created7d: document.getElementById('kpi-created-7d'),
@@ -29,6 +31,15 @@
   function setStatus(node, textNode, status, text) {
     if (node) node.dataset.status = status;
     if (textNode) textNode.textContent = text;
+  }
+
+  function setAnalyticsStatus() {
+    const measurementId = appConfig && appConfig.API && appConfig.API.GA_MEASUREMENT_ID;
+    if (measurementId) {
+      setStatus(els.analyticsStatus, els.analyticsStatusText, 'ok', 'GA4 מחובר · ' + measurementId);
+    } else {
+      setStatus(els.analyticsStatus, els.analyticsStatusText, 'muted', 'מוכן לחיבור GA4 / Cloudflare');
+    }
   }
 
   function setAlerts(items) {
@@ -192,5 +203,6 @@
     if (btn) deleteShare(btn.dataset.deleteShare);
   });
 
+  setAnalyticsStatus();
   loadAdmin();
 })();
