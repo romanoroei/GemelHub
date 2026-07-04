@@ -6899,7 +6899,11 @@ const App = (() => {
       .catch(function() { return url; });
   }
 
-  function _sbApplySharedPortfolioPayload(payload) {
+  // sharedId identifies the specific share link (the server-side share id for
+  // ?p=, or the raw #portfolio= hash payload for the link-in-URL fallback) —
+  // used to avoid saving the same shared portfolio into the saved list twice
+  // if the recipient opens the same link again.
+  function _sbApplySharedPortfolioPayload(payload, sharedId) {
     const isV2 = payload && payload.v === 2;
     const portfolio = isV2 && Array.isArray(payload.p)
       ? payload.p.map(_sbExpandMiniItem)
@@ -6907,14 +6911,36 @@ const App = (() => {
         ? payload.p
         : null;
     if (!portfolio || !portfolio.length) return false;
+    const name = payload.n || 'תיק משותף';
     state.sandbox.portfolio = portfolio;
-    state.sandbox.portfolioName = payload.n || 'תיק משותף';
+    state.sandbox.portfolioName = name;
     _sbSetDirty(false);
     _sbSetAutoSaveId(null);
     saveSandboxPortfolio();
     if (state.activeCategoryId !== 'sandbox') switchCategory('sandbox');
     else renderSandboxPage();
-    showToast('התיק "' + state.sandbox.portfolioName + '" נטען מקישור');
+
+    let alreadySaved = false;
+    if (sharedId) {
+      const list = _sbGetSavedPortfolios();
+      alreadySaved = list.some(p => p.sharedSourceId === sharedId);
+      if (!alreadySaved) {
+        const now = new Date();
+        list.push({
+          id: 'shared_' + now.getTime(),
+          name: name,
+          date: now.toISOString().split('T')[0],
+          savedAt: now.toISOString(),
+          notes: 'נטען מקישור',
+          portfolio: portfolio,
+          sharedSourceId: sharedId,
+        });
+        _sbPutSavedPortfolios(list);
+      }
+    }
+    showToast(alreadySaved
+      ? 'התיק "' + name + '" נטען מהקישור (כבר שמור במעבדה)'
+      : 'התיק "' + name + '" נטען מהקישור ונשמר במעבדה');
     return true;
   }
 
@@ -6972,7 +6998,7 @@ const App = (() => {
         const loaded = await _sbLoadSharedPortfolioPayload(sharedPortfolioId || sharedCompareId);
         const handled = sharedCompareId
           ? _sbApplySharedComparePayload(loaded && loaded.payload)
-          : _sbApplySharedPortfolioPayload(loaded && loaded.payload);
+          : _sbApplySharedPortfolioPayload(loaded && loaded.payload, sharedPortfolioId);
         if (handled) {
           const cleanUrl = new URL(location.href);
           cleanUrl.searchParams.delete('p');
@@ -6990,8 +7016,9 @@ const App = (() => {
     // Single portfolio share
     if (hash.startsWith('#portfolio=')) {
       try {
-        const data = JSON.parse(decodeURIComponent(escape(atob(hash.slice('#portfolio='.length)))));
-        if (_sbApplySharedPortfolioPayload(data)) {
+        const hashPayload = hash.slice('#portfolio='.length);
+        const data = JSON.parse(decodeURIComponent(escape(atob(hashPayload))));
+        if (_sbApplySharedPortfolioPayload(data, hashPayload)) {
           history.replaceState(null, '', location.pathname + location.search);
           return true;
         }
