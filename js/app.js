@@ -5925,10 +5925,9 @@ const App = (() => {
           </tr>`;
         }).join('');
 
-        html += `<div class="sandbox-cat-block">
+        html += `<div class="sandbox-cat-block" data-sandbox-cat-id="${catId}">
           <div class="sandbox-cat-block-head">
             <div class="sandbox-cat-block-title">
-              <span class="sandbox-cat-block-head-dot" style="background:${catDef.color}"></span>
               <span>${catDef.icon} ${catDef.label}</span>
             </div>
             <button type="button" class="sandbox-cat-add-btn" data-sandbox-add-cat="${catId}">
@@ -6156,7 +6155,6 @@ const App = (() => {
         const managerCount = new Set(items.map(it => String(it.provider || '').trim()).filter(Boolean)).size;
         const countLabel = managerCount === 1 ? 'מנהל השקעות 1' : `${managerCount} מנהלי השקעות`;
         return `<span class="svb-category-row">
-          <span class="svb-cat-dot" style="background:${meta.color}"></span>
           <span class="svb-cat-name">${meta.label}</span>
           <span class="svb-cat-value">${valueText}</span>
           <span class="svb-meta">(${countLabel})</span>
@@ -8053,12 +8051,7 @@ const App = (() => {
     section.querySelectorAll('.sandbox-weighted-row').forEach(row => {
       const catBlock = row.closest('.sandbox-cat-block');
       if (!catBlock) return;
-      const headDot = catBlock.querySelector('.sandbox-cat-block-head-dot');
-      const catColor = headDot ? headDot.style.background : '';
-      const catId = Object.keys(grouped).find(k => {
-        const cat = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === k);
-        return cat && cat.color === catColor;
-      });
+      const catId = catBlock.dataset.sandboxCatId;
       if (!catId) return;
       const items = grouped[catId] || [];
       const weights = _sbWeights(items);
