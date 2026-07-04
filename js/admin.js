@@ -2,7 +2,8 @@
   'use strict';
 
   const TOKEN_KEY = 'gemelhub_admin_token_v1';
-  const endpoint = ((window.CONFIG && CONFIG.API && CONFIG.API.SHARED_PORTFOLIO_ENDPOINT) || '').replace(/\/$/, '');
+  const appConfig = typeof CONFIG !== 'undefined' ? CONFIG : window.CONFIG;
+  const endpoint = ((appConfig && appConfig.API && appConfig.API.SHARED_PORTFOLIO_ENDPOINT) || '').replace(/\/$/, '');
 
   const els = {
     form: document.getElementById('admin-token-form'),
