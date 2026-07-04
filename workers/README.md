@@ -58,7 +58,7 @@ GET /Ab7k2Q
 ```
 ## Admin dashboard
 
-The admin dashboard at `admin.html` uses protected Worker endpoints:
+The admin dashboard at `gh-control-2026.html` uses protected Worker endpoints:
 
 - `GET /admin/health`
 - `GET /admin/summary?limit=40`
@@ -70,7 +70,7 @@ Before using it in production, configure an admin secret in Cloudflare:
 npx wrangler secret put GEMELHUB_ADMIN_TOKEN
 ```
 
-Use the same token in the `admin.html` login field. The token is stored only in
+Use the same token in the `gh-control-2026.html` login field. The token is stored only in
 the browser local storage on the admin machine.
 
 The dashboard shows anonymous operational summaries by default. It does not show
