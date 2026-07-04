@@ -6807,6 +6807,14 @@ const App = (() => {
     _sbPrintFooter = null;
   }
 
+  function _ghTrackAnalytics(eventName, params) {
+    try {
+      if (window.GemelHubAnalytics && typeof window.GemelHubAnalytics.track === 'function') {
+        window.GemelHubAnalytics.track(eventName, params || {});
+      }
+    } catch (e) {}
+  }
+
   function setupPrintListeners() {
     window.addEventListener('beforeprint', () => {
       if (!_sbComparePrintInProgress && !document.body.classList.contains('sb-compare-printing')) _sbInjectPrintState();
@@ -6821,6 +6829,9 @@ const App = (() => {
 
   function _sbPrintSummary() {
     if (!_sbInjectPrintState()) return;
+    _ghTrackAnalytics('portfolio_print', {
+      item_count: state.sandbox.portfolio.length || 0
+    });
     _sbWaitForPrintAssets(document).then(function() {
       requestAnimationFrame(function() {
         requestAnimationFrame(function() {
@@ -6915,7 +6926,6 @@ const App = (() => {
     state.sandbox.portfolio = portfolio;
     state.sandbox.portfolioName = name;
     _sbSetDirty(false);
-    _sbSetAutoSaveId(null);
     saveSandboxPortfolio();
     if (state.activeCategoryId !== 'sandbox') switchCategory('sandbox');
     else renderSandboxPage();
@@ -6923,11 +6933,18 @@ const App = (() => {
     let alreadySaved = false;
     if (sharedId) {
       const list = _sbGetSavedPortfolios();
-      alreadySaved = list.some(p => p.sharedSourceId === sharedId);
-      if (!alreadySaved) {
+      const existing = list.find(p => p.sharedSourceId === sharedId);
+      alreadySaved = !!existing;
+      if (existing) {
+        // Point autoSaveId at the existing entry so _sbEnsureCurrentPortfolioPersisted()
+        // (run e.g. when opening the load dialog) treats it as already mirrored and
+        // just updates it in place, instead of creating a second duplicate entry.
+        _sbSetAutoSaveId(existing.id);
+      } else {
         const now = new Date();
+        const id = 'shared_' + now.getTime();
         list.push({
-          id: 'shared_' + now.getTime(),
+          id,
           name: name,
           date: now.toISOString().split('T')[0],
           savedAt: now.toISOString(),
@@ -6936,11 +6953,17 @@ const App = (() => {
           sharedSourceId: sharedId,
         });
         _sbPutSavedPortfolios(list);
+        _sbSetAutoSaveId(id);
       }
+    } else {
+      _sbSetAutoSaveId(null);
     }
     showToast(alreadySaved
       ? 'התיק "' + name + '" נטען מהקישור (כבר שמור במעבדה)'
       : 'התיק "' + name + '" נטען מהקישור ונשמר במעבדה');
+    _ghTrackAnalytics('shared_portfolio_loaded', {
+      item_count: portfolio.length || 0
+    });
     return true;
   }
 
@@ -6968,6 +6991,9 @@ const App = (() => {
       else if (newIds.length === 1) _sbDoLoadPortfolio(newIds[0]);
     }, 500);
     showToast('נטענו ' + newIds.length + ' תיקים מקישור — ההשוואה נפתחת');
+    _ghTrackAnalytics('shared_compare_loaded', {
+      portfolio_count: newIds.length || 0
+    });
     return true;
   }
 
@@ -6984,8 +7010,16 @@ const App = (() => {
     try {
       const sharedUrl = await _sbCreateSharedPortfolioLink('portfolio', data);
       _sbOpenWhatsAppShare(text, sharedUrl || await _sbShortenFallbackUrl(fallbackUrl), suffix);
+      _ghTrackAnalytics('portfolio_share_whatsapp', {
+        item_count: state.sandbox.portfolio.length || 0,
+        method: sharedUrl ? 'worker' : 'fallback'
+      });
     } catch(e) {
       _sbOpenWhatsAppShare(text, await _sbShortenFallbackUrl(fallbackUrl), suffix);
+      _ghTrackAnalytics('portfolio_share_whatsapp', {
+        item_count: state.sandbox.portfolio.length || 0,
+        method: 'fallback'
+      });
     }
   }
 
@@ -7359,6 +7393,9 @@ const App = (() => {
   function _sbPrintCompare() {
     const content = document.getElementById('sb-compare-content');
     if (!content) return;
+    _ghTrackAnalytics('compare_print', {
+      portfolio_count: (state.sandbox.compareItems || []).length || 0
+    });
     const now = new Date();
     const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const title = document.getElementById('sb-compare-title')?.textContent || 'השוואת תיקים';
@@ -7494,8 +7531,16 @@ const App = (() => {
     try {
       const sharedUrl = payload ? await _sbCreateSharedPortfolioLink('compare', payload) : '';
       _sbOpenWhatsAppShare(text, sharedUrl || await _sbShortenFallbackUrl(compareUrl));
+      _ghTrackAnalytics('compare_share_whatsapp', {
+        portfolio_count: items.length || 0,
+        method: sharedUrl ? 'worker' : 'fallback'
+      });
     } catch(e) {
       _sbOpenWhatsAppShare(text, await _sbShortenFallbackUrl(compareUrl));
+      _ghTrackAnalytics('compare_share_whatsapp', {
+        portfolio_count: items.length || 0,
+        method: 'fallback'
+      });
     }
   }
 
@@ -14556,7 +14601,12 @@ const App = (() => {
       renderCashToolPage();
     });
     root.querySelector('#cash-save-draft-btn')?.addEventListener('click', () => persistCashToolDraft(true));
-    root.querySelector('#cash-print-btn')?.addEventListener('click', () => window.print());
+    root.querySelector('#cash-print-btn')?.addEventListener('click', () => {
+      _ghTrackAnalytics('cash_tool_print', {
+        allocation_count: state.cashTool.allocations.length || 0
+      });
+      window.print();
+    });
     root.querySelector('#cash-clear-btn')?.addEventListener('click', clearCashToolDraft);
     root.querySelector('#cash-add-allocation-btn')?.addEventListener('click', upsertCashToolAllocation);
     root.querySelector('#cash-add-similar-btn')?.addEventListener('click', () => {
