@@ -6673,7 +6673,31 @@ const App = (() => {
   let _sbComparePrintInProgress = false;
   let _sbComparePrintOriginalNodes = null;
   let _sbComparePrintScrollY = 0;
-  const SB_PRINT_LOGO_HTML = '<img src="assets/gemelhub-logo-light.svg?v=print-logo-20260704-2" alt="GemelHub" class="sb-print-logo-mark">';
+  const SB_PRINT_LOGO_SRC = 'assets/gemelhub-logo-light.svg?v=print-logo-20260704-3';
+  const SB_PRINT_LOGO_HTML = '<img src="' + SB_PRINT_LOGO_SRC + '" alt="GemelHub" class="sb-print-logo-mark">';
+
+  function _sbWaitForPrintAssets(root) {
+    const scope = root || document;
+    const images = Array.from(scope.querySelectorAll('.sb-print-logo img'));
+    if (!images.length) return Promise.resolve();
+    return Promise.all(images.map(function(img) {
+      const decodeImage = function() {
+        return img.decode ? img.decode().catch(function() {}) : Promise.resolve();
+      };
+      if (img.complete && img.naturalWidth > 0) return decodeImage();
+      return new Promise(function(resolve) {
+        let done = false;
+        const finish = function() {
+          if (done) return;
+          done = true;
+          resolve();
+        };
+        img.addEventListener('load', finish, { once: true });
+        img.addEventListener('error', finish, { once: true });
+        setTimeout(finish, 900);
+      }).then(decodeImage);
+    })).then(function() {});
+  }
 
   function _sbInjectPrintState() {
     if (_sbComparePrintInProgress || document.body.classList.contains('sb-compare-printing')) return false;
@@ -6728,7 +6752,14 @@ const App = (() => {
   }
 
   function _sbPrintSummary() {
-    if (_sbInjectPrintState()) window.print();
+    if (!_sbInjectPrintState()) return;
+    _sbWaitForPrintAssets(document).then(function() {
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          window.print();
+        });
+      });
+    });
   }
 
   // ── Share via branded short links, with URL-hash fallback ──────────────────
@@ -7207,32 +7238,34 @@ const App = (() => {
     // הסטנדרטית להבטיח שפריים אחד לפחות באמת צויר לפני שממשיכים.
     requestAnimationFrame(function() {
       requestAnimationFrame(function() {
-        try {
-          _sbComparePrintCalledAt = Date.now();
-          window.print();
+        _sbWaitForPrintAssets(_sbComparePrintRoot).then(function() {
+          try {
+            _sbComparePrintCalledAt = Date.now();
+            window.print();
 
-          // אות יחיד ובטוח: visibilitychange חוזר ל-visible רק אחרי
-          // שכל ה-overlay של המערכת (כולל שמירת קובץ בפועל) נסגר.
-          // ניסיון קודם להוסיף גם afterprint כ"קיצור דרך" למקרה ביטול
-          // התברר כלא בטוח — התאוריה ש-document.hidden מבדיל בין
-          // שמירה לביטול לא התאמתה בפועל, וזה גרם לשמירות אמיתיות
-          // להיתפס מוקדם מדי (PDF שגוי) שוב. buffer קטן (700ms) כמרווח
-          // ביטחון נוסף. מקרה ביטול נשאר תלוי בכפתור הידני / ברשת
-          // הביטחון — פחות נוח, אבל לא שובר שמירות אמיתיות.
-          _sbComparePrintVisHandler = function() {
-            if (!document.hidden) setTimeout(_sbCleanupComparePrintState, 700);
-          };
-          document.addEventListener('visibilitychange', _sbComparePrintVisHandler);
+            // אות יחיד ובטוח: visibilitychange חוזר ל-visible רק אחרי
+            // שכל ה-overlay של המערכת (כולל שמירת קובץ בפועל) נסגר.
+            // ניסיון קודם להוסיף גם afterprint כ"קיצור דרך" למקרה ביטול
+            // התברר כלא בטוח — התאוריה ש-document.hidden מבדיל בין
+            // שמירה לביטול לא התאמתה בפועל, וזה גרם לשמירות אמיתיות
+            // להיתפס מוקדם מדי (PDF שגוי) שוב. buffer קטן (700ms) כמרווח
+            // ביטחון נוסף. מקרה ביטול נשאר תלוי בכפתור הידני / ברשת
+            // הביטחון — פחות נוח, אבל לא שובר שמירות אמיתיות.
+            _sbComparePrintVisHandler = function() {
+              if (!document.hidden) setTimeout(_sbCleanupComparePrintState, 700);
+            };
+            document.addEventListener('visibilitychange', _sbComparePrintVisHandler);
 
-          // רשת ביטחון: 7 שניות. פשרה מכוונת: שמירה איטית שלוקחת יותר
-          // מ-7 שניות עלולה להיתפס שגוי, אבל זה מקרה נדיר יחסית לעומת
-          // התסכול של המתנה ארוכה בכל ביטול.
-          _sbComparePrintCleanupTimer = setTimeout(_sbCleanupComparePrintState, 7000);
-        } catch (error) {
-          console.warn('Compare print failed', error);
-          _sbCleanupComparePrintState();
-          showToast('לא הצלחנו לפתוח את חלון ההדפסה. נסה שוב.');
-        }
+            // רשת ביטחון: 7 שניות. פשרה מכוונת: שמירה איטית שלוקחת יותר
+            // מ-7 שניות עלולה להיתפס שגוי, אבל זה מקרה נדיר יחסית לעומת
+            // התסכול של המתנה ארוכה בכל ביטול.
+            _sbComparePrintCleanupTimer = setTimeout(_sbCleanupComparePrintState, 7000);
+          } catch (error) {
+            console.warn('Compare print failed', error);
+            _sbCleanupComparePrintState();
+            showToast('לא הצלחנו לפתוח את חלון ההדפסה. נסה שוב.');
+          }
+        });
       });
     });
   }
