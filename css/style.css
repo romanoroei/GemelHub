@@ -20553,7 +20553,7 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     direction: rtl !important;
     text-align: center !important;
     background: #fff !important;
-    margin: var(--sb-print-disclaimer-offset, 10mm) 0 0 !important;
+    margin: 8mm 0 0 !important;
   }
 
   /* ── Prevent blank second page ── */
