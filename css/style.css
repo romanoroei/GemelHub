@@ -19690,8 +19690,18 @@ html body .sandbox-track-id {
     font-weight: 800 !important;
     color: #0c2134 !important;
     margin-bottom: 4px !important;
+    break-after: avoid-page !important;
+    page-break-after: avoid !important;
   }
-  /* Let large compare sections flow across pages; only rows/cards should stay intact. */
+  /* Let large compare sections flow across pages, but keep each category together when it fits. */
+  .sbcmp-cat-block {
+    break-inside: avoid-page !important;
+    page-break-inside: avoid !important;
+  }
+  .sbcmp-col-name-row {
+    break-after: avoid-page !important;
+    page-break-after: avoid !important;
+  }
   .sbcmp-table tr,
   .sbcmp-track-col,
   .sbcmp-track-item,
@@ -20339,13 +20349,17 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     display: none !important;
   }
   body.sb-printing .sandbox-cat-block {
-    break-inside: auto !important;
-    page-break-inside: auto !important;
+    break-inside: avoid-page !important;
+    page-break-inside: avoid !important;
     margin-bottom: 12px !important;
     border: 1px solid #dde3ea !important;
     border-radius: 8px !important;
     padding: 8px 10px !important;
     background: #fff !important;
+  }
+  body.sb-printing .sandbox-cat-block-head {
+    break-after: avoid-page !important;
+    page-break-after: avoid !important;
   }
   body.sb-printing .sandbox-cat-block-title {
     font-size: .82rem !important;
