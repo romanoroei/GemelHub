@@ -19672,7 +19672,12 @@ html body .sandbox-track-id {
 }
 
 @media print {
-  .sbcmp-section { padding: 8px 0 !important; border-top: 1px solid #e2e8f0 !important; }
+  .sbcmp-section {
+    padding: 8px 0 !important;
+    border-top: 1px solid #e2e8f0 !important;
+    break-inside: avoid-page !important;
+    page-break-inside: avoid !important;
+  }
   .sbcmp-section-head {
     font-size: .72rem !important;
     font-weight: 900 !important;
@@ -19687,6 +19692,29 @@ html body .sandbox-track-id {
     font-weight: 800 !important;
     color: #0c2134 !important;
     margin-bottom: 4px !important;
+  }
+  .sbcmp-cat-block,
+  .sbcmp-cat-cols,
+  .sbcmp-tracks-row,
+  .sbcmp-cat-summary,
+  .sbcmp-table {
+    break-inside: avoid-page !important;
+    page-break-inside: avoid !important;
+  }
+  .sbcmp-table tr,
+  .sbcmp-track-col,
+  .sbcmp-track-item,
+  .sbcmp-cat-sum-cell {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  .sbcmp-table thead {
+    display: table-header-group !important;
+  }
+  .sbcmp-table tbody,
+  .sbcmp-table tr {
+    page-break-after: auto !important;
+    page-break-before: auto !important;
   }
   .sbcmp-col-name {
     font-size: .62rem !important;
@@ -20151,12 +20179,25 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   html body.sb-printing .sandbox-cat-table-wrap {
     overflow: visible !important;
     width: 100% !important;
+    break-inside: avoid-page !important;
+    page-break-inside: avoid !important;
   }
   html body.sb-printing .sandbox-cat-table {
     width: 100% !important;
     table-layout: auto !important;
     border-collapse: collapse !important;
-    page-break-inside: auto !important;
+    break-inside: avoid-page !important;
+    page-break-inside: avoid !important;
+  }
+  html body.sb-printing .sandbox-cat-table thead {
+    display: table-header-group !important;
+  }
+  html body.sb-printing .sandbox-cat-table tbody,
+  html body.sb-printing .sandbox-cat-table tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    page-break-after: auto !important;
+    page-break-before: auto !important;
   }
   html body.sb-printing .sandbox-cat-table th {
     padding: 2px 3px !important;
@@ -20309,6 +20350,7 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     display: none !important;
   }
   body.sb-printing .sandbox-cat-block {
+    break-inside: avoid-page !important;
     page-break-inside: avoid !important;
     margin-bottom: 12px !important;
     border: 1px solid #dde3ea !important;
