@@ -19505,7 +19505,8 @@ html body .sandbox-track-id {
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
-.sb-print-logo img {
+.sb-print-logo img,
+.sb-print-logo svg {
   display: block;
   width: 118px;
   height: auto;
@@ -19864,7 +19865,8 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     flex-shrink: 0 !important;
     margin-inline-start: 6px !important;
   }
-  body.sb-printing .sb-print-logo img {
+  body.sb-printing .sb-print-logo img,
+  body.sb-printing .sb-print-logo svg {
     display: block !important;
     width: 118px !important;
     height: auto !important;
