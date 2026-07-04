@@ -7281,6 +7281,8 @@ const App = (() => {
 
   let _sbComparePrintCalledAt = 0;
   let _sbComparePrintVisHandler = null;
+  let _sbComparePrintCountdownInterval = null;
+  const SB_COMPARE_PRINT_SAFETY_MS = 7000;
 
   function _sbCleanupComparePrintState() {
     if (!_sbComparePrintInProgress && !_sbComparePrintOriginalNodes) return; // already cleaned up
@@ -7290,6 +7292,10 @@ const App = (() => {
     if (_sbComparePrintCleanupTimer) {
       clearTimeout(_sbComparePrintCleanupTimer);
       _sbComparePrintCleanupTimer = null;
+    }
+    if (_sbComparePrintCountdownInterval) {
+      clearInterval(_sbComparePrintCountdownInterval);
+      _sbComparePrintCountdownInterval = null;
     }
     if (_sbComparePrintVisHandler) {
       document.removeEventListener('visibilitychange', _sbComparePrintVisHandler);
@@ -7335,7 +7341,10 @@ const App = (() => {
     _sbComparePrintRoot.dir = 'rtl';
     _sbComparePrintRoot.style.display = 'none';
     _sbComparePrintRoot.innerHTML =
-      '<button type="button" id="sb-compare-print-return-btn" class="sb-compare-print-return-btn">← חזרה לתיק</button>' +
+      '<div class="sb-compare-print-return-overlay">' +
+        '<button type="button" id="sb-compare-print-return-btn" class="sb-compare-print-return-btn">← חזרה לתיק</button>' +
+        '<div class="sb-compare-print-return-timer" id="sb-compare-print-return-timer"></div>' +
+      '</div>' +
       '<div class="sb-print-report-header">' +
         '<div class="sb-print-logo">' + SB_PRINT_LOGO_HTML + '</div>' +
         '<div class="sb-print-portfolio-title">' + escapeHtml(title) + '</div>' +
@@ -7375,10 +7384,22 @@ const App = (() => {
             };
             document.addEventListener('visibilitychange', _sbComparePrintVisHandler);
 
-            // רשת ביטחון: 7 שניות. פשרה מכוונת: שמירה איטית שלוקחת יותר
-            // מ-7 שניות עלולה להיתפס שגוי, אבל זה מקרה נדיר יחסית לעומת
-            // התסכול של המתנה ארוכה בכל ביטול.
-            _sbComparePrintCleanupTimer = setTimeout(_sbCleanupComparePrintState, 7000);
+            // רשת ביטחון: אחרי SB_COMPARE_PRINT_SAFETY_MS חוזרים לתיק אוטומטית.
+            // פשרה מכוונת: שמירה איטית שלוקחת יותר מזה עלולה להיתפס שגוי, אבל
+            // זה מקרה נדיר יחסית לעומת התסכול של המתנה ארוכה בכל ביטול. הכפתור
+            // המרכזי + הטיימר הנגלה נותנים למשתמש גם יציאה מיידית וגם ודאות
+            // שהדף יחזור מעצמו אם לא ילחץ.
+            _sbComparePrintCleanupTimer = setTimeout(_sbCleanupComparePrintState, SB_COMPARE_PRINT_SAFETY_MS);
+            const countdownEl = document.getElementById('sb-compare-print-return-timer');
+            if (countdownEl) {
+              const deadline = Date.now() + SB_COMPARE_PRINT_SAFETY_MS;
+              const tick = () => {
+                const secsLeft = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+                countdownEl.textContent = `חוזר אוטומטית בעוד ${secsLeft} שנ׳`;
+              };
+              tick();
+              _sbComparePrintCountdownInterval = setInterval(tick, 250);
+            }
           } catch (error) {
             console.warn('Compare print failed', error);
             _sbCleanupComparePrintState();
