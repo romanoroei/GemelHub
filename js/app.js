@@ -6673,37 +6673,7 @@ const App = (() => {
   let _sbComparePrintInProgress = false;
   let _sbComparePrintOriginalNodes = null;
   let _sbComparePrintScrollY = 0;
-  const SB_PRINT_LOGO_HTML = `
-    <svg class="sb-print-logo-mark" xmlns="http://www.w3.org/2000/svg" width="300" height="86" viewBox="0 0 300 86" role="img" aria-label="GemelHub">
-      <defs>
-        <linearGradient id="sbPrintLogoGold" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#E7C965"/>
-          <stop offset="1" stop-color="#C7A247"/>
-        </linearGradient>
-      </defs>
-      <text x="38" y="45"
-            text-anchor="middle"
-            dominant-baseline="alphabetic"
-            font-family="Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, Arial, sans-serif"
-            font-size="30">&#x1F4B0;</text>
-      <text x="146" y="47"
-            text-anchor="middle"
-            font-family="Heebo, Arial, Helvetica, sans-serif"
-            font-size="46"
-            font-weight="700"
-            letter-spacing="-0.5">
-        <tspan fill="#183A66">Gemel</tspan><tspan fill="url(#sbPrintLogoGold)">Hub</tspan>
-      </text>
-      <text x="146" y="69"
-            text-anchor="middle"
-            direction="rtl"
-            unicode-bidi="plaintext"
-            font-family="Heebo, Arial, Helvetica, sans-serif"
-            font-size="13"
-            font-weight="600"
-            fill="url(#sbPrintLogoGold)">&#1495;&#1497;&#1505;&#1499;&#1493;&#1503; &#1508;&#1504;&#1505;&#1497;&#1493;&#1504;&#1497; &#1489;&#1500;&#1495;&#1497;&#1510;&#1514; &#1499;&#1508;&#1514;&#1493;&#1512;</text>
-    </svg>
-  `;
+  const SB_PRINT_LOGO_HTML = '<img src="assets/gemelhub-logo-light.svg?v=print-logo-20260704-2" alt="GemelHub" class="sb-print-logo-mark">';
 
   function _sbInjectPrintState() {
     if (_sbComparePrintInProgress || document.body.classList.contains('sb-compare-printing')) return false;

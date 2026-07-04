@@ -19507,9 +19507,8 @@ html body .sandbox-track-id {
 }
 .sb-print-logo-mark {
   display: block;
-  width: 108px;
+  width: 110px;
   height: auto;
-  overflow: visible;
 }
 .sb-print-portfolio-title {
   font-size: .9rem;
@@ -19867,9 +19866,8 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   }
   body.sb-printing .sb-print-logo-mark {
     display: block !important;
-    width: 108px !important;
+    width: 110px !important;
     height: auto !important;
-    overflow: visible !important;
   }
   body.sb-printing .sb-print-portfolio-title {
     font-size: 1rem !important;
