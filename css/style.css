@@ -19310,7 +19310,14 @@ html body .sandbox-track-id {
     padding: 6px 8px !important;
   }
   #sb-compare-dialog .sbcmp-value-total strong {
-    font-size: .96rem !important;
+    color: #d4a017 !important;
+    font-size: 1rem !important;
+    font-weight: 950 !important;
+  }
+  #sb-compare-dialog .sbcmp-value-total span,
+  #sb-compare-dialog .sbcmp-value-total strong span {
+    color: #d4a017 !important;
+    font-weight: 950 !important;
   }
   #sb-compare-dialog .sbcmp-value-row {
     font-size: .72rem !important;
@@ -19427,13 +19434,17 @@ html body .sandbox-track-id {
   padding: 8px 8px 0;
 }
 .sbcmp-value-total span {
-  color: #64748b;
-  font-size: .68rem;
-  font-weight: 800;
+  color: #d4a017;
+  font-size: .76rem;
+  font-weight: 950;
 }
 .sbcmp-value-total strong {
   color: #d4a017;
-  font-size: .96rem;
+  font-size: 1rem;
+  font-weight: 950;
+}
+.sbcmp-value-total strong span {
+  color: #d4a017;
   font-weight: 950;
 }
 .sbcmp-value-divider {
@@ -19743,11 +19754,18 @@ html body .sandbox-track-id {
     padding-top: 5px !important;
   }
   .sbcmp-value-total span {
-    font-size: .6rem !important;
+    color: #d4a017 !important;
+    font-size: .68rem !important;
+    font-weight: 950 !important;
   }
   .sbcmp-value-total strong {
     color: #d4a017 !important;
-    font-size: .82rem !important;
+    font-size: .88rem !important;
+    font-weight: 950 !important;
+  }
+  .sbcmp-value-total strong span {
+    color: #d4a017 !important;
+    font-weight: 950 !important;
   }
   .sbcmp-value-divider {
     margin: 5px auto !important;
