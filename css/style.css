@@ -19511,6 +19511,61 @@ html body .sandbox-track-id {
   line-height: 1.6;
   white-space: nowrap;
 }
+.sb-print-value-summary {
+  border: 1px solid #dbe3ee;
+  border-radius: 8px;
+  background: #fff;
+  color: #0c2134;
+  direction: rtl;
+  margin: 0 0 12px;
+  padding: 9px 12px 10px;
+  text-align: center;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.sb-print-value-total {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  justify-content: center;
+  font-weight: 900;
+}
+.sb-print-value-total span {
+  font-size: .78rem;
+}
+.sb-print-value-total strong {
+  font-size: .94rem;
+}
+.sb-print-value-divider {
+  background: #dbe3ee;
+  height: 1px;
+  margin: 7px auto;
+  max-width: 520px;
+  width: 92%;
+}
+.sb-print-value-rows {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.sb-print-value-row {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: center;
+  line-height: 1.35;
+}
+.sb-print-value-cat,
+.sb-print-value-row strong {
+  font-size: .72rem;
+}
+.sb-print-value-managers {
+  color: #64748b;
+  font-size: .66rem;
+}
 .sb-print-disclaimer {
   margin-top: 18px;
   border-top: 1px solid #dde3ea;
@@ -19869,6 +19924,54 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     text-align: left !important;
     line-height: 1.6 !important;
     white-space: nowrap !important;
+  }
+  body.sb-printing .sb-print-value-summary {
+    background: #fff !important;
+    border: 1px solid #dbe3ee !important;
+    border-radius: 8px !important;
+    color: #0c2134 !important;
+    display: block !important;
+    margin: 0 0 12px !important;
+    padding: 9px 12px 10px !important;
+    page-break-inside: avoid !important;
+    text-align: center !important;
+  }
+  body.sb-printing .sb-print-value-total {
+    align-items: baseline !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 7px !important;
+    justify-content: center !important;
+    font-weight: 900 !important;
+  }
+  body.sb-printing .sb-print-value-divider {
+    background: #dbe3ee !important;
+    height: 1px !important;
+    margin: 7px auto !important;
+    max-width: 520px !important;
+    width: 92% !important;
+  }
+  body.sb-printing .sb-print-value-rows {
+    align-items: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+  }
+  body.sb-printing .sb-print-value-row {
+    align-items: baseline !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 5px !important;
+    justify-content: center !important;
+    line-height: 1.35 !important;
+  }
+  body.sb-printing .sb-print-value-cat,
+  body.sb-printing .sb-print-value-row strong {
+    font-size: .72rem !important;
+  }
+  body.sb-printing .sb-print-value-managers {
+    color: #64748b !important;
+    font-size: .66rem !important;
   }
 
   /* ── Hide interactive & chrome elements ── */

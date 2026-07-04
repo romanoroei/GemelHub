@@ -6193,6 +6193,57 @@ const App = (() => {
     }
   }
 
+  function _sbBuildPrintValueSummaryHtml(portfolio) {
+    portfolio = Array.isArray(portfolio) ? portfolio.filter(it => !it.hidden) : [];
+    if (!portfolio.length) return '';
+    const grouped = {};
+    portfolio.forEach(item => {
+      if (!grouped[item.categoryId]) grouped[item.categoryId] = [];
+      grouped[item.categoryId].push(item);
+    });
+    const catOrder = CONFIG.PRODUCT_CATEGORIES.map(c => c.id);
+    const catRows = Object.keys(grouped)
+      .sort((a, b) => catOrder.indexOf(a) - catOrder.indexOf(b))
+      .map(catId => {
+        const items = grouped[catId];
+        const meta = _sbGetCategoryMeta(catId);
+        const amountTotal = items
+          .filter(it => it.investMode === 'amount' && it.investAmount !== '')
+          .reduce((sum, it) => sum + (parseFloat(String(it.investAmount).replace(/,/g, '')) || 0), 0);
+        const pctTotal = items
+          .filter(it => it.investMode === 'percent' && it.investPct !== '')
+          .reduce((sum, it) => sum + (parseFloat(String(it.investPct).replace(/,/g, '')) || 0), 0);
+        const amountText = amountTotal > 0 ? `${Math.round(amountTotal).toLocaleString('he-IL')} ש"ח` : '';
+        const pctText = pctTotal > 0 ? `${pctTotal.toFixed(pctTotal % 1 ? 1 : 0)}%` : '';
+        const valueText = amountText && pctText ? `${amountText} · ${pctText}` : (amountText || pctText || 'ללא סכום');
+        const managerCount = new Set(items.map(it => String(it.provider || '').trim()).filter(Boolean)).size;
+        const managerText = managerCount > 0
+          ? `<span class="sb-print-value-managers">(${managerCount === 1 ? 'מנהל השקעות 1' : `${managerCount} מנהלי השקעות`})</span>`
+          : '';
+        return `<div class="sb-print-value-row">
+          <span class="sb-print-value-cat">${escapeHtml(meta.label)}</span>
+          <strong>${escapeHtml(valueText)}</strong>
+          ${managerText}
+        </div>`;
+      });
+    if (!catRows.length) return '';
+    const allInvestedAsAmount = portfolio.every(item => item.investMode === 'amount');
+    const totalAmount = allInvestedAsAmount
+      ? portfolio.reduce((sum, item) => sum + (parseFloat(String(item.investAmount).replace(/,/g, '')) || 0), 0)
+      : 0;
+    const totalAmountHtml = totalAmount > 0
+      ? `<strong>${Math.round(totalAmount).toLocaleString('he-IL')} ש"ח</strong>`
+      : '';
+    return `
+      <div class="sb-print-value-total">
+        <span>שווי התיק שלי</span>
+        ${totalAmountHtml}
+      </div>
+      <div class="sb-print-value-divider" aria-hidden="true"></div>
+      <div class="sb-print-value-rows">${catRows.join('')}</div>
+    `;
+  }
+
   // ── Sandbox: Named Portfolio Save / Load ──────────────────────────────────
   const SB_PORTFOLIOS_KEY = 'gemelhub_saved_portfolios_v1';
 
@@ -6665,6 +6716,7 @@ const App = (() => {
 
   // ── Print ──────────────────────────────────────────────────────────────────
   let _sbPrintHeader = null;
+  let _sbPrintValueSummary = null;
   let _sbPrintFooter = null;
   let _sbComparePrintRoot = null;
   let _sbComparePrintCleanupTimer = null;
@@ -6715,6 +6767,16 @@ const App = (() => {
       `;
       section.insertBefore(_sbPrintHeader, section.firstChild);
     }
+    if (!_sbPrintValueSummary) {
+      const summaryHtml = _sbBuildPrintValueSummaryHtml(state.sandbox.portfolio);
+      if (summaryHtml) {
+        _sbPrintValueSummary = document.createElement('div');
+        _sbPrintValueSummary.className = 'sb-print-value-summary';
+        _sbPrintValueSummary.setAttribute('dir', 'rtl');
+        _sbPrintValueSummary.innerHTML = summaryHtml;
+        section.insertBefore(_sbPrintValueSummary, _sbPrintHeader ? _sbPrintHeader.nextSibling : section.firstChild);
+      }
+    }
     if (!_sbPrintFooter) {
       _sbPrintFooter = document.createElement('div');
       _sbPrintFooter.className = 'sb-print-disclaimer';
@@ -6731,6 +6793,10 @@ const App = (() => {
       _sbPrintHeader.parentNode.removeChild(_sbPrintHeader);
     }
     _sbPrintHeader = null;
+    if (_sbPrintValueSummary && _sbPrintValueSummary.parentNode) {
+      _sbPrintValueSummary.parentNode.removeChild(_sbPrintValueSummary);
+    }
+    _sbPrintValueSummary = null;
     if (_sbPrintFooter && _sbPrintFooter.parentNode) {
       _sbPrintFooter.parentNode.removeChild(_sbPrintFooter);
     }
