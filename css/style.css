@@ -19675,8 +19675,6 @@ html body .sandbox-track-id {
   .sbcmp-section {
     padding: 8px 0 !important;
     border-top: 1px solid #e2e8f0 !important;
-    break-inside: avoid-page !important;
-    page-break-inside: avoid !important;
   }
   .sbcmp-section-head {
     font-size: .72rem !important;
@@ -19693,14 +19691,7 @@ html body .sandbox-track-id {
     color: #0c2134 !important;
     margin-bottom: 4px !important;
   }
-  .sbcmp-cat-block,
-  .sbcmp-cat-cols,
-  .sbcmp-tracks-row,
-  .sbcmp-cat-summary,
-  .sbcmp-table {
-    break-inside: avoid-page !important;
-    page-break-inside: avoid !important;
-  }
+  /* Let large compare sections flow across pages; only rows/cards should stay intact. */
   .sbcmp-table tr,
   .sbcmp-track-col,
   .sbcmp-track-item,
@@ -20179,15 +20170,13 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   html body.sb-printing .sandbox-cat-table-wrap {
     overflow: visible !important;
     width: 100% !important;
-    break-inside: avoid-page !important;
-    page-break-inside: avoid !important;
   }
   html body.sb-printing .sandbox-cat-table {
     width: 100% !important;
     table-layout: auto !important;
     border-collapse: collapse !important;
-    break-inside: avoid-page !important;
-    page-break-inside: avoid !important;
+    break-inside: auto !important;
+    page-break-inside: auto !important;
   }
   html body.sb-printing .sandbox-cat-table thead {
     display: table-header-group !important;
@@ -20350,8 +20339,8 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     display: none !important;
   }
   body.sb-printing .sandbox-cat-block {
-    break-inside: avoid-page !important;
-    page-break-inside: avoid !important;
+    break-inside: auto !important;
+    page-break-inside: auto !important;
     margin-bottom: 12px !important;
     border: 1px solid #dde3ea !important;
     border-radius: 8px !important;
