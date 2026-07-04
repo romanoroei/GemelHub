@@ -203,13 +203,30 @@
 
     // Measures a *logical order* string (order-independent — width is just
     // the sum of glyph advances) then draws it reordered to visual order.
+    //
+    // IMPORTANT: pdf-lib's drawText()/widthOfTextAtSize(), when used with a
+    // custom fontkit-embedded font, runs the string through the font's own
+    // layout/shaping pass. That pass does its own partial bidi handling and
+    // it's incompatible with ours — verified experimentally that it garbles
+    // numbers embedded in an RTL string (e.g. a date turns into digit-reversed
+    // gibberish) even though our toVisualOrder() output was already correct.
+    // Drawing one character at a time sidesteps that shaping pass entirely
+    // (a single character has nothing left to reorder), at the cost of losing
+    // kerning — an acceptable trade for correct Hebrew text.
     drawLine(text, { x, width, font, size, color, align = 'right' }) {
       const visual = this.ctx.toVisualOrder(text);
-      const w = font.widthOfTextAtSize(visual, size);
+      const chars = Array.from(visual);
+      const widths = chars.map(ch => font.widthOfTextAtSize(ch, size));
+      const w = widths.reduce((a, b) => a + b, 0);
       let drawX = x;
       if (align === 'right') drawX = x + width - w;
       else if (align === 'center') drawX = x + (width - w) / 2;
-      this.page.drawText(visual, { x: drawX, y: this.y, size, font, color: this.color(color) });
+      const fillColor = this.color(color);
+      let cursor = drawX;
+      chars.forEach((ch, i) => {
+        if (ch !== ' ') this.page.drawText(ch, { x: cursor, y: this.y, size, font, color: fillColor });
+        cursor += widths[i];
+      });
       return w;
     }
 
