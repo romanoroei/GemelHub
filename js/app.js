@@ -6723,7 +6723,11 @@ const App = (() => {
   let _sbComparePrintInProgress = false;
   let _sbComparePrintOriginalNodes = null;
   let _sbComparePrintScrollY = 0;
-  const SB_PRINT_LOGO_SRC = 'assets/gemelhub-logo-light.svg?v=print-logo-20260704-3';
+  // Dedicated print variant with a solid gold fill instead of the on-screen
+  // logo's gradient — Android Chrome's print/PDF rasterizer can fail to
+  // resolve a gradient's url() reference on an externally-loaded <img> SVG,
+  // which silently drops that fill (fill=none), making "Hub" disappear.
+  const SB_PRINT_LOGO_SRC = 'assets/gemelhub-logo-print.svg?v=print-logo-20260704-4';
   const SB_PRINT_LOGO_HTML = '<img src="' + SB_PRINT_LOGO_SRC + '" alt="GemelHub" class="sb-print-logo-mark">';
 
   function _sbWaitForPrintAssets(root) {
