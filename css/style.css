@@ -305,15 +305,6 @@ body.sticky-gap-mask-active:not(.fund-page)::before {
   z-index: 1;
 }
 .hero-title  { color: #fff; font-size: 1.9rem; font-weight: 800; margin-bottom: 6px; }
-.hero-logo-title {
-  margin-bottom: 10px;
-}
-.hero-brand-logo {
-  display: block;
-  width: min(520px, 88vw);
-  height: auto;
-  margin: 0 auto;
-}
 .hero-sub    { color: rgba(255,255,255,.85); font-size: .95rem; margin-bottom: 18px; }
 
 .hero-search-wrap { max-width: 520px; margin: 0 auto; }
@@ -416,23 +407,6 @@ body.sticky-gap-mask-active:not(.fund-page)::before {
   white-space: nowrap;
   flex-shrink: 0;
 }
-.site-brand-link {
-  display: inline-flex;
-  align-items: center;
-  flex: 0 0 auto;
-  line-height: 0;
-  text-decoration: none;
-}
-.site-brand-logo {
-  display: block;
-  width: 152px;
-  height: auto;
-}
-@media (max-width: 760px) {
-  .site-brand-logo {
-    width: 128px;
-  }
-}
 /* search inside tsb — task 4: גבול עבה יותר */
 .tsb-inner .hero-search {
   flex: 1;
@@ -469,9 +443,6 @@ body.sticky-gap-mask-active:not(.fund-page)::before {
 }
 .tsb-page-title {
   order: 1;
-}
-.site-brand-link {
-  order: 0;
 }
 .custom-range-entry {
   order: 4;
@@ -3957,7 +3928,13 @@ table.track-table tr.average-row td.exp-col:nth-last-child(3) {
   background: var(--gray-900); color: var(--gray-400);
   padding: 28px 16px; text-align: center; font-size: .8rem;
 }
-.footer-logo { font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 10px; }
+.footer-logo { margin-bottom: 10px; }
+.footer-brand-logo {
+  display: block;
+  width: min(360px, 78vw);
+  height: auto;
+  margin: 0 auto;
+}
 .footer-disclaimer { max-width: 600px; margin: 0 auto 8px; line-height: 1.6; }
 .footer-source a { color: var(--blue-lt); text-decoration: none; }
 .footer-source a:hover { text-decoration: underline; }
@@ -13410,8 +13387,7 @@ tr.sb-row-hidden .sandbox-invest-input {
 
   .header-nav,
   .btn-consult,
-  .hero-sub,
-  .footer-logo {
+  .hero-sub {
     display: none !important;
   }
 
