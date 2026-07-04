@@ -7079,11 +7079,66 @@ const App = (() => {
       </div>`;
   }
 
+  function _sbCompareValueSummaryHtml(items) {
+    const catOrder = CONFIG.PRODUCT_CATEGORIES.map(c => c.id);
+    const cards = items.map((it, ci) => {
+      const portfolio = Array.isArray(it.portfolio) ? it.portfolio.filter(t => !t.hidden) : [];
+      const grouped = {};
+      portfolio.forEach(item => {
+        if (!grouped[item.categoryId]) grouped[item.categoryId] = [];
+        grouped[item.categoryId].push(item);
+      });
+      const allInvestedAsAmount = portfolio.length > 0 && portfolio.every(item => item.investMode === 'amount');
+      const totalAmount = allInvestedAsAmount
+        ? portfolio.reduce((sum, item) => sum + (parseFloat(String(item.investAmount || '').replace(/,/g, '')) || 0), 0)
+        : 0;
+      const totalText = totalAmount > 0
+        ? `<strong><span dir="ltr">₪\u202f${Math.round(totalAmount).toLocaleString('he-IL')}</span></strong>`
+        : '<strong>—</strong>';
+      const rows = Object.keys(grouped)
+        .sort((a, b) => catOrder.indexOf(a) - catOrder.indexOf(b))
+        .map(catId => {
+          const tracks = grouped[catId];
+          const meta = _sbGetCategoryMeta(catId);
+          const label = tracks[0]?.categoryLabel || meta.label || catId;
+          const amountTotal = tracks
+            .filter(t => t.investMode === 'amount' && t.investAmount !== '')
+            .reduce((sum, t) => sum + (parseFloat(String(t.investAmount).replace(/,/g, '')) || 0), 0);
+          const pctTotal = tracks
+            .filter(t => t.investMode === 'percent' && t.investPct !== '')
+            .reduce((sum, t) => sum + (parseFloat(String(t.investPct).replace(/,/g, '')) || 0), 0);
+          const amountText = amountTotal > 0 ? `<span dir="ltr">₪\u202f${Math.round(amountTotal).toLocaleString('he-IL')}</span>` : '';
+          const pctText = pctTotal > 0 ? `${pctTotal.toFixed(pctTotal % 1 ? 1 : 0)}%` : '';
+          const valueText = amountText && pctText ? `${amountText} · ${pctText}` : (amountText || pctText || 'ללא סכום');
+          const managerCount = new Set(tracks.map(t => String(t.provider || '').trim()).filter(Boolean)).size;
+          const managerText = managerCount > 0
+            ? `<span class="sbcmp-value-managers">(${managerCount === 1 ? 'מנהל השקעות 1' : `${managerCount} מנהלי השקעות`})</span>`
+            : '';
+          return `<div class="sbcmp-value-row">
+            <span class="sbcmp-value-cat">${escapeHtml(label)}</span>
+            <strong>${valueText}</strong>
+            ${managerText}
+          </div>`;
+        }).join('');
+      return `<div class="sbcmp-value-card sbcmp-value-card-${ci}">
+        <div class="sbcmp-value-card-name sbcmp-col-${ci}">${escapeHtml(it.name)}</div>
+        <div class="sbcmp-value-total">
+          <span>שווי התיק</span>
+          ${totalText}
+        </div>
+        <div class="sbcmp-value-divider" aria-hidden="true"></div>
+        <div class="sbcmp-value-rows">${rows || '<div class="sbcmp-value-empty">אין מסלולים בתיק</div>'}</div>
+      </div>`;
+    }).join('');
+    return '<div class="sbcmp-section sbcmp-value-section"><div class="sbcmp-section-head">שווי ופירוט התיקים</div><div class="sbcmp-value-grid sbcmp-value-grid-' + items.length + '">' + cards + '</div></div>';
+  }
+
   function _sbRenderCompare(items) {
     const n    = items.length;
     // Hidden routes are excluded from the comparison — same "what if" simulation as the lab table
     items = items.map(it => ({ ...it, portfolio: (it.portfolio || []).filter(t => !t.hidden) }));
     const sums = items.map(it => _sbBuildExtendedSummary(it.portfolio));
+    const valueSummaryHtml = _sbCompareValueSummaryHtml(items);
 
     // ── Section 1: Tracks per category
     const allCats = {};
@@ -7202,7 +7257,7 @@ const App = (() => {
       ? 'השוואה: ' + items[0].name + ' vs ' + items[1].name
       : 'השוואת ' + n + ' תיקים';
     document.getElementById('sb-compare-title').textContent = title;
-    document.getElementById('sb-compare-content').innerHTML = tracksHtml + returnsHtml + exposuresHtml;
+    document.getElementById('sb-compare-content').innerHTML = valueSummaryHtml + tracksHtml + returnsHtml + exposuresHtml;
     state.sandbox.compareItems = items; // stored for share
   }
 
