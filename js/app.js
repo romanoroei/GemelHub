@@ -1719,11 +1719,22 @@ const App = (() => {
 
   // ── Mobile display zoom (options sheet slider) ──────────────────────────
   // Uses the CSS `zoom` property (not transform:scale) specifically because
-  // it triggers a real layout recalculation — media queries and column
-  // wrapping respond to it, so dragging the slider actually reflows tables
-  // to fit more columns/rows, not just a cosmetic shrink with empty margins.
+  // it triggers a real layout recalculation — the rendered size of every
+  // element shrinks/grows, so more (or less) of the table genuinely fits on
+  // screen, not just a cosmetic shrink with empty margins.
   // Range kept intentionally narrow (85–115%) per explicit request: enough
   // to matter, not enough to break the mobile responsive layout.
+  //
+  // IMPORTANT: applied to document.body, not document.documentElement.
+  // updateMobileStickyThead() (the sticky column-header clone shown while
+  // scrolling a tracks table on mobile) already has zoom-compensation logic
+  // built in (`toZoomSpace`), but it reads getComputedStyle(document.body).zoom
+  // specifically. Zooming <html> instead left that read seeing an unrelated,
+  // uncompensated value, so the cloned sticky header's computed positions
+  // drifted further off with every zoom change — exactly the "header row
+  // falls apart during scroll, worse as you zoom" bug reported after
+  // shipping this with documentElement. Zooming body matches what that
+  // existing code expects, and still scales all visible content the same way.
   const MOBILE_ZOOM_KEY = 'gemelhub_mobile_zoom_v1';
   const MOBILE_ZOOM_MIN = 85;
   const MOBILE_ZOOM_MAX = 115;
@@ -1737,7 +1748,8 @@ const App = (() => {
 
   function _sbApplyMobileZoom(pct) {
     const clamped = Math.max(MOBILE_ZOOM_MIN, Math.min(MOBILE_ZOOM_MAX, pct || MOBILE_ZOOM_DEFAULT));
-    document.documentElement.style.zoom = (clamped / 100);
+    document.body.style.zoom = (clamped / 100);
+    scheduleMobileStickyTheadUpdate();
     return clamped;
   }
 
