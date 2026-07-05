@@ -1487,14 +1487,7 @@ const App = (() => {
                aria-label="התאמת גודל תצוגה במובייל" />
       </div>
     `;
-    // Appended to <html>, not <body> — the table-zoom feature applies zoom to
-    // body, and nested CSS zoom is multiplicative (a child's zoom:1 doesn't
-    // cancel an ancestor's zoom, only stacks with it), so being a descendant
-    // of body at all meant this menu's own box kept scaling with body zoom
-    // regardless of its own zoom value, which is exactly why the zoom slider
-    // could end up rendered outside the menu's own fixed bounds at higher
-    // zoom. As a sibling of body instead, it's fully unaffected.
-    document.documentElement.appendChild(sheet);
+    document.body.appendChild(sheet);
     sheet.querySelector('.mobile-category-sheet-close')?.addEventListener('click', closeMobileCategorySheet);
 
     const zoomSlider = sheet.querySelector('#mob-opts-zoom-slider');
@@ -1738,23 +1731,31 @@ const App = (() => {
   // it triggers a real layout recalculation — the rendered size of every
   // element shrinks/grows, so more (or less) of the table genuinely fits on
   // screen, not just a cosmetic shrink with empty margins.
-  // Range kept intentionally narrow (85–115%) per explicit request: enough
+  // Range kept intentionally narrow (85–110%) per explicit request: enough
   // to matter, not enough to break the mobile responsive layout.
   //
-  // IMPORTANT: applied to document.body, not document.documentElement.
-  // updateMobileStickyThead() (the sticky column-header clone shown while
-  // scrolling a tracks table on mobile) already has zoom-compensation logic
-  // built in (`toZoomSpace`), but it reads getComputedStyle(document.body).zoom
-  // specifically. Zooming <html> instead left that read seeing an unrelated,
-  // uncompensated value, so the cloned sticky header's computed positions
-  // drifted further off with every zoom change — exactly the "header row
-  // falls apart during scroll, worse as you zoom" bug reported after
-  // shipping this with documentElement. Zooming body matches what that
-  // existing code expects, and still scales all visible content the same way.
+  // IMPORTANT: applied to .page-body (the wrapper around <main>, i.e. the
+  // actual page content), not document.body/documentElement. Body-level
+  // chrome — the bottom nav (.mobile-app-nav) and the options sheet itself
+  // (appended straight to <body>) — are siblings of .page-body, not
+  // descendants of it, so they're never affected by this. Two earlier
+  // attempts got this wrong:
+  //   - Zooming <html> broke updateMobileStickyThead()'s zoom-compensation
+  //     (`toZoomSpace`), which specifically reads a body-level zoom.
+  //   - Zooming <body> directly then dragged the bottom nav and the options
+  //     sheet's own box into the zoomed scale with it (the sheet is a body
+  //     child), which is what caused the "menu falls apart at high zoom"
+  //     and "bottom nav shouldn't move" reports.
+  // .page-body is the correct scope: it scales the tables (the actual goal)
+  // without touching any body-level UI chrome.
   const MOBILE_ZOOM_KEY = 'gemelhub_mobile_zoom_v1';
   const MOBILE_ZOOM_MIN = 85;
   const MOBILE_ZOOM_MAX = 110;
   const MOBILE_ZOOM_DEFAULT = 100;
+
+  function _sbMobileZoomTarget() {
+    return document.querySelector('.page-body') || document.body;
+  }
 
   function _sbGetMobileZoomPct() {
     const saved = parseInt(localStorage.getItem(MOBILE_ZOOM_KEY), 10);
@@ -1764,7 +1765,7 @@ const App = (() => {
 
   function _sbApplyMobileZoom(pct) {
     const clamped = Math.max(MOBILE_ZOOM_MIN, Math.min(MOBILE_ZOOM_MAX, pct || MOBILE_ZOOM_DEFAULT));
-    document.body.style.zoom = (clamped / 100);
+    _sbMobileZoomTarget().style.zoom = (clamped / 100);
     scheduleMobileStickyTheadUpdate();
     return clamped;
   }
@@ -3915,7 +3916,7 @@ const App = (() => {
       if (cell) renderMobileStickyHeadCell(cell, th);
     });
 
-    const siteZoom = parseFloat(getComputedStyle(document.body).zoom) || 1;
+    const siteZoom = parseFloat(getComputedStyle(_sbMobileZoomTarget()).zoom) || 1;
     const toZoomSpace = value => value / siteZoom;
 
     clone.hidden = false;
