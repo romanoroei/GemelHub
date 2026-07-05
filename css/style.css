@@ -16141,12 +16141,12 @@ tr.sb-row-hidden .sandbox-invest-input {
      menu's own backing + its other content, but NOT the zoom control block
      itself (.mob-opts-zoom stays fully visible/usable while dragging it). */
   .mobile-category-sheet.is-open.is-zoom-dragging {
-    background: rgba(255, 255, 255, .2) !important;
+    background: rgba(255, 255, 255, .1) !important;
     box-shadow: none !important;
     border-color: transparent !important;
   }
   .mobile-category-sheet.is-zoom-dragging > *:not(.mob-opts-zoom) {
-    opacity: .2 !important;
+    opacity: .1 !important;
     transition: opacity .12s ease;
   }
 

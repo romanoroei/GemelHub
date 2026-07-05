@@ -1497,18 +1497,25 @@ const App = (() => {
     // While actively dragging, fade the menu itself down to near-transparent
     // so the user can see the tables underneath resize live and judge the
     // right zoom level — then restore it once they let go.
+    const startZoomDrag = () => {
+      sheet.classList.add('is-zoom-dragging');
+    };
     zoomSlider.addEventListener('input', () => {
       const pct = _sbApplyMobileZoom(parseInt(zoomSlider.value, 10));
       zoomValueEl.textContent = pct + '%';
-      sheet.classList.add('is-zoom-dragging');
+      startZoomDrag();
     });
     const endZoomDrag = () => {
       sheet.classList.remove('is-zoom-dragging');
       _sbSaveMobileZoomPct(parseInt(zoomSlider.value, 10));
     };
+    zoomSlider.addEventListener('pointerdown', startZoomDrag);
+    zoomSlider.addEventListener('touchstart', startZoomDrag, { passive: true });
     zoomSlider.addEventListener('change', endZoomDrag);
     zoomSlider.addEventListener('pointerup', endZoomDrag);
+    zoomSlider.addEventListener('pointercancel', endZoomDrag);
     zoomSlider.addEventListener('touchend', endZoomDrag);
+    zoomSlider.addEventListener('touchcancel', endZoomDrag);
     zoomSlider.addEventListener('blur', endZoomDrag);
 
     sheet.querySelectorAll('[data-mobile-cat]').forEach(btn => {
@@ -1587,7 +1594,7 @@ const App = (() => {
     const sheet = document.getElementById('mobile-category-sheet');
     document.body.classList.remove('mobile-category-sheet-open');
     if (!sheet) return;
-    sheet.classList.remove('is-open');
+    sheet.classList.remove('is-open', 'is-zoom-dragging');
     setTimeout(() => {
       if (!sheet.classList.contains('is-open')) sheet.hidden = true;
     }, 180);
@@ -3916,14 +3923,18 @@ const App = (() => {
       if (cell) renderMobileStickyHeadCell(cell, th);
     });
 
-    const siteZoom = parseFloat(getComputedStyle(_sbMobileZoomTarget()).zoom) || 1;
-    const toZoomSpace = value => value / siteZoom;
+    // getBoundingClientRect() already includes the user-controlled .page-body
+    // zoom. The fixed clone is appended to <body>, so it is affected only by
+    // body zoom; convert visual viewport pixels back to body CSS pixels.
+    const bodyZoom = parseFloat(getComputedStyle(document.body).zoom) || 1;
+    const pageZoom = parseFloat(getComputedStyle(_sbMobileZoomTarget()).zoom) || 1;
+    const toBodyFixedSpace = value => value / bodyZoom;
 
     clone.hidden = false;
-    clone.style.top = `${toZoomSpace(Math.ceil(stickyHeaderBottom))}px`;
-    clone.style.left = `${toZoomSpace(Math.round(wrapperRect.left))}px`;
-    clone.style.width = `${toZoomSpace(Math.round(wrapperRect.width))}px`;
-    clone.style.height = `${toZoomSpace(Math.round(thead.getBoundingClientRect().height || 32))}px`;
+    clone.style.top = `${toBodyFixedSpace(Math.ceil(stickyHeaderBottom))}px`;
+    clone.style.left = `${toBodyFixedSpace(Math.round(wrapperRect.left))}px`;
+    clone.style.width = `${toBodyFixedSpace(Math.round(wrapperRect.width))}px`;
+    clone.style.height = `${toBodyFixedSpace(Math.round(thead.getBoundingClientRect().height || 32))}px`;
     const wrapperWidth = Math.round(wrapperRect.width);
     const managerRect = sourceThs[1]?.getBoundingClientRect();
     const stickyColumnsLeft = managerRect
@@ -3934,30 +3945,39 @@ const App = (() => {
       const cell = clone.children[index];
       if (!cell) return;
       const thRect = th.getBoundingClientRect();
+      const thStyle = getComputedStyle(th);
       const rawLeft = Math.round(thRect.left - wrapperRect.left);
       const rawRight = Math.round(wrapperRect.right - thRect.right);
       const width = Math.round(thRect.width);
+      const visualFontSize = (parseFloat(thStyle.fontSize) || 12) * pageZoom;
+      const visualLineHeight = Number.isFinite(parseFloat(thStyle.lineHeight))
+        ? parseFloat(thStyle.lineHeight) * pageZoom
+        : visualFontSize * 1.05;
+      const visualCellHeight = Math.round(thRect.height);
+      cell.style.setProperty('height', `${toBodyFixedSpace(visualCellHeight)}px`, 'important');
+      cell.style.setProperty('font-size', `${visualFontSize}px`, 'important');
+      cell.style.setProperty('line-height', `${visualLineHeight}px`, 'important');
       if (index === 0) {
         rankWidth = width;
         cell.style.setProperty('left', 'auto', 'important');
         cell.style.setProperty('right', '0px', 'important');
-        cell.style.setProperty('width', `${toZoomSpace(width)}px`, 'important');
-        cell.style.setProperty('min-width', `${toZoomSpace(width)}px`, 'important');
-        cell.style.setProperty('max-width', `${toZoomSpace(width)}px`, 'important');
+        cell.style.setProperty('width', `${toBodyFixedSpace(width)}px`, 'important');
+        cell.style.setProperty('min-width', `${toBodyFixedSpace(width)}px`, 'important');
+        cell.style.setProperty('max-width', `${toBodyFixedSpace(width)}px`, 'important');
         cell.style.setProperty('visibility', 'visible', 'important');
         cell.style.setProperty('clip-path', 'none', 'important');
         return;
       }
       if (index === 1) {
-        // right offset = rank column's own measured width, not a guessed
-        // constant — the clone drifted out of sync with the real column
-        // widths (hardcoded 28/104px vs actual ~21/154px) whenever the CSS
-        // widths were tuned since, causing the visible cutoff/jump on scroll.
-        cell.style.setProperty('left', 'auto', 'important');
-        cell.style.setProperty('right', `${toZoomSpace(rankWidth)}px`, 'important');
-        cell.style.setProperty('width', `${toZoomSpace(width)}px`, 'important');
-        cell.style.setProperty('min-width', `${toZoomSpace(width)}px`, 'important');
-        cell.style.setProperty('max-width', `${toZoomSpace(width)}px`, 'important');
+        const managerLeft = thRect.left - Math.round(wrapperRect.left);
+        const managerWidth = thRect.width;
+        // Use the manager header's own measured left/width, including
+        // sub-pixels, so the sticky clone stays exactly over the source cell.
+        cell.style.setProperty('left', `${toBodyFixedSpace(managerLeft)}px`, 'important');
+        cell.style.setProperty('right', 'auto', 'important');
+        cell.style.setProperty('width', `${toBodyFixedSpace(managerWidth)}px`, 'important');
+        cell.style.setProperty('min-width', `${toBodyFixedSpace(managerWidth)}px`, 'important');
+        cell.style.setProperty('max-width', `${toBodyFixedSpace(managerWidth)}px`, 'important');
         cell.style.setProperty('visibility', 'visible', 'important');
         cell.style.setProperty('clip-path', 'none', 'important');
         return;
@@ -3972,19 +3992,17 @@ const App = (() => {
       const isOutsideWrapper = index >= 2 && visibleWidth <= 0;
       if (index < 2) {
         cell.style.setProperty('left', 'auto', 'important');
-        cell.style.setProperty('right', `${toZoomSpace(rawRight)}px`, 'important');
+        cell.style.setProperty('right', `${toBodyFixedSpace(rawRight)}px`, 'important');
       } else {
-        cell.style.setProperty('left', `${toZoomSpace(rawLeft)}px`, 'important');
+        cell.style.setProperty('left', `${toBodyFixedSpace(rawLeft)}px`, 'important');
         cell.style.setProperty('right', 'auto', 'important');
       }
-      cell.style.setProperty('width', `${toZoomSpace(width)}px`, 'important');
-      cell.style.setProperty('min-width', `${toZoomSpace(width)}px`, 'important');
-      cell.style.setProperty('max-width', `${toZoomSpace(width)}px`, 'important');
+      cell.style.setProperty('width', `${toBodyFixedSpace(width)}px`, 'important');
+      cell.style.setProperty('min-width', `${toBodyFixedSpace(width)}px`, 'important');
+      cell.style.setProperty('max-width', `${toBodyFixedSpace(width)}px`, 'important');
       cell.style.setProperty('overflow', 'hidden', 'important');
       cell.style.setProperty('text-overflow', 'clip', 'important');
-      cell.style.setProperty('clip-path', keepFullWidth ? 'none' : `inset(0 ${toZoomSpace(rightClip)}px 0 ${toZoomSpace(leftClip)}px)`, 'important');
-      cell.style.setProperty('font-size', `${12 * MOBILE_TABLE_ZOOM}px`, 'important');
-      cell.style.setProperty('line-height', '1.05', 'important');
+      cell.style.setProperty('clip-path', keepFullWidth ? 'none' : `inset(0 ${toBodyFixedSpace(rightClip)}px 0 ${toBodyFixedSpace(leftClip)}px)`, 'important');
       cell.style.setProperty('visibility', index < 2 || !isOutsideWrapper ? 'visible' : 'hidden', 'important');
     });
   }
