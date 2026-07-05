@@ -2702,6 +2702,12 @@ const App = (() => {
     }
     updateComparisonUrl();
     updateFilterBadge();
+    // The mobile sticky-thead clone caches column count/positions from the
+    // last time it rendered — if a custom-range column gets added/removed
+    // (or any other column change) without a scroll/resize event happening
+    // right after, the clone would keep showing stale columns until the
+    // user scrolls again. Force it to recompute now, not just on next scroll.
+    scheduleMobileStickyTheadUpdate();
   }
 
   // ─── HOME PAGE ───────────────────────────────────────────────
