@@ -1487,20 +1487,36 @@ const App = (() => {
                aria-label="התאמת גודל תצוגה במובייל" />
       </div>
     `;
-    document.body.appendChild(sheet);
+    // Appended to <html>, not <body> — the table-zoom feature applies zoom to
+    // body, and nested CSS zoom is multiplicative (a child's zoom:1 doesn't
+    // cancel an ancestor's zoom, only stacks with it), so being a descendant
+    // of body at all meant this menu's own box kept scaling with body zoom
+    // regardless of its own zoom value, which is exactly why the zoom slider
+    // could end up rendered outside the menu's own fixed bounds at higher
+    // zoom. As a sibling of body instead, it's fully unaffected.
+    document.documentElement.appendChild(sheet);
     sheet.querySelector('.mobile-category-sheet-close')?.addEventListener('click', closeMobileCategorySheet);
 
     const zoomSlider = sheet.querySelector('#mob-opts-zoom-slider');
     const zoomValueEl = sheet.querySelector('#mob-opts-zoom-value');
     zoomSlider.value = String(_sbGetMobileZoomPct());
     zoomValueEl.textContent = zoomSlider.value + '%';
+    // While actively dragging, fade the menu itself down to near-transparent
+    // so the user can see the tables underneath resize live and judge the
+    // right zoom level — then restore it once they let go.
     zoomSlider.addEventListener('input', () => {
       const pct = _sbApplyMobileZoom(parseInt(zoomSlider.value, 10));
       zoomValueEl.textContent = pct + '%';
+      sheet.classList.add('is-zoom-dragging');
     });
-    zoomSlider.addEventListener('change', () => {
+    const endZoomDrag = () => {
+      sheet.classList.remove('is-zoom-dragging');
       _sbSaveMobileZoomPct(parseInt(zoomSlider.value, 10));
-    });
+    };
+    zoomSlider.addEventListener('change', endZoomDrag);
+    zoomSlider.addEventListener('pointerup', endZoomDrag);
+    zoomSlider.addEventListener('touchend', endZoomDrag);
+    zoomSlider.addEventListener('blur', endZoomDrag);
 
     sheet.querySelectorAll('[data-mobile-cat]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -1737,7 +1753,7 @@ const App = (() => {
   // existing code expects, and still scales all visible content the same way.
   const MOBILE_ZOOM_KEY = 'gemelhub_mobile_zoom_v1';
   const MOBILE_ZOOM_MIN = 85;
-  const MOBILE_ZOOM_MAX = 115;
+  const MOBILE_ZOOM_MAX = 110;
   const MOBILE_ZOOM_DEFAULT = 100;
 
   function _sbGetMobileZoomPct() {
