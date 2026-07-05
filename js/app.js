@@ -6232,17 +6232,17 @@ const App = (() => {
   function _sbUpdateValueBar(portfolio, totalValue, catMap) {
     const bar = document.getElementById('sandbox-value-bar');
     if (!bar) return;
-    const setValueBarSpace = () => {
-      const reserve = bar.classList.contains('is-visible') ? Math.ceil(bar.offsetHeight + 12) : 0;
+    const setValueBarSpace = (visible = bar.classList.contains('is-visible')) => {
+      const reserve = visible ? Math.max(0, Math.ceil(bar.offsetHeight - 9)) : 0;
       document.documentElement.style.setProperty('--sandbox-mobile-value-bar-space', `${reserve}px`);
       const actions = document.querySelector('.sandbox-page-actions');
-      if (actions && bar.classList.contains('is-visible')) {
+      if (actions && visible) {
         const top = Math.ceil(actions.getBoundingClientRect().bottom + 24);
         document.documentElement.style.setProperty('--sandbox-mobile-value-bar-top', `${top}px`);
       }
     };
     if (!portfolio || portfolio.length === 0) {
-      bar.classList.remove('is-visible');
+      bar.classList.remove('is-visible', 'is-position-ready');
       setValueBarSpace();
       return;
     }
@@ -6296,14 +6296,15 @@ const App = (() => {
       bar.style.left   = (window.innerWidth / 2 - 120) + 'px';
       bar.style.bottom = '28px';
     }
-    bar.classList.add('is-visible');
-    setValueBarSpace();
+    bar.classList.remove('is-position-ready');
+    setValueBarSpace(true);
+    bar.classList.add('is-visible', 'is-position-ready');
   }
 
   function _sbHideValueBar() {
     const bar = document.getElementById('sandbox-value-bar');
     if (bar) {
-      bar.classList.remove('is-visible');
+      bar.classList.remove('is-visible', 'is-position-ready');
       document.documentElement.style.setProperty('--sandbox-mobile-value-bar-space', '0px');
       document.documentElement.style.removeProperty('--sandbox-mobile-value-bar-top');
       // No need to restore to body — CSS handles mobile fixed positioning
