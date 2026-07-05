@@ -3912,6 +3912,7 @@ const App = (() => {
     const stickyColumnsLeft = managerRect
       ? Math.round(managerRect.left - wrapperRect.left)
       : wrapperWidth;
+    let rankWidth = 0;
     sourceThs.forEach((th, index) => {
       const cell = clone.children[index];
       if (!cell) return;
@@ -3920,21 +3921,26 @@ const App = (() => {
       const rawRight = Math.round(wrapperRect.right - thRect.right);
       const width = Math.round(thRect.width);
       if (index === 0) {
+        rankWidth = width;
         cell.style.setProperty('left', 'auto', 'important');
         cell.style.setProperty('right', '0px', 'important');
-        cell.style.setProperty('width', `${toZoomSpace(28)}px`, 'important');
-        cell.style.setProperty('min-width', `${toZoomSpace(28)}px`, 'important');
-        cell.style.setProperty('max-width', `${toZoomSpace(28)}px`, 'important');
+        cell.style.setProperty('width', `${toZoomSpace(width)}px`, 'important');
+        cell.style.setProperty('min-width', `${toZoomSpace(width)}px`, 'important');
+        cell.style.setProperty('max-width', `${toZoomSpace(width)}px`, 'important');
         cell.style.setProperty('visibility', 'visible', 'important');
         cell.style.setProperty('clip-path', 'none', 'important');
         return;
       }
       if (index === 1) {
+        // right offset = rank column's own measured width, not a guessed
+        // constant — the clone drifted out of sync with the real column
+        // widths (hardcoded 28/104px vs actual ~21/154px) whenever the CSS
+        // widths were tuned since, causing the visible cutoff/jump on scroll.
         cell.style.setProperty('left', 'auto', 'important');
-        cell.style.setProperty('right', `${toZoomSpace(28)}px`, 'important');
-        cell.style.setProperty('width', `${toZoomSpace(104)}px`, 'important');
-        cell.style.setProperty('min-width', `${toZoomSpace(104)}px`, 'important');
-        cell.style.setProperty('max-width', `${toZoomSpace(104)}px`, 'important');
+        cell.style.setProperty('right', `${toZoomSpace(rankWidth)}px`, 'important');
+        cell.style.setProperty('width', `${toZoomSpace(width)}px`, 'important');
+        cell.style.setProperty('min-width', `${toZoomSpace(width)}px`, 'important');
+        cell.style.setProperty('max-width', `${toZoomSpace(width)}px`, 'important');
         cell.style.setProperty('visibility', 'visible', 'important');
         cell.style.setProperty('clip-path', 'none', 'important');
         return;
