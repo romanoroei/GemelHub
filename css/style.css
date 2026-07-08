@@ -1,4 +1,4 @@
-﻿/* ==========================================
+/* ==========================================
    GemulHub — Main Stylesheet (RTL / Hebrew)
    ========================================== */
 
@@ -39,7 +39,7 @@
 
 
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   html body {
     zoom: .97;
   }
@@ -162,7 +162,7 @@
   }
 }
 
-@media (min-width: 430px) and (max-width: 760px) {
+@media (min-width: 430px) and (max-width: 1024px) {
   html body {
     zoom: 1;
   }
@@ -3328,7 +3328,7 @@ table.track-table.hide-exposure .exp-col {
   display: none;
 }
 /* דסקטופ: הפרדה עדינה בין עמודות תשואה לאלוקציה */
-@media (min-width: 761px) {
+@media (min-width: 1025px) {
   table.track-table:not(.hide-exposure):not(.exposure-only) th.exp-col:first-of-type,
   table.track-table:not(.hide-exposure):not(.exposure-only) td.exp-col:first-child {
     border-right: 2px solid rgba(12, 33, 52, .12);
@@ -4241,7 +4241,7 @@ table.track-table tr.average-row td.exp-col:nth-last-child(3) {
   text-decoration:none;
 }
 .legal-back:hover { text-decoration: underline; }
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   .cookie-banner-inner { flex-direction:column; align-items:flex-start; }
   .cookie-banner-actions { width:100%; }
   .cookie-btn { flex:1; }
@@ -4423,7 +4423,7 @@ table.track-table tr.average-row td.exp-col:nth-last-child(3) {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   .actuarial-heatmap-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -4573,7 +4573,7 @@ table.track-table tr.average-row td.exp-col:nth-last-child(3) {
   border-bottom: none;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   .tracks-container-pension-raised {
     margin-top: -16px;
   }
@@ -8112,10 +8112,13 @@ body.h2h-active #h2h-section {
 
 .h2h-board-scroll {
   overflow-x: auto;
+  overflow-y: hidden;
   padding: 0 0 8px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .h2h-board {
+  width: max-content;
   min-width: 100%;
   display: flex;
   flex-direction: column;
@@ -8124,7 +8127,7 @@ body.h2h-active #h2h-section {
   border-radius: 18px;
   background: #fff;
   box-shadow: 0 16px 36px rgba(12, 33, 52, .06);
-  overflow: hidden;
+  overflow: visible;
   direction: rtl;
   box-sizing: border-box;
 }
@@ -8151,10 +8154,10 @@ body.h2h-active #h2h-section {
 
 .h2h-metrics-head-wrap,
 .h2h-board-row > .h2h-board-metrics {
-  flex: 1 1 auto;
-  width: auto;
+  flex: 0 0 auto;
+  width: max-content;
   min-width: 0;
-  max-width: calc(100% - 188px);
+  max-width: none;
   direction: rtl;
   box-sizing: border-box;
   overflow: visible;
@@ -8201,7 +8204,7 @@ body.h2h-active #h2h-section {
 
 .h2h-board-groups {
   display: grid;
-  grid-template-columns: repeat(var(--h2h-metric-count, 6), minmax(0, 1fr));
+  grid-template-columns: var(--h2h-metric-columns, repeat(var(--h2h-metric-count, 6), minmax(82px, 1fr)));
   min-height: 30px;
   border-bottom: 2px solid rgba(201, 183, 114, .62);
 }
@@ -8228,7 +8231,7 @@ body.h2h-active #h2h-section {
 
 .h2h-board-metrics {
   display: grid;
-  grid-template-columns: repeat(var(--h2h-metric-count, 6), minmax(82px, 1fr));
+  grid-template-columns: var(--h2h-metric-columns, repeat(var(--h2h-metric-count, 6), minmax(82px, 1fr)));
   gap: 0;
   min-width: 0;
 }
@@ -8274,6 +8277,17 @@ body.h2h-active #h2h-section {
   line-height: 1.15;
 }
 
+.h2h-metric-sort-btn.has-sub {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "label icon"
+    "meta icon";
+  column-gap: 4px;
+  row-gap: 1px;
+  width: 100%;
+}
+
 .h2h-metric-sort-btn span {
   min-width: 0;
   overflow: hidden;
@@ -8281,7 +8295,22 @@ body.h2h-active #h2h-section {
   white-space: nowrap;
 }
 
+.h2h-metric-sort-btn small {
+  grid-area: meta;
+  min-width: 0;
+  color: #6f7f91;
+  font-size: .62rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.h2h-metric-sort-btn.has-sub span {
+  grid-area: label;
+}
+
 .h2h-metric-sort-btn i {
+  grid-area: icon;
   flex: 0 0 auto;
   color: #a88618;
   font-size: .72rem;
@@ -8734,7 +8763,7 @@ body.h2h-active,
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   .h2h-workspace {
     padding: 14px 10px 90px;
   }
@@ -10254,7 +10283,7 @@ body.h2h-active,
 .sandbox-value-bar.is-dragging { cursor: grabbing; transition: none; box-shadow: 0 10px 36px rgba(180,83,9,.6); }
 
 /* Desktop: bar sticky below the category tabs bar */
-@media (min-width: 761px) {
+@media (min-width: 1025px) {
   #sandbox-section .sandbox-value-bar {
     position: sticky !important;
     top: var(--sticky-total-h, 96px) !important;
@@ -12081,7 +12110,7 @@ tr.sb-row-hidden .sandbox-invest-input {
 }
 
 /* Mobile: compare tables become stacked cards, so the page never needs horizontal scroll. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   html,
   body {
     max-width: 100%;
@@ -12313,7 +12342,7 @@ tr.sb-row-hidden .sandbox-invest-input {
 }
 
 /* Mobile compact table mode: keep real tables, no card conversion, no horizontal page scroll. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   .track-table-wrapper {
     overflow-x: hidden !important;
   }
@@ -12494,7 +12523,7 @@ tr.sb-row-hidden .sandbox-invest-input {
 }
 
 /* Mobile polish pass: keep tables compact and complete without card layout. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   .category-tabs-bar {
     height: auto !important;
     min-height: var(--tabs-h);
@@ -12759,7 +12788,7 @@ tr.sb-row-hidden .sandbox-invest-input {
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   #tracks-container table.track-table th.col-sorted-head {
     top: auto !important;
     transform: none !important;
@@ -12802,7 +12831,7 @@ tr.sb-row-hidden .sandbox-invest-input {
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   #tracks-container table.track-table {
     --mobile-table-font: clamp(.54rem, 1.7vw, .68rem);
   }
@@ -12837,7 +12866,7 @@ tr.sb-row-hidden .sandbox-invest-input {
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   #tracks-container table.track-table th:nth-child(1),
   #tracks-container table.track-table td:nth-child(1),
   #tracks-container table.track-table.has-yearly-returns th:nth-child(1),
@@ -12898,7 +12927,7 @@ tr.sb-row-hidden .sandbox-invest-input {
 }
 
 /* Mobile header/action pass: compact controls, sticky category context, popovers below their trigger. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   .sticky-header {
     position: sticky !important;
     top: 0 !important;
@@ -13354,7 +13383,7 @@ tr.sb-row-hidden .sandbox-invest-input {
 }
 
 /* App-grade mobile shell: readable type, touch targets, and focused content. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   :root {
     --header-h: 52px;
     --tabs-h: 42px;
@@ -13903,7 +13932,7 @@ tr.sb-row-hidden .sandbox-invest-input {
 }
 
 /* Mobile recovery: financial screens must stay dense, scrollable, and readable. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   :root {
     --header-h: 46px;
     --tabs-h: 34px;
@@ -14283,7 +14312,7 @@ tr.sb-row-hidden .sandbox-invest-input {
 }
 
 /* Mobile fine tune: readable finance table, sticky manager column, compact action tray. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   .category-tabs-bar {
     position: relative;
     box-shadow: inset 18px 0 14px -16px rgba(15, 23, 42, .45),
@@ -14534,7 +14563,7 @@ tr.sb-row-hidden .sandbox-invest-input {
 }
 
 /* Mobile sticky/sheet hardening: keep drawers above tables and remove black header artifacts. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   html body #tracks-container .track-table-wrapper table.track-table thead th,
   html body #tracks-container .track-table-wrapper table.track-table thead th:nth-child(1),
   html body #tracks-container .track-table-wrapper table.track-table thead th:nth-child(2) {
@@ -14618,7 +14647,7 @@ tr.sb-row-hidden .sandbox-invest-input {
 }
 
 /* Mobile correction pass: compact headers, readable yields, two-row selection tray. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   .track-header,
   #tracks-container:not(.tracks-two-col-blocked) .track-header {
     display: grid !important;
@@ -14780,7 +14809,7 @@ tr.sb-row-hidden .sandbox-invest-input {
   display: none;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   body {
     padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px));
     overflow-x: hidden;
@@ -15098,7 +15127,7 @@ tr.sb-row-hidden .sandbox-invest-input {
 }
 
 /* Mobile financial-table mode: keep GemelHub tables, freeze identity columns, scroll returns. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   :root {
     --mobile-app-nav-clearance: calc(82px + env(safe-area-inset-bottom, 0px));
     --mobile-sticky-rank-w: 30px;
@@ -15327,7 +15356,7 @@ tr.sb-row-hidden .sandbox-invest-input {
   display: none;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   .category-tabs-bar {
     display: none !important;
   }
@@ -16323,7 +16352,7 @@ tr.sb-row-hidden .sandbox-invest-input {
 }
 
 /* Final mobile table specificity pass. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   html body #tracks-container .track-block .track-thead-clone,
   html body #tracks-container .track-block .track-thead-clone * {
     display: none !important;
@@ -16478,7 +16507,7 @@ tr.sb-row-hidden .sandbox-invest-input {
 }
 
 /* Final mobile cleanup: remove legacy sticky strip, tune dense table text and selection tray. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   html body #tracks-container .track-table-wrapper {
     overflow-x: auto !important;
     overflow-y: hidden !important;
@@ -16927,7 +16956,7 @@ tr.sb-row-hidden .sandbox-invest-input {
 }
 
 /* Last mobile overrides: these intentionally sit at EOF to beat legacy table rules. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   html body #tracks-container .track-table-wrapper table.track-table thead th,
   html body #tracks-container .track-table-wrapper table.track-table.has-yearly-returns thead th,
   html body #tracks-container .track-table-wrapper table.track-table thead th:nth-child(1),
@@ -16998,7 +17027,7 @@ tr.sb-row-hidden .sandbox-invest-input {
    columns even though sticky positioning is working correctly.
    Fix: give sticky columns z-index > 690 so they always paint on top.
    ═══════════════════════════════════════════════════════════════════ */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   /* 1. Wrapper is the scroll container */
   html body #tracks-container .track-table-wrapper {
     overflow-x: auto !important;
@@ -17063,7 +17092,7 @@ tr.sb-row-hidden .sandbox-invest-input {
   display: none !important;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   :focus-visible {
     outline-color: rgba(12, 33, 52, .55);
   }
@@ -17272,7 +17301,7 @@ tr.sb-row-hidden .sandbox-invest-input {
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   html body #tracks-container .track-table-wrapper table.track-table th:nth-child(2),
   html body #tracks-container .track-table-wrapper table.track-table td:nth-child(2) {
     width: 102px !important;
@@ -17330,7 +17359,7 @@ tr.sb-row-hidden .sandbox-invest-input {
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   html body #tracks-container .track-header-controls,
   html body #tracks-container:not(.tracks-two-col-blocked) .track-header-controls {
     display: grid !important;
@@ -17382,7 +17411,7 @@ tr.sb-row-hidden .sandbox-invest-input {
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   html body #tracks-container .track-header-controls,
   html body #tracks-container:not(.tracks-two-col-blocked) .track-header-controls {
     gap: 4px 6px !important;
@@ -17444,7 +17473,7 @@ tr.sb-row-hidden .sandbox-invest-input {
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   html body #tracks-container .track-title-group,
   html body #tracks-container:not(.tracks-two-col-blocked) .track-title-group {
     justify-content: flex-start !important;
@@ -17544,7 +17573,7 @@ tr.sb-row-hidden .sandbox-invest-input {
   }
 }
 
-@media (min-width: 761px) {
+@media (min-width: 1025px) {
   html body #tracks-container .track-label {
     display: inline-flex !important;
     align-items: center !important;
@@ -17574,7 +17603,7 @@ tr.sb-row-hidden .sandbox-invest-input {
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   html body #tracks-container .track-block.is-mobile-sticky-compact .track-header,
   html body #tracks-container:not(.tracks-two-col-blocked) .track-block.is-mobile-sticky-compact .track-header {
     padding: 6px 7px !important;
@@ -17708,7 +17737,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   line-height: 1.08 !important;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   html body #tracks-container .track-label,
   html body #tracks-container:not(.tracks-two-col-blocked) .track-label,
   html body #tracks-container .track-block.is-mobile-sticky-compact .track-label,
@@ -17733,7 +17762,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
 }
 
 /* Mobile requested fixes: allocation-only mode, full-height options sheet, per-category filter badges. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   html body .mobile-category-sheet {
     top: max(8px, env(safe-area-inset-top, 0px)) !important;
     bottom: calc(var(--mobile-app-nav-clearance, 72px) - 2px) !important;
@@ -17966,7 +17995,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
 }
 
 /* Mobile filter drawer polish: compact lists and standalone rounded panel. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   html body.mobile-filter-open::before {
     content: none !important;
     display: none !important;
@@ -18044,7 +18073,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
 }
 
 /* Mobile follow-up fixes: denser filter rows, no sticky strip on tools, readable nav badges. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   html body.mobile-filter-open #sidebar .filter-checkbox {
     min-height: 24px !important;
     padding: 1px 4px !important;
@@ -18322,7 +18351,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   html body .mobile-sticky-thead-clone {
     display: block !important;
     pointer-events: none !important;
@@ -18813,7 +18842,7 @@ html body .sandbox-track-id {
 }
 
 /* Mobile table rows: compact, but let content define the height. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row),
   html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) > td {
     height: auto !important;
@@ -18924,7 +18953,7 @@ html body .sandbox-track-id {
 }
 
 /* Final H2H mobile override: keep this last so the board remains table-like on phones. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   body.h2h-active #content-area { padding-top: 0 !important; }
   body.h2h-active #h2h-section { margin: 0 !important; padding: 0 !important; }
   body.h2h-active .h2h-workspace {
@@ -19891,7 +19920,7 @@ html body .sandbox-track-id {
 }
 
 /* ── mobile sandbox track name overflow ── */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   .sandbox-track-name { overflow-wrap: break-word; word-break: break-word; min-width: 0; }
   .sandbox-track-meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
@@ -19963,17 +19992,21 @@ html body .sandbox-track-id {
 .sb-compare-btn:hover { background: #e0e7ff; }
 
 /* H2H mobile metrics drawer: reaches the bottom nav and sits above floating CTAs. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   body.h2h-active .h2h-metrics-panel.h2h-metrics-drawer {
     top: 0 !important;
-    bottom: var(--mobile-nav-h, 68px) !important;
+    bottom: calc(var(--mobile-app-nav-clearance, 78px) + 58px) !important;
     height: auto !important;
-    max-height: calc(100dvh - var(--mobile-nav-h, 68px)) !important;
+    max-height: calc(100dvh - var(--mobile-app-nav-clearance, 78px) - 58px) !important;
     width: min(356px, calc(100vw - 78px)) !important;
     padding: 0 !important;
     border-radius: 0 0 0 10px !important;
     overflow: hidden !important;
     z-index: 4200 !important;
+  }
+
+  body.h2h-active .h2h-topbar .h2h-metrics-tog-btn {
+    display: none !important;
   }
 
   body.h2h-active .h2h-metrics-backdrop {
@@ -20036,6 +20069,137 @@ html body .sandbox-track-id {
     height: 14px !important;
     flex: 0 0 14px !important;
   }
+}
+
+.h2h-custom-range-box {
+  margin-top: 8px;
+  padding: 9px;
+  border: 1px solid rgba(201,183,114,0.38);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #fffdf7 0%, #ffffff 100%);
+  display: grid;
+  gap: 8px;
+}
+
+.h2h-custom-range-head,
+.h2h-range-actions,
+.h2h-custom-range-mode {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.h2h-custom-range-head {
+  justify-content: space-between;
+  color: #0f2744;
+  font-size: .78rem;
+}
+
+.h2h-custom-range-refresh {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid #d8e2ee;
+  background: #fff;
+  color: #21456d;
+  cursor: pointer;
+}
+
+.h2h-range-mode-btn,
+.h2h-range-apply,
+.h2h-range-clear {
+  border-radius: 8px;
+  border: 1px solid #d8e2ee;
+  background: #fff;
+  color: #183354;
+  font-family: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.h2h-range-mode-btn {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: .72rem;
+}
+
+.h2h-range-mode-btn.is-active {
+  background: #0f2744;
+  border-color: #0f2744;
+  color: #fff;
+}
+
+.h2h-range-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.h2h-range-fields[hidden] {
+  display: none !important;
+}
+
+.h2h-range-fields label {
+  display: grid;
+  gap: 3px;
+  font-size: .68rem;
+  font-weight: 800;
+  color: #607087;
+}
+
+.h2h-range-fields select {
+  min-width: 0;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid #d8e2ee;
+  background: #fff;
+  color: #0f2744;
+  font: inherit;
+  font-size: .74rem;
+  font-weight: 700;
+}
+
+.h2h-range-actions {
+  justify-content: flex-start;
+}
+
+.h2h-range-apply,
+.h2h-range-clear {
+  padding: 7px 10px;
+  font-size: .72rem;
+}
+
+.h2h-range-apply {
+  background: #c9b772;
+  border-color: #b69f4e;
+  color: #10243d;
+}
+
+.h2h-range-clear {
+  color: #b91c1c;
+}
+
+.h2h-range-apply:disabled,
+.h2h-range-clear:disabled,
+.h2h-custom-range-refresh:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.h2h-range-meta,
+.h2h-range-status {
+  min-height: 15px;
+  font-size: .68rem;
+  line-height: 1.25;
+}
+
+.h2h-range-meta {
+  color: #0f766e;
+  font-weight: 800;
+}
+
+.h2h-range-status {
+  color: #8b5e13;
 }
 
 /* ── Compare print root: unconditional fallback (not scoped to @media print).
@@ -20759,7 +20923,7 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
 }
 
 /* ── Mobile table row-height squeeze (overrides "polish pass" at ~12420) ── */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   html body #tracks-container table.track-table th,
   html body #tracks-container table.track-table td,
   html body #tracks-container:not(.tracks-two-col-blocked) table.track-table th,
@@ -20787,7 +20951,7 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
 }
 
 /* Final mobile density tuning: readable returns and rank badges without tall rows. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   html body #tracks-container .track-table-wrapper table.track-table tbody tr:not(.average-row) > td {
     padding-top: 3px !important;
     padding-bottom: 3px !important;
@@ -20895,7 +21059,7 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
 }
 
 /* Wide-mobile layout fix: keep narrow phones unchanged, but fill the full width on larger mobile screens. */
-@media (min-width: 641px) and (max-width: 760px) {
+@media (min-width: 641px) and (max-width: 1024px) {
   html body #tracks-container .track-table-wrapper {
     width: 100% !important;
     max-width: 100% !important;
@@ -20937,7 +21101,7 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
 }
 
 /* Sandbox mobile dashboard: keep the value summary in-flow and make donut cards readable. */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   html body .sandbox-page-header {
     position: sticky !important;
     top: 0 !important;

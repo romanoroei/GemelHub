@@ -1,4 +1,4 @@
-﻿// ==========================================
+// ==========================================
 // APP MODULE - GemulHub Main Logic
 // ==========================================
 
@@ -286,8 +286,11 @@ const App = (() => {
     { id:'1yr',       label:'12 חודשים אחורה',       shortLabel:'12 חוד׳', group:'תשואות',      defaultOn:true  },
     { id:'3yr_cum',   label:'3 שנים (מצטבר)',        shortLabel:'3 שנים',  group:'תשואות',      defaultOn:true  },
     { id:'5yr_cum',   label:'5 שנים (מצטבר)',        shortLabel:'5 שנים',  group:'תשואות',      defaultOn:true  },
-    { id:'3yr_ann',   label:'3 שנ׳ (שנתי ממוצע)',   shortLabel:'3 שנתי',  group:'תשואות',      defaultOn:false },
-    { id:'5yr_ann',   label:'5 שנ׳ (שנתי ממוצע)',   shortLabel:'5 שנתי',  group:'תשואות',      defaultOn:false },
+    { id:'3yr_ann',   label:'3 שנ׳ (שנתי ממוצע)',   shortLabel:'3 שנים',  group:'תשואות',      defaultOn:false },
+    { id:'5yr_ann',   label:'5 שנ׳ (שנתי ממוצע)',   shortLabel:'5 שנים',  group:'תשואות',      defaultOn:false },
+    { id:'7yr_cum',   label:'7 שנים (מצטבר)',        shortLabel:'7 שנים',  group:'תשואות',      defaultOn:false },
+    { id:'7yr_ann',   label:'7 שנ׳ (שנתי ממוצע)',   shortLabel:'7 שנים',  group:'תשואות',      defaultOn:false },
+    { id:'customRange', label:'טווח השקעה מותאם',    shortLabel:'טווח מותאם', group:'תשואות',    defaultOn:false },
     { id:'assets',    label:'סך נכסים',               shortLabel:'נכסים',   group:'מידע כללי',  defaultOn:true  },
     { id:'stock',     label:'חשיפה למניות',           shortLabel:'מניות',   group:'חשיפות',      defaultOn:false },
     { id:'abroad',    label:'חשיפה לחו"ל',            shortLabel:'חו״ל',    group:'חשיפות',      defaultOn:false },
@@ -315,10 +318,31 @@ const App = (() => {
     yearsLoading: false,
     yearsRequestId: 0,
     yearsSignature: '',
+    trailing7DataByCat: new Map(),
+    trailing7Loading: false,
+    trailing7RequestId: 0,
+    trailing7Signature: '',
     viewMode: 'table',
     focusFundIds: new Set(),
     sortMetricId: '',
     persistedKeys: new Set(),
+    customRange: {
+      loading: false,
+      availabilityLoading: false,
+      active: false,
+      selectionMode: 'months',
+      startPeriod: '',
+      endPeriod: '',
+      selectedYear: '',
+      availablePeriods: [],
+      availableYears: [],
+      yieldMapByCat: new Map(),
+      signature: '',
+      availabilitySignature: '',
+      status: '',
+      meta: '',
+      userSelectedRange: false
+    },
   };
   const H2H_STORAGE_KEY = 'gemelhubH2HComparison';
 
@@ -584,7 +608,7 @@ const App = (() => {
   }
 
   function updateMobileStickyHeader() {
-    const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
     const header = document.querySelector('.sticky-header');
     const hero = document.getElementById('hero-banner');
     if (
@@ -711,7 +735,7 @@ const App = (() => {
     const urlView = urlParams.get('view');
     const urlFund = urlParams.get('fund');
     const urlProvider = urlParams.get('provider');
-    const isMobileViewport = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+    const isMobileViewport = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
     const shouldStartAtFirstTable = !!window.__GEMELHUB_FORCE_TABLE_TOP__ ||
       (isMobileViewport && !!window.__GEMELHUB_IS_RELOAD__ && !urlApp && !urlView && !urlParams.get('openAdvanced'));
     const effectiveUrlTrack = shouldStartAtFirstTable ? null : urlTrack;
@@ -1238,7 +1262,7 @@ const App = (() => {
     const panel = document.getElementById('display-options-panel');
     const title = document.getElementById('page-main-title');
     const isVisible = state.advancedOptionsOpen && !state.isHomePage && getCurrentCompareMode() === 'tracks';
-    const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
     if (btn) {
       btn.style.display = isVisible ? '' : 'none';
       btn.classList.toggle('is-mobile-heatmap-toggle', isMobile);
@@ -1329,7 +1353,7 @@ const App = (() => {
     if (btn) {
       btn.addEventListener('click', () => {
         state.advancedOptionsOpen = true;
-        const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+        const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
         if (isMobile) {
           state.displayOptionsOpen = false;
           state.displayOptions.heatmap = !state.displayOptions.heatmap;
@@ -1635,17 +1659,27 @@ const App = (() => {
       const target = item.dataset.mobileAppTarget;
       const active = (target !== 'categories' && target !== 'sidebar-filter' && target === current) ||
         (target === 'categories' && document.body.classList.contains('mobile-category-sheet-open')) ||
-        (target === 'sidebar-filter' && document.body.classList.contains('mobile-filter-open')) ||
+        (target === 'sidebar-filter' && (current === 'h2h' ? !!state.h2h.metricsOpen : document.body.classList.contains('mobile-filter-open'))) ||
         (target === 'filter' && !!state.advancedOptionsOpen && !state.isHomePage) ||
         (target === 'h2h' && current === 'h2h') ||
         (target === 'sandbox' && current === 'sandbox');
       item.classList.toggle('is-active', active);
       item.setAttribute('aria-current', active ? 'page' : 'false');
       if (target === 'filter' || target === 'sidebar-filter') {
-        const disabled = state.isHomePage || current === 'h2h' || current === 'sandbox';
+        const disabled = state.isHomePage || current === 'sandbox';
         item.disabled = disabled;
         item.setAttribute('aria-disabled', disabled ? 'true' : 'false');
         item.classList.toggle('is-disabled', disabled);
+      }
+      if (target === 'sidebar-filter') {
+        const label = Array.from(item.querySelectorAll('span')).find(span => !span.classList.contains('mob-nav-icon-wrap') && !span.classList.contains('mob-nav-badge'));
+        const icon = item.querySelector('i');
+        if (label) label.textContent = current === 'h2h' ? 'מדדים' : 'סינון';
+        item.setAttribute('aria-label', current === 'h2h' ? 'בחירת מדדים להשוואה' : 'סינון');
+        if (icon) {
+          icon.classList.toggle('fa-filter', current !== 'h2h');
+          icon.classList.toggle('fa-sliders', current === 'h2h');
+        }
       }
     });
     syncMobileCategorySheet();
@@ -1665,7 +1699,11 @@ const App = (() => {
       if (action === 'categories') {
         openMobileCategorySheet();
       } else if (action === 'sidebar-filter') {
-        if (document.body.classList.contains('mobile-filter-open')) {
+        if (state.activeCategoryId === 'h2h' && !state.isHomePage) {
+          state.h2h.metricsOpen = !state.h2h.metricsOpen;
+          renderH2H();
+          syncMobileAppNav('h2h');
+        } else if (document.body.classList.contains('mobile-filter-open')) {
           closeMobileFilterDrawer();
         } else {
           openMobileFilterDrawer();
@@ -1862,7 +1900,7 @@ const App = (() => {
 
     if (filterBtn) filterBtn.style.display = isComparison && state.advancedOptionsOpen && !isSandbox ? '' : 'none';
     if (searchWrap) {
-      const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+      const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
       const fundSearchPending = !!state._pendingFundSearch;
       state._pendingFundSearch = false;
       searchWrap.style.display = isSandbox || (isMobile && state.advancedOptionsOpen && !fundSearchPending) ? 'none' : '';
@@ -2936,7 +2974,7 @@ const App = (() => {
   }
 
   function startMobileFirstTableScrollGuard() {
-    const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
     if (!isMobile) return;
     requestAnimationFrame(() => {
       scrollToComparisonTableTop();
@@ -2953,7 +2991,7 @@ const App = (() => {
     const stickyH = stickyHeader && getComputedStyle(stickyHeader).display !== 'none'
       ? stickyHeader.getBoundingClientRect().height
       : 0;
-    const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
     if (isMobile) {
       return document.body.classList.contains('mobile-sticky-header-fixed') ? mobileHeaderH : 0;
     }
@@ -3719,7 +3757,7 @@ const App = (() => {
     if (!table || !thead) return;
 
     block.querySelector('.track-thead-clone')?.remove();
-    if (window.matchMedia && window.matchMedia('(max-width: 760px)').matches) return;
+    if (window.matchMedia && window.matchMedia('(max-width: 1024px)').matches) return;
 
     const cloneWrap = document.createElement('div');
     cloneWrap.className = 'track-thead-clone';
@@ -3850,7 +3888,7 @@ const App = (() => {
   }
 
   function updateMobileStickyThead() {
-    const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
     if (!isMobile || getCurrentCompareMode() !== 'tracks') {
       hideMobileStickyThead();
       clearMobileStickyCompactBlock();
@@ -4018,7 +4056,7 @@ const App = (() => {
   // Inline style with 'important' beats any stylesheet rule — the only reliable
   // way since dozens of conflicting !important CSS rules fight over position on thead th.
   function applyMobileTheadSticky() {
-    if (!window.matchMedia('(max-width: 760px)').matches) return;
+    if (!window.matchMedia('(max-width: 1024px)').matches) return;
     document.querySelectorAll('.track-table-wrapper table.track-table').forEach(table => {
       const row = table.querySelector('thead tr');
       if (!row) return;
@@ -4400,7 +4438,7 @@ const App = (() => {
   }
 
   function applyMobileTableSizing(scope = document) {
-    const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
     scope.querySelectorAll('table.track-table').forEach(table => {
       const clearInlineMobileTableStyles = () => {
         table.style.removeProperty('table-layout');
@@ -4473,7 +4511,7 @@ const App = (() => {
         const colWidths = firstRowTHs.map(th => getColWidth(th));
         const rawTableWidth = colWidths.reduce((s, w) => s + w, 0);
         const wrapper = table.closest('.track-table-wrapper');
-        const wideMobile = window.matchMedia && window.matchMedia('(min-width: 641px) and (max-width: 760px)').matches;
+        const wideMobile = window.matchMedia && window.matchMedia('(min-width: 641px) and (max-width: 1024px)').matches;
         const wideMobileTargetWidth = wideMobile
           ? (wrapper?.clientWidth || Math.round((document.documentElement.clientWidth || window.innerWidth || 0) * 1.13))
           : 0;
@@ -4676,7 +4714,7 @@ const App = (() => {
 
   function setupMobileTableScrollbar(wrapper) {
     if (!wrapper) return;
-    const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
     if (!isMobile) {
       removeMobileTableScrollbar(wrapper);
       return;
@@ -4761,7 +4799,7 @@ const App = (() => {
   }
 
   function normalizeMobileFinanceTablePresentation(scope = document) {
-    const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
     if (!isMobile) return;
     scope.querySelectorAll('table.mobile-finance-table, table.mobile-finance-table *').forEach(el => {
       if (el.matches('thead th')) {
@@ -5196,7 +5234,7 @@ const App = (() => {
         e.stopPropagation();
         const newMode = btn.dataset.mode;
         const wasExposure = state.showExposure;
-        const isMobileExposureMode = state.showExposure && window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+        const isMobileExposureMode = state.showExposure && window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
         if (isMobileExposureMode) {
           state.showExposure = false;
           document.querySelectorAll('.exp-toggle-btn').forEach(b => b.classList.remove('is-active'));
@@ -5272,7 +5310,7 @@ const App = (() => {
         e.stopPropagation();
         state.showExposure = !state.showExposure;
         const shouldReturnToCompactTrack = !state.showExposure && state.compactTracksView;
-        const isMobileExposureMode = state.showExposure && window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+        const isMobileExposureMode = state.showExposure && window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
         if (isMobileExposureMode) {
           document.querySelectorAll('.yield-mode-btn, .yearly-expand-btn').forEach(b => b.classList.remove('is-active'));
         }
@@ -5281,7 +5319,7 @@ const App = (() => {
           b.classList.toggle('is-active', state.showExposure);
         });
         // toggle class על כל הטבלאות — CSS מסתיר/מציג .exp-col
-        const _isMobExp = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+        const _isMobExp = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
         document.querySelectorAll('table.track-table').forEach(t => {
           t.classList.toggle('hide-exposure', !state.showExposure);
           t.classList.toggle('exposure-only', state.showExposure && _isMobExp);
@@ -8784,7 +8822,7 @@ const App = (() => {
     };
     const sc = (f) => sortField === f ? ' col-sorted' : '';
 
-    const _isDesktopExp = state.showExposure && !(window.matchMedia && window.matchMedia('(max-width: 760px)').matches);
+    const _isDesktopExp = state.showExposure && !(window.matchMedia && window.matchMedia('(max-width: 1024px)').matches);
     let rows = '';
     records.forEach((r, idx) => {
       const baseName = getProviderDisplayName(r.CONTROLLING_CORPORATION, r.MANAGING_CORPORATION);
@@ -8962,7 +9000,7 @@ const App = (() => {
 
     const _yr3Lbl = '3 שנים';
     const _yr5Lbl = '5 שנים';
-    const _hideYieldSubLabel = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+    const _hideYieldSubLabel = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
     const _yieldSubLabel = _hideYieldSubLabel
       ? ''
       : state.yieldMode === 'annualized'
@@ -8984,7 +9022,7 @@ const App = (() => {
     );
 
     return `
-      <table class="track-table${customRangeActive && !yearlyActive ? ' has-custom-range' : ''}${yearlyActive ? ' has-yearly-returns' : ''}${matchYearlyHeight ? ' match-yearly-height' : ''}${!state.showExposure ? ' hide-exposure' : ''}${state.showExposure && (window.matchMedia && window.matchMedia('(max-width: 760px)').matches) ? ' exposure-only' : ''}">
+      <table class="track-table${customRangeActive && !yearlyActive ? ' has-custom-range' : ''}${yearlyActive ? ' has-yearly-returns' : ''}${matchYearlyHeight ? ' match-yearly-height' : ''}${!state.showExposure ? ' hide-exposure' : ''}${state.showExposure && (window.matchMedia && window.matchMedia('(max-width: 1024px)').matches) ? ' exposure-only' : ''}">
         <thead>
           <tr>
             <th title="דירוג" scope="col">#</th>
@@ -10013,7 +10051,7 @@ const App = (() => {
 
     function syncMobileSidebarStyle() {
       if (document.body.classList.contains('mobile-filter-open')) return;
-      const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+      const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
       if (!isMobile) {
         sidebar.removeAttribute('style');
         return;
@@ -12032,7 +12070,7 @@ const App = (() => {
           trackId: item.trackId,
           fundId: String(item.record?.FUND_ID || '')
         })).filter(item => item.catId && item.trackId && item.fundId),
-        metrics: Array.from(state.h2h.metrics || []),
+        metrics: Array.from(state.h2h.metrics || []).filter(metricId => metricId !== 'customRange'),
         yearMetrics: Array.from(state.h2h.yearMetrics || []),
         viewMode: state.h2h.viewMode || 'table',
         focusFundIds: Array.from(state.h2h.focusFundIds || []),
@@ -12085,7 +12123,7 @@ const App = (() => {
       const savedItems = Array.isArray(parsed?.items) ? parsed.items : [];
       if (Array.isArray(parsed?.metrics) && parsed.metrics.length) {
         const validMetricIds = new Set(H2H_METRICS.map(metric => metric.id));
-        state.h2h.metrics = new Set(parsed.metrics.filter(metricId => validMetricIds.has(metricId)));
+        state.h2h.metrics = new Set(parsed.metrics.filter(metricId => validMetricIds.has(metricId) && metricId !== 'customRange'));
       }
       if (Array.isArray(parsed?.yearMetrics)) {
         state.h2h.yearMetrics = new Set(parsed.yearMetrics.map(String).filter(year => /^\d{4}$/.test(year)));
@@ -12144,6 +12182,17 @@ const App = (() => {
       const value = state.h2h.yearDataByCat?.get(item.catId)?.yieldMap?.get(String(item.record?.FUND_ID))?.get(year);
       return value == null || isNaN(value) ? NaN : value;
     }
+    if (metricId === 'customRange') {
+      const range = state.h2h.customRange || {};
+      if (!range.active || range.signature !== getH2HItemsSignature()) return NaN;
+      const value = range.yieldMapByCat?.get(item.catId)?.get(String(item.record?.FUND_ID));
+      return value == null || isNaN(value) ? NaN : value;
+    }
+    if (metricId === '7yr_cum' || metricId === '7yr_ann') {
+      const value = state.h2h.trailing7DataByCat?.get(item.catId)?.get(String(item.record?.FUND_ID));
+      if (value == null || isNaN(value)) return NaN;
+      return metricId === '7yr_ann' ? (Math.pow(1 + Number(value) / 100, 1 / 7) - 1) * 100 : Number(value);
+    }
     const r = item.record;
     const y12 = item.yields12M;
     switch(metricId) {
@@ -12200,6 +12249,7 @@ const App = (() => {
       const rawYear = getH2HMetricRaw(item, metricId);
       return isNaN(rawYear) ? '-' : formatPercent(rawYear);
     }
+    if ((metricId === '7yr_cum' || metricId === '7yr_ann') && state.h2h.trailing7Loading) return 'טוען...';
     const raw = getH2HMetricRaw(item, metricId);
     // סך נכסים — TOTAL_ASSETS נשמר ביחידות מיליון ₪
     if (metricId === 'assets') {
@@ -12216,6 +12266,212 @@ const App = (() => {
     if (metricId === 'alpha')     return isNaN(raw) ? '-' : `\u200E${raw > 0 ? '+' : ''}${raw.toFixed(2)}%`;
     if (['stock','abroad','fx'].includes(metricId)) return isNaN(raw) ? '-' : `\u200E${raw.toFixed(1)}%`;
     return formatPercent(raw);
+  }
+
+  function getH2HCustomRangeState() {
+    if (!state.h2h.customRange) {
+      state.h2h.customRange = {
+        loading: false,
+        availabilityLoading: false,
+        active: false,
+        selectionMode: 'months',
+        startPeriod: '',
+        endPeriod: '',
+        selectedYear: '',
+        availablePeriods: [],
+        availableYears: [],
+        yieldMapByCat: new Map(),
+        signature: '',
+        availabilitySignature: '',
+        status: '',
+        meta: '',
+        userSelectedRange: false
+      };
+    }
+    if (typeof state.h2h.customRange.userSelectedRange !== 'boolean') {
+      state.h2h.customRange.userSelectedRange = false;
+    }
+    return state.h2h.customRange;
+  }
+
+  function getH2HCustomRangeLabel() {
+    const range = getH2HCustomRangeState();
+    if (!range.startPeriod || !range.endPeriod) return 'טווח מותאם';
+    if (range.selectionMode === 'year' && range.selectedYear) return String(range.selectedYear);
+    return `${formatReportPeriod(range.startPeriod)} – ${formatReportPeriod(range.endPeriod)}`;
+  }
+
+  function getH2HCustomRangeMonthCount() {
+    const range = getH2HCustomRangeState();
+    return getMonthCountBetween(range.startPeriod, range.endPeriod);
+  }
+
+  function getH2HCustomRangeMetaText() {
+    const monthCount = getH2HCustomRangeMonthCount();
+    return monthCount ? `${monthCount} חודשים` : '';
+  }
+
+  function getH2HCustomRangeYears(periods) {
+    const byYear = new Map();
+    (periods || []).forEach(period => {
+      const value = Number(period);
+      const year = Math.floor(value / 100);
+      const month = value % 100;
+      if (!year || month < 1 || month > 12) return;
+      if (!byYear.has(year)) byYear.set(year, new Set());
+      byYear.get(year).add(month);
+    });
+    return Array.from(byYear.entries())
+      .filter(([, months]) => months.size === 12)
+      .map(([year]) => year)
+      .sort((a, b) => b - a);
+  }
+
+  function getH2HPeriodIntersection(periodLists) {
+    const validLists = (periodLists || []).map(list => (list || []).map(Number).filter(Boolean));
+    if (!validLists.length) return [];
+    const [first, ...rest] = validLists;
+    const restSets = rest.map(list => new Set(list));
+    return first
+      .filter(period => restSets.every(set => set.has(period)))
+      .filter((period, index, arr) => arr.indexOf(period) === index)
+      .sort((a, b) => b - a);
+  }
+
+  function getH2HDefaultCustomRangePeriods(periods) {
+    const sortedDesc = (periods || []).map(Number).filter(Boolean).sort((a, b) => b - a);
+    if (!sortedDesc.length) return { startPeriod: '', endPeriod: '' };
+    const endPeriod = sortedDesc[0];
+    const startPeriod = sortedDesc[Math.min(23, sortedDesc.length - 1)];
+    return {
+      startPeriod: String(startPeriod),
+      endPeriod: String(endPeriod)
+    };
+  }
+
+  function syncH2HCustomRangeFromYear(year) {
+    const range = getH2HCustomRangeState();
+    const safeYear = Number(year);
+    if (!safeYear) return;
+    range.selectedYear = String(safeYear);
+    range.startPeriod = String((safeYear * 100) + 1);
+    range.endPeriod = String((safeYear * 100) + 12);
+  }
+
+  function invalidateH2HCustomRangeData() {
+    const range = getH2HCustomRangeState();
+    range.active = false;
+    range.loading = false;
+    range.yieldMapByCat = new Map();
+    range.signature = '';
+    range.status = '';
+    range.meta = '';
+  }
+
+  function refreshH2HCustomRangePanel(root = document) {
+    const box = root?.querySelector?.('[data-h2h-custom-range]') || document.querySelector('[data-h2h-custom-range]');
+    if (!box) return;
+    const drawerBody = document.querySelector('#h2h-mp .h2h-drawer-body');
+    const scrollTop = drawerBody?.scrollTop || 0;
+    box.outerHTML = renderH2HCustomRangeControls();
+    bindH2HCustomRangeControls(root);
+    restoreH2HDrawerScroll(scrollTop);
+  }
+
+  async function ensureH2HCustomRangeAvailability(force = false) {
+    const range = getH2HCustomRangeState();
+    const catIds = Array.from(new Set((state.h2h.items || []).map(item => item.catId).filter(Boolean))).sort();
+    const signature = catIds.join('|');
+    if (!catIds.length) {
+      range.availablePeriods = [];
+      range.availableYears = [];
+      range.availabilitySignature = '';
+      return;
+    }
+    if (!force && range.availabilitySignature === signature) return;
+    if (range.availabilityLoading) return;
+    range.availabilityLoading = true;
+    range.status = 'טוען תקופות זמינות...';
+    refreshH2HCustomRangePanel();
+    try {
+      const periodLists = await Promise.all(catIds.map(catId => APIModule.getAvailableReportPeriods(catId, 'כלל האוכלוסיה')));
+      const periods = getH2HPeriodIntersection(periodLists);
+      range.availablePeriods = periods;
+      range.availableYears = getH2HCustomRangeYears(periods);
+      range.availabilitySignature = signature;
+      const currentStartValid = periods.some(period => String(period) === String(range.startPeriod));
+      const currentEndValid = periods.some(period => String(period) === String(range.endPeriod));
+      if (periods.length && (!range.userSelectedRange || !currentStartValid || !currentEndValid)) {
+        const defaults = getH2HDefaultCustomRangePeriods(periods);
+        range.startPeriod = defaults.startPeriod;
+        range.endPeriod = defaults.endPeriod;
+        range.selectionMode = 'months';
+      }
+      if (!range.selectedYear && range.availableYears.length) range.selectedYear = String(range.availableYears[0]);
+      range.status = periods.length ? '' : 'לא נמצאו תקופות משותפות לכל הקטגוריות שנבחרו.';
+    } catch (error) {
+      console.error(error);
+      range.availablePeriods = [];
+      range.availableYears = [];
+      range.availabilitySignature = signature;
+      range.status = 'לא הצלחנו לטעון את התקופות כרגע.';
+    } finally {
+      range.availabilityLoading = false;
+      refreshH2HCustomRangePanel();
+    }
+  }
+
+  async function applyH2HCustomRangeSelection() {
+    const range = getH2HCustomRangeState();
+    if (range.selectionMode === 'year') syncH2HCustomRangeFromYear(range.selectedYear);
+    const startPeriod = Number(range.startPeriod);
+    const endPeriod = Number(range.endPeriod);
+    if (!startPeriod || !endPeriod || endPeriod < startPeriod) {
+      range.status = 'יש לבחור טווח תקין מהחודש המוקדם אל המאוחר.';
+      renderH2H();
+      return;
+    }
+    if (!state.h2h.metrics.has('customRange')) {
+      const selectedCount = (state.h2h.metrics?.size || 0) + (state.h2h.yearMetrics?.size || 0);
+      if (selectedCount >= 15) {
+        range.status = 'כדי להוסיף טווח מותאם צריך להסיר מדד אחר.';
+        renderH2H();
+        return;
+      }
+      state.h2h.metrics.add('customRange');
+    }
+    const catIds = Array.from(new Set((state.h2h.items || []).map(item => item.catId).filter(Boolean)));
+    range.loading = true;
+    range.status = 'מחשב תשואה מותאמת...';
+    renderH2H();
+    try {
+      const entries = await Promise.all(catIds.map(async catId => {
+        const map = await APIModule.getCustomRangeYields(catId, startPeriod, endPeriod, 'כלל האוכלוסיה');
+        return [catId, map];
+      }));
+      range.yieldMapByCat = new Map(entries);
+      range.active = true;
+      range.signature = getH2HItemsSignature();
+      range.startPeriod = String(startPeriod);
+      range.endPeriod = String(endPeriod);
+      range.meta = `הטווח שנבחר כולל ${getMonthCountBetween(startPeriod, endPeriod)} חודשים`;
+      range.status = '';
+      persistH2HState();
+    } catch (error) {
+      console.error(error);
+      range.status = 'לא הצלחנו לחשב את הטווח המותאם כרגע.';
+    } finally {
+      range.loading = false;
+      renderH2H();
+    }
+  }
+
+  function clearH2HCustomRangeSelection() {
+    invalidateH2HCustomRangeData();
+    getH2HCustomRangeState().userSelectedRange = false;
+    state.h2h.metrics.delete('customRange');
+    persistH2HState();
+    renderH2H();
   }
 
   // ─── צבעים לקטגוריה ולמסלול בכרטיסי ראש בראש ─────────────────
@@ -12243,6 +12499,59 @@ const App = (() => {
     return '#6366f1'; // אינדיגו — ברירת מחדל
   }
 
+  function renderH2HCustomRangeControls() {
+    const range = getH2HCustomRangeState();
+    const periods = range.availablePeriods || [];
+    const years = range.availableYears || [];
+    const startPeriodOptions = periods.map(period => `<option value="${period}"${String(period) === String(range.startPeriod) ? ' selected' : ''}>${formatReportPeriod(period)}</option>`).join('');
+    const endPeriodOptions = periods.map(period => `<option value="${period}"${String(period) === String(range.endPeriod) ? ' selected' : ''}>${formatReportPeriod(period)}</option>`).join('');
+    const yearOptions = years.map(year => `<option value="${year}"${String(year) === String(range.selectedYear) ? ' selected' : ''}>${year}</option>`).join('');
+    const mode = range.selectionMode || 'months';
+    const hasItems = (state.h2h.items || []).length > 0;
+    const disabled = !hasItems || range.loading || range.availabilityLoading || !periods.length || (mode === 'year' && !years.length);
+    const rangeMonthMeta = getH2HCustomRangeMetaText();
+    return `
+      <div class="h2h-custom-range-box" data-h2h-custom-range>
+        <div class="h2h-custom-range-head">
+          <strong>טווח השקעה מותאם</strong>
+          <button type="button" class="h2h-custom-range-refresh" data-h2h-range-refresh title="רענון תקופות">
+            <i class="fas fa-rotate-right" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div class="h2h-custom-range-mode" role="group" aria-label="בחירת סוג טווח">
+          <button type="button" class="h2h-range-mode-btn ${mode === 'months' ? 'is-active' : ''}" data-h2h-range-mode="months">חודשים</button>
+          <button type="button" class="h2h-range-mode-btn ${mode === 'year' ? 'is-active' : ''}" data-h2h-range-mode="year">שנה</button>
+        </div>
+        <div class="h2h-range-fields" ${mode === 'months' ? '' : 'hidden'}>
+          <label>מ־
+            <select data-h2h-range-start ${disabled ? 'disabled' : ''}>
+              ${startPeriodOptions || '<option value="">אין תקופות</option>'}
+            </select>
+          </label>
+          <label>עד
+            <select data-h2h-range-end ${disabled ? 'disabled' : ''}>
+              ${endPeriodOptions || '<option value="">אין תקופות</option>'}
+            </select>
+          </label>
+        </div>
+        <div class="h2h-range-fields" ${mode === 'year' ? '' : 'hidden'}>
+          <label>שנה
+            <select data-h2h-range-year ${disabled || !years.length ? 'disabled' : ''}>
+              ${yearOptions || '<option value="">אין שנה מלאה</option>'}
+            </select>
+          </label>
+        </div>
+        <div class="h2h-range-actions">
+          <button type="button" class="h2h-range-apply" data-h2h-range-apply ${disabled ? 'disabled' : ''}>
+            ${range.loading ? 'מחשב...' : 'חשב והצג'}
+          </button>
+          <button type="button" class="h2h-range-clear" data-h2h-range-clear ${!range.active && !state.h2h.metrics.has('customRange') ? 'disabled' : ''}>נקה</button>
+        </div>
+        <div class="h2h-range-meta" data-h2h-range-meta>${rangeMonthMeta ? `${getH2HCustomRangeLabel()} · ${rangeMonthMeta}` : (range.meta || '')}</div>
+        <div class="h2h-range-status">${range.status || (!hasItems ? 'בחר קופות כדי להפעיל טווח מותאם.' : '')}</div>
+      </div>`;
+  }
+
   function renderH2HMetricsPanel() {
     const selectedCount = (state.h2h.metrics?.size || 0) + (state.h2h.yearMetrics?.size || 0);
     const limitReached = selectedCount >= 15;
@@ -12258,6 +12567,7 @@ const App = (() => {
               <span>${m.label}</span>
             </label>`).join('')}
         </div>
+        ${grp === 'תשואות' ? renderH2HCustomRangeControls() : ''}
       </div>`).join('');
     const years = getH2HAvailableYears();
     const yearsGroup = `
@@ -12307,8 +12617,48 @@ const App = (() => {
     state.h2h.yearsLoading = false;
   }
 
+  function invalidateH2HTrailing7Data() {
+    state.h2h.trailing7DataByCat = new Map();
+    state.h2h.trailing7Signature = '';
+    state.h2h.trailing7RequestId += 1;
+    state.h2h.trailing7Loading = false;
+  }
+
   function h2hNeedsYearData() {
     return !!state.h2h.yearMetrics.size || state.h2h.viewMode === 'chart';
+  }
+
+  function h2hNeedsTrailing7Data() {
+    return !!(state.h2h.metrics?.has('7yr_cum') || state.h2h.metrics?.has('7yr_ann'));
+  }
+
+  async function ensureH2HTrailing7DataLoaded() {
+    if (!h2hNeedsTrailing7Data() || !state.h2h.items.length || state.h2h.trailing7Loading) return;
+    const signature = getH2HItemsSignature();
+    if (state.h2h.trailing7Signature === signature) return;
+    const requestId = ++state.h2h.trailing7RequestId;
+    state.h2h.trailing7Loading = true;
+    renderH2H();
+    try {
+      const catIds = Array.from(new Set(state.h2h.items.map(item => item.catId).filter(Boolean)));
+      const entries = await Promise.all(catIds.map(async catId => {
+        const map = await APIModule.getTrailing7Yields(catId, 'כלל האוכלוסיה');
+        return [catId, map];
+      }));
+      if (state.h2h.trailing7RequestId !== requestId) return;
+      state.h2h.trailing7DataByCat = new Map(entries);
+      state.h2h.trailing7Signature = signature;
+    } catch (error) {
+      console.error(error);
+      if (state.h2h.trailing7RequestId !== requestId) return;
+      state.h2h.trailing7DataByCat = new Map();
+      state.h2h.trailing7Signature = signature;
+    } finally {
+      if (state.h2h.trailing7RequestId === requestId) {
+        state.h2h.trailing7Loading = false;
+        renderH2H();
+      }
+    }
   }
 
   async function ensureH2HYearDataLoaded() {
@@ -12494,6 +12844,7 @@ const App = (() => {
     const year = parseH2HYearMetric(metricId);
     if (year) state.h2h.yearMetrics.delete(String(year));
     else state.h2h.metrics.delete(metricId);
+    if (metricId === 'customRange') invalidateH2HCustomRangeData();
     if (state.h2h.sortMetricId === metricId) state.h2h.sortMetricId = '';
     persistH2HState();
     renderH2H();
@@ -12528,6 +12879,8 @@ const App = (() => {
           state.h2h.focusFundIds?.delete(removedFundId);
         }
         invalidateH2HYearData();
+        invalidateH2HTrailing7Data();
+        invalidateH2HCustomRangeData();
         persistH2HState();
         renderH2H();
       });
@@ -13108,6 +13461,8 @@ const App = (() => {
         });
       });
       invalidateH2HYearData();
+      invalidateH2HTrailing7Data();
+      invalidateH2HCustomRangeData();
       document.getElementById('h2h-wiz-overlay')?.remove();
       persistH2HState();
       renderH2H();
@@ -13346,7 +13701,16 @@ const App = (() => {
       const latestPeriod = Math.max(...(state.h2h.items || []).map(item => Number(item.record?.REPORT_PERIOD) || 0));
       return formatH2HReportPeriodShort(latestPeriod) || metric.shortLabel || metric.label;
     }
+    if (metric.id === 'customRange') return getH2HCustomRangeLabel();
     return metric.shortLabel || metric.label;
+  }
+
+  function getH2HMetricHeadSubLabel(metric) {
+    const id = metric?.id || '';
+    if (id === 'customRange') return getH2HCustomRangeMetaText();
+    if (id === '3yr_cum' || id === '5yr_cum' || id === '7yr_cum') return 'מצטבר';
+    if (id === '3yr_ann' || id === '5yr_ann' || id === '7yr_ann') return 'ממוצע שנתי';
+    return '';
   }
 
   function getH2HRanking(activeMetrics, items) {
@@ -13420,6 +13784,7 @@ const App = (() => {
     const metricBlockMeta = metric => {
       const id = metric.id || '';
       if (id === 'assets') return { key: 'identity', label: 'תעודת זהות', order: 10 };
+      if (id === 'customRange') return { key: 'returns', label: 'מבחן התשואה', order: 19 };
       if (id === 'monthly') return { key: 'returns', label: 'מבחן התשואה', order: 20 };
       if (id === 'ytd') return { key: 'returns', label: 'מבחן התשואה', order: 21 };
       if (id === '1yr') return { key: 'returns', label: 'מבחן התשואה', order: 22 };
@@ -13427,6 +13792,8 @@ const App = (() => {
       if (id === '3yr_ann') return { key: 'returns', label: 'מבחן התשואה', order: 24 };
       if (id === '5yr_cum') return { key: 'returns', label: 'מבחן התשואה', order: 25 };
       if (id === '5yr_ann') return { key: 'returns', label: 'מבחן התשואה', order: 26 };
+      if (id === '7yr_cum') return { key: 'returns', label: 'מבחן התשואה', order: 26.2 };
+      if (id === '7yr_ann') return { key: 'returns', label: 'מבחן התשואה', order: 26.4 };
       if (parseH2HYearMetric(id)) return { key: 'returns', label: 'מבחן התשואה', order: 27 + (3000 - Number(parseH2HYearMetric(id))) / 1000 };
       if (id === 'sharpe') return { key: 'risk', label: 'סיכון ואלוקציה', order: 40 };
       if (id === 'stock') return { key: 'risk', label: 'סיכון ואלוקציה', order: 41 };
@@ -13484,6 +13851,8 @@ const App = (() => {
       return getH2HMetricShortLabel(metric);
     };
     const metricColumnWidth = metric => {
+      if (metric.id === 'customRange') return 150;
+      if (['3yr_cum','3yr_ann','5yr_cum','5yr_ann','7yr_cum','7yr_ann'].includes(metric.id)) return 96;
       const chars = String(getH2HMetricHeadLabel(metric) || '').length;
       return Math.max(64, Math.min(112, 44 + (chars * 5)));
     };
@@ -13505,10 +13874,12 @@ const App = (() => {
       const prev = activeMetrics[metricIndex - 1];
       const blockStart = prev && prev._block.key !== metric._block.key ? ' h2h-block-start' : '';
       const isSorted = state.h2h.sortMetricId === metric.id;
+      const metricSubLabel = getH2HMetricHeadSubLabel(metric);
       return `
       <div class="h2h-metric-head-card${blockStart}">
-        <button type="button" class="h2h-metric-sort-btn${isSorted ? ' is-active' : ''}" data-h2h-sort-metric="${metric.id}" title="מיין ${metric.label} מהגבוה לנמוך">
+        <button type="button" class="h2h-metric-sort-btn${isSorted ? ' is-active' : ''}${metricSubLabel ? ' has-sub' : ''}" data-h2h-sort-metric="${metric.id}" title="מיין ${metric.label} מהגבוה לנמוך">
           <span>${getH2HMetricHeadLabel(metric)}</span>
+          ${metricSubLabel ? `<small>${metricSubLabel}</small>` : ''}
           <i class="fas fa-arrow-down-wide-short" aria-hidden="true"></i>
         </button>
         <button type="button" class="h2h-metric-remove-btn" data-h2h-remove-metric="${metric.id}" title="הסר עמודה" aria-label="הסר את ${metric.label}">×</button>
@@ -13567,7 +13938,7 @@ const App = (() => {
         const blockStart = prev && prev._block.key !== metric._block.key ? ' h2h-block-start' : '';
         const isYearMetric = !!parseH2HYearMetric(metric.id);
         const rankCls = isBest ? ' h2h-best' : isWorst ? ' h2h-worst' : '';
-        const signedColorMetrics = new Set(['monthly','ytd','1yr','3yr_cum','5yr_cum','3yr_ann','5yr_ann','sharpe','positive','momentum','alpha','actuarial']);
+        const signedColorMetrics = new Set(['monthly','ytd','1yr','3yr_cum','5yr_cum','3yr_ann','5yr_ann','7yr_cum','7yr_ann','customRange','sharpe','positive','momentum','alpha','actuarial']);
         const lowerIsBetterMetrics = new Set(['stddev']);
         let colorCls = '';
         if (Number.isFinite(raw)) {
@@ -13859,6 +14230,60 @@ const App = (() => {
     });
   }
 
+  function bindH2HCustomRangeControls(root) {
+    const panel = root?.querySelector('[data-h2h-custom-range]');
+    if (!panel) return;
+    const range = getH2HCustomRangeState();
+    const startSelect = panel.querySelector('[data-h2h-range-start]');
+    const endSelect = panel.querySelector('[data-h2h-range-end]');
+    const yearSelect = panel.querySelector('[data-h2h-range-year]');
+    const metaEl = panel.querySelector('[data-h2h-range-meta]');
+    const updateRangeMeta = () => {
+      if (!metaEl) return;
+      const rangeMonthMeta = getH2HCustomRangeMetaText();
+      metaEl.textContent = rangeMonthMeta ? `${getH2HCustomRangeLabel()} · ${rangeMonthMeta}` : (range.meta || '');
+    };
+    const syncVisibleRangeMode = () => {
+      const mode = range.selectionMode === 'year' ? 'year' : 'months';
+      panel.querySelectorAll('[data-h2h-range-mode]').forEach(btn => {
+        btn.classList.toggle('is-active', btn.dataset.h2hRangeMode === mode);
+      });
+      panel.querySelectorAll('.h2h-range-fields').forEach(fields => {
+        const hasYearSelect = !!fields.querySelector('[data-h2h-range-year]');
+        fields.hidden = mode === 'year' ? !hasYearSelect : hasYearSelect;
+      });
+      updateRangeMeta();
+    };
+    if (startSelect && range.startPeriod) startSelect.value = String(range.startPeriod);
+    if (endSelect && range.endPeriod) endSelect.value = String(range.endPeriod);
+    if (yearSelect && range.selectedYear) yearSelect.value = String(range.selectedYear);
+
+    panel.querySelectorAll('[data-h2h-range-mode]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        range.selectionMode = btn.dataset.h2hRangeMode === 'year' ? 'year' : 'months';
+        range.userSelectedRange = true;
+        if (range.selectionMode === 'year') syncH2HCustomRangeFromYear(range.selectedYear || range.availableYears?.[0]);
+        if (startSelect && range.startPeriod) startSelect.value = String(range.startPeriod);
+        if (endSelect && range.endPeriod) endSelect.value = String(range.endPeriod);
+        if (yearSelect && range.selectedYear) yearSelect.value = String(range.selectedYear);
+        syncVisibleRangeMode();
+      });
+    });
+    startSelect?.addEventListener('change', () => { range.startPeriod = startSelect.value; range.selectionMode = 'months'; range.userSelectedRange = true; updateRangeMeta(); });
+    endSelect?.addEventListener('change', () => { range.endPeriod = endSelect.value; range.selectionMode = 'months'; range.userSelectedRange = true; updateRangeMeta(); });
+    yearSelect?.addEventListener('change', () => {
+      range.selectionMode = 'year';
+      range.userSelectedRange = true;
+      syncH2HCustomRangeFromYear(yearSelect.value);
+      if (startSelect && range.startPeriod) startSelect.value = String(range.startPeriod);
+      if (endSelect && range.endPeriod) endSelect.value = String(range.endPeriod);
+      syncVisibleRangeMode();
+    });
+    panel.querySelector('[data-h2h-range-refresh]')?.addEventListener('click', () => ensureH2HCustomRangeAvailability(true));
+    panel.querySelector('[data-h2h-range-apply]')?.addEventListener('click', applyH2HCustomRangeSelection);
+    panel.querySelector('[data-h2h-range-clear]')?.addEventListener('click', clearH2HCustomRangeSelection);
+  }
+
   renderH2H = function() {
     const ws = document.getElementById('h2h-workspace');
     if (!ws) return;
@@ -13919,6 +14344,7 @@ const App = (() => {
       state.h2h.metricsOpen = false;
       renderH2H();
     });
+    bindH2HCustomRangeControls(ws);
     if (state.h2h.metricsOutsideHandler) {
       document.removeEventListener('pointerdown', state.h2h.metricsOutsideHandler, true);
       state.h2h.metricsOutsideHandler = null;
@@ -13927,7 +14353,8 @@ const App = (() => {
       state.h2h.metricsOutsideHandler = event => {
         const panel = document.getElementById('h2h-mp');
         const toggle = document.getElementById('h2h-mtog');
-        if (panel?.contains(event.target) || toggle?.contains(event.target)) return;
+        const mobileMetricsNav = document.querySelector('[data-mobile-app-action="sidebar-filter"]');
+        if (panel?.contains(event.target) || toggle?.contains(event.target) || mobileMetricsNav?.contains(event.target)) return;
         document.removeEventListener('pointerdown', state.h2h.metricsOutsideHandler, true);
         state.h2h.metricsOutsideHandler = null;
         state.h2h.metricsOpen = false;
@@ -13942,6 +14369,8 @@ const App = (() => {
       state.h2h.items = [];
       state.h2h.focusFundIds = new Set();
       invalidateH2HYearData();
+      invalidateH2HTrailing7Data();
+      invalidateH2HCustomRangeData();
       clearPersistedH2HState();
       renderH2H();
     });
@@ -13987,6 +14416,13 @@ const App = (() => {
         }
         if (cb.checked) state.h2h.metrics.add(cb.dataset.metric);
         else state.h2h.metrics.delete(cb.dataset.metric);
+        if (cb.dataset.metric === 'customRange') {
+          if (cb.checked && !getH2HCustomRangeState().active) ensureH2HCustomRangeAvailability();
+          if (!cb.checked) invalidateH2HCustomRangeData();
+        }
+        if (cb.checked && (cb.dataset.metric === '7yr_cum' || cb.dataset.metric === '7yr_ann')) {
+          ensureH2HTrailing7DataLoaded();
+        }
         const tbl = ws.querySelector('.h2h-results, .h2h-board-scroll, .h2h-tbl-scroll, .h2h-chart-panel, .h2h-chart-empty');
         const noM = ws.querySelector('.h2h-no-metrics');
         const newHtml = renderH2HActiveView();
@@ -13995,6 +14431,7 @@ const App = (() => {
         else if (state.h2h.items.length > 0) ws.insertAdjacentHTML('beforeend', newHtml);
         persistH2HState();
         refreshH2HMetricsDrawerChrome(ws);
+        bindH2HCustomRangeControls(ws);
         restoreH2HDrawerScroll(drawerScrollTop);
         bindH2HTableInteractions(ws);
       });
@@ -14019,8 +14456,11 @@ const App = (() => {
       });
     });
     if (hasItems && h2hNeedsYearData()) ensureH2HYearDataLoaded();
+    if (hasItems && h2hNeedsTrailing7Data()) ensureH2HTrailing7DataLoaded();
+    if (hasItems && state.h2h.metricsOpen) ensureH2HCustomRangeAvailability();
 
     bindH2HTableInteractions(ws);
+    syncMobileAppNav('h2h');
   };
 
   function parseNumberInput(value) {
