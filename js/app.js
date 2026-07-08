@@ -4471,6 +4471,26 @@ const App = (() => {
           return w;
         };
         const colWidths = firstRowTHs.map(th => getColWidth(th));
+        const rawTableWidth = colWidths.reduce((s, w) => s + w, 0);
+        const wrapper = table.closest('.track-table-wrapper');
+        const wideMobile = window.matchMedia && window.matchMedia('(min-width: 641px) and (max-width: 760px)').matches;
+        const wideMobileTargetWidth = wideMobile
+          ? (wrapper?.clientWidth || Math.round((document.documentElement.clientWidth || window.innerWidth || 0) * 1.13))
+          : 0;
+        const targetTableWidth = wideMobileTargetWidth
+          ? Math.max(rawTableWidth, wideMobileTargetWidth)
+          : rawTableWidth;
+        if (targetTableWidth > rawTableWidth) {
+          const flexibleIndexes = colWidths
+            .map((w, index) => (index > 1 && w > 0 ? index : -1))
+            .filter(index => index >= 0);
+          let remaining = targetTableWidth - rawTableWidth;
+          flexibleIndexes.forEach((index, offset) => {
+            const add = Math.floor(remaining / (flexibleIndexes.length - offset));
+            colWidths[index] += add;
+            remaining -= add;
+          });
+        }
         const tableWidth = colWidths.reduce((s, w) => s + w, 0);
         table.style.setProperty('width', `${tableWidth}px`, 'important');
         table.style.setProperty('min-width', `${tableWidth}px`, 'important');
@@ -6098,11 +6118,11 @@ const App = (() => {
     section.innerHTML = html;
     _sbAttachEvents(section);
 
-    // Anchor value bar below the sandbox header (CSS handles mobile vs desktop positioning)
+    // Anchor value bar inside the sandbox header, directly below the action buttons.
     const _sbPageHeader = section.querySelector('.sandbox-page-header');
     const _sbValueBar = document.getElementById('sandbox-value-bar');
     if (_sbPageHeader && _sbValueBar) {
-      _sbPageHeader.insertAdjacentElement('afterend', _sbValueBar);
+      _sbPageHeader.appendChild(_sbValueBar);
     }
   }
 

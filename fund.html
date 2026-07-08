@@ -37,8 +37,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=fund-logo-20260704" />
-  <link rel="stylesheet" href="css/fund.css?v=mobile-fixes19-20260626" />
+  <link rel="stylesheet" href="css/style.css?v=wide-mobile-tables-20260708" />
+  <link rel="stylesheet" href="css/fund.css?v=wide-mobile-tables-20260708" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="fund-page">
@@ -1914,7 +1914,11 @@ function renderPeersTable(myFundId, myName) {
         const returnCount = columnCount - 2;
         const minReturnWidth = isYearlyPeerTable ? 52 : 54;
         const maxReturnWidth = isYearlyPeerTable ? 54 : 56;
-        const restWidth = Math.min(maxReturnWidth, Math.max(minReturnWidth, Math.floor((wrapperWidth - rankWidth - managerWidth) / returnCount)));
+        const isWideMobilePeer = window.matchMedia && window.matchMedia('(min-width: 641px) and (max-width: 760px)').matches;
+        const naturalRestWidth = Math.max(minReturnWidth, Math.floor((wrapperWidth - rankWidth - managerWidth) / returnCount));
+        const restWidth = isWideMobilePeer
+          ? naturalRestWidth
+          : Math.min(maxReturnWidth, naturalRestWidth);
         const totalWidth = rankWidth + managerWidth + (restWidth * returnCount);
         table.style.setProperty('width', `${totalWidth}px`, 'important');
         table.style.setProperty('min-width', '0', 'important');

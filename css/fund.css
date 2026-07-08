@@ -3779,3 +3779,30 @@ body.fund-page #peers-table-wrap table.track-table tr.average-row .peer-yield-nu
     height: 96px;
   }
 }
+
+/* Wide-mobile peer table correction: use the available viewport width on larger phones. */
+@media (min-width: 641px) and (max-width: 760px) {
+  html body.fund-page #peers-table-wrap,
+  html body.fund-page #peers-table-wrap .peers-table-scroll {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table,
+  html body.fund-page #peers-table-wrap table.track-table.fund-peer-yearly-table {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: none !important;
+    table-layout: fixed !important;
+  }
+
+  html body.fund-page #peers-table-wrap table.track-table th:nth-child(n+3),
+  html body.fund-page #peers-table-wrap table.track-table td:nth-child(n+3),
+  html body.fund-page #peers-table-wrap table.track-table:not(.fund-peer-yearly-table) th:nth-child(3),
+  html body.fund-page #peers-table-wrap table.track-table:not(.fund-peer-yearly-table) td:nth-child(3) {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+}

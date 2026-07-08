@@ -10246,6 +10246,7 @@ body.h2h-active,
   opacity: 1;
   pointer-events: auto;
 }
+
 .sandbox-value-bar.is-visible:not(.is-position-ready) {
   opacity: 0;
   pointer-events: none;
@@ -18449,15 +18450,19 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
 
   html body .sandbox-value-bar,
   #sandbox-section .sandbox-value-bar {
-    position: fixed !important;
-    top: var(--sandbox-mobile-value-bar-top, 100px) !important;
-    right: 10px !important;
-    left: 10px !important;
+    position: static !important;
+    grid-row: 3 !important;
+    align-self: stretch !important;
+    justify-self: stretch !important;
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
     bottom: auto !important;
-    width: auto !important;
+    width: 100% !important;
     max-width: none !important;
     transform: none !important;
-    z-index: 890 !important;
+    z-index: auto !important;
+    margin: 4px 0 0 !important;
     padding: 9px 10px !important;
     border-radius: 12px !important;
     justify-content: center !important;
@@ -20886,5 +20891,209 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   html body #tracks-container .track-table-wrapper table.track-table .fund-id-tag-icons .table-allocation-flag-il {
     width: 19px !important;
     height: 13px !important;
+  }
+}
+
+/* Wide-mobile layout fix: keep narrow phones unchanged, but fill the full width on larger mobile screens. */
+@media (min-width: 641px) and (max-width: 760px) {
+  html body #tracks-container .track-table-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table,
+  html body #tracks-container .track-table-wrapper table.track-table.has-yearly-returns {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: none !important;
+    table-layout: fixed !important;
+  }
+
+  html body #tracks-container .track-table-wrapper table.track-table th:nth-child(n+3),
+  html body #tracks-container .track-table-wrapper table.track-table td:nth-child(n+3) {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  html body .sandbox-value-bar,
+  html body #sandbox-value-bar,
+  html body #sandbox-section .sandbox-value-bar {
+    position: static !important;
+    grid-row: 3 !important;
+    align-self: stretch !important;
+    justify-self: stretch !important;
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    transform: none !important;
+    z-index: auto !important;
+    margin: 4px 0 0 !important;
+  }
+}
+
+/* Sandbox mobile dashboard: keep the value summary in-flow and make donut cards readable. */
+@media (max-width: 760px) {
+  html body .sandbox-page-header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 880 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto auto !important;
+    align-items: stretch !important;
+    gap: 6px !important;
+    margin: 0 -10px 12px !important;
+    padding: 18px 10px 10px !important;
+    background: rgba(255, 255, 255, .96) !important;
+    border-bottom: 1px solid rgba(226, 232, 240, .9) !important;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, .05) !important;
+  }
+
+  html body .sandbox-page-actions {
+    grid-row: 2 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    align-items: center !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  html body #sandbox-section .sandbox-value-bar,
+  html body #sandbox-value-bar {
+    position: static !important;
+    grid-row: 3 !important;
+    align-self: stretch !important;
+    justify-self: stretch !important;
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    transform: none !important;
+    z-index: auto !important;
+    margin: 4px 0 0 !important;
+  }
+
+  html body .sandbox-cat-table .exp-wrap {
+    display: grid !important;
+    grid-template-columns: 30px minmax(28px, 1fr) !important;
+    align-items: center !important;
+    justify-content: stretch !important;
+    gap: 4px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    direction: ltr !important;
+  }
+
+  html body .sandbox-cat-table .exp-val {
+    display: block !important;
+    min-width: 30px !important;
+    text-align: left !important;
+    font-size: .74rem !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+  }
+
+  html body .sandbox-cat-table .exp-bar-bg {
+    display: block !important;
+    width: 100% !important;
+    min-width: 28px !important;
+    height: 7px !important;
+    min-height: 7px !important;
+    background: #e2e8f0 !important;
+    border-radius: 999px !important;
+    overflow: hidden !important;
+  }
+
+  html body .sandbox-cat-table .exp-bar {
+    display: block !important;
+    height: 100% !important;
+    min-height: 7px !important;
+    border-radius: 999px !important;
+  }
+
+  html body .sb-distribution-section {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  html body .sb-distribution-donut-card {
+    padding: 12px !important;
+    min-height: 0 !important;
+  }
+
+  html body .sb-distribution-donut-card h3 {
+    margin-bottom: 8px !important;
+    font-size: .94rem !important;
+  }
+
+  html body .sb-distribution-donut-wrap {
+    grid-template-columns: minmax(124px, 152px) minmax(0, 1fr) !important;
+    gap: 10px !important;
+    align-items: center !important;
+  }
+
+  html body .sb-distribution-donut-shell {
+    width: clamp(124px, 30vw, 152px) !important;
+  }
+
+  html body .sb-distribution-center {
+    width: 72px !important;
+  }
+
+  html body .sb-distribution-products .sb-distribution-center {
+    width: 82px !important;
+  }
+
+  html body .sb-distribution-center strong {
+    font-size: .94rem !important;
+  }
+
+  html body .sb-distribution-products .sb-distribution-center strong {
+    font-size: .68rem !important;
+    line-height: 1.08 !important;
+  }
+
+  html body .sb-distribution-center span,
+  html body .sb-distribution-center em {
+    font-size: .58rem !important;
+  }
+
+  html body .sb-distribution-legend {
+    gap: 4px !important;
+    max-width: none !important;
+    width: 100% !important;
+  }
+
+  html body .sb-distribution-legend-row {
+    grid-template-columns: auto minmax(0, 1fr) minmax(48px, auto) !important;
+    gap: 5px !important;
+    padding: 3px 4px !important;
+    font-size: .72rem !important;
+    min-height: 25px !important;
+  }
+
+  html body .sb-distribution-legend-row strong {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    word-break: normal !important;
+  }
+
+  html body .sb-distribution-legend-value {
+    min-width: 48px !important;
+    font-size: .72rem !important;
+  }
+
+  html body .sb-distribution-legend-value em {
+    font-size: .62rem !important;
   }
 }
