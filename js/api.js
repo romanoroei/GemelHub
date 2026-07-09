@@ -531,7 +531,11 @@ const APIModule = (() => {
     let records   = getLatestRecords(allRaw);
 
     // 2. יצרנים מורשים
-    records = filterByAllowedProviders(records);
+    // במצב "כולל קופות סקטוריאליות" אין סינון לפי רשימת המנהלים הרגילה,
+    // אחרת קופות כמו 382 עדיין יוסתרו בגלל מנהל סקטוריאלי.
+    if (isPension || isPolisa || targetPopulation) {
+      records = filterByAllowedProviders(records);
+    }
 
     // 2b. הסר קרנות "בניהול אישי" (task 8)
     records = records.filter(r => !(r.FUND_NAME || '').includes('בניהול אישי'));
@@ -686,7 +690,9 @@ const APIModule = (() => {
         ? await fetchPolisaHistoricalRangeData()
         : await getSourceRecordsByCategory(categoryId);
 
-    records = filterByAllowedProviders(records);
+    if (isPension || isPolisa || targetPopulation) {
+      records = filterByAllowedProviders(records);
+    }
     records = records.filter(r => !(r.FUND_NAME || '').includes('בניהול אישי'));
 
     if (isPolisa) {

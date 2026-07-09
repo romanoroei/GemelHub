@@ -934,17 +934,17 @@ const App = (() => {
       if (title) title.innerHTML = '<i class="fas fa-building"></i> מנהלי השקעות <button class="btn-clear-filter" id="clear-providers" aria-label="נקה סינון מנהלים">נקה</button>';
     }
 
-    const sectionTitles = document.querySelectorAll('#sidebar-filters .sidebar-section-title');
-    if (sectionTitles[2]) sectionTitles[2].innerHTML = '<i class="fas fa-users"></i> אוכלוסיית יעד';
+    const populationTitle = document.querySelector('#population-filter-section .sidebar-section-title');
+    if (populationTitle) populationTitle.innerHTML = '<i class="fas fa-users"></i> אוכלוסיית יעד';
 
     const populationGroup = document.getElementById('filter-population');
     if (populationGroup) populationGroup.setAttribute('aria-label', 'אוכלוסיית יעד');
     const populationInputs = document.querySelectorAll('#filter-population input[name="population"]');
-    if (populationInputs[0]) populationInputs[0].value = 'כלל האוכלוסייה';
+    if (populationInputs[0]) populationInputs[0].value = DEFAULT_TARGET_POPULATION;
     if (populationInputs[1]) populationInputs[1].value = '';
     const populationOptions = document.querySelectorAll('#filter-population label span');
     if (populationOptions[0]) populationOptions[0].textContent = 'כלל האוכלוסייה';
-    if (populationOptions[1]) populationOptions[1].textContent = 'הצג הכל';
+    if (populationOptions[1]) populationOptions[1].textContent = 'כולל קופות סקטוריאליות';
 
     const exportBtn = document.getElementById('btn-export');
     if (exportBtn) {
@@ -3604,6 +3604,9 @@ const App = (() => {
   }
 
   function setupPopulationRadio() {
+    const section = document.getElementById('population-filter-section');
+    if (section) section.hidden = !categoryUsesTargetPopulation();
+
     document.querySelectorAll('input[name="population"]').forEach(radio => {
       // Remove old listeners by cloning
       const newR = radio.cloneNode(true);
@@ -12012,7 +12015,7 @@ const App = (() => {
     const isPension = !!(cat && cat.pensionAPI);
     const isPolisa  = !!(cat && cat.polisaAPI);
     const [organized, yields12M, sharpeMap, consistencyMap, stdDevMap, momentumMap, actuarialRows = []] = await Promise.all([
-      APIModule.getOrganizedData({ categoryId:catId, targetPopulation:'כלל האוכלוסיה', selectedProviders:new Set() }),
+      APIModule.getOrganizedData({ categoryId:catId, targetPopulation:'', selectedProviders:new Set() }),
       isPension ? APIModule.get12MYieldsPension()         : isPolisa ? APIModule.get12MYieldsPolisa()        : APIModule.get12MYields(),
       isPension ? APIModule.getAllSharpeRatiosPension()   : isPolisa ? APIModule.getAllSharpeRatiosPolisa()   : APIModule.getAllSharpeRatios(),
       isPension ? APIModule.getConsistencyMapPension()    : isPolisa ? APIModule.getConsistencyMapPolisa()   : APIModule.getConsistencyMap(),
@@ -12394,7 +12397,7 @@ const App = (() => {
     range.status = 'טוען תקופות זמינות...';
     refreshH2HCustomRangePanel();
     try {
-      const periodLists = await Promise.all(catIds.map(catId => APIModule.getAvailableReportPeriods(catId, 'כלל האוכלוסיה')));
+      const periodLists = await Promise.all(catIds.map(catId => APIModule.getAvailableReportPeriods(catId, '')));
       const periods = getH2HPeriodIntersection(periodLists);
       range.availablePeriods = periods;
       range.availableYears = getH2HCustomRangeYears(periods);
@@ -12446,7 +12449,7 @@ const App = (() => {
     renderH2H();
     try {
       const entries = await Promise.all(catIds.map(async catId => {
-        const map = await APIModule.getCustomRangeYields(catId, startPeriod, endPeriod, 'כלל האוכלוסיה');
+        const map = await APIModule.getCustomRangeYields(catId, startPeriod, endPeriod, '');
         return [catId, map];
       }));
       range.yieldMapByCat = new Map(entries);
@@ -12642,7 +12645,7 @@ const App = (() => {
     try {
       const catIds = Array.from(new Set(state.h2h.items.map(item => item.catId).filter(Boolean)));
       const entries = await Promise.all(catIds.map(async catId => {
-        const map = await APIModule.getTrailing7Yields(catId, 'כלל האוכלוסיה');
+        const map = await APIModule.getTrailing7Yields(catId, '');
         return [catId, map];
       }));
       if (state.h2h.trailing7RequestId !== requestId) return;
@@ -12675,7 +12678,7 @@ const App = (() => {
         grouped.get(item.catId).push(item.record);
       });
       const entries = await Promise.all(Array.from(grouped.entries()).map(async ([catId, records]) => {
-        const result = await APIModule.getYearlyYieldsForFunds(records, catId, 'כלל האוכלוסיה', 10);
+        const result = await APIModule.getYearlyYieldsForFunds(records, catId, '', 10);
         return [catId, result];
       }));
       if (state.h2h.yearsRequestId !== requestId) return;
