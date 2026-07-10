@@ -3004,24 +3004,39 @@ const App = (() => {
     window.scrollTo({ top: Math.max(0, y), behavior });
   }
 
-  function scrollToTrackTableFirstRow(block, behavior = 'smooth') {
+  function getTrackTableFirstRowScrollTarget(block) {
     if (!block) return;
     const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
-    if (!isMobile) {
-      scrollToTrackBlockTop(block, behavior);
-      return;
-    }
+    if (!isMobile) return null;
     const firstRow = block.querySelector('.track-table-wrapper tbody tr:not(.average-row)');
     const trackHeader = block.querySelector('.track-header');
     const thead = block.querySelector('.track-table-wrapper thead');
-    if (!firstRow || !trackHeader || !thead) {
+    if (!firstRow || !trackHeader || !thead) return null;
+    const logoHeight = document.querySelector('.mobile-table-logo-bar')?.getBoundingClientRect().height || 0;
+    const desiredTop = logoHeight + trackHeader.getBoundingClientRect().height + thead.getBoundingClientRect().height + 2;
+    return {
+      desiredTop,
+      top: firstRow.getBoundingClientRect().top,
+      y: firstRow.getBoundingClientRect().top + window.scrollY - desiredTop
+    };
+  }
+
+  function scrollToTrackTableFirstRow(block, behavior = 'smooth', options = {}) {
+    if (!block) return;
+    const target = getTrackTableFirstRowScrollTarget(block);
+    if (!target) {
       scrollToTrackBlockTop(block, behavior);
       return;
     }
-    const logoHeight = document.querySelector('.mobile-table-logo-bar')?.getBoundingClientRect().height || 0;
-    const desiredTop = logoHeight + trackHeader.getBoundingClientRect().height + thead.getBoundingClientRect().height + 2;
-    const y = firstRow.getBoundingClientRect().top + window.scrollY - desiredTop;
-    window.scrollTo({ top: Math.max(0, y), behavior });
+    if (options.onlyIfNeeded && Math.abs(target.top - target.desiredTop) <= 14) return;
+    window.scrollTo({ top: Math.max(0, target.y), behavior });
+  }
+
+  function scheduleTrackTableFirstRowScroll(block, options = {}) {
+    const behavior = options.behavior || 'smooth';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => scrollToTrackTableFirstRow(block, behavior, options));
+    });
   }
 
   function navigateToTrackTable(categoryId, trackId) {
@@ -5267,6 +5282,7 @@ const App = (() => {
         const newMode = btn.dataset.mode;
         const wasExposure = state.showExposure;
         const isMobileExposureMode = state.showExposure && window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
+        const hasActiveYearly = Array.from(state.yearlyByTrack.values()).some(entry => entry.active);
         if (isMobileExposureMode) {
           state.showExposure = false;
           document.querySelectorAll('.exp-toggle-btn').forEach(b => b.classList.remove('is-active'));
@@ -5274,6 +5290,17 @@ const App = (() => {
             t.classList.add('hide-exposure');
             t.classList.remove('exposure-only');
           });
+        }
+        if (wasExposure && newMode === state.yieldMode && !hasActiveYearly) {
+          document.querySelectorAll('.yield-mode-btn[data-mode]').forEach(b => {
+            b.classList.toggle('is-active', b.dataset.mode === state.yieldMode);
+          });
+          syncTracksDensityClasses();
+          if (Array.from(document.querySelectorAll('table.track-table')).some(t => !t.querySelector('th.yield-col, td.yield-cell'))) {
+            state._blockRenderers.forEach(fn => fn());
+          }
+          scheduleTrackTableFirstRowScroll(block, { onlyIfNeeded: true, behavior: 'auto' });
+          return;
         }
         if (newMode === 'yearly') {
           const trackId = block.dataset.trackId || null;
@@ -5284,10 +5311,14 @@ const App = (() => {
           });
           syncTracksDensityClasses();
           state._blockRenderers.forEach(fn => fn());
+          scheduleTrackTableFirstRowScroll(block);
           ensureYearlyTrackLoaded(trackId, 5);
           return;
         }
-        if (!wasExposure && state.yieldMode === newMode && !Array.from(state.yearlyByTrack.values()).some(entry => entry.active)) return;
+        if (!wasExposure && state.yieldMode === newMode && !hasActiveYearly) {
+          scheduleTrackTableFirstRowScroll(block, { onlyIfNeeded: true });
+          return;
+        }
         state.yieldMode = newMode;
         clearAllYearlyTrackStates();
         // עדכון is-active על כל הכפתורים בכל הבלוקים
@@ -5297,6 +5328,7 @@ const App = (() => {
         // רינדור מחדש של כל הטבלאות (ערכי 3Y/5Y משתנים)
         syncTracksDensityClasses();
         state._blockRenderers.forEach(fn => fn());
+        scheduleTrackTableFirstRowScroll(block);
       });
     });
 
@@ -5317,6 +5349,7 @@ const App = (() => {
         });
         syncTracksDensityClasses();
         state._blockRenderers.forEach(fn => fn());
+        scheduleTrackTableFirstRowScroll(block);
         ensureYearlyTrackLoaded(trackId, 5);
         return;
       }
@@ -5332,6 +5365,7 @@ const App = (() => {
       });
       syncTracksDensityClasses();
       state._blockRenderers.forEach(fn => fn());
+      scheduleTrackTableFirstRowScroll(block);
       ensureYearlyTrackLoaded(trackId, 10);
     });
 
@@ -5352,17 +5386,23 @@ const App = (() => {
         });
         // toggle class על כל הטבלאות — CSS מסתיר/מציג .exp-col
         const _isMobExp = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
-        document.querySelectorAll('table.track-table').forEach(t => {
+        const tables = Array.from(document.querySelectorAll('table.track-table'));
+        const needsExposureRender = state.showExposure && tables.some(t => !t.querySelector('th.exp-col, td.exp-col'));
+        const needsYieldRender = !state.showExposure && tables.some(t => !t.querySelector('th.yield-col, td.yield-cell'));
+        tables.forEach(t => {
           t.classList.toggle('hide-exposure', !state.showExposure);
           t.classList.toggle('exposure-only', state.showExposure && _isMobExp);
         });
         syncTracksDensityClasses();
-        state._blockRenderers.forEach(fn => fn());
-        if (state.showExposure || shouldReturnToCompactTrack) {
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => scrollToTrackBlockTop(block));
-          });
+        clearMobileExposureCompetingActiveButtons();
+        if (needsExposureRender || needsYieldRender) {
+          state._blockRenderers.forEach(fn => fn());
+          if (state.showExposure) scheduleTrackTableFirstRowScroll(block, { onlyIfNeeded: true, behavior: 'auto' });
+          else if (shouldReturnToCompactTrack) requestAnimationFrame(() => requestAnimationFrame(() => scrollToTrackBlockTop(block, 'auto')));
+          return;
         }
+        if (state.showExposure) scheduleTrackTableFirstRowScroll(block, { onlyIfNeeded: true, behavior: 'auto' });
+        else if (shouldReturnToCompactTrack) requestAnimationFrame(() => requestAnimationFrame(() => scrollToTrackBlockTop(block)));
       });
     }
   }
