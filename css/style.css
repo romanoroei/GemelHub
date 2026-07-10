@@ -3088,6 +3088,10 @@ body:not(.advanced-options-open) .custom-range-panel {
 }
 .track-block:hover { box-shadow: var(--shadow-md); }
 
+.mobile-table-logo-bar {
+  display: none;
+}
+
 .track-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 13px 18px;
@@ -17302,6 +17306,42 @@ tr.sb-row-hidden .sandbox-invest-input {
 }
 
 @media (max-width: 1024px) {
+  html body {
+    --mobile-track-logo-h: 52px;
+  }
+
+  html body .mobile-table-logo-bar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 3600 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: var(--mobile-track-logo-h) !important;
+    min-height: var(--mobile-track-logo-h) !important;
+    width: 100% !important;
+    padding: 4px 10px !important;
+    background: #fff !important;
+    border: 1px solid rgba(226, 232, 240, .9) !important;
+    border-inline: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: 0 1px 0 rgba(12, 33, 52, .08), 0 4px 14px rgba(12, 33, 52, .06) !important;
+    box-sizing: border-box !important;
+  }
+
+  html body .mobile-table-logo-bar img {
+    display: block !important;
+    width: min(285px, 76vw) !important;
+    max-width: 100% !important;
+    max-height: 42px !important;
+    object-fit: contain !important;
+  }
+
+  html body #tracks-container .track-header {
+    top: var(--mobile-track-logo-h) !important;
+    border-radius: 0 !important;
+  }
+
   html body #tracks-container .track-table-wrapper table.track-table th:nth-child(2),
   html body #tracks-container .track-table-wrapper table.track-table td:nth-child(2) {
     width: 102px !important;
@@ -17513,7 +17553,7 @@ tr.sb-row-hidden .sandbox-invest-input {
     justify-content: center !important;
     margin: 0 !important;
     padding: 2px 9px 3px !important;
-    color: #c9b772 !important;
+    color: #fff !important;
     background: #0c2134 !important;
     border-radius: 999px !important;
     font-size: 1.15rem !important;
@@ -17547,9 +17587,9 @@ tr.sb-row-hidden .sandbox-invest-input {
   }
 
   html body #tracks-container .yearly-mode-btn.is-active {
-    background: #0c2134 !important;
-    border-color: #0c2134 !important;
-    color: #fff !important;
+    background: rgba(201, 183, 114, .22) !important;
+    border-color: rgba(166, 138, 0, .55) !important;
+    color: #0c2134 !important;
   }
 
   html body #tracks-container .yearly-expand-btn {
@@ -17653,7 +17693,7 @@ tr.sb-row-hidden .sandbox-invest-input {
     justify-content: center !important;
     margin: 0 !important;
     padding: 2px 9px 3px !important;
-    color: #c9b772 !important;
+    color: #fff !important;
     background: #0c2134 !important;
     border-radius: 999px !important;
     font-size: 1.15rem !important;
@@ -17927,9 +17967,9 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   }
 
   html body #tracks-container .yield-toggle-group .tbl-ctrl-btn.is-active {
-    background: #0c2134 !important;
-    border-color: #0c2134 !important;
-    color: #fff !important;
+    background: rgba(201, 183, 114, .22) !important;
+    border-color: rgba(166, 138, 0, .55) !important;
+    color: #0c2134 !important;
   }
 
   html body #tracks-container .track-table-wrapper table.track-table th.custom-range-col {

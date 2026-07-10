@@ -3903,10 +3903,12 @@ const App = (() => {
       return;
     }
 
+    const logoBarRect = document.querySelector('.mobile-table-logo-bar')?.getBoundingClientRect();
+    const activeBlockLine = Math.ceil(logoBarRect?.bottom || 0);
     const blocks = Array.from(document.querySelectorAll('#tracks-container .track-block'));
     const activeBlock = blocks.find(block => {
       const r = block.getBoundingClientRect();
-      return r.top <= 0 && r.bottom > 108;
+      return r.top <= activeBlockLine && r.bottom > activeBlockLine + 2;
     });
     if (!activeBlock) {
       hideMobileStickyThead();
@@ -3930,11 +3932,9 @@ const App = (() => {
     let theadRect = thead.getBoundingClientRect();
     let controlsRect = activeBlock.querySelector('.track-header-controls')?.getBoundingClientRect();
     let stickyHeaderBottom = Math.max(headerRect.bottom, controlsRect?.bottom || 0);
-    const stickyHeadHeight = Math.ceil(theadRect.height || 32);
-    const stickyExitBuffer = stickyHeadHeight + 24;
+    const stickyExitBuffer = 2;
     const shouldShow =
-      wrapperRect.bottom > stickyHeaderBottom + stickyExitBuffer &&
-      activeBlock.getBoundingClientRect().bottom > stickyHeaderBottom + stickyExitBuffer;
+      activeBlock.getBoundingClientRect().bottom > activeBlockLine + stickyExitBuffer;
     if (!shouldShow) {
       hideMobileStickyThead();
       return;
