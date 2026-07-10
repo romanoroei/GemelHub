@@ -3004,6 +3004,26 @@ const App = (() => {
     window.scrollTo({ top: Math.max(0, y), behavior });
   }
 
+  function scrollToTrackTableFirstRow(block, behavior = 'smooth') {
+    if (!block) return;
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
+    if (!isMobile) {
+      scrollToTrackBlockTop(block, behavior);
+      return;
+    }
+    const firstRow = block.querySelector('.track-table-wrapper tbody tr:not(.average-row)');
+    const trackHeader = block.querySelector('.track-header');
+    const thead = block.querySelector('.track-table-wrapper thead');
+    if (!firstRow || !trackHeader || !thead) {
+      scrollToTrackBlockTop(block, behavior);
+      return;
+    }
+    const logoHeight = document.querySelector('.mobile-table-logo-bar')?.getBoundingClientRect().height || 0;
+    const desiredTop = logoHeight + trackHeader.getBoundingClientRect().height + thead.getBoundingClientRect().height + 2;
+    const y = firstRow.getBoundingClientRect().top + window.scrollY - desiredTop;
+    window.scrollTo({ top: Math.max(0, y), behavior });
+  }
+
   function navigateToTrackTable(categoryId, trackId) {
     if (!categoryId || REMOVED_CATEGORY_IDS.has(categoryId)) return;
     state.pendingTrackId = trackId || null;
@@ -4386,6 +4406,7 @@ const App = (() => {
       syncResponsiveTableLabels(block);
       bindFundLinks(block);
       bindTableControls(block);
+      clearMobileExposureCompetingActiveButtons();
       requestAnimationFrame(() => syncAllocationIconOverflow(block));
       applyMobileTheadSticky();
       scheduleMobileStickyTheadUpdate();
@@ -4430,11 +4451,19 @@ const App = (() => {
     });
 
     // קישורי קופה + כפתורי toggle (בנייה ראשונית)
+    block.querySelector('.track-name')?.addEventListener('click', e => {
+      if (!(window.matchMedia && window.matchMedia('(max-width: 1024px)').matches)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      scrollToTrackTableFirstRow(block);
+    });
+
     applyMobileTableSizing(block);
     updateTwoColHeaderWrap(block);
     syncResponsiveTableLabels(block);
     bindFundLinks(block);
     bindTableControls(block);
+    clearMobileExposureCompetingActiveButtons();
     requestAnimationFrame(() => syncAllocationIconOverflow(block));
 
     return block;
@@ -5341,6 +5370,18 @@ const App = (() => {
   // ═══════════════════════════════════════════════════════════════
   // SANDBOX — המעבדה שלי
   // ═══════════════════════════════════════════════════════════════
+
+  function clearMobileExposureCompetingActiveButtons() {
+    const isMobileExposureMode = !!(
+      state.showExposure &&
+      window.matchMedia &&
+      window.matchMedia('(max-width: 1024px)').matches
+    );
+    if (!isMobileExposureMode) return;
+    document.querySelectorAll('.yield-mode-btn, .yearly-expand-btn').forEach(btn => {
+      btn.classList.remove('is-active');
+    });
+  }
 
   function _sbGetTrackLabel(trackId) {
     return CONFIG.INVESTMENT_TRACKS.find(t => t.id === trackId)?.label || trackId;

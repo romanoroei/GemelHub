@@ -17560,6 +17560,8 @@ tr.sb-row-hidden .sandbox-invest-input {
     font-weight: 950 !important;
     white-space: nowrap !important;
     line-height: 1 !important;
+    cursor: pointer !important;
+    -webkit-tap-highlight-color: transparent !important;
   }
 
   html body #tracks-container .track-header-controls,
@@ -17923,7 +17925,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     display: grid !important;
     grid-template-columns: 30px minmax(32px, 1fr) !important;
     align-items: center !important;
-    gap: 5px !important;
+    gap: 7px !important;
     justify-content: stretch !important;
   }
 
@@ -17951,6 +17953,14 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     line-height: 1 !important;
     font-weight: 900 !important;
     text-align: left !important;
+  }
+
+  html body #tracks-container:has(table.track-table.exposure-only) .yield-mode-btn.is-active,
+  html body #tracks-container:has(table.track-table.exposure-only) .yearly-expand-btn.is-active {
+    background: rgba(248, 250, 252, .92) !important;
+    border-color: rgba(148, 163, 184, .55) !important;
+    color: #0c2134 !important;
+    box-shadow: none !important;
   }
 
   html body #tracks-container .yield-toggle-group {
