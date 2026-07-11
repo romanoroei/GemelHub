@@ -14,7 +14,16 @@ import {
 const config = loadConfig();
 const latestRawPeriod = process.env.SHARE_IMAGE_PERIOD_RAW || await fetchLatestReportPeriod(config);
 const period = process.env.SHARE_IMAGE_PERIOD || formatPeriodFolder(latestRawPeriod);
-const targets = buildTargets(config);
+const allTargets = buildTargets(config);
+const targetCategory = process.env.SHARE_IMAGE_CATEGORY || '';
+const targetTrack = process.env.SHARE_IMAGE_TRACK || '';
+const targetMode = process.env.SHARE_IMAGE_MODE || '';
+const targetLimit = Number.parseInt(process.env.SHARE_IMAGE_LIMIT || '', 10);
+const targets = allTargets
+  .filter((target) => !targetCategory || target.categoryId === targetCategory)
+  .filter((target) => !targetTrack || target.trackId === targetTrack)
+  .filter((target) => !targetMode || target.mode === targetMode)
+  .slice(0, Number.isFinite(targetLimit) && targetLimit > 0 ? targetLimit : undefined);
 const siteUrl = process.env.SHARE_IMAGE_SITE_URL || 'https://romanoroei.github.io/GemelHub/';
 const outDir = path.join(process.cwd(), 'assets', 'share-images', period);
 
@@ -83,6 +92,15 @@ async function enableAllocationMode(page, trackId) {
   }, trackId, { timeout: 30000 });
 }
 
+async function waitForReturnsColumns(page, trackId) {
+  await page.waitForFunction((id) => {
+    const block = Array.from(document.querySelectorAll('.track-block'))
+      .find((item) => item.dataset.trackId === id);
+    const table = block?.querySelector('table.track-table');
+    return !!table?.querySelector('th[data-sortfield="7yr"]') && !table.querySelector('.cell-loader');
+  }, trackId, { timeout: 60000 }).catch(() => {});
+}
+
 async function preparePage(page, target, baseUrl) {
   const url = new URL('/index.html', baseUrl);
   url.searchParams.set('cat', target.categoryId);
@@ -94,13 +112,15 @@ async function preparePage(page, target, baseUrl) {
 
   if (target.mode === 'allocation') {
     await enableAllocationMode(page, target.trackId);
+  } else {
+    await waitForReturnsColumns(page, target.trackId);
   }
 
   await page.addStyleTag({
     content: `
       html, body {
-        width: 760px !important;
-        min-width: 760px !important;
+        width: 1180px !important;
+        min-width: 1180px !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #f3f6fb !important;
@@ -124,8 +144,8 @@ async function preparePage(page, target, baseUrl) {
       }
       .gemelhub-share-stage {
         direction: rtl;
-        width: 720px;
-        margin: 20px auto;
+        width: 1140px;
+        margin: 22px auto;
         background: #fff;
         border: 1px solid #d8c589;
         box-shadow: 0 18px 42px rgba(15, 23, 42, .16);
@@ -146,7 +166,7 @@ async function preparePage(page, target, baseUrl) {
         top: auto !important;
         border-radius: 0 !important;
         justify-content: center !important;
-        padding: 12px 16px !important;
+        padding: 16px 18px !important;
         background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
         border: 0 !important;
         border-bottom: 2px solid #d8c589 !important;
@@ -158,7 +178,9 @@ async function preparePage(page, target, baseUrl) {
       body.gemelhub-share-capture .track-label {
         justify-content: center !important;
         text-align: center !important;
-        font-size: 24px !important;
+        font-size: 34px !important;
+        gap: 14px !important;
+        line-height: 1.15 !important;
       }
       body.gemelhub-share-capture .track-name {
         color: #fff !important;
@@ -172,12 +194,30 @@ async function preparePage(page, target, baseUrl) {
         min-width: 100% !important;
         max-width: 100% !important;
         table-layout: fixed !important;
-        font-size: 14px !important;
+        font-size: 18px !important;
       }
       body.gemelhub-share-capture table.track-table th,
       body.gemelhub-share-capture table.track-table td {
-        padding: 7px 8px !important;
+        padding: 10px 12px !important;
         white-space: normal !important;
+      }
+      body.gemelhub-share-capture table.track-table th:nth-child(1),
+      body.gemelhub-share-capture table.track-table td:nth-child(1) {
+        width: 54px !important;
+        min-width: 54px !important;
+        max-width: 54px !important;
+      }
+      body.gemelhub-share-capture table.track-table th:nth-child(2),
+      body.gemelhub-share-capture table.track-table td:nth-child(2) {
+        width: 230px !important;
+        min-width: 230px !important;
+        max-width: 230px !important;
+      }
+      body.gemelhub-share-capture table.track-table th:nth-child(n+3),
+      body.gemelhub-share-capture table.track-table td:nth-child(n+3) {
+        width: 142px !important;
+        min-width: 142px !important;
+        max-width: 142px !important;
       }
       body.gemelhub-share-capture table.track-table thead,
       body.gemelhub-share-capture table.track-table thead tr,
@@ -186,8 +226,48 @@ async function preparePage(page, target, baseUrl) {
         top: auto !important;
       }
       body.gemelhub-share-capture table.track-table .sandbox-check,
-      body.gemelhub-share-capture table.track-table .provider-status-stack {
+      body.gemelhub-share-capture table.track-table .fund-link-icon {
         display: none !important;
+      }
+      body.gemelhub-share-capture table.track-table .provider-cell,
+      body.gemelhub-share-capture table.track-table .provider-cell > div {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+      }
+      body.gemelhub-share-capture table.track-table .prov-name,
+      body.gemelhub-share-capture table.track-table .prov-name-text {
+        display: block !important;
+        width: 100% !important;
+        max-width: none !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        white-space: normal !important;
+        line-height: 1.08 !important;
+        font-size: 18px !important;
+        font-weight: 900 !important;
+      }
+      body.gemelhub-share-capture table.track-table .prov-id {
+        justify-content: flex-start !important;
+        gap: 6px !important;
+        font-size: 14px !important;
+      }
+      body.gemelhub-share-capture table.track-table .yield-value-wrap,
+      body.gemelhub-share-capture table.track-table .yield-number-shell {
+        overflow: visible !important;
+      }
+      body.gemelhub-share-capture table.track-table .yield-top-rank {
+        display: inline-flex !important;
+        position: static !important;
+        transform: none !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 18px !important;
+        height: 18px !important;
+        min-width: 18px !important;
+        margin-inline-start: 4px !important;
+        font-size: 11px !important;
+        line-height: 18px !important;
       }
       body.gemelhub-share-capture.capture-mode-returns table.track-table th.exp-col,
       body.gemelhub-share-capture.capture-mode-returns table.track-table td.exp-col {
@@ -213,7 +293,7 @@ async function preparePage(page, target, baseUrl) {
         border-bottom: 1px solid #d8c589;
       }
       .gemelhub-share-brand img {
-        height: 42px;
+        height: 76px;
         width: auto;
         display: block;
       }
@@ -226,18 +306,18 @@ async function preparePage(page, target, baseUrl) {
         align-items: center;
         justify-content: center;
         margin-top: 6px;
-        padding: 4px 10px;
+        padding: 8px 24px;
         border-radius: 999px;
         border: 1px solid #d8c589;
         background: #fff9df;
         color: #1f3b68;
-        font: 800 12px/1 Arial, sans-serif;
+        font: 900 24px/1 Arial, sans-serif;
       }
       .gemelhub-share-footer {
         padding: 12px 16px;
         text-align: center;
         direction: rtl;
-        font: 700 13px/1.4 Arial, sans-serif;
+        font: 700 18px/1.4 Arial, sans-serif;
         color: #1f3b68;
         background: #fff;
         border-top: 1px solid #e7dcb8;
@@ -269,7 +349,7 @@ async function preparePage(page, target, baseUrl) {
     if (!block.querySelector('.gemelhub-share-brand')) {
       const brand = document.createElement('div');
       brand.className = 'gemelhub-share-brand';
-      brand.innerHTML = `<img src="assets/gemelhub-logo.svg" alt="GemelHub"><div class="gemelhub-share-link">${siteUrl}</div><div class="gemelhub-share-mode">${mode === 'allocation' ? 'אלוקציית השקעות' : 'תשואה מצטברת'}</div>`;
+      brand.innerHTML = `<img src="assets/gemelhub-logo-print.svg" alt="GemelHub"><div class="gemelhub-share-link">${siteUrl}</div><div class="gemelhub-share-mode">${mode === 'allocation' ? 'אלוקציית השקעות' : 'תשואה מצטברת'}</div>`;
       block.insertBefore(brand, block.firstElementChild);
     }
 
@@ -298,7 +378,7 @@ try {
       baseURL: baseUrl,
       locale: 'he-IL',
       timezoneId: 'Asia/Jerusalem',
-      viewport: { width: 760, height: 1200 },
+      viewport: { width: 1180, height: 1600 },
       deviceScaleFactor: 2
     });
     await context.addInitScript(() => {

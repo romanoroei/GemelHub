@@ -4458,7 +4458,7 @@ const App = (() => {
     titleShareBtn.type = 'button';
     titleShareBtn.title = 'שתף צילום של הטבלה הנוכחית';
     titleShareBtn.setAttribute('aria-label', 'שתף צילום של הטבלה הנוכחית');
-    titleShareBtn.innerHTML = '<i class="fas fa-camera" aria-hidden="true"></i><i class="fas fa-share-alt" aria-hidden="true"></i>';
+    titleShareBtn.innerHTML = '<i class="fas fa-camera" aria-hidden="true"></i>';
     block.querySelector('.track-title-group')?.appendChild(titleShareBtn);
 
     block.addEventListener('click', e => {
