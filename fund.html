@@ -291,6 +291,18 @@
   </button>
 </nav>
 
+<section class="mobile-recent-funds-drawer" id="mobile-recent-funds-drawer" aria-label="קופות שנצפו לאחרונה">
+  <button type="button" class="mobile-recent-funds-handle" id="mobile-recent-funds-handle" aria-expanded="false" aria-controls="mobile-recent-funds-list" aria-label="פתח קופות שנצפו לאחרונה">
+    <i class="fas fa-chevron-up" aria-hidden="true"></i>
+  </button>
+  <div class="mobile-recent-funds-panel">
+    <div class="mobile-recent-funds-head">
+      <strong>נצפו לאחרונה</strong>
+    </div>
+    <div class="mobile-recent-funds-list" id="mobile-recent-funds-list" role="list"></div>
+  </div>
+</section>
+
 <div class="feature-lock-message" id="feature-lock-message" role="status" aria-live="polite" hidden>
   <i class="fas fa-lock" aria-hidden="true"></i>
   <span>הפיצ'ר הזה זמין למשתמשים רשומים בלבד</span>
@@ -3219,7 +3231,24 @@ document.addEventListener('DOMContentLoaded', () => {
         item.addEventListener('click', function() {
           var fid = item.dataset.fundid;
           var cid = item.dataset.catid;
-          if (fid) window.location.href = 'fund.html?id=' + fid + '&cat=' + (cid || '');
+          if (fid) {
+            var hit = hits.find(function(res) { return String(res.id) === String(fid) && String(res.catId || '') === String(cid || ''); });
+            if (hit) {
+              var categoryLabel = '';
+              try {
+                var cat = (CONFIG && CONFIG.PRODUCT_CATEGORIES || []).find(function(c) { return c.id === cid; });
+                categoryLabel = cat ? cat.label : '';
+              } catch (e) {}
+              addRecentViewedFund({
+                fundId: fid,
+                catId: cid || '',
+                providerName: hit.name,
+                trackLabel: hit.fname || hit.sub || '',
+                categoryLabel: categoryLabel
+              });
+            }
+            window.location.href = 'fund.html?id=' + fid + '&cat=' + (cid || '');
+          }
         });
       });
     }
@@ -3335,6 +3364,190 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(function() { sheet.classList.add('is-open'); });
   }
 
+  var RECENT_VIEWED_FUNDS_KEY = 'gemelhub_recent_viewed_funds_v1';
+  var RECENT_VIEWED_FUNDS_TIP_KEY = 'gemelhub_recent_viewed_funds_tip_seen_v1';
+  var RECENT_VIEWED_FUNDS_LIMIT = 8;
+
+  function getRecentViewedFunds() {
+    try {
+      var raw = localStorage.getItem(RECENT_VIEWED_FUNDS_KEY);
+      var items = raw ? JSON.parse(raw) : [];
+      return Array.isArray(items) ? items.filter(function(item) { return item && item.fundId; }).slice(0, RECENT_VIEWED_FUNDS_LIMIT) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveRecentViewedFunds(items) {
+    try {
+      localStorage.setItem(RECENT_VIEWED_FUNDS_KEY, JSON.stringify(items.slice(0, RECENT_VIEWED_FUNDS_LIMIT)));
+    } catch (e) {}
+  }
+
+  function addRecentViewedFund(item) {
+    if (!item || !item.fundId) return;
+    var nextItem = {
+      fundId: String(item.fundId || ''),
+      catId: String(item.catId || item.categoryId || ''),
+      providerName: String(item.providerName || item.provider || ''),
+      trackId: String(item.trackId || ''),
+      trackLabel: String(item.trackLabel || ''),
+      categoryLabel: String(item.categoryLabel || ''),
+      y12m: item.y12m === null || item.y12m === undefined ? '' : String(item.y12m),
+      rank: item.rank === null || item.rank === undefined ? '' : String(item.rank),
+      total: item.total === null || item.total === undefined ? '' : String(item.total),
+      viewedAt: Date.now()
+    };
+    var uniqueKey = nextItem.catId + '::' + nextItem.fundId;
+    var items = getRecentViewedFunds().filter(function(existing) {
+      return String(existing.catId || '') + '::' + String(existing.fundId || '') !== uniqueKey;
+    });
+    saveRecentViewedFunds([nextItem].concat(items));
+    renderMobileRecentFunds();
+  }
+
+  function formatRecentFundReturn(value) {
+    var num = parseFloat(value);
+    return Number.isFinite(num) && typeof formatPercent === 'function' ? formatPercent(num) : '-';
+  }
+
+  function renderMobileRecentFunds() {
+    var list = document.getElementById('mobile-recent-funds-list');
+    if (!list) return;
+    var items = getRecentViewedFunds();
+    var drawer = document.getElementById('mobile-recent-funds-drawer');
+    if (drawer) {
+      var visibleRows = Math.max(1, Math.min(items.length || 1, RECENT_VIEWED_FUNDS_LIMIT));
+      drawer.style.setProperty('--recent-panel-h', (34 + (visibleRows * 66)) + 'px');
+    }
+    if (!items.length) {
+      list.innerHTML = '<div class="mobile-recent-funds-empty">קופות שצפית בהן יופיעו כאן</div>';
+      return;
+    }
+    list.innerHTML = items.map(function(item) {
+      var y12 = parseFloat(item.y12m);
+      var tone = Number.isFinite(y12) ? (y12 >= 0 ? 'is-positive' : 'is-negative') : '';
+      var title = [item.providerName, item.trackLabel].filter(Boolean).join(' · ') || ('קופה #' + item.fundId);
+      var category = item.categoryLabel || item.trackLabel || '';
+      var rank = item.rank ? ('מקום ' + escapeHtml(item.rank) + (item.total ? ' מתוך ' + escapeHtml(item.total) : '')) : 'דירוג לא זמין';
+      return [
+        '<article class="mobile-recent-fund-item" data-fundid="' + escapeHtml(item.fundId) + '" data-catid="' + escapeHtml(item.catId || '') + '" data-trackid="' + escapeHtml(item.trackId || '') + '" role="listitem">',
+          '<button type="button" class="mobile-recent-fund-main" data-recent-fund-open>',
+            '<span class="mobile-recent-fund-name">' + escapeHtml(title) + '</span>',
+            '<span class="mobile-recent-fund-category" data-recent-track-open>' + escapeHtml(category) + '</span>',
+          '</button>',
+          '<button type="button" class="mobile-recent-fund-metrics" data-recent-fund-open aria-label="פתח את דף הקופה">',
+            '<span class="mobile-recent-fund-return-label">תשואה 12 חודשים</span>',
+            '<span class="mobile-recent-fund-return ' + tone + '">' + escapeHtml(formatRecentFundReturn(item.y12m)) + '</span>',
+            '<span class="mobile-recent-fund-rank">' + rank + '</span>',
+          '</button>',
+        '</article>'
+      ].join('');
+    }).join('');
+    list.querySelectorAll('.mobile-recent-fund-item').forEach(function(button) {
+      function openFund() {
+        var fundId = button.dataset.fundid;
+        var catId = button.dataset.catid || '';
+        if (!fundId) return;
+        var current = getRecentViewedFunds().find(function(item) {
+          return String(item.fundId) === String(fundId) && String(item.catId || '') === String(catId);
+        });
+        if (current) addRecentViewedFund(current);
+        window.location.href = 'fund.html?id=' + encodeURIComponent(fundId) + '&cat=' + encodeURIComponent(catId);
+      }
+      button.querySelectorAll('[data-recent-fund-open]').forEach(function(el) {
+        el.addEventListener('click', openFund);
+      });
+      var trackButton = button.querySelector('[data-recent-track-open]');
+      if (trackButton) trackButton.addEventListener('click', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        var catId = button.dataset.catid || '';
+        var trackId = button.dataset.trackid || '';
+        if (!catId) return;
+        window.location.href = 'index.html?cat=' + encodeURIComponent(catId) + (trackId ? '&focusTrack=' + encodeURIComponent(trackId) : '');
+      });
+    });
+  }
+
+  function setupMobileRecentFundsDrawer() {
+    var drawer = document.getElementById('mobile-recent-funds-drawer');
+    var handle = document.getElementById('mobile-recent-funds-handle');
+    if (!drawer || !handle) return;
+
+    function setOpen(open) {
+      drawer.classList.toggle('is-open', open);
+      handle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      handle.setAttribute('aria-label', open ? 'סגור קופות שנצפו לאחרונה' : 'פתח קופות שנצפו לאחרונה');
+    }
+
+    var startY = 0;
+    var dragDelta = 0;
+    var dragged = false;
+
+    function beginDrag(y) {
+      startY = y;
+      dragDelta = 0;
+      dragged = false;
+    }
+
+    function moveDrag(y) {
+      if (!startY) return;
+      dragDelta = y - startY;
+      if (Math.abs(dragDelta) > 10) dragged = true;
+    }
+
+    function endDrag() {
+      if (dragged) {
+        setOpen(dragDelta < 0);
+        setTimeout(function() { dragged = false; }, 0);
+      }
+      startY = 0;
+      dragDelta = 0;
+    }
+
+    handle.addEventListener('pointerdown', function(event) {
+      beginDrag(event.clientY);
+      if (handle.setPointerCapture) handle.setPointerCapture(event.pointerId);
+    });
+    handle.addEventListener('pointermove', function(event) { moveDrag(event.clientY); });
+    handle.addEventListener('pointerup', function(event) {
+      if (handle.releasePointerCapture) handle.releasePointerCapture(event.pointerId);
+      endDrag();
+    });
+    handle.addEventListener('touchstart', function(event) { beginDrag((event.touches && event.touches[0] && event.touches[0].clientY) || 0); }, { passive: true });
+    handle.addEventListener('touchmove', function(event) { moveDrag((event.touches && event.touches[0] && event.touches[0].clientY) || 0); }, { passive: true });
+    handle.addEventListener('touchend', endDrag);
+    handle.addEventListener('mousedown', function(event) { beginDrag(event.clientY); });
+    document.addEventListener('mousemove', function(event) { moveDrag(event.clientY); });
+    document.addEventListener('mouseup', endDrag);
+    handle.addEventListener('click', function() {
+      if (dragged) return;
+      setOpen(!drawer.classList.contains('is-open'));
+    });
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') setOpen(false);
+    });
+    renderMobileRecentFunds();
+    showMobileRecentFundsTipOnce(drawer);
+  }
+
+  function showMobileRecentFundsTipOnce(drawer) {
+    try {
+      if (!drawer || localStorage.getItem(RECENT_VIEWED_FUNDS_TIP_KEY) === '1') return;
+      localStorage.setItem(RECENT_VIEWED_FUNDS_TIP_KEY, '1');
+      var tip = document.createElement('div');
+      tip.className = 'mobile-recent-funds-tip';
+      tip.innerHTML = '<i class="far fa-clock" aria-hidden="true"></i><span>היסטוריית חיפושים</span>';
+      drawer.appendChild(tip);
+      requestAnimationFrame(function() { tip.classList.add('is-visible'); });
+      setTimeout(function() {
+        tip.classList.remove('is-visible');
+        setTimeout(function() { tip.remove(); }, 220);
+      }, 3000);
+    } catch (e) {}
+  }
+
   window.addEventListener('popstate', function(e) {
     var catSheet    = document.getElementById('mobile-category-sheet');
     var searchSheet = document.getElementById('mobile-fund-search-sheet');
@@ -3351,6 +3564,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.addEventListener('DOMContentLoaded', function() {
+    setupMobileRecentFundsDrawer();
     document.querySelectorAll('[data-fund-mobile-action]').forEach(function(btn) {
       btn.addEventListener('click', function() {
         if (btn.dataset.fundMobileAction === 'categories') {

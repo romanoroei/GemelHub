@@ -4716,21 +4716,41 @@ table.track-table tr.average-row td.exp-col:nth-last-child(3) {
   gap: 8px;
   padding: 12px 16px;
   border-radius: 999px;
-  background: #10b981;
-  color: #fff;
+  background: linear-gradient(135deg, #0c2134 0%, #173f6b 58%, #c9a227 160%);
+  color: #fff8dc;
   text-decoration: none;
   font-weight: 800;
   font-size: .9rem;
-  box-shadow: 0 16px 30px rgba(0,0,0,.18);
-  border: none;
+  box-shadow: 0 16px 30px rgba(12, 33, 52, .24), inset 0 0 0 1px rgba(201, 162, 39, .42);
+  border: 1px solid rgba(201, 162, 39, .62);
   cursor: pointer;
   font-family: var(--font);
+  animation: gemelhubCtaAttention 3.4s ease-in-out 1s 2;
 }
 .whatsapp-float:hover {
   transform: translateY(-1px);
+  background: linear-gradient(135deg, #102b46 0%, #1d4c7e 58%, #d7b342 160%);
 }
 .whatsapp-float i {
+  color: #f5d56e;
   font-size: 1.05rem;
+}
+
+@keyframes gemelhubCtaAttention {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 16px 30px rgba(12, 33, 52, .24), inset 0 0 0 1px rgba(201, 162, 39, .42);
+  }
+  18% {
+    transform: translateY(-2px) scale(1.035);
+    box-shadow: 0 20px 34px rgba(12, 33, 52, .32), 0 0 0 5px rgba(201, 162, 39, .18), inset 0 0 0 1px rgba(255, 240, 191, .72);
+  }
+  34% {
+    transform: translateY(0) scale(1);
+  }
+  48% {
+    transform: translateY(-1px) scale(1.025);
+  }
 }
 @media (max-width: 768px) {
   .hero-cta {
@@ -4950,15 +4970,16 @@ table.track-table tr.average-row td.exp-col:nth-last-child(3) {
   min-height: 36px;
   padding: 0 12px;
   border-radius: 999px;
-  background: #10b981;
-  color: #fff;
+  background: linear-gradient(135deg, #0c2134 0%, #173f6b 58%, #c9a227 160%);
+  color: #fff8dc;
   text-decoration: none;
   font-weight: 700;
   font-size: .8rem;
   flex: 0 0 auto;
-  border: none;
+  border: 1px solid rgba(201, 162, 39, .55);
   cursor: pointer;
   font-family: var(--font);
+  animation: gemelhubCtaAttention 3.4s ease-in-out 1s 2;
 }
 
 @media (max-width: 768px) {
@@ -14641,7 +14662,7 @@ tr.sb-row-hidden .sandbox-invest-input {
   }
 
   html body .cookie-banner {
-    z-index: 8150 !important;
+    z-index: 8350 !important;
   }
 
   html body .scroll-top-btn,
@@ -14809,6 +14830,7 @@ tr.sb-row-hidden .sandbox-invest-input {
 
 /* GemelHub mobile app shell and card tables. */
 .mobile-app-nav,
+.mobile-recent-funds-drawer,
 .feature-lock-message {
   display: none;
 }
@@ -14836,6 +14858,22 @@ tr.sb-row-hidden .sandbox-invest-input {
     background: rgba(255, 255, 255, .97);
     box-shadow: 0 -4px 20px rgba(15, 23, 42, .10);
     backdrop-filter: blur(14px);
+    overflow: visible;
+  }
+
+  .mobile-app-nav::before {
+    content: none;
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% - 1px);
+    width: clamp(150px, 34vw, 174px);
+    height: 56px;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg, #fffdf3 0%, #fff0bf 45%, #f5d56e 100%);
+    clip-path: polygon(19% 0, 81% 0, 100% 100%, 0 100%);
+    filter: drop-shadow(0 -1px 0 rgba(255, 255, 255, .9)) drop-shadow(0 -1px 0 rgba(132, 91, 10, .24));
+    pointer-events: none;
+    z-index: 0;
   }
 
   .mobile-app-nav-item {
@@ -14857,6 +14895,8 @@ tr.sb-row-hidden .sandbox-invest-input {
     text-decoration: none;
     cursor: pointer;
     touch-action: manipulation;
+    position: relative;
+    z-index: 1;
   }
 
   .mobile-app-nav-item i {
@@ -14889,6 +14929,314 @@ tr.sb-row-hidden .sandbox-invest-input {
 
   .mobile-app-nav-item.is-active.mobile-app-nav-lock i {
     color: #fff;
+  }
+
+  .mobile-recent-funds-drawer {
+    --recent-handle-h: 22px;
+    --recent-panel-h: 94px;
+    --mobile-nav-gold-bg: linear-gradient(180deg, #fffdf3 0%, #fff0bf 45%, #f5d56e 100%);
+    --mobile-nav-gold-border: rgba(132, 91, 10, .38);
+    position: fixed;
+    inset-inline: 0;
+    bottom: calc(var(--mobile-app-nav-clearance, 78px) - 18px);
+    z-index: 8190;
+    display: block;
+    height: min(calc(var(--recent-handle-h) + var(--recent-panel-h)), calc(100dvh - var(--mobile-app-nav-clearance, 78px) - 10px));
+    transform: translateY(calc(100% - var(--recent-handle-h)));
+    transition: transform .24s ease, bottom .24s ease;
+    pointer-events: none;
+    direction: rtl;
+  }
+
+  .mobile-recent-funds-drawer.is-open {
+    bottom: calc(var(--mobile-app-nav-clearance, 78px) - 16px);
+    transform: translateY(0);
+  }
+
+  .mobile-recent-funds-handle {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: clamp(100px, 25vw, 122px);
+    height: var(--recent-handle-h);
+    min-height: 0;
+    padding: 0;
+    line-height: 1;
+    transform: translateX(-50%);
+    border: 0;
+    border-radius: 0;
+    background: linear-gradient(180deg, #f3ce5d 0%, #f7dc78 42%, #fffdf3 88%, #fffdf3 100%);
+    clip-path: polygon(25% 0, 75% 0, 98% 100%, 2% 100%);
+    border-radius: 10px 10px 0 0;
+    color: #7b5204;
+    box-shadow: none;
+    pointer-events: auto;
+    touch-action: none;
+    cursor: pointer;
+  }
+
+  .mobile-recent-funds-handle::before,
+  .mobile-recent-funds-handle::after {
+    content: none;
+  }
+
+  .mobile-recent-funds-handle i {
+    position: relative;
+    z-index: 1;
+    font-size: .64rem;
+    transition: transform .18s ease;
+  }
+
+  .mobile-recent-funds-drawer.is-open .mobile-recent-funds-handle i {
+    transform: rotate(180deg);
+  }
+
+  .mobile-recent-funds-panel {
+    position: absolute;
+    inset-inline: 0;
+    top: calc(var(--recent-handle-h) - 1px);
+    bottom: 0;
+    overflow: hidden;
+    border: 0;
+    border-top: 1px solid rgba(132, 91, 10, .22);
+    border-radius: 14px 14px 0 0;
+    background: #fffefa;
+    box-shadow: 0 -6px 18px rgba(131, 92, 13, .12);
+    pointer-events: auto;
+  }
+
+  .mobile-recent-funds-tip {
+    position: absolute;
+    left: 50%;
+    top: -78px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 166px;
+    justify-content: center;
+    padding: 10px 16px;
+    border: 1px solid var(--mobile-nav-gold-border);
+    border-radius: 15px;
+    background: var(--mobile-nav-gold-bg);
+    color: #4a3108;
+    font-size: .94rem;
+    font-weight: 900;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, .16);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 8px);
+    transition: opacity .18s ease, transform .18s ease;
+  }
+
+  .mobile-recent-funds-tip::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -10px;
+    width: 20px;
+    height: 20px;
+    background: #f5d56e;
+    border-inline-end: 1px solid rgba(146, 100, 14, .28);
+    border-bottom: 1px solid rgba(146, 100, 14, .28);
+    transform: translateX(-50%) rotate(45deg);
+  }
+
+  .mobile-recent-funds-tip i {
+    color: #8a5a05;
+    font-size: 1.15rem;
+  }
+
+  .mobile-recent-funds-tip.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .mobile-recent-funds-head {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 34px;
+    padding: 0 14px;
+    border-bottom: 1px solid rgba(131, 92, 13, .22);
+    background: var(--mobile-nav-gold-bg);
+    color: #4a3108;
+    font-size: .86rem;
+  }
+
+  .mobile-recent-funds-head strong {
+    font-size: .84rem;
+    font-weight: 900;
+  }
+
+  .mobile-recent-funds-head span {
+    color: #8b8f98;
+    font-size: .73rem;
+    font-weight: 800;
+  }
+
+  .mobile-recent-funds-list {
+    height: calc(100% - 34px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    background: linear-gradient(180deg, #fffdfa 0%, #fff 34%);
+  }
+
+  .mobile-recent-fund-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 66px;
+    padding: 8px 13px;
+    border: 0;
+    border-bottom: 1px solid #e5e7eb;
+    background: transparent;
+    color: #111827;
+    text-align: right;
+    font: inherit;
+  }
+
+  .mobile-recent-fund-main,
+  .mobile-recent-fund-metrics {
+    display: block;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    padding: 0;
+  }
+
+  .mobile-recent-fund-main {
+    min-width: 0;
+    text-align: right;
+  }
+
+  .mobile-recent-fund-name {
+    display: block;
+    overflow: hidden;
+    color: #222a35;
+    font-size: .92rem;
+    font-weight: 900;
+    line-height: 1.22;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-recent-fund-category {
+    display: inline-flex;
+    max-width: 100%;
+    margin-top: 5px;
+    padding: 2px 8px;
+    overflow: hidden;
+    border: 1px solid rgba(201, 183, 114, .34);
+    border-radius: 999px;
+    background: #fff8dc;
+    color: #8a5a05;
+    font-size: .68rem;
+    font-weight: 900;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .mobile-recent-fund-item[data-catid="hashtalamot"] .mobile-recent-fund-category {
+    border-color: #93c5fd;
+    background: #eff6ff;
+    color: #1d4ed8;
+  }
+
+  .mobile-recent-fund-item[data-catid="gemel_tagmulim"] .mobile-recent-fund-category,
+  .mobile-recent-fund-item[data-catid="gemel"] .mobile-recent-fund-category {
+    border-color: #86efac;
+    background: #f0fdf4;
+    color: #15803d;
+  }
+
+  .mobile-recent-fund-item[data-catid="gemel_hashkaa"] .mobile-recent-fund-category,
+  .mobile-recent-fund-item[data-catid="investment"] .mobile-recent-fund-category {
+    border-color: #c4b5fd;
+    background: #f5f3ff;
+    color: #6d28d9;
+  }
+
+  .mobile-recent-fund-item[data-catid="pension_mekafit"] .mobile-recent-fund-category,
+  .mobile-recent-fund-item[data-catid="pension"] .mobile-recent-fund-category {
+    border-color: #fdba74;
+    background: #fff7ed;
+    color: #c2410c;
+  }
+
+  .mobile-recent-fund-item[data-catid="pension_mashlima"] .mobile-recent-fund-category {
+    border-color: #67e8f9;
+    background: #ecfeff;
+    color: #0e7490;
+  }
+
+  .mobile-recent-fund-item[data-catid="polisa_chisachon"] .mobile-recent-fund-category,
+  .mobile-recent-fund-item[data-catid="polisa"] .mobile-recent-fund-category,
+  .mobile-recent-fund-item[data-catid="savings_policy"] .mobile-recent-fund-category {
+    border-color: #f9a8d4;
+    background: #fdf2f8;
+    color: #be185d;
+  }
+
+  .mobile-recent-fund-metrics {
+    min-width: 84px;
+    text-align: left;
+    direction: ltr;
+  }
+
+  .mobile-recent-fund-return-label {
+    display: block;
+    margin-bottom: 3px;
+    color: #8b8f98;
+    font-size: .62rem;
+    font-weight: 900;
+    line-height: 1.1;
+    direction: rtl;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .mobile-recent-fund-return {
+    display: block;
+    font-size: .96rem;
+    font-weight: 900;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .mobile-recent-fund-return.is-positive {
+    color: #16a34a;
+  }
+
+  .mobile-recent-fund-return.is-negative {
+    color: #dc2626;
+  }
+
+  .mobile-recent-fund-rank {
+    display: block;
+    margin-top: 4px;
+    color: #9ca3af;
+    font-size: .7rem;
+    font-weight: 800;
+    line-height: 1.15;
+    direction: rtl;
+  }
+
+  .mobile-recent-funds-empty {
+    display: grid;
+    place-items: center;
+    min-height: 58px;
+    padding: 18px;
+    color: #8b8f98;
+    font-size: .88rem;
+    font-weight: 800;
+    text-align: center;
   }
 
   .feature-lock-message {
@@ -14944,7 +15292,7 @@ tr.sb-row-hidden .sandbox-invest-input {
   }
 
   .cookie-banner {
-    bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
+    bottom: calc(128px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   .site-footer {
@@ -17211,9 +17559,9 @@ tr.sb-row-hidden .sandbox-invest-input {
   }
 
   html body .mobile-app-nav {
-    background: linear-gradient(180deg, #fff8dc 0%, #f4d06f 100%) !important;
-    border: 1px solid rgba(146, 100, 14, .42) !important;
-    box-shadow: 0 -10px 26px rgba(146, 100, 14, .22), inset 0 1px 0 rgba(255, 255, 255, .82) !important;
+    background: linear-gradient(180deg, #fffdf3 0%, #fff0bf 45%, #f5d56e 100%) !important;
+    border: 0 !important;
+    box-shadow: 0 -8px 22px rgba(132, 91, 10, .18), inset 0 1px 0 rgba(255, 255, 255, .94) !important;
     min-height: 66px !important;
     padding: 8px !important;
     gap: 5px !important;

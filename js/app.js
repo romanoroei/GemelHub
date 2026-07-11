@@ -19,6 +19,7 @@ const App = (() => {
     yields12MPolisa: null,   // Map<FUND_ID, number|null> — פוליסות חיסכון
     trailing7Y: { loading: false, categoryId: null, targetPopulation: null, map: null, requestId: 0, error: null },
     pendingTrackId: null,    // task 8: ניווט ישיר למסלול מדף הבית
+    pendingTrackFocusOnly: false,
     pendingCompareTopScroll: false,
     pendingInitialTableTopScroll: false,
     pendingActuarialFundId: null,
@@ -663,6 +664,7 @@ const App = (() => {
     syncAdvancedOptionsUi();
     setupSearch();
     setupMobileFundSearch();
+    setupMobileRecentFundsDrawer();
     setupAdvancedSearch();
     setupCustomRange();
     setupModal();
@@ -732,13 +734,14 @@ const App = (() => {
     const urlApp = urlParams.get('app');
     const urlCat = urlParams.get('cat');
     const urlTrack = urlParams.get('track');
+    const urlFocusTrack = urlParams.get('focusTrack');
     const urlView = urlParams.get('view');
     const urlFund = urlParams.get('fund');
     const urlProvider = urlParams.get('provider');
     const isMobileViewport = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
     const shouldStartAtFirstTable = !!window.__GEMELHUB_FORCE_TABLE_TOP__ ||
       (isMobileViewport && !!window.__GEMELHUB_IS_RELOAD__ && !urlApp && !urlView && !urlParams.get('openAdvanced'));
-    const effectiveUrlTrack = shouldStartAtFirstTable ? null : urlTrack;
+    const effectiveUrlTrack = shouldStartAtFirstTable ? null : (urlFocusTrack || urlTrack);
     state.pendingCompareMode = urlView === 'actuarial' ? 'actuarial' : null;
     state.pendingActuarialFundId = urlView === 'actuarial' ? (urlFund || null) : null;
     state.pendingActuarialCompanyName = urlView === 'actuarial' ? (urlProvider || null) : null;
@@ -753,10 +756,12 @@ const App = (() => {
     } else if (urlCat && CONFIG.PRODUCT_CATEGORIES.find(c => c.id === urlCat && !REMOVED_CATEGORY_IDS.has(c.id))) {
       state.pendingTrackId = effectiveUrlTrack || null;
       state.pendingCompareTopScroll = !!effectiveUrlTrack;
+      state.pendingTrackFocusOnly = !!(urlFocusTrack && effectiveUrlTrack);
       switchCategory(urlCat);
     } else {
       state.pendingTrackId = null;
       state.pendingCompareTopScroll = false;
+      state.pendingTrackFocusOnly = false;
       switchCategory('hashtalamot');
     }
     if (urlParams.get('openAdvanced') === '1') {
@@ -2960,6 +2965,10 @@ const App = (() => {
       || document.getElementById('tracks-container')
       || document.getElementById('tracks-area');
     if (!target) return;
+    if (state.pendingTrackFocusOnly && target.classList?.contains('track-block')) {
+      scrollToTrackTableFirstRow(target, 'auto', { onlyIfNeeded: false });
+      return;
+    }
     const rowTop = (() => {
       if (!target.classList?.contains('track-block')) return target.getBoundingClientRect().top;
       const targetTop = target.getBoundingClientRect().top;
@@ -3353,7 +3362,7 @@ const App = (() => {
       buildProviderFilters(organized);
       setupPopulationRadio();
       updatePageTitle(catId, organized);
-      if (state.pendingCompareTopScroll && state.pendingTrackId) {
+      if (state.pendingCompareTopScroll && state.pendingTrackId && !state.pendingTrackFocusOnly) {
         state.selectedTracks.delete(state.pendingTrackId);
         document.querySelectorAll('#filter-tracks input:checked').forEach(input => {
           input.checked = false;
@@ -3388,6 +3397,7 @@ const App = (() => {
           scrollToComparisonTableTop();
           state.pendingTrackId = null;
           state.pendingCompareTopScroll = false;
+          state.pendingTrackFocusOnly = false;
         }, 2800);
       } else if (state.pendingInitialTableTopScroll) {
         startMobileFirstTableScrollGuard();
@@ -4949,6 +4959,17 @@ const App = (() => {
         const fundId = el.dataset.fundid;
         const catId  = state.activeCategoryId;
         if (fundId) {
+          addRecentViewedFund({
+            fundId,
+            catId: catId || el.dataset.categoryid || '',
+            providerName: el.dataset.provider || '',
+            trackId: el.dataset.trackid || '',
+            trackLabel: el.dataset.tracklabel || '',
+            categoryLabel: el.dataset.categorylabel || '',
+            y12m: el.dataset.y12m || '',
+            rank: el.dataset.rank || '',
+            total: el.dataset.total || ''
+          });
           window.location.href = `fund.html?id=${fundId}&cat=${catId || ''}`;
         }
       });
@@ -8999,7 +9020,17 @@ const App = (() => {
         <tr>
           <td class="rank-cell">${rank}</td>
           <td scope="row">
-            <div class="provider-cell fund-link" data-fundid="${fundId}" title="לחץ לפרטי הקופה">
+            <div class="provider-cell fund-link"
+              data-fundid="${escapeAttr(String(fundId))}"
+              data-provider="${escapeAttr(name)}"
+              data-trackid="${escapeAttr(trackId)}"
+              data-tracklabel="${escapeAttr(_sbGetTrackLabel(trackId))}"
+              data-categoryid="${escapeAttr(state.activeCategoryId || '')}"
+              data-categorylabel="${escapeAttr(_sbGetCategoryLabel(state.activeCategoryId))}"
+              data-y12m="${y12m != null ? escapeAttr(String(y12m)) : ''}"
+              data-rank="${escapeAttr(String(rank))}"
+              data-total="${escapeAttr(String(records.length))}"
+              title="לחץ לפרטי הקופה">
               <span class="provider-status-stack"
                 data-fundid="${escapeAttr(String(fundId))}"
                 data-trackid="${escapeAttr(trackId)}"
@@ -16232,6 +16263,206 @@ const App = (() => {
   window.startRotatingCtaPopup = startRotatingCtaPopup;
   window.stopRotatingCtaPopup = stopRotatingCtaPopup;
 
+  const RECENT_VIEWED_FUNDS_KEY = 'gemelhub_recent_viewed_funds_v1';
+  const RECENT_VIEWED_FUNDS_TIP_KEY = 'gemelhub_recent_viewed_funds_tip_seen_v1';
+  const RECENT_VIEWED_FUNDS_LIMIT = 8;
+
+  function getRecentViewedFunds() {
+    try {
+      const raw = localStorage.getItem(RECENT_VIEWED_FUNDS_KEY);
+      const items = raw ? JSON.parse(raw) : [];
+      return Array.isArray(items) ? items.filter(item => item && item.fundId).slice(0, RECENT_VIEWED_FUNDS_LIMIT) : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function saveRecentViewedFunds(items) {
+    try {
+      localStorage.setItem(RECENT_VIEWED_FUNDS_KEY, JSON.stringify(items.slice(0, RECENT_VIEWED_FUNDS_LIMIT)));
+    } catch (error) {}
+  }
+
+  function addRecentViewedFund(item) {
+    if (!item?.fundId) return;
+    const nextItem = {
+      fundId: String(item.fundId || ''),
+      catId: String(item.catId || item.categoryId || ''),
+      providerName: String(item.providerName || item.provider || ''),
+      trackId: String(item.trackId || ''),
+      trackLabel: String(item.trackLabel || ''),
+      categoryLabel: String(item.categoryLabel || ''),
+      y12m: item.y12m === null || item.y12m === undefined ? '' : String(item.y12m),
+      rank: item.rank === null || item.rank === undefined ? '' : String(item.rank),
+      total: item.total === null || item.total === undefined ? '' : String(item.total),
+      viewedAt: Date.now()
+    };
+    const uniqueKey = `${nextItem.catId}::${nextItem.fundId}`;
+    const items = getRecentViewedFunds().filter(existing => `${existing.catId || ''}::${existing.fundId}` !== uniqueKey);
+    saveRecentViewedFunds([nextItem, ...items]);
+    renderMobileRecentFunds();
+  }
+
+  function formatRecentFundReturn(value) {
+    const num = parseFloat(value);
+    return Number.isFinite(num) ? formatPercent(num) : '-';
+  }
+
+  function renderMobileRecentFunds() {
+    const list = document.getElementById('mobile-recent-funds-list');
+    if (!list) return;
+    const items = getRecentViewedFunds();
+    const drawer = document.getElementById('mobile-recent-funds-drawer');
+    if (drawer) {
+      const visibleRows = Math.max(1, Math.min(items.length || 1, RECENT_VIEWED_FUNDS_LIMIT));
+      drawer.style.setProperty('--recent-panel-h', `${34 + (visibleRows * 66)}px`);
+    }
+    if (!items.length) {
+      list.innerHTML = '<div class="mobile-recent-funds-empty">קופות שצפית בהן יופיעו כאן</div>';
+      return;
+    }
+    list.innerHTML = items.map(item => {
+      const y12 = parseFloat(item.y12m);
+      const tone = Number.isFinite(y12) ? (y12 >= 0 ? 'is-positive' : 'is-negative') : '';
+      const title = [item.providerName, item.trackLabel].filter(Boolean).join(' · ') || `קופה #${item.fundId}`;
+      const category = item.categoryLabel || item.trackLabel || '';
+      const rank = item.rank ? `מקום ${escapeHtml(item.rank)}${item.total ? ` מתוך ${escapeHtml(item.total)}` : ''}` : 'דירוג לא זמין';
+      return `
+        <article class="mobile-recent-fund-item" data-fundid="${escapeHtml(item.fundId)}" data-catid="${escapeHtml(item.catId || '')}" data-trackid="${escapeHtml(item.trackId || '')}" role="listitem">
+          <button type="button" class="mobile-recent-fund-main" data-recent-fund-open>
+            <span class="mobile-recent-fund-name">${escapeHtml(title)}</span>
+            <span class="mobile-recent-fund-category" data-recent-track-open>${escapeHtml(category)}</span>
+          </button>
+          <button type="button" class="mobile-recent-fund-metrics" data-recent-fund-open aria-label="פתח את דף הקופה">
+            <span class="mobile-recent-fund-return-label">תשואה 12 חודשים</span>
+            <span class="mobile-recent-fund-return ${tone}">${escapeHtml(formatRecentFundReturn(item.y12m))}</span>
+            <span class="mobile-recent-fund-rank">${rank}</span>
+          </button>
+        </article>
+      `;
+    }).join('');
+    list.querySelectorAll('.mobile-recent-fund-item').forEach(button => {
+      const openFund = () => {
+        const fundId = button.dataset.fundid;
+        const catId = button.dataset.catid || '';
+        if (!fundId) return;
+        const current = getRecentViewedFunds().find(item => String(item.fundId) === String(fundId) && String(item.catId || '') === String(catId));
+        if (current) addRecentViewedFund(current);
+        window.location.href = `fund.html?id=${encodeURIComponent(fundId)}&cat=${encodeURIComponent(catId)}`;
+      };
+      button.querySelectorAll('[data-recent-fund-open]').forEach(el => {
+        el.addEventListener('click', openFund);
+      });
+      button.querySelector('[data-recent-track-open]')?.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        const catId = button.dataset.catid || '';
+        const trackId = button.dataset.trackid || '';
+        if (!catId) return;
+        window.location.href = `index.html?cat=${encodeURIComponent(catId)}${trackId ? `&focusTrack=${encodeURIComponent(trackId)}` : ''}`;
+      });
+    });
+  }
+
+  function setupMobileRecentFundsDrawer() {
+    const drawer = document.getElementById('mobile-recent-funds-drawer');
+    const handle = document.getElementById('mobile-recent-funds-handle');
+    if (!drawer || !handle) return;
+
+    const setOpen = open => {
+      drawer.classList.toggle('is-open', open);
+      handle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      handle.setAttribute('aria-label', open ? 'סגור קופות שנצפו לאחרונה' : 'פתח קופות שנצפו לאחרונה');
+    };
+
+    let startY = 0;
+    let dragDelta = 0;
+    let dragged = false;
+
+    const beginDrag = y => {
+      startY = y;
+      dragDelta = 0;
+      dragged = false;
+    };
+
+    const moveDrag = y => {
+      if (!startY) return;
+      dragDelta = y - startY;
+      if (Math.abs(dragDelta) > 10) dragged = true;
+    };
+
+    const endDrag = () => {
+      if (dragged) {
+        setOpen(dragDelta < 0);
+        setTimeout(() => { dragged = false; }, 0);
+      }
+      startY = 0;
+      dragDelta = 0;
+    };
+
+    handle.addEventListener('pointerdown', event => {
+      beginDrag(event.clientY);
+      handle.setPointerCapture?.(event.pointerId);
+    });
+
+    handle.addEventListener('pointermove', event => {
+      moveDrag(event.clientY);
+    });
+
+    handle.addEventListener('pointerup', event => {
+      handle.releasePointerCapture?.(event.pointerId);
+      endDrag();
+    });
+
+    handle.addEventListener('touchstart', event => {
+      beginDrag(event.touches?.[0]?.clientY || 0);
+    }, { passive: true });
+
+    handle.addEventListener('touchmove', event => {
+      moveDrag(event.touches?.[0]?.clientY || 0);
+    }, { passive: true });
+
+    handle.addEventListener('touchend', endDrag);
+
+    handle.addEventListener('mousedown', event => {
+      beginDrag(event.clientY);
+    });
+
+    document.addEventListener('mousemove', event => {
+      moveDrag(event.clientY);
+    });
+
+    document.addEventListener('mouseup', endDrag);
+
+    handle.addEventListener('click', () => {
+      if (dragged) return;
+      setOpen(!drawer.classList.contains('is-open'));
+    });
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') setOpen(false);
+    });
+
+    renderMobileRecentFunds();
+    showMobileRecentFundsTipOnce(drawer);
+  }
+
+  function showMobileRecentFundsTipOnce(drawer) {
+    try {
+      if (!drawer || localStorage.getItem(RECENT_VIEWED_FUNDS_TIP_KEY) === '1') return;
+      localStorage.setItem(RECENT_VIEWED_FUNDS_TIP_KEY, '1');
+      const tip = document.createElement('div');
+      tip.className = 'mobile-recent-funds-tip';
+      tip.innerHTML = '<i class="far fa-clock" aria-hidden="true"></i><span>היסטוריית חיפושים</span>';
+      drawer.appendChild(tip);
+      requestAnimationFrame(() => tip.classList.add('is-visible'));
+      setTimeout(() => {
+        tip.classList.remove('is-visible');
+        setTimeout(() => tip.remove(), 220);
+      }, 3000);
+    } catch (error) {}
+  }
+
   function setupMobileFundSearch() {
     const panel   = document.getElementById('mob-fund-search-panel');
     const input   = document.getElementById('mob-fund-search-input');
@@ -16288,7 +16519,19 @@ const App = (() => {
           const fundId = item.dataset.fundid;
           const catId  = item.dataset.catid;
           closePanel();
-          if (fundId && catId) window.location.href = `fund.html?id=${encodeURIComponent(fundId)}&cat=${encodeURIComponent(catId)}`;
+          if (fundId && catId) {
+            const hit = hits.find(h => String(h.fundId) === String(fundId) && String(h.catId) === String(catId));
+            if (hit) {
+              addRecentViewedFund({
+                fundId,
+                catId,
+                providerName: hit.name,
+                trackLabel: hit.sub || '',
+                categoryLabel: _sbGetCategoryLabel(catId)
+              });
+            }
+            window.location.href = `fund.html?id=${encodeURIComponent(fundId)}&cat=${encodeURIComponent(catId)}`;
+          }
         });
       });
     }
