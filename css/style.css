@@ -3162,6 +3162,61 @@ body:not(.advanced-options-open) .custom-range-panel {
 }
 .track-toggle-btn.collapsed { transform: rotate(-90deg); }
 
+.track-share-image-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(209, 155, 19, .44);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fffdf3 0%, #fff0bf 100%);
+  color: var(--blue);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, .12);
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.track-share-image-btn .fa-camera {
+  font-size: 15px;
+}
+
+.track-share-image-btn .fa-share-alt {
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
+  width: 13px;
+  height: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 7px;
+  box-shadow: 0 0 0 2px #fff8d8;
+}
+
+.track-share-image-btn:hover,
+.track-share-image-btn:focus-visible {
+  border-color: rgba(209, 155, 19, .78);
+  transform: translateY(-1px);
+}
+
+.share-track-image-btn.is-loading {
+  opacity: .72;
+  pointer-events: none;
+}
+
+.share-track-image-btn.is-loading i {
+  animation: shareSpin .8s linear infinite;
+}
+
+@keyframes shareSpin {
+  to { transform: rotate(360deg); }
+}
+
 .track-table-wrapper { overflow-x: auto; background: #fff; }
 .track-table-wrapper.collapsed { display: none; }
 

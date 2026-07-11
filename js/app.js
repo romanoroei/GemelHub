@@ -4453,6 +4453,14 @@ const App = (() => {
     `;
 
     // מיון עצמאי לכל קובייה בלבד (event delegation)
+    const titleShareBtn = document.createElement('button');
+    titleShareBtn.className = 'track-share-image-btn share-track-image-btn';
+    titleShareBtn.type = 'button';
+    titleShareBtn.title = 'שתף צילום של הטבלה הנוכחית';
+    titleShareBtn.setAttribute('aria-label', 'שתף צילום של הטבלה הנוכחית');
+    titleShareBtn.innerHTML = '<i class="fas fa-camera" aria-hidden="true"></i><i class="fas fa-share-alt" aria-hidden="true"></i>';
+    block.querySelector('.track-title-group')?.appendChild(titleShareBtn);
+
     block.addEventListener('click', e => {
       const th = e.target.closest('th[data-sortfield]');
       if (!th) return;
@@ -5230,6 +5238,75 @@ const App = (() => {
     return Promise.race([promise, timeout]).finally(() => clearTimeout(timerId));
   }
 
+  function shareImageSlug(value) {
+    return Array.from(String(value || '').trim()).map(ch => {
+      if (/^[a-z0-9_-]$/i.test(ch)) return ch.toLowerCase();
+      return `-${ch.codePointAt(0).toString(16)}-`;
+    }).join('').replace(/-+/g, '-').replace(/^-|-$/g, '') || 'item';
+  }
+
+  function getShareImageMode() {
+    return state.showExposure ? 'allocation' : 'returns';
+  }
+
+  async function getLatestShareImagePeriod() {
+    const res = await fetch('assets/share-images/latest-period.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('latest-period missing');
+    const data = await res.json();
+    if (!data?.period) throw new Error('latest-period invalid');
+    return String(data.period);
+  }
+
+  async function shareTrackImage(track) {
+    if (!track?.id || !state.activeCategoryId) return;
+    const mode = getShareImageMode();
+    const category = CONFIG.PRODUCT_CATEGORIES.find(item => item.id === state.activeCategoryId);
+    const categoryLabel = category?.label || state.activeCategoryId;
+    const title = `${categoryLabel} - ${track.label}`;
+    const block = Array.from(document.querySelectorAll('.track-block'))
+      .find(item => item.dataset.trackId === track.id);
+    const btn = block?.querySelector('.share-track-image-btn');
+    try {
+      if (btn) {
+        btn.classList.add('is-loading');
+        btn.disabled = true;
+      }
+      const period = await getLatestShareImagePeriod();
+      const imageUrl = `assets/share-images/${encodeURIComponent(period)}/${shareImageSlug(state.activeCategoryId)}__${shareImageSlug(track.id)}__${mode}.png`;
+      const absoluteUrl = new URL(imageUrl, window.location.href).toString();
+      const imageRes = await fetch(imageUrl, { cache: 'no-store' });
+      if (!imageRes.ok) throw new Error('share image missing');
+      const blob = await imageRes.blob();
+      const file = new File([blob], `${shareImageSlug(categoryLabel)}-${shareImageSlug(track.label)}-${mode}.png`, { type: blob.type || 'image/png' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+        await navigator.share({
+          title,
+          text: `השוואת ${title} ב-GemelHub`,
+          files: [file]
+        });
+        return;
+      }
+      if (navigator.share) {
+        await navigator.share({
+          title,
+          text: `השוואת ${title} ב-GemelHub`,
+          url: absoluteUrl
+        });
+        return;
+      }
+      window.open(absoluteUrl, '_blank', 'noopener');
+    } catch (error) {
+      console.warn('Could not share track image', error);
+      alert('תמונת השיתוף עדיין לא זמינה למסלול הזה. היא תיווצר אוטומטית אחרי עדכון הנתונים הבא.');
+    } finally {
+      if (btn) {
+        btn.classList.remove('is-loading');
+        btn.disabled = false;
+      }
+    }
+  }
+
   async function mapWithConcurrency(items, limit, mapper) {
     const result = new Array(items.length);
     let nextIndex = 0;
@@ -5391,6 +5468,14 @@ const App = (() => {
     });
 
     // כפתור הצג/הסתר אלוקציה — toggle class בלבד, ללא רינדור מחדש
+    block.querySelector('.share-track-image-btn')?.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      const trackId = block.dataset.trackId || null;
+      const track = CONFIG.INVESTMENT_TRACKS.find(item => item.id === trackId);
+      shareTrackImage(track);
+    });
+
     const eBtn = block.querySelector('.exp-toggle-btn');
     if (eBtn) {
       eBtn.addEventListener('click', e => {
