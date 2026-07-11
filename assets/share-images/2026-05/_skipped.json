@@ -1,0 +1,234 @@
+[
+  {
+    "categoryId": "gemel_tagmulim",
+    "categoryLabel": "קופות גמל",
+    "trackId": "ashrai_agach_maniот",
+    "trackLabel": "אשראי ואג\"ח + מניות עד 25%",
+    "mode": "returns",
+    "error": "page.waitForSelector: Timeout 90000ms exceeded.\nCall log:\n  - waiting for locator('.track-block[data-track-id=\"ashrai_agach_maniот\"] table.track-table tbody tr:not(.average-row)') to be visible\n"
+  },
+  {
+    "categoryId": "gemel_tagmulim",
+    "categoryLabel": "קופות גמל",
+    "trackId": "ashrai_agach_maniот",
+    "trackLabel": "אשראי ואג\"ח + מניות עד 25%",
+    "mode": "allocation",
+    "error": "page.waitForSelector: Timeout 90000ms exceeded.\nCall log:\n  - waiting for locator('.track-block[data-track-id=\"ashrai_agach_maniот\"] table.track-table tbody tr:not(.average-row)') to be visible\n"
+  },
+  {
+    "categoryId": "gemel_tagmulim",
+    "categoryLabel": "קופות גמל",
+    "trackId": "kaklali",
+    "trackLabel": "כללי",
+    "mode": "returns",
+    "error": "page.waitForSelector: Timeout 90000ms exceeded.\nCall log:\n  - waiting for locator('.track-block[data-track-id=\"kaklali\"] table.track-table tbody tr:not(.average-row)') to be visible\n"
+  },
+  {
+    "categoryId": "gemel_tagmulim",
+    "categoryLabel": "קופות גמל",
+    "trackId": "kaklali",
+    "trackLabel": "כללי",
+    "mode": "allocation",
+    "error": "page.waitForSelector: Timeout 90000ms exceeded.\nCall log:\n  - waiting for locator('.track-block[data-track-id=\"kaklali\"] table.track-table tbody tr:not(.average-row)') to be visible\n"
+  },
+  {
+    "categoryId": "polisa_chisachon",
+    "categoryLabel": "פוליסות חיסכון",
+    "trackId": "polisa_ashrai_maniот",
+    "trackLabel": "אשראי ואג\"ח עם מניות (עד 25%)",
+    "mode": "allocation",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mekafit",
+    "categoryLabel": "פנסיה מקיפה",
+    "trackId": "pension_gil_50",
+    "trackLabel": "לבני 50 ומטה",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mekafit",
+    "categoryLabel": "פנסיה מקיפה",
+    "trackId": "pension_maniот",
+    "trackLabel": "מניות",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mekafit",
+    "categoryLabel": "פנסיה מקיפה",
+    "trackId": "pension_sp500",
+    "trackLabel": "עוקב S&P 500",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mekafit",
+    "categoryLabel": "פנסיה מקיפה",
+    "trackId": "pension_meshulab_sahar",
+    "trackLabel": "משולב סחיר",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mekafit",
+    "categoryLabel": "פנסיה מקיפה",
+    "trackId": "pension_okev_maniот",
+    "trackLabel": "עוקב מדדי מניות",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mekafit",
+    "categoryLabel": "פנסיה מקיפה",
+    "trackId": "pension_okev_mimdim",
+    "trackLabel": "עוקב מדדים גמיש",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mekafit",
+    "categoryLabel": "פנסיה מקיפה",
+    "trackId": "pension_halachti",
+    "trackLabel": "הלכה",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mekafit",
+    "categoryLabel": "פנסיה מקיפה",
+    "trackId": "pension_ashrai",
+    "trackLabel": "אשראי ואג\"ח",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mekafit",
+    "categoryLabel": "פנסיה מקיפה",
+    "trackId": "pension_kayemet",
+    "trackLabel": "קיימות",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mekafit",
+    "categoryLabel": "פנסיה מקיפה",
+    "trackId": "pension_kaklali",
+    "trackLabel": "כללי",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mekafit",
+    "categoryLabel": "פנסיה מקיפה",
+    "trackId": "pension_kabala_basic",
+    "trackLabel": "בסיסי למקבלי קצבה",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mekafit",
+    "categoryLabel": "פנסיה מקיפה",
+    "trackId": "pension_kabala_halacha",
+    "trackLabel": "הלכה למקבלי קצבה/קיימים",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mashlima",
+    "categoryLabel": "פנסיה כללית",
+    "trackId": "pension_gil_50_60",
+    "trackLabel": "לבני 50-60",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mashlima",
+    "categoryLabel": "פנסיה כללית",
+    "trackId": "pension_gil_60_plus",
+    "trackLabel": "לבני 60 ומעלה",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mashlima",
+    "categoryLabel": "פנסיה כללית",
+    "trackId": "pension_maniот",
+    "trackLabel": "מניות",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mashlima",
+    "categoryLabel": "פנסיה כללית",
+    "trackId": "pension_sp500",
+    "trackLabel": "עוקב S&P 500",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mashlima",
+    "categoryLabel": "פנסיה כללית",
+    "trackId": "pension_maniот_sahar",
+    "trackLabel": "מניות סחיר",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mashlima",
+    "categoryLabel": "פנסיה כללית",
+    "trackId": "pension_okev_maniот",
+    "trackLabel": "עוקב מדדי מניות",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mashlima",
+    "categoryLabel": "פנסיה כללית",
+    "trackId": "pension_okev_agach",
+    "trackLabel": "עוקב מדדי אג\"ח",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mashlima",
+    "categoryLabel": "פנסיה כללית",
+    "trackId": "pension_ashrai",
+    "trackLabel": "אשראי ואג\"ח",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mashlima",
+    "categoryLabel": "פנסיה כללית",
+    "trackId": "pension_kaklali",
+    "trackLabel": "כללי",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mashlima",
+    "categoryLabel": "פנסיה כללית",
+    "trackId": "pension_ksafi",
+    "trackLabel": "כספי (שקלי)",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mashlima",
+    "categoryLabel": "פנסיה כללית",
+    "trackId": "pension_kabala_halacha",
+    "trackLabel": "הלכה למקבלי קצבה/קיימים",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  },
+  {
+    "categoryId": "pension_mashlima",
+    "categoryLabel": "פנסיה כללית",
+    "trackId": "pension_kabala_kayam",
+    "trackLabel": "למקבלי קצבה קיימים",
+    "mode": "returns",
+    "error": "locator.screenshot: Element is not attached to the DOM\nCall log:\n  - taking element screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n  - attempting scroll into view action\n    - waiting for element to be stable\n"
+  }
+]
