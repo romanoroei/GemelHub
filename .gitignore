@@ -12,6 +12,7 @@ package-lock.json
 # Temporary screenshots / recordings
 recording-*.png
 whatsapp-*.png
+share-sample-*.png
 
 # Backup files
 *.bak

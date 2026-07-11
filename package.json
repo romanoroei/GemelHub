@@ -1,7 +1,7 @@
 {
   "scripts": {
     "share-images:check": "node scripts/check-share-image-period.mjs",
-    "share-images:generate": "node scripts/generate-share-images.mjs",
+    "share-images:generate": "node scripts/generate-share-images-clean.mjs",
     "worker:kv:create": "wrangler kv namespace create GEMELHUB_SHARED_PORTFOLIOS",
     "worker:kv:preview": "wrangler kv namespace create GEMELHUB_SHARED_PORTFOLIOS --preview",
     "worker:deploy": "wrangler deploy",

@@ -41,7 +41,7 @@ jobs:
         run: npm run share-images:check
 
       - name: Generate images
-        if: steps.period.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        if: steps.period.outputs.changed == 'true' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
         env:
           SHARE_IMAGE_PERIOD: ${{ steps.period.outputs.latest_period }}
           SHARE_IMAGE_PERIOD_RAW: ${{ steps.period.outputs.latest_raw_period }}
@@ -49,7 +49,7 @@ jobs:
         run: npm run share-images:generate
 
       - name: Commit generated images
-        if: steps.period.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        if: steps.period.outputs.changed == 'true' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
