@@ -14639,11 +14639,19 @@ const App = (() => {
       if (metric.id === 'positive') return 'חודשים חיוביים';
       return getH2HMetricShortLabel(metric);
     };
+    const _h2hHeadMeasureCtx = document.createElement('canvas').getContext('2d');
     const metricColumnWidth = metric => {
       if (metric.id === 'customRange') return 150;
       if (['3yr_cum','3yr_ann','5yr_cum','5yr_ann','7yr_cum','7yr_ann'].includes(metric.id)) return 96;
-      const chars = String(getH2HMetricHeadLabel(metric) || '').length;
-      return Math.max(64, Math.min(112, 44 + (chars * 5)));
+      const label = String(getH2HMetricHeadLabel(metric) || '');
+      _h2hHeadMeasureCtx.font = "900 12.16px 'Heebo',Arial,sans-serif";
+      const textW = _h2hHeadMeasureCtx.measureText(label).width;
+      // Every column header card also carries a fixed-size "remove column" (×) button plus its own
+      // padding/gaps and a reserved slot for the sort-arrow icon that only appears on hover/active —
+      // that overhead (not just the label text) has to fit inside the column, or short labels like
+      // year numbers get clipped down to "...16" even though the character-count math looked fine.
+      const overhead = 54;
+      return Math.max(64, Math.min(140, Math.ceil(textW + overhead)));
     };
     const metricGridTemplate = activeMetrics.map(metric => `${metricColumnWidth(metric)}px`).join(' ');
     const metricGroups = [];
