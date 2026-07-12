@@ -4034,13 +4034,13 @@ table.track-table tr.average-row td.exp-col:nth-last-child(3) {
 .toast.fade-out { opacity: 0; }
 
 .share-options-toast {
-  position: fixed; bottom: 28px; right: 24px; left: 24px; margin-inline-start: auto;
-  max-width: 340px; background: #fff; color: var(--gray-800);
+  position: fixed; top: 50%; right: 24px; left: auto; transform: translateY(-50%);
+  width: calc(100vw - 48px); max-width: 340px; background: #fff; color: var(--gray-800);
   padding: 16px 18px 14px; border-radius: 14px; font-family: var(--font);
   box-shadow: var(--shadow-lg); border: 1px solid var(--gray-200);
   z-index: 9999; direction: rtl; transition: opacity .35s, transform .35s;
 }
-.share-options-toast.fade-out { opacity: 0; transform: translateY(8px); }
+.share-options-toast.fade-out { opacity: 0; transform: translateY(calc(-50% + 8px)); }
 .share-options-toast-title { font-size: .88rem; font-weight: 800; margin-bottom: 10px; }
 .share-options-toast-actions { display: flex; gap: 8px; }
 .share-options-toast-btn {

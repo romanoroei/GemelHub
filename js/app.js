@@ -5330,6 +5330,58 @@ const App = (() => {
     return _shareLogoImagePromise;
   }
 
+  // Drawn as vector shapes (not the flag emoji, and not the site's real PNG icons) on purpose:
+  // regional-indicator flag emoji (🇮🇱/🇺🇸) silently fall back to plain "IL"/"US" text boxes on
+  // many Windows/Linux Chrome + font combinations (confirmed while testing this feature), and the
+  // site's real flag PNGs are large externally-loaded files that would reintroduce the file://
+  // canvas-tainting bug the logo fix above addresses. An inline SVG data: URI is safe and renders
+  // identically everywhere.
+  const SHARE_FLAG_IL_SVG_DATA_URI = 'data:image/svg+xml,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20">' +
+    '<rect width="30" height="20" rx="3" fill="#fff"/>' +
+    '<rect y="3" width="30" height="2.6" fill="#2563eb"/>' +
+    '<rect y="14.4" width="30" height="2.6" fill="#2563eb"/>' +
+    '<path d="M15 6.6l3.4 5.8H11.6L15 6.6z" fill="none" stroke="#2563eb" stroke-width="1.2" stroke-linejoin="round"/>' +
+    '<path d="M15 13.4L11.6 7.6h6.8L15 13.4z" fill="none" stroke="#2563eb" stroke-width="1.2" stroke-linejoin="round"/>' +
+    '</svg>'
+  );
+  const SHARE_FLAG_US_SVG_DATA_URI = 'data:image/svg+xml,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20">' +
+    '<rect width="30" height="20" rx="3" fill="#fff"/>' +
+    '<g fill="#B22234">' +
+    '<rect y="0" width="30" height="1.54"/><rect y="3.08" width="30" height="1.54"/>' +
+    '<rect y="6.16" width="30" height="1.54"/><rect y="9.24" width="30" height="1.54"/>' +
+    '<rect y="12.32" width="30" height="1.54"/><rect y="15.4" width="30" height="1.54"/>' +
+    '<rect y="18.48" width="30" height="1.52"/>' +
+    '</g>' +
+    '<rect width="13" height="10.8" fill="#3C3B6E"/>' +
+    '</svg>'
+  );
+  const _shareFlagImagePromises = {};
+  function loadShareFlagImage(kind) {
+    const src = kind === 'il' ? SHARE_FLAG_IL_SVG_DATA_URI : kind === 'us' ? SHARE_FLAG_US_SVG_DATA_URI : null;
+    if (!src) return Promise.resolve(null);
+    if (!_shareFlagImagePromises[kind]) {
+      _shareFlagImagePromises[kind] = new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = src;
+      });
+    }
+    return _shareFlagImagePromises[kind];
+  }
+
+  const EMOJI_FONT = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Arial,sans-serif';
+  // Emoji glyphs (not the site's real PNG/SVG icons) on purpose: those PNGs are large,
+  // externally-loaded files, which would reintroduce the exact file:// canvas-tainting bug the
+  // logo fix above addresses. A plain text glyph never taints the canvas.
+  // Glyph choices deliberately mirror what the real icons actually depict (checked the source PNGs):
+  // allocation-fx.png is a gold "$", allocation-shekel.png is a blue "₪" — not a generic exchange symbol.
+  const TAG_ICON_GLYPH = { warning: '⚠️', abroad: '🌐', fx: '$', shekel: '₪' };
+  const TAG_ICON_COLOR = { fx: '#b8860b', shekel: '#2563eb' };
+  const TAG_ICON_FLAG_KINDS = new Set(['il', 'us']);
+
   const SHARE_EXP_COLORS = { stock: '#6366f1', abroad: '#10b981', fx: '#f97316' };
   const SHARE_RANK_STYLE = {
     1: { bg: '#fef3c7', text: '#92400e', border: '#fbbf24' },
@@ -5399,11 +5451,22 @@ const App = (() => {
       const nameEl = providerTd?.querySelector('.prov-name-text');
       const colorEl = providerTd?.querySelector('.prov-name');
       const idEl = providerTd?.querySelector('.fund-id-number');
+      const tagIconsEl = providerTd?.querySelector('.fund-id-tag-icons');
+      const tagIcons = [];
+      if (tagIconsEl) {
+        if (tagIconsEl.querySelector('.table-allocation-warning')) tagIcons.push('warning');
+        if (tagIconsEl.querySelector('.table-allocation-flag-il')) tagIcons.push('il');
+        if (tagIconsEl.querySelector('.table-allocation-icon-us')) tagIcons.push('us');
+        if (tagIconsEl.querySelector('.table-allocation-icon-abroad')) tagIcons.push('abroad');
+        if (tagIconsEl.querySelector('.table-allocation-icon-fx')) tagIcons.push('fx');
+        if (tagIconsEl.querySelector('.table-allocation-icon-shekel')) tagIcons.push('shekel');
+      }
       return {
         rank: tds[0] ? tds[0].textContent.trim() : '',
         providerName: nameEl ? nameEl.textContent.trim() : (providerTd?.textContent.trim() || ''),
         providerColor: (colorEl && colorEl.style.color) || '#1a3560',
         fundId: idEl ? idEl.textContent.trim().replace(/^#/, '') : '',
+        tagIcons,
         cells: tds.slice(2).map((td, i) => readDataCell(td, dataCols[i] || {}))
       };
     };
@@ -5447,8 +5510,11 @@ const App = (() => {
     mctx.font = `800 14px ${FONT}`;
     let managerW = 100;
     data.rows.forEach(r => {
-      const w = mctx.measureText(`${r.providerName}   #${r.fundId}`).width + 34;
-      managerW = Math.max(managerW, Math.min(w, 240));
+      const iconsW = (r.tagIcons && r.tagIcons.length)
+        ? r.tagIcons.reduce((sum, kind) => sum + (TAG_ICON_FLAG_KINDS.has(kind) ? 18 : 14), 4)
+        : 0;
+      const w = mctx.measureText(`${r.providerName}   #${r.fundId}`).width + 34 + iconsW;
+      managerW = Math.max(managerW, Math.min(w, 260));
     });
 
     mctx.font = `700 12.5px ${FONT}`;
@@ -5486,6 +5552,10 @@ const App = (() => {
 
     // ── brand header ──
     let y = 22;
+    const usedFlagKinds = new Set();
+    data.rows.forEach(r => (r.tagIcons || []).forEach(kind => { if (TAG_ICON_FLAG_KINDS.has(kind)) usedFlagKinds.add(kind); }));
+    const flagImages = {};
+    await Promise.all(Array.from(usedFlagKinds).map(async kind => { flagImages[kind] = await loadShareFlagImage(kind); }));
     const logo = await loadShareLogoImage();
     ctx.textAlign = 'center';
     if (logo && logo.width) {
@@ -5626,7 +5696,32 @@ const App = (() => {
           ctx.fillText(row.providerName, c.x + c.w - 24, cy - 6);
           ctx.font = `600 10.5px ${FONT}`;
           ctx.fillStyle = '#94a3b8';
-          ctx.fillText(`#${row.fundId}`, c.x + c.w - 24, cy + 9);
+          const fundIdText = `#${row.fundId}`;
+          ctx.fillText(fundIdText, c.x + c.w - 24, cy + 9);
+          if (row.tagIcons && row.tagIcons.length) {
+            const fundIdW = ctx.measureText(fundIdText).width;
+            const iconBaseline = cy + 9;
+            let iconRight = c.x + c.w - 24 - fundIdW - 5;
+            row.tagIcons.forEach(kind => {
+              if (TAG_ICON_FLAG_KINDS.has(kind)) {
+                const flagImg = flagImages[kind];
+                const flagW = 15, flagH = 10;
+                if (flagImg && flagImg.width) {
+                  ctx.drawImage(flagImg, iconRight - flagW, iconBaseline - flagH / 2, flagW, flagH);
+                }
+                iconRight -= flagW + 3;
+              } else {
+                const glyph = TAG_ICON_GLYPH[kind];
+                if (!glyph) return;
+                const color = TAG_ICON_COLOR[kind];
+                ctx.font = color ? `900 12px ${FONT}` : `11px ${EMOJI_FONT}`;
+                ctx.fillStyle = color || '#000000';
+                ctx.fillText(glyph, iconRight, iconBaseline);
+                iconRight -= 14;
+              }
+            });
+          }
+          ctx.fillStyle = '#94a3b8';
           ctx.textAlign = 'center';
         } else {
           const cell = row.cells[c.i];
@@ -5737,6 +5832,7 @@ const App = (() => {
 
   async function shareTrackImage(track) {
     if (!track?.id || !state.activeCategoryId) return;
+
     const mode = getShareImageMode();
     const modeLabel = getShareImageModeLabel();
     const category = CONFIG.PRODUCT_CATEGORIES.find(item => item.id === state.activeCategoryId);
@@ -5767,7 +5863,7 @@ const App = (() => {
       // Try the native share sheet everywhere it's offered (mobile *and* desktop browsers that wire
       // one up, e.g. Windows share) — it's the only way to hand the actual image file to WhatsApp/
       // Mail/"edit" in one step. NotAllowedError/AbortError just mean it's unavailable or the user
-      // backed out, so fall through to the download + WhatsApp-link toast below instead of failing.
+      // backed out, so fall through to the plain download + toast below instead of failing.
       if (navigator.canShare && navigator.share && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({ title, text: shareText, files: [file] });
@@ -5778,20 +5874,12 @@ const App = (() => {
         }
       }
 
-      let opened = null;
-      try {
-        const objectUrl = URL.createObjectURL(file);
-        opened = window.open(objectUrl, '_blank', 'noopener');
-        if (!opened || opened.closed || typeof opened.closed === 'undefined') {
-          URL.revokeObjectURL(objectUrl);
-          throw new Error('popup blocked');
-        }
-        setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
-      } catch (openError) {
-        downloadBlob(file, fileName);
-      }
+      // No new tab/window on purpose — the image just saves straight into the current page's
+      // download flow, and the toast below offers WhatsApp/copy-link right where the user already is.
+      downloadBlob(file, fileName);
       showShareOptionsToast(shareText, shareUrl);
     } catch (error) {
+      if (preOpenedWindow && !preOpenedWindow.closed) preOpenedWindow.close();
       console.warn('Could not create share image', error);
       alert('לא הצלחתי ליצור תמונת שיתוף כרגע. כדאי לנסות שוב בעוד רגע.');
     } finally {
