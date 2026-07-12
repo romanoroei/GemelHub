@@ -37,7 +37,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=wide-mobile-tables-20260708" />
+  <link rel="stylesheet" href="css/style.css?v=share-image-fixes-round4-20260712" />
   <link rel="stylesheet" href="css/fund.css?v=wide-mobile-tables-20260708" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -1703,7 +1703,7 @@ function renderPeersTable(myFundId, myName) {
   });
 
   const myRank = sorted.findIndex(r => String(r.FUND_ID) === String(myFundId)) + 1;
-  const sortLabels = { monthly:'חודשי', ytd:'YTD', yearly_ytd:'YTD', '1yr':'12 חוד׳', '3yr':'3 שנים', '5yr':'5 שנים' };
+  const sortLabels = { monthly:'חודשי', ytd:'השנה', yearly_ytd:'השנה', '1yr':'12 חוד׳', '3yr':'3 שנים', '5yr':'5 שנים' };
   const activeSortLabel = /^year_\d{4}$/.test(peerSort.field) ? peerSort.field.slice(5) : (sortLabels[peerSort.field] || peerSort.field);
   // כותרת עמודת חודשי — לפי תקופת הדיווח האחרונה (כמו בטבלה הראשית)
   const latestPeriod = displayPeers.reduce((mx, r) => Math.max(mx, Number(r.REPORT_PERIOD||0)), 0) || null;
@@ -1888,10 +1888,10 @@ function renderPeersTable(myFundId, myName) {
             <th>#</th>
             <th>מנהל</th>
             ${peerReturnMode === 'yearly' ? `
-            <th data-pf="yearly_ytd" class="${sch('yearly_ytd')}" style="cursor:pointer;" title="תשואה מתחילת השנה">YTD ${arrow('yearly_ytd')}<span class="th-yield-sub">מתחילת השנה</span></th>
+            <th data-pf="yearly_ytd" class="${sch('yearly_ytd')}" style="cursor:pointer;" title="תשואה מתחילת השנה">השנה ${arrow('yearly_ytd')}</th>
             ${yearlyHeaderCells}` : `
             <th data-pf="monthly" class="${sch('monthly')}" style="cursor:pointer;">${monthCol} ${arrow('monthly')}</th>
-            <th data-pf="ytd"     class="${sch('ytd')}"     style="cursor:pointer;" title="תשואה מתחילת השנה">YTD ${arrow('ytd')}</th>
+            <th data-pf="ytd"     class="${sch('ytd')}"     style="cursor:pointer;" title="תשואה מתחילת השנה">השנה ${arrow('ytd')}</th>
             <th data-pf="1yr"     class="${sch('1yr')}"     style="cursor:pointer;">12 חוד׳ ${arrow('1yr')}</th>
             <th data-pf="3yr"     class="${sch('3yr')}"     style="cursor:pointer;">3 שנים ${arrow('3yr')}<span class="th-yield-sub">תשואה מצטברת</span></th>
             <th data-pf="5yr"     class="${sch('5yr')}"     style="cursor:pointer;">5 שנים ${arrow('5yr')}<span class="th-yield-sub">תשואה מצטברת</span></th>`}

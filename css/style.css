@@ -3602,18 +3602,6 @@ th:has(.th-yield-sub) {
   white-space: nowrap;
 }
 
-/* כותרת "מתחילת שנה" בשתי שורות */
-th:has(.th-ytd-break) {
-  white-space: normal;
-  overflow: visible;
-  text-overflow: clip;
-}
-.th-ytd-break {
-  display: inline-block;
-  white-space: normal;
-  line-height: 1.2;
-}
-
 /* Exposure cell */
 table.track-table th.exp-col:nth-last-child(3),
 table.track-table td.exp-col:nth-last-child(3) {
@@ -4044,6 +4032,31 @@ table.track-table tr.average-row td.exp-col:nth-last-child(3) {
   transition: opacity .4s;
 }
 .toast.fade-out { opacity: 0; }
+
+.share-options-toast {
+  position: fixed; bottom: 28px; right: 24px; left: 24px; margin-inline-start: auto;
+  max-width: 340px; background: #fff; color: var(--gray-800);
+  padding: 16px 18px 14px; border-radius: 14px; font-family: var(--font);
+  box-shadow: var(--shadow-lg); border: 1px solid var(--gray-200);
+  z-index: 9999; direction: rtl; transition: opacity .35s, transform .35s;
+}
+.share-options-toast.fade-out { opacity: 0; transform: translateY(8px); }
+.share-options-toast-title { font-size: .88rem; font-weight: 800; margin-bottom: 10px; }
+.share-options-toast-actions { display: flex; gap: 8px; }
+.share-options-toast-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 9px 8px; border-radius: 9px; border: none; cursor: pointer;
+  font-family: var(--font); font-size: .78rem; font-weight: 700; white-space: nowrap;
+}
+.share-options-toast-btn.whatsapp { background: #25d366; color: #fff; }
+.share-options-toast-btn.whatsapp:hover { background: #1ebe5a; }
+.share-options-toast-btn.copy { background: var(--gray-100); color: var(--gray-800); }
+.share-options-toast-btn.copy:hover { background: var(--gray-200); }
+.share-options-toast-close {
+  position: absolute; top: 8px; left: 10px; background: none; border: none;
+  color: var(--gray-400); cursor: pointer; font-size: .85rem; padding: 4px;
+}
+.share-options-toast-close:hover { color: var(--gray-600); }
 
 /* ══════════ MOBILE FILTER BTN ══════════ */
 .mobile-filter-btn {

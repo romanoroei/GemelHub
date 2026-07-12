@@ -283,7 +283,7 @@ const App = (() => {
   // ─── H2H state ────────────────────────────────────────────────
   const H2H_METRICS = [
     { id:'monthly',   label:'תשואה חודשית',          shortLabel:'',        group:'תשואות',      defaultOn:true  },
-    { id:'ytd',       label:'מתחילת שנה',             shortLabel:'YTD',     group:'תשואות',      defaultOn:true  },
+    { id:'ytd',       label:'השנה',                   shortLabel:'השנה',    group:'תשואות',      defaultOn:true  },
     { id:'1yr',       label:'12 חודשים אחורה',       shortLabel:'12 חוד׳', group:'תשואות',      defaultOn:true  },
     { id:'3yr_cum',   label:'3 שנים (מצטבר)',        shortLabel:'3 שנים',  group:'תשואות',      defaultOn:true  },
     { id:'5yr_cum',   label:'5 שנים (מצטבר)',        shortLabel:'5 שנים',  group:'תשואות',      defaultOn:true  },
@@ -5238,67 +5238,562 @@ const App = (() => {
     return Promise.race([promise, timeout]).finally(() => clearTimeout(timerId));
   }
 
+  // Keeps Hebrew (and any other Unicode) readable in the downloaded file name — only strips the
+  // handful of characters that are genuinely illegal in Windows/macOS file names. The previous
+  // version hex-encoded every non-ASCII character, turning every Hebrew file name into gibberish
+  // like "5e7-5e8-5e0...".
   function shareImageSlug(value) {
-    return Array.from(String(value || '').trim()).map(ch => {
-      if (/^[a-z0-9_-]$/i.test(ch)) return ch.toLowerCase();
-      return `-${ch.codePointAt(0).toString(16)}-`;
-    }).join('').replace(/-+/g, '-').replace(/^-|-$/g, '') || 'item';
+    const cleaned = String(value || '')
+      .replace(/[\\/:*?"<>|]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return cleaned || 'מסלול';
   }
 
   function getShareImageMode() {
     return state.showExposure ? 'allocation' : 'returns';
   }
 
-  async function getLatestShareImagePeriod() {
-    const res = await fetch('assets/share-images/latest-period.json', { cache: 'no-store' });
-    if (!res.ok) throw new Error('latest-period missing');
-    const data = await res.json();
-    if (!data?.period) throw new Error('latest-period invalid');
-    return String(data.period);
+  function getShareImageModeLabel() {
+    if (state.showExposure) return 'אלוקציית השקעות';
+    const activeCustomRange = state.customRange?.active && !!state.customRange?.yieldMap;
+    if (activeCustomRange) return 'טווח תשואה מותאם';
+    if (state.yearlyReturns?.active) return 'תשואה לפי שנים';
+    return state.yieldMode === 'annualized' ? 'ממוצע שנתי' : 'תשואה מצטברת';
+  }
+
+  function shareImageFileName(categoryLabel, trackLabel) {
+    return `${shareImageSlug(categoryLabel)} - ${shareImageSlug(trackLabel)}.png`;
+  }
+
+  function canvasToBlob(canvas, type, quality) {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('canvas blob unavailable')), type || 'image/png', quality);
+    });
+  }
+
+  function roundRectPath(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function wrapCanvasText(ctx, text, maxWidth) {
+    const words = String(text || '').split(' ');
+    const lines = [];
+    let line = '';
+    words.forEach(word => {
+      const candidate = line ? `${line} ${word}` : word;
+      if (line && ctx.measureText(candidate).width > maxWidth) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = candidate;
+      }
+    });
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  let _shareLogoImagePromise = null;
+  // Inlined (not fetched from assets/gemelhub-logo-print.svg) on purpose: loading the logo as a
+  // separate file — over file:// (opening index.html directly) or even plain http:// in some
+  // browser configs — taints the canvas the moment it's drawn with ctx.drawImage(). The taint
+  // doesn't throw there; it only surfaces later as a SecurityError from canvas.toBlob(), which is
+  // exactly the "couldn't create image" failure this was producing. A same-document data: URI
+  // never taints a canvas, so drawing it is always safe regardless of how the page was opened.
+  const SHARE_LOGO_SVG_DATA_URI = 'data:image/svg+xml,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="720" height="184" viewBox="120 42 720 184">' +
+    '<text x="190" y="140" text-anchor="middle" dominant-baseline="alphabetic" ' +
+    'font-family="Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, Arial, sans-serif" font-size="96">\u{1F4B0}</text>' +
+    '<text x="535" y="150" text-anchor="middle" font-family="Heebo, Arial, Helvetica, sans-serif" ' +
+    'font-size="118" font-weight="600" letter-spacing="-1">' +
+    '<tspan fill="#183A66">Gemel</tspan><tspan fill="#d4a017">Hub</tspan></text>' +
+    '<text x="535" y="205" text-anchor="middle" direction="rtl" unicode-bidi="plaintext" ' +
+    'font-family="Heebo, Arial, Helvetica, sans-serif" font-size="36" font-weight="500" fill="#d4a017">' +
+    'חיסכון פנסיוני בלחיצת כפתור' +
+    '</text></svg>'
+  );
+
+  function loadShareLogoImage() {
+    if (_shareLogoImagePromise) return _shareLogoImagePromise;
+    _shareLogoImagePromise = new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(null); // logo is a nice-to-have — never block the image on it
+      img.src = SHARE_LOGO_SVG_DATA_URI;
+    });
+    return _shareLogoImagePromise;
+  }
+
+  const SHARE_EXP_COLORS = { stock: '#6366f1', abroad: '#10b981', fx: '#f97316' };
+  const SHARE_RANK_STYLE = {
+    1: { bg: '#fef3c7', text: '#92400e', border: '#fbbf24' },
+    2: { bg: '#f1f5f9', text: '#475569', border: '#cbd5e1' },
+    3: { bg: '#ffedd5', text: '#9a3412', border: '#fdba74' }
+  };
+
+  // Reads the exact table the user currently sees (mode, filters, sort, rows) straight off the
+  // live DOM, so the share image always matches the on-screen view without duplicating the table's
+  // own formatting/ranking/heat-map logic.
+  function extractShareTableData(block) {
+    // Scoped to .track-table-wrapper deliberately: on desktop, buildTrackTable's sticky-header
+    // clone (.track-thead-clone) carries the exact same "table.track-table" class but only ever
+    // holds a cloned <thead> with zero body rows. An unscoped querySelector('table.track-table')
+    // matches whichever sits first in the DOM — the empty clone — which is exactly why the old
+    // html2canvas path (and this one, before this fix) produced a blank/failed image on desktop
+    // while mobile (where the clone is never created) worked fine.
+    const table = block.querySelector('.track-table-wrapper table.track-table');
+    if (!table) return null;
+    const theadRow = table.querySelector('thead tr');
+    const allTh = theadRow ? Array.from(theadRow.children) : [];
+    const dataCols = allTh.slice(2).map(th => {
+      const clone = th.cloneNode(true);
+      clone.querySelectorAll('.sort-arrow, .th-yield-sub').forEach(el => el.remove());
+      return {
+        label: clone.textContent.trim(),
+        isExp: th.classList.contains('exp-col'),
+        sortField: th.dataset.sortfield || '',
+        isSorted: th.classList.contains('col-sorted-head')
+      };
+    });
+
+    const cellText = td => {
+      if (!td) return '-';
+      if (td.dataset.displayBaseText) return td.dataset.displayBaseText;
+      const clone = td.cloneNode(true);
+      clone.querySelectorAll('.yield-top-rank, .yield-badge').forEach(el => el.remove());
+      return clone.textContent.trim() || '-';
+    };
+    const cellSign = td => {
+      if (!td) return 0;
+      if (td.classList.contains('yield-pos')) return 1;
+      if (td.classList.contains('yield-neg')) return -1;
+      return 0;
+    };
+
+    const readDataCell = (td, col) => {
+      if (col.isExp) {
+        const bar = td.querySelector('.exp-bar');
+        const text = cellText(td);
+        const pct = bar ? (parseFloat(bar.style.width) || 0) : (parseFloat(text) || 0);
+        const color = (bar && bar.style.background) || SHARE_EXP_COLORS[col.sortField] || '#6366f1';
+        return { text, allocation: { pct, color } };
+      }
+      const topRankEl = td.querySelector('.yield-top-rank');
+      return {
+        text: cellText(td),
+        sign: cellSign(td),
+        topRank: topRankEl ? parseInt(topRankEl.textContent, 10) || null : null,
+        badge: td.querySelector('.yield-badge')?.textContent || ''
+      };
+    };
+
+    const readRow = tr => {
+      const tds = Array.from(tr.children);
+      const providerTd = tds[1];
+      const nameEl = providerTd?.querySelector('.prov-name-text');
+      const colorEl = providerTd?.querySelector('.prov-name');
+      const idEl = providerTd?.querySelector('.fund-id-number');
+      return {
+        rank: tds[0] ? tds[0].textContent.trim() : '',
+        providerName: nameEl ? nameEl.textContent.trim() : (providerTd?.textContent.trim() || ''),
+        providerColor: (colorEl && colorEl.style.color) || '#1a3560',
+        fundId: idEl ? idEl.textContent.trim().replace(/^#/, '') : '',
+        cells: tds.slice(2).map((td, i) => readDataCell(td, dataCols[i] || {}))
+      };
+    };
+
+    const rows = Array.from(table.querySelectorAll('tbody tr:not(.average-row)')).map(readRow);
+    const avgTr = table.querySelector('tbody tr.average-row');
+    const avgRow = avgTr ? {
+      cells: Array.from(avgTr.children).slice(2).map((td, i) => {
+        const col = dataCols[i] || {};
+        if (col.isExp) {
+          const text = td.textContent.trim() || '-';
+          return { text, allocation: { pct: parseFloat(text) || 0, color: SHARE_EXP_COLORS[col.sortField] || '#6366f1' } };
+        }
+        return { text: td.textContent.trim() || '-', sign: cellSign(td) };
+      })
+    } : null;
+
+    return { columns: dataCols, rows, avgRow };
+  }
+
+  // Renders a brand-new <canvas> for the current table — no external library, no DOM snapshot
+  // library, so it can never hang or fail on CSS it doesn't understand.
+  async function buildShareCanvas(block, categoryLabel, trackLabel, modeLabel) {
+    const data = extractShareTableData(block);
+    if (!data || !data.rows.length) throw new Error('No table rows to render');
+
+    const FONT = "'Heebo', Arial, sans-serif";
+    const PAD = 26;
+    const RANK_W = 42;
+    const HEADER_H = 46;
+    const ROW_H = 42;
+    const AVG_H = 44;
+    const TOP_H = 154; // must stay in sync with the header block actually drawn below (logo + title + mode pill + gap)
+    const DISCLAIMER_TEXT = 'הנתונים מוצגים לצורכי מידע והשוואה בלבד ואינם מהווים ייעוץ, שיווק או המלצה אישית. התשואות מוצגות לפני דמי ניהול.';
+    const DISCLAIMER_LINE_H = 15;
+    const FOOTER_H = 42;
+
+    const measureCanvas = document.createElement('canvas');
+    const mctx = measureCanvas.getContext('2d');
+
+    mctx.font = `800 14px ${FONT}`;
+    let managerW = 100;
+    data.rows.forEach(r => {
+      const w = mctx.measureText(`${r.providerName}   #${r.fundId}`).width + 34;
+      managerW = Math.max(managerW, Math.min(w, 240));
+    });
+
+    mctx.font = `700 12.5px ${FONT}`;
+    const colWidths = data.columns.map(col => {
+      const headerW = mctx.measureText(col.label).width;
+      return Math.max(col.isExp ? 108 : 88, Math.ceil(headerW) + 26);
+    });
+
+    const tableW = RANK_W + managerW + colWidths.reduce((a, b) => a + b, 0);
+    const width = Math.ceil(tableW + PAD * 2);
+
+    mctx.font = `600 11px ${FONT}`;
+    const disclaimerLines = wrapCanvasText(mctx, DISCLAIMER_TEXT, tableW);
+    const disclaimerH = disclaimerLines.length * DISCLAIMER_LINE_H + 14;
+
+    const height = Math.ceil(TOP_H + HEADER_H + data.rows.length * ROW_H + (data.avgRow ? AVG_H : 0) + disclaimerH + FOOTER_H + PAD / 2);
+
+    // High quality by default, but never risk exceeding real browser canvas limits.
+    let scale = Math.min(2, window.devicePixelRatio || 2);
+    const MAX_DIM = 8000, MAX_AREA = 60000000;
+    while (scale > 1 && (width * scale > MAX_DIM || height * scale > MAX_DIM || width * height * scale * scale > MAX_AREA)) {
+      scale -= 0.25;
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.ceil(width * scale);
+    canvas.height = Math.ceil(height * scale);
+    const ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
+    ctx.direction = 'rtl';
+    ctx.textBaseline = 'middle';
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+
+    // ── brand header ──
+    let y = 22;
+    const logo = await loadShareLogoImage();
+    ctx.textAlign = 'center';
+    if (logo && logo.width) {
+      const logoH = 42, logoW = logoH * (logo.width / logo.height);
+      ctx.drawImage(logo, width / 2 - logoW / 2, y, logoW, logoH);
+      y += logoH + 16;
+    } else {
+      ctx.font = `800 24px ${FONT}`;
+      ctx.fillStyle = '#183A66';
+      ctx.fillText('GemelHub', width / 2, y + 16);
+      y += 40;
+    }
+
+    ctx.font = `800 21px ${FONT}`;
+    ctx.fillStyle = '#0f172a';
+    ctx.fillText(`${categoryLabel} - ${trackLabel}`, width / 2, y + 12);
+    y += 32;
+
+    ctx.font = `700 12.5px ${FONT}`;
+    const pillW = ctx.measureText(modeLabel).width + 30, pillH = 24;
+    const pillX = width / 2 - pillW / 2;
+    ctx.fillStyle = '#fffbea';
+    roundRectPath(ctx, pillX, y, pillW, pillH, 12);
+    ctx.fill();
+    ctx.strokeStyle = '#d8c589';
+    ctx.lineWidth = 1;
+    roundRectPath(ctx, pillX, y, pillW, pillH, 12);
+    ctx.stroke();
+    ctx.fillStyle = '#8a6d1d';
+    ctx.fillText(modeLabel, width / 2, y + pillH / 2 + 1);
+
+    // ── table geometry (RTL: rank rightmost, then manager, then data columns in DOM order) ──
+    const tableY = TOP_H;
+    const tableX0 = PAD;
+    const cols = [];
+    {
+      let x = tableX0 + tableW;
+      x -= RANK_W; cols.push({ x, w: RANK_W, key: 'rank' });
+      x -= managerW; cols.push({ x, w: managerW, key: 'manager' });
+      data.columns.forEach((col, i) => {
+        x -= colWidths[i];
+        cols.push({ x, w: colWidths[i], key: 'data', col, i });
+      });
+    }
+    const bodyH = data.rows.length * ROW_H + (data.avgRow ? AVG_H : 0);
+
+    // sorted-column tint spanning the whole column (header + body), matching the site's highlight
+    cols.forEach(c => {
+      if (c.key === 'data' && c.col.isSorted) {
+        ctx.fillStyle = 'rgba(253,224,71,0.16)';
+        ctx.fillRect(c.x, tableY, c.w, HEADER_H + bodyH);
+      }
+    });
+
+    // header row
+    ctx.fillStyle = '#f6f5ef';
+    ctx.fillRect(tableX0, tableY, tableW, HEADER_H);
+    ctx.font = `800 12.5px ${FONT}`;
+    cols.forEach(c => {
+      const isSortedHeader = c.key === 'data' && c.col.isSorted;
+      ctx.fillStyle = isSortedHeader ? '#8a6d1d' : '#475569';
+      const label = c.key === 'rank' ? '#' : c.key === 'manager' ? 'מנהל' : c.col.label;
+      ctx.fillText(label, c.x + c.w / 2, tableY + HEADER_H / 2 + 1);
+    });
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(tableX0, tableY + HEADER_H);
+    ctx.lineTo(tableX0 + tableW, tableY + HEADER_H);
+    ctx.stroke();
+
+    // ── body rows ──
+    let rowY = tableY + HEADER_H;
+    const drawAllocationCell = (c, cy, cell) => {
+      const pct = cell.allocation.pct;
+      ctx.font = `700 13px ${FONT}`;
+      ctx.fillStyle = '#1e293b';
+      ctx.fillText(cell.text, c.x + c.w / 2, cy - 7);
+      const barW = c.w - 24, barX = c.x + 12, barY = cy + 8, barH = 6;
+      ctx.fillStyle = '#e2e8f0';
+      roundRectPath(ctx, barX, barY, barW, barH, 3);
+      ctx.fill();
+      const fillW = Math.max(0, Math.min(100, pct)) / 100 * barW;
+      if (fillW > 0) {
+        ctx.fillStyle = cell.allocation.color;
+        roundRectPath(ctx, barX, barY, fillW, barH, 3);
+        ctx.fill();
+      }
+    };
+    const drawYieldCell = (c, cy, cell) => {
+      ctx.font = `700 13.5px ${FONT}`;
+      ctx.fillStyle = cell.sign > 0 ? '#1cb452' : cell.sign < 0 ? '#dc2626' : '#1e293b';
+      ctx.fillText(cell.text, c.x + c.w / 2, cy);
+      if (cell.topRank && SHARE_RANK_STYLE[cell.topRank]) {
+        const textW = ctx.measureText(cell.text).width;
+        const style = SHARE_RANK_STYLE[cell.topRank];
+        const r = 6.5;
+        const bx = c.x + c.w / 2 + textW / 2 + r + 3;
+        const by = cy - 9;
+        ctx.beginPath();
+        ctx.arc(bx, by, r, 0, Math.PI * 2);
+        ctx.fillStyle = style.bg;
+        ctx.fill();
+        ctx.strokeStyle = style.border;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.font = `900 8.5px ${FONT}`;
+        ctx.fillStyle = style.text;
+        ctx.fillText(String(cell.topRank), bx, by + 0.5);
+      }
+    };
+
+    data.rows.forEach((row, rowIdx) => {
+      const cy = rowY + ROW_H / 2;
+      if (rowIdx % 2 === 1) {
+        ctx.fillStyle = '#fafaf8';
+        ctx.fillRect(tableX0, rowY, tableW, ROW_H);
+        cols.forEach(c => {
+          if (c.key === 'data' && c.col.isSorted) {
+            ctx.fillStyle = 'rgba(253,224,71,0.16)';
+            ctx.fillRect(c.x, rowY, c.w, ROW_H);
+          }
+        });
+      }
+      cols.forEach(c => {
+        if (c.key === 'rank') {
+          ctx.font = `700 12.5px ${FONT}`;
+          ctx.fillStyle = '#94a3b8';
+          ctx.fillText(row.rank, c.x + c.w / 2, cy);
+        } else if (c.key === 'manager') {
+          ctx.beginPath();
+          ctx.arc(c.x + c.w - 14, cy, 4, 0, Math.PI * 2);
+          ctx.fillStyle = row.providerColor;
+          ctx.fill();
+          ctx.font = `800 13.5px ${FONT}`;
+          ctx.fillStyle = row.providerColor;
+          ctx.textAlign = 'right';
+          ctx.fillText(row.providerName, c.x + c.w - 24, cy - 6);
+          ctx.font = `600 10.5px ${FONT}`;
+          ctx.fillStyle = '#94a3b8';
+          ctx.fillText(`#${row.fundId}`, c.x + c.w - 24, cy + 9);
+          ctx.textAlign = 'center';
+        } else {
+          const cell = row.cells[c.i];
+          if (!cell) return;
+          if (cell.allocation) drawAllocationCell(c, cy, cell);
+          else drawYieldCell(c, cy, cell);
+        }
+      });
+      rowY += ROW_H;
+    });
+
+    // ── group average row ──
+    if (data.avgRow) {
+      ctx.fillStyle = '#fefce8';
+      ctx.fillRect(tableX0, rowY, tableW, AVG_H);
+      ctx.strokeStyle = '#ca8a04';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(tableX0, rowY); ctx.lineTo(tableX0 + tableW, rowY);
+      ctx.moveTo(tableX0, rowY + AVG_H); ctx.lineTo(tableX0 + tableW, rowY + AVG_H);
+      ctx.stroke();
+      const cy = rowY + AVG_H / 2;
+      cols.forEach(c => {
+        if (c.key === 'rank') return;
+        if (c.key === 'manager') {
+          ctx.font = `800 italic 13px ${FONT}`;
+          ctx.fillStyle = '#64748b';
+          ctx.textAlign = 'right';
+          ctx.fillText('ממוצע קבוצה', c.x + c.w - 24, cy);
+          ctx.textAlign = 'center';
+        } else {
+          const cell = data.avgRow.cells[c.i];
+          if (!cell) return;
+          if (cell.allocation) {
+            drawAllocationCell(c, cy, cell);
+          } else {
+            ctx.font = `800 italic 13px ${FONT}`;
+            ctx.fillStyle = cell.sign > 0 ? '#1cb452' : cell.sign < 0 ? '#dc2626' : '#334155';
+            ctx.fillText(cell.text, c.x + c.w / 2, cy);
+          }
+        }
+      });
+      rowY += AVG_H;
+    }
+
+    // ── legal disclaimer (below the table, above the brand footer) ──
+    ctx.font = `600 11px ${FONT}`;
+    ctx.fillStyle = '#94a3b8';
+    ctx.textAlign = 'center';
+    let disclaimerY = height - FOOTER_H - disclaimerH + DISCLAIMER_LINE_H / 2 + 7;
+    disclaimerLines.forEach(line => {
+      ctx.fillText(line, width / 2, disclaimerY);
+      disclaimerY += DISCLAIMER_LINE_H;
+    });
+
+    // ── footer (no URL, per product requirements) ──
+    ctx.font = `600 12px ${FONT}`;
+    ctx.fillStyle = '#94a3b8';
+    ctx.textAlign = 'center';
+    ctx.fillText('נוצר ב-GemelHub', width / 2, height - FOOTER_H / 2);
+
+    return canvas;
+  }
+
+  function downloadBlob(blob, fileName) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  }
+
+  // Shown after the image was opened/downloaded (i.e. no native share sheet was available) so the
+  // user can still reach WhatsApp — or copy the track link to share it anywhere else — without the
+  // browser being able to attach the file automatically.
+  function showShareOptionsToast(shareText, shareUrl) {
+    document.querySelectorAll('.share-options-toast').forEach(el => el.remove());
+    const toast = document.createElement('div');
+    toast.className = 'share-options-toast';
+    toast.innerHTML = `
+      <button type="button" class="share-options-toast-close" aria-label="סגור">✕</button>
+      <div class="share-options-toast-title">התמונה נשמרה למחשב</div>
+      <div class="share-options-toast-actions">
+        <button type="button" class="share-options-toast-btn whatsapp"><i class="fab fa-whatsapp" aria-hidden="true"></i> שתף בווטסאפ</button>
+        <button type="button" class="share-options-toast-btn copy"><i class="fas fa-link" aria-hidden="true"></i> העתק קישור למסלול</button>
+      </div>
+    `;
+    document.body.appendChild(toast);
+    const close = () => { toast.classList.add('fade-out'); setTimeout(() => toast.remove(), 350); };
+    toast.querySelector('.whatsapp').addEventListener('click', () => {
+      window.open('https://wa.me/?text=' + encodeURIComponent(shareText), '_blank', 'noopener');
+      close();
+    });
+    toast.querySelector('.copy').addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        showToast('הקישור הועתק');
+      } catch (e) { /* clipboard API unavailable — user can still copy from the WhatsApp text */ }
+      close();
+    });
+    toast.querySelector('.share-options-toast-close').addEventListener('click', close);
+    setTimeout(close, 14000);
   }
 
   async function shareTrackImage(track) {
     if (!track?.id || !state.activeCategoryId) return;
     const mode = getShareImageMode();
+    const modeLabel = getShareImageModeLabel();
     const category = CONFIG.PRODUCT_CATEGORIES.find(item => item.id === state.activeCategoryId);
     const categoryLabel = category?.label || state.activeCategoryId;
     const title = `${categoryLabel} - ${track.label}`;
     const block = Array.from(document.querySelectorAll('.track-block'))
       .find(item => item.dataset.trackId === track.id);
     const btn = block?.querySelector('.share-track-image-btn');
+    if (!block) return;
+    const shareUrl = `${location.origin}${location.pathname}?cat=${encodeURIComponent(state.activeCategoryId)}&focusTrack=${encodeURIComponent(track.id)}`;
+    const shareText = `השוואת ${title} ב-GemelHub לפי התצוגה שבחרת\n${shareUrl}`;
     try {
       if (btn) {
         btn.classList.add('is-loading');
         btn.disabled = true;
       }
-      const period = await getLatestShareImagePeriod();
-      const imageUrl = `assets/share-images/${encodeURIComponent(period)}/${shareImageSlug(state.activeCategoryId)}__${shareImageSlug(track.id)}__${mode}.png`;
-      const absoluteUrl = new URL(imageUrl, window.location.href).toString();
-      const imageRes = await fetch(imageUrl, { cache: 'no-store' });
-      if (!imageRes.ok) throw new Error('share image missing');
-      const blob = await imageRes.blob();
-      const file = new File([blob], `${shareImageSlug(categoryLabel)}-${shareImageSlug(track.label)}-${mode}.png`, { type: blob.type || 'image/png' });
+      const canvas = await buildShareCanvas(block, categoryLabel, track.label, modeLabel);
+      const fileName = shareImageFileName(categoryLabel, track.label);
+      let blob;
+      try {
+        blob = await canvasToBlob(canvas, 'image/png');
+      } catch (blobError) {
+        // Extremely large tables: fall back to JPEG, which tends to succeed where PNG encoding fails.
+        blob = await canvasToBlob(canvas, 'image/jpeg', 0.92);
+      }
+      const file = new File([blob], fileName, { type: blob.type });
 
-      if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
-        await navigator.share({
-          title,
-          text: `השוואת ${title} ב-GemelHub`,
-          files: [file]
-        });
-        return;
+      // Try the native share sheet everywhere it's offered (mobile *and* desktop browsers that wire
+      // one up, e.g. Windows share) — it's the only way to hand the actual image file to WhatsApp/
+      // Mail/"edit" in one step. NotAllowedError/AbortError just mean it's unavailable or the user
+      // backed out, so fall through to the download + WhatsApp-link toast below instead of failing.
+      if (navigator.canShare && navigator.share && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ title, text: shareText, files: [file] });
+          return;
+        } catch (shareError) {
+          if (shareError?.name === 'AbortError') return; // user cancelled the share sheet — not a failure
+          console.warn('navigator.share failed, falling back to download', shareError);
+        }
       }
-      if (navigator.share) {
-        await navigator.share({
-          title,
-          text: `השוואת ${title} ב-GemelHub`,
-          url: absoluteUrl
-        });
-        return;
+
+      let opened = null;
+      try {
+        const objectUrl = URL.createObjectURL(file);
+        opened = window.open(objectUrl, '_blank', 'noopener');
+        if (!opened || opened.closed || typeof opened.closed === 'undefined') {
+          URL.revokeObjectURL(objectUrl);
+          throw new Error('popup blocked');
+        }
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+      } catch (openError) {
+        downloadBlob(file, fileName);
       }
-      window.open(absoluteUrl, '_blank', 'noopener');
+      showShareOptionsToast(shareText, shareUrl);
     } catch (error) {
-      console.warn('Could not share track image', error);
-      alert('תמונת השיתוף עדיין לא זמינה למסלול הזה. היא תיווצר אוטומטית אחרי עדכון הנתונים הבא.');
+      console.warn('Could not create share image', error);
+      alert('לא הצלחתי ליצור תמונת שיתוף כרגע. כדאי לנסות שוב בעוד רגע.');
     } finally {
       if (btn) {
         btn.classList.remove('is-loading');
@@ -5467,14 +5962,20 @@ const App = (() => {
       ensureYearlyTrackLoaded(trackId, 10);
     });
 
-    // כפתור הצג/הסתר אלוקציה — toggle class בלבד, ללא רינדור מחדש
-    block.querySelector('.share-track-image-btn')?.addEventListener('click', e => {
-      e.preventDefault();
-      e.stopPropagation();
-      const trackId = block.dataset.trackId || null;
-      const track = CONFIG.INVESTMENT_TRACKS.find(item => item.id === trackId);
-      shareTrackImage(track);
-    });
+    // כפתור שיתוף תמונה — bindTableControls נקרא מחדש בכל רינדור (מיון, טוגל אלוקציה וכו'),
+    // אבל הכפתור עצמו נשאר אותו אלמנט DOM לאורך כל חיי הבלוק. בלי השמירה הזו כל רינדור מוסיף
+    // עוד listener על אותו כפתור, ולחיצה בודדת אחרי כמה מיונים מייצרת כמה תמונות/הורדות בבת אחת.
+    const shareImgBtn = block.querySelector('.share-track-image-btn');
+    if (shareImgBtn && !shareImgBtn.dataset.shareBound) {
+      shareImgBtn.dataset.shareBound = '1';
+      shareImgBtn.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        const trackId = block.dataset.trackId || null;
+        const track = CONFIG.INVESTMENT_TRACKS.find(item => item.id === trackId);
+        shareTrackImage(track);
+      });
+    }
 
     const eBtn = block.querySelector('.exp-toggle-btn');
     if (eBtn) {
@@ -6088,7 +6589,7 @@ const App = (() => {
 
   const SB_RETURN_FIELDS = [
     { id: 'monthly', label: 'חודשי', itemKey: 'y1' },
-    { id: 'ytd', label: 'YTD', itemKey: 'y3' },
+    { id: 'ytd', label: 'השנה', itemKey: 'y3' },
     { id: '12m', label: '12 חוד׳', itemKey: 'y12m' },
     { id: '3y', label: '3 שנים', itemKey: 'y5' },
     { id: '5y', label: '5 שנים', itemKey: 'y5yr' }
@@ -9215,7 +9716,7 @@ const App = (() => {
             return `<th${sortedThClass(sortKey, 'yield-col')} data-sortfield="${sortKey}" ${ariaSort(sortKey)} scope="col">${year} ${arrow(sortKey)}</th>`;
           }).join('')
         : `<th scope="col">${yearlyState?.error === 'timeout' ? 'הטעינה ארוכה מדי, לחץ שוב לטעינה' : yearlyState?.error === 'failed' ? 'הטעינה נכשלה, לחץ שוב לטעינה' : 'לא נמצאו שנים מלאות'}</th>`;
-    const yearlyHeaderCells = `<th${sortedThClass(yearlyYtdSortKey, 'yield-col')} data-sortfield="${yearlyYtdSortKey}" ${ariaSort(yearlyYtdSortKey)} scope="col">YTD ${arrow(yearlyYtdSortKey)}</th>${yearlyYearHeaderCells}`;
+    const yearlyHeaderCells = `<th${sortedThClass(yearlyYtdSortKey, 'yield-col')} data-sortfield="${yearlyYtdSortKey}" ${ariaSort(yearlyYtdSortKey)} scope="col">השנה ${arrow(yearlyYtdSortKey)}</th>${yearlyYearHeaderCells}`;
     const matchYearlyHeight = !yearlyActive && (
       state.compactTracksView ||
       (state.showExposure && (state.yieldMode === 'cumulative' || state.yieldMode === 'annualized'))
@@ -9229,7 +9730,7 @@ const App = (() => {
             <th scope="col">מנהל</th>
             ${(!state.showExposure || _isDesktopExp) && !yearlyActive && customRangeActive ? `<th${sortedThClass('customRange', 'custom-range-col yield-col')} data-sortfield="customRange" ${ariaSort('customRange')} scope="col"><span class="custom-range-th">טווח מותאם</span> ${arrow('customRange')}<small class="custom-range-th-dates">${formatRangePeriodOnly(state.customRange.startPeriod, state.customRange.endPeriod)}</small></th>` : ''}
             ${(!state.showExposure || _isDesktopExp) ? (yearlyActive ? yearlyHeaderCells : `<th${sortedThClass('monthly', 'yield-col')} data-sortfield="monthly" ${ariaSort('monthly')} scope="col">${monthCol} ${arrow('monthly')}</th>
-            <th${sortedThClass('ytd', 'yield-col')} data-sortfield="ytd" ${ariaSort('ytd')} scope="col">YTD ${arrow('ytd')}</th>
+            <th${sortedThClass('ytd', 'yield-col')} data-sortfield="ytd" ${ariaSort('ytd')} scope="col">השנה ${arrow('ytd')}</th>
             <th${sortedThClass('1yr', 'yield-col')} data-sortfield="1yr" ${ariaSort('1yr')} scope="col">12 חוד׳ ${arrow('1yr')}</th>
             <th${sortedThClass('3yr', 'yield-col')} data-sortfield="3yr" ${ariaSort('3yr')} scope="col">${_yr3Lbl} ${arrow('3yr')}${_yieldSubLabel}</th>
             <th${sortedThClass('5yr', 'yield-col')} data-sortfield="5yr" ${ariaSort('5yr')} scope="col">${_yr5Lbl} ${arrow('5yr')}${_yieldSubLabel}</th>
