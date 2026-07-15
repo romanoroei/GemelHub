@@ -9122,7 +9122,14 @@ const App = (() => {
     // invest inputs — comma formatting on input, save clean value on blur
     section.querySelectorAll('.sandbox-invest-input').forEach(input => {
       input.addEventListener('input', () => {
-        const raw = input.value.replace(/,/g, '').replace(/[^\d.]/g, '');
+        const oldValue = input.value;
+        const oldSelStart = input.selectionStart;
+        // Count real digits (ignoring thousands separators) before the caret, so the caret can be
+        // restored to the same digit after reformatting — not the same character index, which shifts
+        // whenever a comma is inserted/removed and previously caused digits typed afterwards to land
+        // in the wrong slot (e.g. typing 150342 landing as 150423).
+        const digitsBeforeCaret = oldValue.slice(0, oldSelStart).replace(/[^\d.]/g, '').length;
+        const raw = oldValue.replace(/,/g, '').replace(/[^\d.]/g, '');
         if (raw === '' || isNaN(Number(raw))) {
           // still save empty
           const item = _sbFindPortfolioItemFromElement(input);
@@ -9136,9 +9143,13 @@ const App = (() => {
           return;
         }
         const formatted = Number(raw).toLocaleString('he-IL');
-        const selStart = input.selectionStart;
         input.value = formatted;
-        try { input.setSelectionRange(selStart, selStart); } catch(e) {}
+        let seen = 0, newPos = formatted.length;
+        for (let i = 0; i < formatted.length; i++) {
+          if (formatted[i] !== ',') seen++;
+          if (seen === digitsBeforeCaret) { newPos = i + 1; break; }
+        }
+        try { input.setSelectionRange(newPos, newPos); } catch(e) {}
         // live save
         const item = _sbFindPortfolioItemFromElement(input);
         if (item) {
