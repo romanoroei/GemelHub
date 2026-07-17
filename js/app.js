@@ -1677,7 +1677,7 @@ const App = (() => {
         item.classList.toggle('is-disabled', disabled);
       }
       if (target === 'sidebar-filter') {
-        const label = Array.from(item.querySelectorAll('span')).find(span => !span.classList.contains('mob-nav-icon-wrap') && !span.classList.contains('mob-nav-badge'));
+        const label = Array.from(item.querySelectorAll('span')).find(span => !span.classList.contains('mob-nav-icon-wrap') && !span.classList.contains('mob-nav-badge') && !span.classList.contains('nav-filter-dot'));
         const icon = item.querySelector('i');
         if (label) label.textContent = current === 'h2h' ? 'מדדים' : 'סינון';
         item.setAttribute('aria-label', current === 'h2h' ? 'בחירת מדדים להשוואה' : 'סינון');
