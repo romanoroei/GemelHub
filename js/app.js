@@ -1732,7 +1732,7 @@ const App = (() => {
       sidebar.style.setProperty('top', '82px', 'important');
       sidebar.style.setProperty('right', '8px', 'important');
       sidebar.style.setProperty('width', 'min(268px, calc(100vw - 18px))', 'important');
-      sidebar.style.setProperty('bottom', 'calc(var(--mobile-app-nav-clearance, 72px) - 10px)', 'important');
+      sidebar.style.setProperty('bottom', 'calc(66px + env(safe-area-inset-bottom, 0px))', 'important');
       sidebar.style.setProperty('z-index', '9050', 'important');
       sidebar.style.setProperty('background', '#fff', 'important');
       sidebar.style.setProperty('padding', '12px 12px', 'important');

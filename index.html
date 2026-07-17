@@ -58,7 +58,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=share-image-fixes-round7-20260713" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-filter-drawer-fix-20260718" />
   <style>
     @media (max-width: 760px) {
       .advanced-search-overlay { z-index: 9500 !important; }
@@ -78,7 +78,7 @@
       body.mobile-filter-open #sidebar.sidebar-collapsed {
         position: fixed !important;
         top: 0 !important; right: 0 !important;
-        bottom: var(--mobile-app-nav-clearance, 72px) !important;
+        bottom: calc(66px + env(safe-area-inset-bottom, 0px)) !important;
         width: min(290px, 88vw) !important;
         height: auto !important;
         z-index: 9050 !important;
@@ -432,6 +432,7 @@
                   <i class="fas fa-building"></i> מנהלי השקעות
                   <button class="btn-clear-filter" id="clear-providers" aria-label="נקה סינון מנהלים">נקה</button>
                 </div>
+                <p class="provider-filter-hint">לחיצה על שם מנהל מסירה אותו מהטבלה</p>
                 <div class="filter-checkboxes" id="filter-providers"></div>
               </div>
 
@@ -745,6 +746,6 @@
 
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
-  <script src="js/app.js?v=sandbox-invest-caret-fix-20260714"></script>
+  <script src="js/app.js?v=mobile-filter-drawer-fix-20260718"></script>
 </body>
 </html>
