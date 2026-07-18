@@ -2980,6 +2980,12 @@ const App = (() => {
     const offset = getTrackScrollOffset();
     const y = rowTop + window.scrollY - offset;
     window.scrollTo({ top: Math.max(0, y), behavior: 'auto' });
+    // updateMobileStickyHeader() normally only runs off the native 'scroll' event, which isn't
+    // guaranteed to fire before the next requestAnimationFrame — on some categories that race lost,
+    // leaving mobile-sticky-header-fixed stale (still false) for the corrective second pass below,
+    // so it never subtracted the header's height and the scroll overshot far enough to hide the
+    // first 1-2 rows behind the now-fixed header. Calling it synchronously here removes that race.
+    updateMobileStickyHeader();
   }
 
   function startMobileFirstTableScrollGuard() {
@@ -17159,6 +17165,8 @@ const App = (() => {
       const visibleRows = Math.max(1, Math.min(items.length || 1, RECENT_VIEWED_FUNDS_LIMIT));
       drawer.style.setProperty('--recent-panel-h', `${34 + (visibleRows * 66)}px`);
     }
+    const clearBtn = document.getElementById('mobile-recent-funds-clear');
+    if (clearBtn) clearBtn.disabled = !items.length;
     if (!items.length) {
       list.innerHTML = '<div class="mobile-recent-funds-empty">קופות שצפית בהן יופיעו כאן</div>';
       return;
@@ -17216,6 +17224,12 @@ const App = (() => {
       handle.setAttribute('aria-expanded', open ? 'true' : 'false');
       handle.setAttribute('aria-label', open ? 'סגור קופות שנצפו לאחרונה' : 'פתח קופות שנצפו לאחרונה');
     };
+
+    document.getElementById('mobile-recent-funds-clear')?.addEventListener('click', event => {
+      event.stopPropagation();
+      saveRecentViewedFunds([]);
+      renderMobileRecentFunds();
+    });
 
     let startY = 0;
     let dragDelta = 0;

@@ -15122,7 +15122,7 @@ tr.sb-row-hidden .sandbox-invest-input {
   .mobile-recent-funds-head {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
     height: 34px;
     padding: 0 14px;
     border-bottom: 1px solid rgba(131, 92, 13, .22);
@@ -15140,6 +15140,24 @@ tr.sb-row-hidden .sandbox-invest-input {
     color: #8b8f98;
     font-size: .73rem;
     font-weight: 800;
+  }
+
+  .mobile-recent-funds-clear {
+    background: none;
+    border: none;
+    padding: 4px 2px;
+    font-family: inherit;
+    font-size: .72rem;
+    font-weight: 800;
+    color: #8a5a10;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .mobile-recent-funds-clear:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    text-decoration: none;
   }
 
   .mobile-recent-funds-list {

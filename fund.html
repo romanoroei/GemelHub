@@ -45,7 +45,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=h2h-print-leaderboard-20260718" />
+  <link rel="stylesheet" href="css/style.css?v=recent-funds-clear-btn-20260718" />
   <link rel="stylesheet" href="css/fund.css?v=wide-mobile-tables-20260708" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -306,6 +306,7 @@
   <div class="mobile-recent-funds-panel">
     <div class="mobile-recent-funds-head">
       <strong>נצפו לאחרונה</strong>
+      <button type="button" class="mobile-recent-funds-clear" id="mobile-recent-funds-clear">נקה הכל</button>
     </div>
     <div class="mobile-recent-funds-list" id="mobile-recent-funds-list" role="list"></div>
   </div>
@@ -3428,6 +3429,8 @@ document.addEventListener('DOMContentLoaded', () => {
       var visibleRows = Math.max(1, Math.min(items.length || 1, RECENT_VIEWED_FUNDS_LIMIT));
       drawer.style.setProperty('--recent-panel-h', (34 + (visibleRows * 66)) + 'px');
     }
+    var clearBtn = document.getElementById('mobile-recent-funds-clear');
+    if (clearBtn) clearBtn.disabled = !items.length;
     if (!items.length) {
       list.innerHTML = '<div class="mobile-recent-funds-empty">קופות שצפית בהן יופיעו כאן</div>';
       return;
@@ -3488,6 +3491,13 @@ document.addEventListener('DOMContentLoaded', () => {
       handle.setAttribute('aria-expanded', open ? 'true' : 'false');
       handle.setAttribute('aria-label', open ? 'סגור קופות שנצפו לאחרונה' : 'פתח קופות שנצפו לאחרונה');
     }
+
+    var clearBtn = document.getElementById('mobile-recent-funds-clear');
+    if (clearBtn) clearBtn.addEventListener('click', function(event) {
+      event.stopPropagation();
+      saveRecentViewedFunds([]);
+      renderMobileRecentFunds();
+    });
 
     var startY = 0;
     var dragDelta = 0;
