@@ -7445,6 +7445,7 @@ body.h2h-active #h2h-section {
 
 .h2h-add-btn,
 .h2h-clear-btn,
+.h2h-print-btn,
 .h2h-metrics-tog-btn,
 .h2h-view-btn {
   min-height: 38px;
@@ -8874,7 +8875,8 @@ body.h2h-active,
   .h2h-topbar-actions,
   .h2h-metrics-tog-btn,
   .h2h-add-btn,
-  .h2h-clear-btn {
+  .h2h-clear-btn,
+  .h2h-print-btn {
     width: 100%;
     justify-content: center;
   }
@@ -19439,13 +19441,14 @@ html body .sandbox-track-id {
   }
   body.h2h-active .h2h-topbar-actions {
     display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 7px !important;
     width: 100% !important;
   }
   body.h2h-active .h2h-add-btn,
   body.h2h-active .h2h-metrics-tog-btn,
-  body.h2h-active .h2h-clear-btn {
+  body.h2h-active .h2h-clear-btn,
+  body.h2h-active .h2h-print-btn {
     width: 100% !important;
     min-width: 0 !important;
     min-height: 34px !important;
@@ -19472,7 +19475,13 @@ html body .sandbox-track-id {
     background: #fff5f7 !important;
     color: #be123c !important;
   }
-  body.h2h-active .h2h-clear-btn:disabled { opacity: .52 !important; cursor: not-allowed !important; }
+  body.h2h-active .h2h-print-btn {
+    border: 1px solid rgba(201, 183, 114, .78) !important;
+    background: #fff !important;
+    color: #0f2d44 !important;
+  }
+  body.h2h-active .h2h-clear-btn:disabled,
+  body.h2h-active .h2h-print-btn:disabled { opacity: .52 !important; cursor: not-allowed !important; }
   body.h2h-active .h2h-topbar-main { width: 100% !important; }
   body.h2h-active .h2h-inline-stats {
     display: grid !important;
@@ -20736,6 +20745,36 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   background: rgba(255, 255, 255, .16);
   padding: 6px 16px;
   border-radius: 20px;
+}
+
+/* ── H2H print content: board was built for on-screen dragging/scrolling, not print.
+   Unconditional (not @media-print-scoped) for the same reason as the rest of this section —
+   some mobile browsers apply the print stylesheet unreliably during the actual capture.
+   `html body...` prefix (not just `.h2h-print-root ...`) is needed to outrank the mobile
+   `body.h2h-active ...` !important rules, which stay active during print since h2h-active
+   is never removed from body while sb-compare-printing is added alongside it. ── */
+html body.sb-compare-printing .h2h-print-root .h2h-drag-handle,
+html body.sb-compare-printing .h2h-print-root .h2h-rm-btn,
+html body.sb-compare-printing .h2h-print-root .h2h-metric-remove-btn,
+html body.sb-compare-printing .h2h-print-root .h2h-metric-sort-btn i.fa-arrow-down-wide-short {
+  display: none !important;
+}
+html body.sb-compare-printing .h2h-print-root .h2h-metric-sort-btn {
+  cursor: default !important;
+  pointer-events: none !important;
+}
+html body.sb-compare-printing .h2h-print-root .h2h-fund-axis,
+html body.sb-compare-printing .h2h-print-root .h2h-board-row .h2h-fund-row-th {
+  position: static !important;
+  box-shadow: none !important;
+}
+html body.sb-compare-printing .h2h-print-root .h2h-board-scroll {
+  overflow: visible !important;
+}
+html body.sb-compare-printing .h2h-print-root .h2h-board-head,
+html body.sb-compare-printing .h2h-print-root .h2h-board-row {
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 /* ── Print styles ── */

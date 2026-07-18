@@ -15092,6 +15092,77 @@ const App = (() => {
     panel.querySelector('[data-h2h-range-clear]')?.addEventListener('click', clearH2HCustomRangeSelection);
   }
 
+  // הדפסת "ראש בראש" — משתמשת באותה תשתית שהוכחה עצמה בהדפסת "השווה תיקים"
+  // בסנדבוקס (אותם קלאסים/מזהים: body.sb-compare-printing, #sb-compare-print-root
+  // וכו'), כולל אותו CSS. אין הפעלה אוטומטית מבוססת afterprint/matchMedia —
+  // ראה את ההערות המפורטות ליד _sbPrintCompare למה זה לא אמין במובייל.
+  function _h2hPrintCompare() {
+    const content = document.querySelector('#h2h-workspace .h2h-results')
+      || document.querySelector('#h2h-workspace .h2h-empty')
+      || document.querySelector('#h2h-workspace .h2h-no-metrics');
+    if (!content) return;
+    _ghTrackAnalytics('h2h_print', { fund_count: (state.h2h.items || []).length || 0 });
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+    _sbComparePrintInProgress = true;
+    _sbCleanupComparePrintState();
+    _sbComparePrintInProgress = true;
+    _sbCleanupPrintState();
+    _sbComparePrintRoot = document.createElement('div');
+    _sbComparePrintRoot.id = 'sb-compare-print-root';
+    _sbComparePrintRoot.className = 'h2h-print-root';
+    _sbComparePrintRoot.dir = 'rtl';
+    _sbComparePrintRoot.style.display = 'none';
+    _sbComparePrintRoot.innerHTML =
+      '<div class="sb-compare-print-return-overlay">' +
+        '<button type="button" id="sb-compare-print-return-btn" class="sb-compare-print-return-btn">← חזרה להשוואה</button>' +
+        '<div class="sb-compare-print-return-timer" id="sb-compare-print-return-timer"></div>' +
+      '</div>' +
+      '<div class="sb-print-report-header">' +
+        '<div class="sb-print-logo">' + SB_PRINT_LOGO_HTML + '</div>' +
+        '<div class="sb-print-portfolio-title">השוואה ראש בראש</div>' +
+        '<div class="sb-print-meta">הופק: ' + dateStr + '<br>רועי רומנו, מתכנן פיננסי וסוכן פנסיוני מורשה | 052-8089808</div>' +
+      '</div>' +
+      content.outerHTML +
+      '<div class="sb-print-disclaimer">המידע נועד לספק תמונת מצב כללית והשוואתית בלבד ואינו מהווה ייעוץ השקעות, שיווק פנסיוני או תחליף לייעוץ אישי המותאם לצרכי הלקוח. הנתונים מבוססים על מקורות פומביים ועשויים להכיל טעויות או אי-דיוקים. אין לראות בתשואות העבר התחייבות לתשואות עתידיות. לפני קבלת החלטה פיננסית מומלץ להתייעץ עם בעל רישיון.</div>';
+    _sbComparePrintScrollY = window.scrollY || 0;
+    _sbComparePrintOriginalNodes = Array.from(document.body.childNodes);
+    document.body.replaceChildren(_sbComparePrintRoot);
+    document.body.classList.add('sb-compare-printing');
+    document.getElementById('sb-compare-print-return-btn')?.addEventListener('click', _sbCleanupComparePrintState);
+    void _sbComparePrintRoot.offsetHeight;
+
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        _sbWaitForPrintAssets(_sbComparePrintRoot).then(function() {
+          try {
+            window.print();
+            _sbComparePrintVisHandler = function() {
+              if (!document.hidden) setTimeout(_sbCleanupComparePrintState, 700);
+            };
+            document.addEventListener('visibilitychange', _sbComparePrintVisHandler);
+            _sbComparePrintCleanupTimer = setTimeout(_sbCleanupComparePrintState, SB_COMPARE_PRINT_SAFETY_MS);
+            const countdownEl = document.getElementById('sb-compare-print-return-timer');
+            if (countdownEl) {
+              const deadline = Date.now() + SB_COMPARE_PRINT_SAFETY_MS;
+              const tick = () => {
+                const secsLeft = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+                countdownEl.textContent = `חוזר אוטומטית בעוד ${secsLeft} שנ׳`;
+              };
+              tick();
+              _sbComparePrintCountdownInterval = setInterval(tick, 250);
+            }
+          } catch (error) {
+            console.warn('H2H print failed', error);
+            _sbCleanupComparePrintState();
+            showToast('לא הצלחנו לפתוח את חלון ההדפסה. נסה שוב.');
+          }
+        });
+      });
+    });
+  }
+
   renderH2H = function() {
     const ws = document.getElementById('h2h-workspace');
     if (!ws) return;
@@ -15110,6 +15181,9 @@ const App = (() => {
           </button>
           <button class="h2h-clear-btn" id="h2h-clear-btn" ${hasItems ? '' : 'disabled'}>
             <i class="fas fa-trash-alt"></i> נקה השוואה
+          </button>
+          <button class="tbl-ctrl-btn h2h-print-btn" id="h2h-print-btn" title="הדפס השוואה" ${hasItems ? '' : 'disabled'}>
+            <i class="fas fa-print"></i> הדפסה
           </button>
         </div>
         <div class="h2h-topbar-main">
@@ -15182,6 +15256,7 @@ const App = (() => {
       clearPersistedH2HState();
       renderH2H();
     });
+    document.getElementById('h2h-print-btn')?.addEventListener('click', _h2hPrintCompare);
 
     ws.querySelectorAll('.h2h-view-btn').forEach(btn => {
       btn.addEventListener('click', () => {
