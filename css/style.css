@@ -20753,8 +20753,8 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
    (provider / track / fund id, stacked) is H2H-specific. ── */
 .h2h-print-th { vertical-align: middle; }
 .h2h-print-col-provider { font-weight: 900; font-size: .74rem; line-height: 1.2; }
-.h2h-print-col-track { font-weight: 700; font-size: .64rem; opacity: .92; margin-top: 2px; line-height: 1.2; }
-.h2h-print-col-id { font-weight: 600; font-size: .58rem; opacity: .85; margin-top: 1px; }
+.h2h-print-col-category { font-weight: 700; font-size: .62rem; opacity: .9; margin-top: 2px; line-height: 1.2; }
+.h2h-print-col-track { font-weight: 600; font-size: .58rem; opacity: .85; margin-top: 1px; line-height: 1.2; }
 
 /* ── Print styles ── */
 @media print {

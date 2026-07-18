@@ -15111,8 +15111,8 @@ const App = (() => {
       const colorCls = ci < 4 ? ` sbcmp-th-${ci}` : '';
       head += `<th class="h2h-print-th${colorCls}">`
         + `<div class="h2h-print-col-provider">${escapeHtml(item.provName || '')}</div>`
-        + `<div class="h2h-print-col-track">${escapeHtml(item.trackLabel || item.catLabel || '')}</div>`
-        + `<div class="h2h-print-col-id">#${escapeHtml(String(item.record?.FUND_ID || ''))}</div>`
+        + `<div class="h2h-print-col-category">${escapeHtml(item.catLabel || '')}</div>`
+        + `<div class="h2h-print-col-track">${escapeHtml(item.trackLabel || '')} · #${escapeHtml(String(item.record?.FUND_ID || ''))}</div>`
         + '</th>';
     });
     head += '</tr>';
@@ -15133,8 +15133,39 @@ const App = (() => {
       return row + '</tr>';
     }).join('');
 
-    return '<div class="sbcmp-section"><div class="sbcmp-section-head">השוואת מדדים</div>'
-      + '<table class="sbcmp-table"><thead>' + head + '</thead><tbody>' + rows + '</tbody></table></div>';
+    // דירוג קופות מובילות — אותו חישוב בדיוק כמו ה-leaderStrip בלוח החי (renderH2HTable):
+    // ספירת "ניצחונות" לפי מדד (לא כולל מניות/חו"ל/מט"ח, שאין להם "טוב יותר" חד-משמעי).
+    const crownEligibleMetricIds = activeMetrics
+      .filter(metric => !allocationMetrics.has(metric.id))
+      .map(metric => metric.id);
+    const winCounts = items.map((item, index) => ({
+      item,
+      index,
+      wins: crownEligibleMetricIds.filter(metricId => bestIdx[metricId] === index).length
+    })).sort((a, b) => b.wins - a.wins);
+    const leaderStripHtml = winCounts.some(entry => entry.wins > 0)
+      ? '<div class="h2h-leader-strip">'
+        + '<div class="h2h-leader-head"><span class="h2h-leader-kicker">דירוג קופות מובילות</span></div>'
+        + '<div class="h2h-leader-podium">'
+        + winCounts.slice(0, 3).map((entry, rankIndex) => {
+          const wonMetricLabels = crownEligibleMetricIds
+            .filter(metricId => bestIdx[metricId] === entry.index)
+            .map(metricId => getH2HMetricShortLabel(activeMetrics.find(metric => metric.id === metricId) || { id: metricId, label: metricId }));
+          const rankClass = rankIndex === 0 ? 'is-first' : rankIndex === 1 ? 'is-second' : 'is-third';
+          const rankLabel = rankIndex === 0 ? 'מקום ראשון' : rankIndex === 1 ? 'מקום שני' : 'מקום שלישי';
+          return `<article class="h2h-leader-card ${rankClass}">`
+            + `<div class="h2h-leader-rank"><b>${rankIndex + 1}</b><span>${rankLabel}</span></div>`
+            + `<div class="h2h-leader-card-main"><strong>${escapeHtml(entry.item.provName || '')}</strong><em>${escapeHtml(entry.item.trackLabel || entry.item.catLabel || '')}</em></div>`
+            + `<div class="h2h-leader-card-score"><strong>${entry.wins}</strong><span>${entry.wins === 1 ? 'מדד מוביל' : 'מדדים מובילים'}</span></div>`
+            + (wonMetricLabels.length ? `<div class="h2h-leader-metrics">${wonMetricLabels.map(label => `<span>${escapeHtml(label)}</span>`).join('')}</div>` : '')
+            + '</article>';
+        }).join('')
+        + '</div></div>'
+      : '';
+
+    return '<div class="sbcmp-section"><div class="sbcmp-section-head">השוואת קופות</div>'
+      + '<table class="sbcmp-table"><thead>' + head + '</thead><tbody>' + rows + '</tbody></table></div>'
+      + (leaderStripHtml ? '<div class="sbcmp-section">' + leaderStripHtml + '</div>' : '');
   }
 
   // הדפסת "ראש בראש" — משתמשת באותה תשתית שהוכחה עצמה בהדפסת "השווה תיקים"
