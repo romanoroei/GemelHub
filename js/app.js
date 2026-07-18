@@ -2991,10 +2991,18 @@ const App = (() => {
   function startMobileFirstTableScrollGuard() {
     const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
     if (!isMobile) return;
+    // A single immediate pass isn't enough: provider logos/icons in the table rows load
+    // asynchronously and without reserved dimensions, so the page can still reflow (shifting
+    // the target table down or up by roughly a row's height) well after this first correction
+    // runs — leaving the first 1-2 rows hidden behind the sticky header exactly as before, just
+    // from a different cause. Re-run the same correction at a few later checkpoints, mirroring
+    // the retry cadence already used for the pendingCompareTopScroll case below.
     requestAnimationFrame(() => {
       scrollToComparisonTableTop();
-      state.pendingInitialTableTopScroll = false;
+      requestAnimationFrame(scrollToComparisonTableTop);
     });
+    [150, 400, 900, 1600].forEach(delay => setTimeout(scrollToComparisonTableTop, delay));
+    setTimeout(() => { state.pendingInitialTableTopScroll = false; }, 1600);
   }
 
   function getTrackScrollOffset() {
