@@ -19441,7 +19441,7 @@ html body .sandbox-track-id {
   }
   body.h2h-active .h2h-topbar-actions {
     display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 7px !important;
     width: 100% !important;
   }
@@ -20747,35 +20747,14 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   border-radius: 20px;
 }
 
-/* ── H2H print content: board was built for on-screen dragging/scrolling, not print.
-   Unconditional (not @media-print-scoped) for the same reason as the rest of this section —
-   some mobile browsers apply the print stylesheet unreliably during the actual capture.
-   `html body...` prefix (not just `.h2h-print-root ...`) is needed to outrank the mobile
-   `body.h2h-active ...` !important rules, which stay active during print since h2h-active
-   is never removed from body while sb-compare-printing is added alongside it. ── */
-html body.sb-compare-printing .h2h-print-root .h2h-drag-handle,
-html body.sb-compare-printing .h2h-print-root .h2h-rm-btn,
-html body.sb-compare-printing .h2h-print-root .h2h-metric-remove-btn,
-html body.sb-compare-printing .h2h-print-root .h2h-metric-sort-btn i.fa-arrow-down-wide-short {
-  display: none !important;
-}
-html body.sb-compare-printing .h2h-print-root .h2h-metric-sort-btn {
-  cursor: default !important;
-  pointer-events: none !important;
-}
-html body.sb-compare-printing .h2h-print-root .h2h-fund-axis,
-html body.sb-compare-printing .h2h-print-root .h2h-board-row .h2h-fund-row-th {
-  position: static !important;
-  box-shadow: none !important;
-}
-html body.sb-compare-printing .h2h-print-root .h2h-board-scroll {
-  overflow: visible !important;
-}
-html body.sb-compare-printing .h2h-print-root .h2h-board-head,
-html body.sb-compare-printing .h2h-print-root .h2h-board-row {
-  break-inside: avoid;
-  page-break-inside: avoid;
-}
+/* ── H2H print table: funds as column headers (X axis), metrics as rows down the right —
+   built as a plain data table (see _h2hBuildPrintTableHtml), reusing the same .sbcmp-table
+   look as the sandbox's portfolio-compare print. Only the fund-identity header content
+   (provider / track / fund id, stacked) is H2H-specific. ── */
+.h2h-print-th { vertical-align: middle; }
+.h2h-print-col-provider { font-weight: 900; font-size: .74rem; line-height: 1.2; }
+.h2h-print-col-track { font-weight: 700; font-size: .64rem; opacity: .92; margin-top: 2px; line-height: 1.2; }
+.h2h-print-col-id { font-weight: 600; font-size: .58rem; opacity: .85; margin-top: 1px; }
 
 /* ── Print styles ── */
 @media print {

@@ -15092,15 +15092,58 @@ const App = (() => {
     panel.querySelector('[data-h2h-range-clear]')?.addEventListener('click', clearH2HCustomRangeSelection);
   }
 
+  // בונה טבלת הדפסה נפרדת מה-DOM האינטראקטיבי של הלוח (לא outerHTML של הלוח החי) —
+  // באותה צורה בדיוק כמו טבלת ההשוואה בסנדבוקס (mkTable ליד _sbRenderCompare): קופות
+  // ככותרות עמודה (ציר ה-X), מדדים כשורות מימין. מכיוון שהמחרוזת נבנית מאפס, אין שום
+  // סיכוי שכפתור/ידית-גרירה/תפריט יתגלגלו להדפסה בטעות — הם פשוט לא קיימים בה.
+  function _h2hBuildPrintTableHtml() {
+    const items = state.h2h.items || [];
+    if (!items.length) return '';
+    const activeMetrics = getH2HActiveMetrics();
+    if (!activeMetrics.length) return '';
+    const { bestIdx } = getH2HRanking(activeMetrics, items);
+    const signedMetrics = new Set(['monthly', 'ytd', '1yr', '3yr_cum', '5yr_cum', '3yr_ann', '5yr_ann', '7yr_cum', '7yr_ann', 'customRange', 'sharpe', 'positive', 'momentum', 'alpha', 'actuarial']);
+    const lowerIsBetterMetrics = new Set(['stddev']);
+    const allocationMetrics = new Set(['stock', 'abroad', 'fx']);
+
+    let head = '<tr><th>מדד</th>';
+    items.forEach((item, ci) => {
+      const colorCls = ci < 4 ? ` sbcmp-th-${ci}` : '';
+      head += `<th class="h2h-print-th${colorCls}">`
+        + `<div class="h2h-print-col-provider">${escapeHtml(item.provName || '')}</div>`
+        + `<div class="h2h-print-col-track">${escapeHtml(item.trackLabel || item.catLabel || '')}</div>`
+        + `<div class="h2h-print-col-id">#${escapeHtml(String(item.record?.FUND_ID || ''))}</div>`
+        + '</th>';
+    });
+    head += '</tr>';
+
+    const rows = activeMetrics.map(metric => {
+      let row = `<tr><td class="sbcmp-row-label">${escapeHtml(getH2HMetricShortLabel(metric) || metric.label)}</td>`;
+      items.forEach((item, index) => {
+        const raw = getH2HMetricRaw(item, metric.id);
+        const isBest = bestIdx[metric.id] === index;
+        let signCls = '';
+        if (Number.isFinite(raw)) {
+          if (signedMetrics.has(metric.id) || parseH2HYearMetric(metric.id)) signCls = raw > 0 ? 'pos' : raw < 0 ? 'neg' : '';
+          else if (lowerIsBetterMetrics.has(metric.id)) signCls = isBest ? 'pos' : '';
+        }
+        const crown = isBest && !allocationMetrics.has(metric.id) ? '<i class="fas fa-crown sbcmp-best-icon" aria-hidden="true"></i>' : '';
+        row += `<td class="${signCls}"><span class="sbcmp-val-wrap">${crown}${getH2HMetricDisplay(item, metric.id)}</span></td>`;
+      });
+      return row + '</tr>';
+    }).join('');
+
+    return '<div class="sbcmp-section"><div class="sbcmp-section-head">השוואת מדדים</div>'
+      + '<table class="sbcmp-table"><thead>' + head + '</thead><tbody>' + rows + '</tbody></table></div>';
+  }
+
   // הדפסת "ראש בראש" — משתמשת באותה תשתית שהוכחה עצמה בהדפסת "השווה תיקים"
   // בסנדבוקס (אותם קלאסים/מזהים: body.sb-compare-printing, #sb-compare-print-root
   // וכו'), כולל אותו CSS. אין הפעלה אוטומטית מבוססת afterprint/matchMedia —
   // ראה את ההערות המפורטות ליד _sbPrintCompare למה זה לא אמין במובייל.
   function _h2hPrintCompare() {
-    const content = document.querySelector('#h2h-workspace .h2h-results')
-      || document.querySelector('#h2h-workspace .h2h-empty')
-      || document.querySelector('#h2h-workspace .h2h-no-metrics');
-    if (!content) return;
+    const tableHtml = _h2hBuildPrintTableHtml();
+    if (!tableHtml) return;
     _ghTrackAnalytics('h2h_print', { fund_count: (state.h2h.items || []).length || 0 });
     const now = new Date();
     const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -15124,7 +15167,7 @@ const App = (() => {
         '<div class="sb-print-portfolio-title">השוואה ראש בראש</div>' +
         '<div class="sb-print-meta">הופק: ' + dateStr + '<br>רועי רומנו, מתכנן פיננסי וסוכן פנסיוני מורשה | 052-8089808</div>' +
       '</div>' +
-      content.outerHTML +
+      tableHtml +
       '<div class="sb-print-disclaimer">המידע נועד לספק תמונת מצב כללית והשוואתית בלבד ואינו מהווה ייעוץ השקעות, שיווק פנסיוני או תחליף לייעוץ אישי המותאם לצרכי הלקוח. הנתונים מבוססים על מקורות פומביים ועשויים להכיל טעויות או אי-דיוקים. אין לראות בתשואות העבר התחייבות לתשואות עתידיות. לפני קבלת החלטה פיננסית מומלץ להתייעץ עם בעל רישיון.</div>';
     _sbComparePrintScrollY = window.scrollY || 0;
     _sbComparePrintOriginalNodes = Array.from(document.body.childNodes);
