@@ -7,6 +7,114 @@ const APIModule = (() => {
   let _fetchPromise = null;
   const _resourceCache = new Map();
   const _resourcePromiseCache = new Map();
+
+  // ─── Static data cache (twice-daily GitHub Action refresh — .github/workflows/data-sync.yml) ───
+  // Every CKAN call in this file funnels through ckanFetch() instead of calling fetch() directly.
+  // When a pre-synced local copy exists for the requested resource_id, it's served from that (fast,
+  // resilient to data.gov.il being down/slow) with the exact same filter/limit/offset semantics as
+  // the live API — callers can't tell the difference. Falls through to the real live fetch whenever
+  // the local cache is missing, unavailable, or doesn't cover the request shape (e.g. an unfiltered
+  // pull of a sharded archive, which by design isn't served locally).
+  const CKAN_CACHE_MAP = {
+    [CONFIG.API.GEMEL_RESOURCE_ID]:             { file: 'data/ckan/gemel-current.json' },
+    [CONFIG.API.GEMEL_2023_RESOURCE_ID]:        { file: 'data/ckan/gemel-2023.json' },
+    [CONFIG.API.GEMEL_1999_2022_RESOURCE_ID]:   { sharded: 'data/ckan/gemel-1999-2022' },
+    [CONFIG.API.PENSION_RESOURCE_ID]:           { file: 'data/ckan/pension-current.json' },
+    [CONFIG.API.PENSION_2023_RESOURCE_ID]:      { file: 'data/ckan/pension-2023.json' },
+    [CONFIG.API.PENSION_1999_2022_RESOURCE_ID]: { file: 'data/ckan/pension-1999-2022.json' },
+    [CONFIG.API.POLISA_RESOURCE_ID]:            { file: 'data/ckan/polisa-current.json' },
+    [CONFIG.API.POLISA_2023_RESOURCE_ID]:       { file: 'data/ckan/polisa-2023.json' },
+    [CONFIG.API.POLISA_1999_2022_RESOURCE_ID]:  { file: 'data/ckan/polisa-1999-2022.json' }
+  };
+
+  const _staticJsonCache = new Map();
+  function _loadStaticJson(path) {
+    if (_staticJsonCache.has(path)) return _staticJsonCache.get(path);
+    const p = fetch(path).then(resp => {
+      if (!resp.ok) throw new Error(`static cache HTTP ${resp.status} for ${path}`);
+      return resp.json();
+    }).catch(err => { _staticJsonCache.delete(path); throw err; });
+    _staticJsonCache.set(path, p);
+    return p;
+  }
+
+  function _recordMatchesFilters(record, filters) {
+    if (!filters) return true;
+    return Object.keys(filters).every(key => String(record[key] ?? '') === String(filters[key]));
+  }
+
+  async function _ckanFromSingleFile(cacheEntry, filters, limit, offset) {
+    const data = await _loadStaticJson(cacheEntry.file);
+    let records = data.records || [];
+    if (filters) records = records.filter(r => _recordMatchesFilters(r, filters));
+    const total = records.length;
+    return { records: records.slice(offset, offset + limit), total };
+  }
+
+  async function _ckanFromShardedArchive(cacheEntry, filters, limit, offset) {
+    if (!filters) return null; // unfiltered pull of a sharded archive isn't served locally
+    const dir = cacheEntry.sharded;
+    if (filters.FUND_ID) {
+      let records;
+      try {
+        records = await _loadStaticJson(`${dir}/${filters.FUND_ID}.json`);
+      } catch (e) {
+        records = []; // fund has no rows in this archive — a valid, common case, not a failure
+      }
+      records = records.filter(r => _recordMatchesFilters(r, filters));
+      const total = records.length;
+      return { records: records.slice(offset, offset + limit), total };
+    }
+    if (filters.FUND_CLASSIFICATION) {
+      const index = await _loadStaticJson(`${dir}/_index.json`);
+      const matchingFundIds = Object.keys(index).filter(fundId => {
+        const entry = index[fundId];
+        if (entry.cls !== filters.FUND_CLASSIFICATION) return false;
+        if (filters.SUB_SPECIALIZATION && entry.sub !== filters.SUB_SPECIALIZATION) return false;
+        return true;
+      });
+      const CONCURRENCY = 24;
+      let all = [];
+      for (let i = 0; i < matchingFundIds.length; i += CONCURRENCY) {
+        const batch = matchingFundIds.slice(i, i + CONCURRENCY);
+        const results = await Promise.all(batch.map(fundId =>
+          _loadStaticJson(`${dir}/${fundId}.json`).catch(() => [])
+        ));
+        all = all.concat(...results);
+      }
+      const records = all.filter(r => _recordMatchesFilters(r, filters));
+      const total = records.length;
+      return { records: records.slice(offset, offset + limit), total };
+    }
+    return null; // some other filter shape with no index to resolve it — let the live API handle it
+  }
+
+  async function ckanFetch(url) {
+    try {
+      const parsed = new URL(url, location.href);
+      const resourceId = parsed.searchParams.get('resource_id');
+      const cacheEntry = resourceId && CKAN_CACHE_MAP[resourceId];
+      if (cacheEntry) {
+        const filtersRaw = parsed.searchParams.get('filters');
+        const filters = filtersRaw ? JSON.parse(filtersRaw) : null;
+        const limit = Number(parsed.searchParams.get('limit')) || CONFIG.API.LIMIT;
+        const offset = Number(parsed.searchParams.get('offset')) || 0;
+        const result = cacheEntry.sharded
+          ? await _ckanFromShardedArchive(cacheEntry, filters, limit, offset)
+          : await _ckanFromSingleFile(cacheEntry, filters, limit, offset);
+        if (result) {
+          return {
+            ok: true,
+            json: async () => ({ success: true, result: { records: result.records, total: result.total } })
+          };
+        }
+      }
+    } catch (staticErr) {
+      console.warn('static CKAN cache unavailable, falling back to live API', staticErr);
+    }
+    return fetch(url);
+  }
+
   (function extendAgachSahirTracks() {
     const insertAfter = (list, afterId, newId) => {
       if (!Array.isArray(list) || list.includes(newId)) return;
@@ -145,7 +253,7 @@ const APIModule = (() => {
 
       while (offset < total) {
         const url = `${CONFIG.API.BASE_URL}?resource_id=${resourceId}&limit=${CONFIG.API.LIMIT}&offset=${offset}`;
-        const resp = await fetch(url);
+        const resp = await ckanFetch(url);
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const json = await resp.json();
         if (!json.success) throw new Error('API returned success=false');
@@ -226,7 +334,7 @@ const APIModule = (() => {
 
       while (offset < total) {
         const url = `${CONFIG.API.BASE_URL}?resource_id=${resourceId}&filters=${filtersStr}&limit=${CONFIG.API.LIMIT}&offset=${offset}`;
-        const resp = await fetch(url);
+        const resp = await ckanFetch(url);
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const json = await resp.json();
         if (!json.success) throw new Error('API returned success=false');
@@ -307,7 +415,7 @@ const APIModule = (() => {
     if (_fetchPensionPromise) return _fetchPensionPromise;
     _fetchPensionPromise = (async () => {
       const url = `${CONFIG.API.BASE_URL}?resource_id=${CONFIG.API.PENSION_RESOURCE_ID}&limit=${CONFIG.API.LIMIT}`;
-      const resp = await fetch(url);
+      const resp = await ckanFetch(url);
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const json = await resp.json();
       if (!json.success) throw new Error('API returned success=false');
@@ -367,7 +475,7 @@ const APIModule = (() => {
     if (_fetchPolisaPromise) return _fetchPolisaPromise;
     _fetchPolisaPromise = (async () => {
       const url = `${CONFIG.API.BASE_URL}?resource_id=${CONFIG.API.POLISA_RESOURCE_ID}&limit=${CONFIG.API.LIMIT}`;
-      const resp = await fetch(url);
+      const resp = await ckanFetch(url);
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const json = await resp.json();
       if (!json.success) throw new Error('API returned success=false');

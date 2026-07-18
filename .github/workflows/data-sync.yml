@@ -1,0 +1,78 @@
+name: CKAN Data Sync
+
+# Twice-daily check of the Ministry of Finance's open-data resources. Runs a cheap check first
+# (single sorted row per "current" resource) and only pulls the full dataset when the actual
+# REPORT_PERIOD has advanced — see scripts/ckan-sync.mjs for the full rationale.
+#
+# Cron times are UTC; 03:00/11:00 UTC land around 06:00/14:00 Israel time (IDT, UTC+3) in summer
+# and 05:00/13:00 (IST, UTC+2) in winter — the hour of seasonal drift doesn't matter for a "did the
+# month change" check.
+"on":
+  schedule:
+    - cron: '0 3 * * *'
+    - cron: '0 11 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: ckan-data-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run CKAN sync
+        id: sync
+        run: node scripts/ckan-sync.mjs
+
+      - name: Commit updated data
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/ckan
+          if ! git diff --cached --quiet; then
+            git commit -m "Sync CKAN data ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+            git push
+          else
+            echo "No data changes to commit."
+          fi
+
+      - name: Open alert issue
+        if: steps.sync.outputs.open_alert == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "data.gov.il sync failing (${{ steps.sync.outputs.consecutive_failures }} checks in a row)" \
+            --label "data-sync-alert" \
+            --body "The CKAN data sync has failed ${{ steps.sync.outputs.consecutive_failures }} consecutive scheduled checks (~1.5+ days). The live site keeps serving its last known-good cached data, so nothing is broken for visitors — but the source (data.gov.il) may be down, or its API contract may have changed. Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Notify by email via Formspree
+        if: steps.sync.outputs.open_alert == 'true'
+        run: |
+          curl -s -X POST https://formspree.io/f/xdapqnyr \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
+            -d "{\"_subject\": \"GemelHub: data sync failing\", \"message\": \"data.gov.il sync has failed ${{ steps.sync.outputs.consecutive_failures }} consecutive scheduled checks in a row. The live site keeps serving its last known-good cached data. Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+
+      - name: Close alert issue
+        if: steps.sync.outputs.close_alert == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          issue_number=$(gh issue list --label "data-sync-alert" --state open --json number --jq '.[0].number')
+          if [ -n "$issue_number" ]; then
+            gh issue comment "$issue_number" --body "data.gov.il sync succeeded again — closing this alert."
+            gh issue close "$issue_number"
+          fi
