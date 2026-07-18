@@ -54,9 +54,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh issue create \
-            --title "data.gov.il sync failing (${{ steps.sync.outputs.consecutive_failures }} checks in a row)" \
+            --title "data.gov.il sync failed (check #${{ steps.sync.outputs.consecutive_failures }})" \
             --label "data-sync-alert" \
-            --body "The CKAN data sync has failed ${{ steps.sync.outputs.consecutive_failures }} consecutive scheduled checks (~1.5+ days). The live site keeps serving its last known-good cached data, so nothing is broken for visitors — but the source (data.gov.il) may be down, or its API contract may have changed. Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            --body "The CKAN data sync failed on its most recent check. The live site keeps serving its last known-good cached data, so nothing is broken for visitors — but the source (data.gov.il) may be down, or its API contract may have changed. Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
       - name: Notify by email via Formspree
         if: steps.sync.outputs.open_alert == 'true'
@@ -64,7 +64,7 @@ jobs:
           curl -s -X POST https://formspree.io/f/xdapqnyr \
             -H "Content-Type: application/json" \
             -H "Accept: application/json" \
-            -d "{\"_subject\": \"GemelHub: data sync failing\", \"message\": \"data.gov.il sync has failed ${{ steps.sync.outputs.consecutive_failures }} consecutive scheduled checks in a row. The live site keeps serving its last known-good cached data. Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+            -d "{\"_subject\": \"GemelHub: data sync failed\", \"message\": \"data.gov.il sync failed on its most recent scheduled check. The live site keeps serving its last known-good cached data. Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
 
       - name: Close alert issue
         if: steps.sync.outputs.close_alert == 'true'

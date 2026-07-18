@@ -34,7 +34,7 @@ const BASE_URL = 'https://data.gov.il/api/3/action/datastore_search';
 const PAGE_LIMIT = 32000;
 const DATA_DIR = path.join(REPO_ROOT, 'data', 'ckan');
 const STATE_FILE = path.join(DATA_DIR, 'sync-state.json');
-const FAILURE_ALERT_THRESHOLD = 3; // ~1.5 days at twice-daily cadence
+const FAILURE_ALERT_THRESHOLD = 1; // alert immediately on the very first failed check
 const MIN_RECORD_RATIO = 0.5; // refuse to overwrite good data with a suspiciously small fetch
 
 const FAMILIES = {
@@ -218,7 +218,7 @@ async function main() {
     }
   }
 
-  // 3) Failure-streak tracking, for alerting when the source is down for an extended stretch.
+  // 3) Failure tracking — alert on the very first failed check, no waiting.
   const wasAboveThreshold = (state.consecutiveFailures || 0) >= FAILURE_ALERT_THRESHOLD;
   if (checkFailed) {
     state.consecutiveFailures = (state.consecutiveFailures || 0) + 1;
