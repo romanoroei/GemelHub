@@ -7566,6 +7566,14 @@ body.h2h-active #h2h-section {
   position: sticky;
   right: 0;
   z-index: 3;
+  /* iOS Safari has a long-standing bug where a sticky element inside a horizontally-scrolling
+     container goes blank during vertical page scroll and only repaints once the container itself
+     is scrolled. Forcing this element onto its own compositing layer avoids the missed repaint. */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .h2h-fund-axis {
@@ -8783,7 +8791,7 @@ body.h2h-active,
     position: fixed;
     top: 0;
     right: 0;
-    bottom: 0;
+    bottom: var(--mobile-app-nav-clearance, 78px);
     z-index: 3000;
     width: min(360px, 92vw);
     max-height: none;
@@ -20456,9 +20464,13 @@ html body .sandbox-track-id {
 @media (max-width: 1024px) {
   body.h2h-active .h2h-metrics-panel.h2h-metrics-drawer {
     top: 0 !important;
-    bottom: calc(var(--mobile-app-nav-clearance, 78px) + 58px) !important;
+    bottom: var(--mobile-app-nav-clearance, 78px) !important;
+    /* Deliberately no max-height here: with top and bottom both set, the box already stretches to
+       fill the space between them against the real viewport. A parallel max-height computed from
+       100dvh used to fight that stretch — dvh can resolve smaller than the viewport actually used
+       for fixed positioning, and the smaller of the two would win, leaving a gap above the bottom
+       nav bar. The drawer body scrolls internally (.h2h-drawer-body) so nothing overflows. */
     height: auto !important;
-    max-height: calc(100dvh - var(--mobile-app-nav-clearance, 78px) - 58px) !important;
     width: min(356px, calc(100vw - 78px)) !important;
     padding: 0 !important;
     border-radius: 0 0 0 10px !important;
