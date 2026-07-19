@@ -3407,7 +3407,28 @@ const App = (() => {
         const trackIdToScroll = state.pendingTrackId;
         requestAnimationFrame(() => {
           const trackBlock = document.querySelector(`#tracks-container .track-block[data-track-id="${CSS.escape(trackIdToScroll)}"]`);
-          trackBlock?.scrollIntoView({ block: 'start', behavior: 'auto' });
+          if (!trackBlock) return;
+          trackBlock.scrollIntoView({ block: 'start', behavior: 'auto' });
+          // scrollIntoView only accounts for normal in-flow layout — it has no idea that
+          // .sticky-header (position: sticky, currently stuck) or its mobile equivalent still
+          // visually overlaps the top of the viewport, so the target can land underneath it
+          // regardless. Rather than hardcode which specific element/CSS var that is per
+          // breakpoint (that approach drifted out of sync before), measure whatever is actually
+          // sticky/fixed and currently pinned at the very top of the viewport, and nudge the
+          // remaining distance if the target landed underneath it. Excludes the target itself
+          // (and anything inside it) — otherwise its own now-near-zero top/bottom would match.
+          requestAnimationFrame(() => {
+            let pinnedBottom = 0;
+            document.querySelectorAll('body *').forEach(el => {
+              if (trackBlock.contains(el)) return;
+              const pos = getComputedStyle(el).position;
+              if (pos !== 'fixed' && pos !== 'sticky') return;
+              const rect = el.getBoundingClientRect();
+              if (rect.top <= 1 && rect.bottom > 1 && rect.width > 0) pinnedBottom = Math.max(pinnedBottom, rect.bottom);
+            });
+            const targetTop = trackBlock.getBoundingClientRect().top;
+            if (targetTop < pinnedBottom) window.scrollBy({ top: pinnedBottom - targetTop, behavior: 'auto' });
+          });
         });
       }
       state.pendingTrackId = null;
