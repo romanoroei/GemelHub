@@ -739,7 +739,8 @@ const App = (() => {
     const urlFund = urlParams.get('fund');
     const urlProvider = urlParams.get('provider');
     const isMobileViewport = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
-    const shouldStartAtFirstTable = false; // TEMP diagnostic: disabled to isolate the missing-first-row bug
+    const shouldStartAtFirstTable = !!window.__GEMELHUB_FORCE_TABLE_TOP__ ||
+      (isMobileViewport && !!window.__GEMELHUB_IS_RELOAD__ && !urlApp && !urlView && !urlParams.get('openAdvanced'));
     const effectiveUrlTrack = shouldStartAtFirstTable ? null : (urlFocusTrack || urlTrack);
     state.pendingCompareMode = urlView === 'actuarial' ? 'actuarial' : null;
     state.pendingActuarialFundId = urlView === 'actuarial' ? (urlFund || null) : null;
