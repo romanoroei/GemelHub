@@ -2969,18 +2969,6 @@ const App = (() => {
       scrollToTrackTableFirstRow(target, 'auto', { onlyIfNeeded: false });
       return;
     }
-    const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
-    if (isMobile) {
-      // Let the browser do this natively instead of computing a manual scrollTo offset from
-      // getBoundingClientRect()/getTrackScrollOffset(): that hand-rolled math has been the
-      // recurring source of the table landing "too high" (first row hidden under the sticky
-      // header) — every fix attempt at the arithmetic itself only moved the bug around. scroll-
-      // margin-top on .track-block (see css/style.css) tells the browser directly how much space
-      // to reserve above the target, so it can never drift out of sync with whatever's actually
-      // fixed on screen at scroll time.
-      target.scrollIntoView({ block: 'start', behavior: 'auto' });
-      return;
-    }
     const rowTop = (() => {
       if (!target.classList?.contains('track-block')) return target.getBoundingClientRect().top;
       const targetTop = target.getBoundingClientRect().top;
@@ -3394,52 +3382,39 @@ const App = (() => {
       refreshCustomRangeAvailability()
         .then(() => {
           if (state.activeCategoryId === requestedCategoryId) renderComparisonView();
+          if (state.activeCategoryId === requestedCategoryId && state.pendingCompareTopScroll) {
+            setTimeout(scrollToComparisonTableTop, 0);
+          }
         })
         .catch(() => {});
 
-      // Reload no longer scrolls at all on purpose (see startMobileFirstTableScrollGuard's removal)
-      // — every version of that attempt landed mid-table. Jumping to a specific track from a fund
-      // page is a narrower, single-shot case: one scrollIntoView call, no retries, no manual pixel
-      // math. Retrying repeatedly over 2+ seconds was the likely source of the same mid-table
-      // landing here too — a later retry re-snapping the page after the user had already started
-      // reading it, or after the DOM shifted under it.
-      if (state.pendingCompareTopScroll && state.pendingTrackId) {
-        const trackIdToScroll = state.pendingTrackId;
-        requestAnimationFrame(() => {
-          const trackBlock = document.querySelector(`#tracks-container .track-block[data-track-id="${CSS.escape(trackIdToScroll)}"]`);
-          if (!trackBlock) return;
-          // Anchor on the first actual data row, not the block — the block can include its own
-          // header content above the row, and scrollIntoView('start') on the block doesn't
-          // guarantee the row itself clears whatever's pinned at the top.
-          const anchor = trackBlock.querySelector('tbody tr:not(.average-row)') || trackBlock;
-          anchor.scrollIntoView({ block: 'start', behavior: 'auto' });
-          // scrollIntoView only accounts for normal in-flow layout — it has no idea .sticky-header
-          // and .mobile-table-logo-bar (both position: sticky, currently stuck, stacked on top of
-          // each other on mobile) still visually overlap the top of the viewport, so the anchor
-          // can land underneath them regardless. A generic "scan every position:fixed/sticky
-          // element on the page" version of this was tried and made things worse — it was also
-          // matching hidden overlays/modals/backdrops that use visibility:hidden or opacity:0
-          // rather than display:none (so they still report real getBoundingClientRect() bounds),
-          // occasionally nudging by an entire viewport height. Stick to the two known, always-
-          // relevant elements instead, checked for actual visibility.
-          requestAnimationFrame(() => {
-            let pinnedBottom = 0;
-            ['.sticky-header', '.mobile-table-logo-bar'].forEach(selector => {
-              const el = document.querySelector(selector);
-              if (!el) return;
-              const cs = getComputedStyle(el);
-              if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity || '1') === 0) return;
-              const rect = el.getBoundingClientRect();
-              if (rect.top <= 2 && rect.bottom > 1 && rect.width > 0 && rect.height > 0) pinnedBottom = Math.max(pinnedBottom, rect.bottom);
-            });
-            const drift = pinnedBottom - anchor.getBoundingClientRect().top;
-            if (drift > 1) window.scrollBy({ top: drift, behavior: 'auto' });
-          });
-        });
+      // Restored to the exact pre-session implementation (manual pixel math + repeated retries) —
+      // every attempt this session at a "smarter" version (scrollIntoView, scroll-margin-top,
+      // scanning for pinned/sticky elements) regressed this in a new way. This one is proven.
+      // Reload intentionally does NOT scroll at all anymore (see the removed
+      // pendingInitialTableTopScroll branch below) — that was a separate, confirmed-working fix
+      // and is unrelated to this track-jump path.
+      if (state.pendingCompareTopScroll) {
+        setTimeout(scrollToComparisonTableTop, 100);
+        setTimeout(scrollToComparisonTableTop, 500);
+        setTimeout(scrollToComparisonTableTop, 1200);
+        setTimeout(scrollToComparisonTableTop, 2200);
+        setTimeout(() => {
+          scrollToComparisonTableTop();
+          state.pendingTrackId = null;
+          state.pendingCompareTopScroll = false;
+          state.pendingTrackFocusOnly = false;
+        }, 2800);
+      } else if (state.pendingTrackId && getCurrentCompareMode() === 'tracks') {
+        state.pendingTrackId = null;
+        setTimeout(() => {
+          const tableTop = document.getElementById('tracks-area') || document.getElementById('tracks-container');
+          if (tableTop) {
+            const y = tableTop.getBoundingClientRect().top + window.scrollY - getTrackScrollOffset();
+            window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+          }
+        }, 150);
       }
-      state.pendingTrackId = null;
-      state.pendingCompareTopScroll = false;
-      state.pendingTrackFocusOnly = false;
       state.pendingInitialTableTopScroll = false;
     } catch(e) {
       console.error(e);
@@ -3787,6 +3762,12 @@ const App = (() => {
       }
     }
 
+    if (state.pendingCompareTopScroll) {
+      requestAnimationFrame(() => {
+        scrollToComparisonTableTop();
+        requestAnimationFrame(scrollToComparisonTableTop);
+      });
+    }
     guardDisplayOptionsAfterRender();
     requestAnimationFrame(updateMobileStickyThead);
   }

@@ -13039,15 +13039,6 @@ tr.sb-row-hidden .sandbox-invest-input {
     padding-top: calc(var(--mobile-sticky-header-h, 0px) + 8px) !important;
   }
 
-  /* Used by scrollToComparisonTableTop()'s scrollIntoView() on mobile — reserves exactly the
-     currently-fixed header's height above the target, so the browser's own scroll positioning
-     always accounts for it instead of a hand-computed pixel offset that can drift out of sync. */
-  #tracks-container .track-block,
-  #tracks-container,
-  #tracks-area {
-    scroll-margin-top: var(--mobile-sticky-header-h, 0px);
-  }
-
   .category-tabs-bar {
     position: relative !important;
     z-index: 3 !important;
