@@ -3394,35 +3394,17 @@ const App = (() => {
       refreshCustomRangeAvailability()
         .then(() => {
           if (state.activeCategoryId === requestedCategoryId) renderComparisonView();
-          if (state.activeCategoryId === requestedCategoryId && (state.pendingCompareTopScroll || state.pendingInitialTableTopScroll)) {
-            setTimeout(scrollToComparisonTableTop, 0);
-          }
         })
         .catch(() => {});
 
-      if (state.pendingCompareTopScroll) {
-        setTimeout(scrollToComparisonTableTop, 100);
-        setTimeout(scrollToComparisonTableTop, 500);
-        setTimeout(scrollToComparisonTableTop, 1200);
-        setTimeout(scrollToComparisonTableTop, 2200);
-        setTimeout(() => {
-          scrollToComparisonTableTop();
-          state.pendingTrackId = null;
-          state.pendingCompareTopScroll = false;
-          state.pendingTrackFocusOnly = false;
-        }, 2800);
-      } else if (state.pendingInitialTableTopScroll) {
-        startMobileFirstTableScrollGuard();
-      } else if (state.pendingTrackId && getCurrentCompareMode() === 'tracks') {
-        state.pendingTrackId = null;
-        setTimeout(() => {
-          const tableTop = document.getElementById('tracks-area') || document.getElementById('tracks-container');
-          if (tableTop) {
-            const y = tableTop.getBoundingClientRect().top + window.scrollY - getTrackScrollOffset();
-            window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-          }
-        }, 150);
-      }
+      // No programmatic scrolling here on purpose: every version of it tried (manual pixel math,
+      // race-condition fixes, retry passes, scrollIntoView) ended up landing mid-table instead of
+      // at row 1, while simply leaving the page's natural scroll position alone — exactly what a
+      // plain category-tab switch already does — renders the first table correctly every time.
+      state.pendingTrackId = null;
+      state.pendingCompareTopScroll = false;
+      state.pendingTrackFocusOnly = false;
+      state.pendingInitialTableTopScroll = false;
     } catch(e) {
       console.error(e);
       document.getElementById('tracks-container').innerHTML =
@@ -3769,12 +3751,6 @@ const App = (() => {
       }
     }
 
-    if (state.pendingCompareTopScroll || state.pendingInitialTableTopScroll) {
-      requestAnimationFrame(() => {
-        scrollToComparisonTableTop();
-        requestAnimationFrame(scrollToComparisonTableTop);
-      });
-    }
     guardDisplayOptionsAfterRender();
     requestAnimationFrame(updateMobileStickyThead);
   }
