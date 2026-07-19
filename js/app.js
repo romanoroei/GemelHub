@@ -2980,6 +2980,13 @@ const App = (() => {
     const offset = getTrackScrollOffset();
     const y = rowTop + window.scrollY - offset;
     window.scrollTo({ top: Math.max(0, y), behavior: 'auto' });
+    // On mobile, getTrackScrollOffset() reads document.body's mobile-sticky-header-fixed class,
+    // which normally only updates off the native 'scroll' event — not guaranteed to fire before
+    // the next of the 5 retries below reads it again, so a stale (still-false) class means the
+    // header's height never gets subtracted and the next retry can overshoot past row 1. This one
+    // targeted line keeps that class in sync with where we just scrolled to, so each retry works
+    // off current information instead of whatever it was several hundred ms ago.
+    updateMobileStickyHeader();
   }
 
   function startMobileFirstTableScrollGuard() {
