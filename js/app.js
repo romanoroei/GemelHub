@@ -21,6 +21,7 @@ const App = (() => {
     pendingTrackId: null,    // task 8: ניווט ישיר למסלול מדף הבית
     pendingTrackFocusOnly: false,
     pendingCompareTopScroll: false,
+    pendingInitialTableTopScroll: false,
     pendingActuarialFundId: null,
     pendingActuarialCompanyName: null,
     pendingActuarialHighlightDone: false,
@@ -693,6 +694,7 @@ const App = (() => {
     updateStickyGapMask();
     window.gemelhubScrollToTop = scrollMainPageToTop;
     window.gemelhubScrollToComparisonTableTop = scrollToComparisonTableTop;
+    window.gemelhubStartFirstTableScrollGuard = startMobileFirstTableScrollGuard;
     window.addEventListener('beforeunload', () => {
       // Force-read all visible sandbox inputs into state before saving,
       // in case a field was edited but blur/change hadn't fired yet.
@@ -736,11 +738,14 @@ const App = (() => {
     const urlView = urlParams.get('view');
     const urlFund = urlParams.get('fund');
     const urlProvider = urlParams.get('provider');
-    const effectiveUrlTrack = urlFocusTrack || urlTrack;
+    const isMobileViewport = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
+    const shouldStartAtFirstTable = false; // TEMP diagnostic: disabled to isolate the missing-first-row bug
+    const effectiveUrlTrack = shouldStartAtFirstTable ? null : (urlFocusTrack || urlTrack);
     state.pendingCompareMode = urlView === 'actuarial' ? 'actuarial' : null;
     state.pendingActuarialFundId = urlView === 'actuarial' ? (urlFund || null) : null;
     state.pendingActuarialCompanyName = urlView === 'actuarial' ? (urlProvider || null) : null;
     state.pendingActuarialHighlightDone = false;
+    state.pendingInitialTableTopScroll = !!shouldStartAtFirstTable;
     if (handledSharedPortfolioUrl) {
       // Shared portfolio links handle their own navigation after loading.
     } else if (urlApp === 'h2h') {
@@ -2982,6 +2987,31 @@ const App = (() => {
     updateMobileStickyHeader();
   }
 
+  function startMobileFirstTableScrollGuard() {
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
+    if (!isMobile) return;
+    // Our own corrective window.scrollTo() calls fire native 'scroll' events, and
+    // updateMobileStickyThead()'s only real trigger condition is scrollY > 0 — so the instant we
+    // land on the target table it was cloning a fixed-position copy of the table's header right on
+    // top of the real header, covering part (or all) of row 1 underneath it. Suppress it for the
+    // whole settle window below; it resumes normally once the user actually scrolls afterward.
+    mobileStickyTheadSuppressedUntil = Date.now() + 1700;
+    hideMobileStickyThead();
+    clearMobileStickyCompactBlock();
+    // A single immediate pass isn't enough: provider logos/icons in the table rows load
+    // asynchronously and without reserved dimensions, so the page can still reflow (shifting
+    // the target table down or up by roughly a row's height) well after this first correction
+    // runs — leaving the first 1-2 rows hidden behind the sticky header exactly as before, just
+    // from a different cause. Re-run the same correction at a few later checkpoints, mirroring
+    // the retry cadence already used for the pendingCompareTopScroll case below.
+    requestAnimationFrame(() => {
+      scrollToComparisonTableTop();
+      requestAnimationFrame(scrollToComparisonTableTop);
+    });
+    [150, 400, 900, 1600].forEach(delay => setTimeout(scrollToComparisonTableTop, delay));
+    setTimeout(() => { state.pendingInitialTableTopScroll = false; }, 1600);
+  }
+
   function getTrackScrollOffset() {
     const rootStyle = getComputedStyle(document.documentElement);
     const heroH = parseFloat(rootStyle.getPropertyValue('--hero-h')) || 0;
@@ -3373,7 +3403,7 @@ const App = (() => {
       refreshCustomRangeAvailability()
         .then(() => {
           if (state.activeCategoryId === requestedCategoryId) renderComparisonView();
-          if (state.activeCategoryId === requestedCategoryId && state.pendingCompareTopScroll) {
+          if (state.activeCategoryId === requestedCategoryId && (state.pendingCompareTopScroll || state.pendingInitialTableTopScroll)) {
             setTimeout(scrollToComparisonTableTop, 0);
           }
         })
@@ -3390,6 +3420,8 @@ const App = (() => {
           state.pendingCompareTopScroll = false;
           state.pendingTrackFocusOnly = false;
         }, 2800);
+      } else if (state.pendingInitialTableTopScroll) {
+        startMobileFirstTableScrollGuard();
       } else if (state.pendingTrackId && getCurrentCompareMode() === 'tracks') {
         state.pendingTrackId = null;
         setTimeout(() => {
@@ -3746,7 +3778,7 @@ const App = (() => {
       }
     }
 
-    if (state.pendingCompareTopScroll) {
+    if (state.pendingCompareTopScroll || state.pendingInitialTableTopScroll) {
       requestAnimationFrame(() => {
         scrollToComparisonTableTop();
         requestAnimationFrame(scrollToComparisonTableTop);
@@ -3816,6 +3848,7 @@ const App = (() => {
   let mobileStickyCompactBlock = null;
   let mobileStickyScrollWrapper = null;
   let mobileStickyTheadRaf = 0;
+  let mobileStickyTheadSuppressedUntil = 0;
   const MOBILE_TABLE_ZOOM = 1;
 
   function ensureMobileStickyThead() {
@@ -3927,6 +3960,16 @@ const App = (() => {
   function updateMobileStickyThead() {
     const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
     if (!isMobile || getCurrentCompareMode() !== 'tracks') {
+      hideMobileStickyThead();
+      clearMobileStickyCompactBlock();
+      return;
+    }
+    // While the reload scroll-to-first-table guard is settling (see startMobileFirstTableScrollGuard),
+    // suppress this entirely. Our own corrective window.scrollTo() calls fire native 'scroll' events,
+    // and this function's only real trigger condition is scrollY > 0 — so it was firing and cloning
+    // a fixed-position copy of the table's header right on top of the real header the instant we
+    // landed on the target table, covering part (or all) of row 1 underneath it.
+    if (Date.now() < mobileStickyTheadSuppressedUntil) {
       hideMobileStickyThead();
       clearMobileStickyCompactBlock();
       return;
