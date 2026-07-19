@@ -2969,6 +2969,18 @@ const App = (() => {
       scrollToTrackTableFirstRow(target, 'auto', { onlyIfNeeded: false });
       return;
     }
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
+    if (isMobile) {
+      // Let the browser do this natively instead of computing a manual scrollTo offset from
+      // getBoundingClientRect()/getTrackScrollOffset(): that hand-rolled math has been the
+      // recurring source of the table landing "too high" (first row hidden under the sticky
+      // header) — every fix attempt at the arithmetic itself only moved the bug around. scroll-
+      // margin-top on .track-block (see css/style.css) tells the browser directly how much space
+      // to reserve above the target, so it can never drift out of sync with whatever's actually
+      // fixed on screen at scroll time.
+      target.scrollIntoView({ block: 'start', behavior: 'auto' });
+      return;
+    }
     const rowTop = (() => {
       if (!target.classList?.contains('track-block')) return target.getBoundingClientRect().top;
       const targetTop = target.getBoundingClientRect().top;
