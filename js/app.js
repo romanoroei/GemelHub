@@ -2991,6 +2991,14 @@ const App = (() => {
   function startMobileFirstTableScrollGuard() {
     const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
     if (!isMobile) return;
+    // Our own corrective window.scrollTo() calls fire native 'scroll' events, and
+    // updateMobileStickyThead()'s only real trigger condition is scrollY > 0 — so the instant we
+    // land on the target table it was cloning a fixed-position copy of the table's header right on
+    // top of the real header, covering part (or all) of row 1 underneath it. Suppress it for the
+    // whole settle window below; it resumes normally once the user actually scrolls afterward.
+    mobileStickyTheadSuppressedUntil = Date.now() + 1700;
+    hideMobileStickyThead();
+    clearMobileStickyCompactBlock();
     // A single immediate pass isn't enough: provider logos/icons in the table rows load
     // asynchronously and without reserved dimensions, so the page can still reflow (shifting
     // the target table down or up by roughly a row's height) well after this first correction
@@ -3841,6 +3849,7 @@ const App = (() => {
   let mobileStickyCompactBlock = null;
   let mobileStickyScrollWrapper = null;
   let mobileStickyTheadRaf = 0;
+  let mobileStickyTheadSuppressedUntil = 0;
   const MOBILE_TABLE_ZOOM = 1;
 
   function ensureMobileStickyThead() {
@@ -3952,6 +3961,16 @@ const App = (() => {
   function updateMobileStickyThead() {
     const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
     if (!isMobile || getCurrentCompareMode() !== 'tracks') {
+      hideMobileStickyThead();
+      clearMobileStickyCompactBlock();
+      return;
+    }
+    // While the reload scroll-to-first-table guard is settling (see startMobileFirstTableScrollGuard),
+    // suppress this entirely. Our own corrective window.scrollTo() calls fire native 'scroll' events,
+    // and this function's only real trigger condition is scrollY > 0 — so it was firing and cloning
+    // a fixed-position copy of the table's header right on top of the real header the instant we
+    // landed on the target table, covering part (or all) of row 1 underneath it.
+    if (Date.now() < mobileStickyTheadSuppressedUntil) {
       hideMobileStickyThead();
       clearMobileStickyCompactBlock();
       return;
