@@ -3397,10 +3397,19 @@ const App = (() => {
         })
         .catch(() => {});
 
-      // No programmatic scrolling here on purpose: every version of it tried (manual pixel math,
-      // race-condition fixes, retry passes, scrollIntoView) ended up landing mid-table instead of
-      // at row 1, while simply leaving the page's natural scroll position alone — exactly what a
-      // plain category-tab switch already does — renders the first table correctly every time.
+      // Reload no longer scrolls at all on purpose (see startMobileFirstTableScrollGuard's removal)
+      // — every version of that attempt landed mid-table. Jumping to a specific track from a fund
+      // page is a narrower, single-shot case: one scrollIntoView call, no retries, no manual pixel
+      // math. Retrying repeatedly over 2+ seconds was the likely source of the same mid-table
+      // landing here too — a later retry re-snapping the page after the user had already started
+      // reading it, or after the DOM shifted under it.
+      if (state.pendingCompareTopScroll && state.pendingTrackId) {
+        const trackIdToScroll = state.pendingTrackId;
+        requestAnimationFrame(() => {
+          const trackBlock = document.querySelector(`#tracks-container .track-block[data-track-id="${CSS.escape(trackIdToScroll)}"]`);
+          trackBlock?.scrollIntoView({ block: 'start', behavior: 'auto' });
+        });
+      }
       state.pendingTrackId = null;
       state.pendingCompareTopScroll = false;
       state.pendingTrackFocusOnly = false;
