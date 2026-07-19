@@ -11,13 +11,7 @@
         var isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
         var navEntry = performance && performance.getEntriesByType ? performance.getEntriesByType('navigation')[0] : null;
         window.__GEMELHUB_IS_RELOAD__ = !!(navEntry && navEntry.type === 'reload');
-        window.__GEMELHUB_FORCE_TABLE_TOP__ = !!(
-          isMobile &&
-          window.__GEMELHUB_IS_RELOAD__ &&
-          !params.get('app') &&
-          !params.get('view') &&
-          !params.get('openAdvanced')
-        );
+        window.__GEMELHUB_FORCE_TABLE_TOP__ = false; // TEMP diagnostic: disabled to isolate the missing-first-row bug
         if (window.__GEMELHUB_FORCE_TABLE_TOP__) window.scrollTo(0, 0);
         var consentKey = 'gemelhub_cookie_notice_closed_v2';
         var forceShow = params.get('showCookieBanner') === '1';
@@ -747,6 +741,6 @@
 
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
-  <script src="js/app.js?v=mobile-sticky-thead-clone-fix-20260719"></script>
+  <script src="js/app.js?v=DIAGNOSTIC-scroll-disabled-20260719"></script>
 </body>
 </html>
