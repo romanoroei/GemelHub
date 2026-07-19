@@ -3413,37 +3413,28 @@ const App = (() => {
           // guarantee the row itself clears whatever's pinned at the top.
           const anchor = trackBlock.querySelector('tbody tr:not(.average-row)') || trackBlock;
           anchor.scrollIntoView({ block: 'start', behavior: 'auto' });
-          // scrollIntoView only accounts for normal in-flow layout — it has no idea that
-          // .sticky-header and .mobile-table-logo-bar (both position: sticky, currently stuck,
-          // and stacked on top of each other on mobile) still visually overlap the top of the
-          // viewport, so the anchor can land underneath them regardless. Rather than hardcode
-          // which specific elements/CSS vars those are per breakpoint (that approach drifted out
-          // of sync before), measure whatever is actually sticky/fixed and currently pinned at the
-          // top of the viewport, and nudge the remaining distance if the anchor landed underneath
-          // it. Runs a few times: nudging can itself cause a stacked sticky element to newly
-          // engage (or disengage), so re-check after each correction instead of assuming one pass
-          // is enough — capped at 3 so it can't turn into an open-ended fight with the layout.
-          let attemptsLeft = 3;
-          const settle = () => {
+          // scrollIntoView only accounts for normal in-flow layout — it has no idea .sticky-header
+          // and .mobile-table-logo-bar (both position: sticky, currently stuck, stacked on top of
+          // each other on mobile) still visually overlap the top of the viewport, so the anchor
+          // can land underneath them regardless. A generic "scan every position:fixed/sticky
+          // element on the page" version of this was tried and made things worse — it was also
+          // matching hidden overlays/modals/backdrops that use visibility:hidden or opacity:0
+          // rather than display:none (so they still report real getBoundingClientRect() bounds),
+          // occasionally nudging by an entire viewport height. Stick to the two known, always-
+          // relevant elements instead, checked for actual visibility.
+          requestAnimationFrame(() => {
             let pinnedBottom = 0;
-            document.querySelectorAll('body *').forEach(el => {
-              if (trackBlock.contains(el)) return;
-              const pos = getComputedStyle(el).position;
-              if (pos !== 'fixed' && pos !== 'sticky') return;
+            ['.sticky-header', '.mobile-table-logo-bar'].forEach(selector => {
+              const el = document.querySelector(selector);
+              if (!el) return;
+              const cs = getComputedStyle(el);
+              if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity || '1') === 0) return;
               const rect = el.getBoundingClientRect();
-              if (rect.top <= 2 && rect.bottom > 1 && rect.width > 0) pinnedBottom = Math.max(pinnedBottom, rect.bottom);
+              if (rect.top <= 2 && rect.bottom > 1 && rect.width > 0 && rect.height > 0) pinnedBottom = Math.max(pinnedBottom, rect.bottom);
             });
-            const anchorTop = anchor.getBoundingClientRect().top;
-            const drift = pinnedBottom - anchorTop;
-            attemptsLeft -= 1;
-            if (drift > 1 && attemptsLeft > 0) {
-              window.scrollBy({ top: drift, behavior: 'auto' });
-              requestAnimationFrame(settle);
-            } else if (drift > 1) {
-              window.scrollBy({ top: drift, behavior: 'auto' });
-            }
-          };
-          requestAnimationFrame(settle);
+            const drift = pinnedBottom - anchor.getBoundingClientRect().top;
+            if (drift > 1) window.scrollBy({ top: drift, behavior: 'auto' });
+          });
         });
       }
       state.pendingTrackId = null;
