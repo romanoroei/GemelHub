@@ -230,13 +230,7 @@ body.advanced-options-open {
   border: 0;
 }
 
-/* Chrome Android's native pull-to-refresh reloads the page mid-gesture, before the browser's
-   own overscroll/rubber-band animation has settled — the fresh page's first paint inherits that
-   still-resolving scroll state, which is what was hiding the first 1-2 rows of the tracks table
-   specifically on pull-to-refresh (never on a tap-triggered reload or in-app navigation).
-   overscroll-behavior-y: contain stops Chrome from treating an overscroll at the top of THIS
-   page as a pull-to-refresh trigger at all, removing the race outright. */
-html { font-size: 15px; scroll-behavior: smooth; overscroll-behavior-y: contain; }
+html { font-size: 15px; scroll-behavior: smooth; }
 body {
   font-family: var(--font);
   background: var(--page-bg);
@@ -244,7 +238,6 @@ body {
   color: var(--gray-800);
   direction: rtl;
   min-height: 100vh;
-  overscroll-behavior-y: contain;
 }
 
 body:not(.fund-page)::before {
