@@ -631,7 +631,11 @@ function findFundTrack(record, category) {
 function buildTrackCompareUrl(catId, trackId) {
   const url = new URL('index.html', window.location.href);
   if (catId) url.searchParams.set('cat', catId);
-  if (trackId) url.searchParams.set('track', trackId);
+  // focusTrack (not track) is what routes through pendingTrackFocusOnly in app.js — the precise,
+  // already-correct scrollToTrackTableFirstRow() positioning used when clicking a track name
+  // inside the table itself. The plain `track` param instead goes through the generic
+  // getTrackScrollOffset()-based path, which is what kept landing mid-table.
+  if (trackId) url.searchParams.set('focusTrack', trackId);
   url.hash = 'compare';
   return url.pathname.split('/').pop() + url.search + url.hash;
 }
