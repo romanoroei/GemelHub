@@ -6632,7 +6632,7 @@ body.fund-page table.track-table th {
 }
 .h2h-mgroup-items { display: flex; flex-direction: column; gap: 5px; }
 .h2h-mgroup-sublabel {
-  font-size: .68rem; font-weight: 700; color: var(--h2h-gold-dark, #a88618);
+  font-size: .76rem; font-weight: 700; color: var(--gray-900, #0f172a);
   margin: 10px 0 6px; padding-top: 8px; border-top: 1px dashed rgba(201, 183, 114, .35);
 }
 .h2h-mgroup-sublabel-toggle {
@@ -6643,10 +6643,10 @@ body.fund-page table.track-table th {
      being the same specificity but declared later, used to silently override its font-size/weight/
      color back to the ambient default, which is why this header didn't visually match its own
      intended style. */
-  font-size: .68rem; font-weight: 700; color: var(--h2h-gold-dark, #a88618);
+  font-size: .76rem; font-weight: 700; color: var(--gray-900, #0f172a);
   text-align: right; padding-top: 8px; margin: 10px 0 6px;
 }
-.h2h-mgroup-sublabel-toggle i { font-size: .62rem; color: var(--h2h-gold-dark, #a88618); }
+.h2h-mgroup-sublabel-toggle i { font-size: .62rem; color: var(--gray-900, #0f172a); }
 .h2h-mcheckbox {
   display: flex; align-items: center; gap: 7px;
   font-size: .88rem; font-weight: 700; color: var(--gray-700); cursor: pointer;
@@ -20670,8 +20670,8 @@ html body .sandbox-track-id {
 
 .h2h-custom-range-head {
   justify-content: space-between;
-  color: var(--h2h-gold-dark, #a88618);
-  font-size: .68rem;
+  color: var(--gray-900, #0f172a);
+  font-size: .76rem;
   font-weight: 700;
 }
 
@@ -20682,10 +20682,10 @@ html body .sandbox-track-id {
   /* Buttons don't inherit font-size/weight from ancestors by default (only explicit CSS values
      like the "color: inherit" below actually apply) — has to be stated directly here, or it falls
      back to the browser's default button font and doesn't match the year-returns header at all. */
-  font-size: .68rem; font-weight: 700; color: var(--h2h-gold-dark, #a88618);
+  font-size: .76rem; font-weight: 700; color: var(--gray-900, #0f172a);
 }
 .h2h-custom-range-toggle strong { font-size: inherit; font-weight: inherit; color: inherit; }
-.h2h-custom-range-toggle i { font-size: .62rem; color: var(--h2h-gold-dark, #a88618); }
+.h2h-custom-range-toggle i { font-size: .62rem; color: var(--gray-900, #0f172a); }
 
 .h2h-custom-range-refresh {
   width: 28px;
