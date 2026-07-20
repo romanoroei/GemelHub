@@ -13408,8 +13408,8 @@ const App = (() => {
               <span>${m.label}</span>
             </label>`).join('')}
         </div>
-        ${grp === 'תשואות' ? renderH2HCustomRangeControls() : ''}
         ${grp === 'תשואות' ? yearsHtml : ''}
+        ${grp === 'תשואות' ? renderH2HCustomRangeControls() : ''}
       </div>`).join('');
   }
 
@@ -14605,6 +14605,10 @@ const App = (() => {
   function getH2HMetricBlockMeta(metric) {
     const id = metric.id || '';
     if (id === 'assets') return { key: 'identity', label: 'תעודת זהות', order: 10 };
+    // Custom range is the metric the user actively picked a bespoke period for — when active it
+    // leads the "מבחן התשואה" group (right after identity, ahead of monthly/ytd/1yr/etc.), since
+    // it belongs to that group rather than in front of it.
+    if (id === 'customRange') return { key: 'returns', label: 'מבחן התשואה', order: 15 };
     if (id === 'monthly') return { key: 'returns', label: 'מבחן התשואה', order: 20 };
     if (id === 'ytd') return { key: 'returns', label: 'מבחן התשואה', order: 21 };
     if (id === '1yr') return { key: 'returns', label: 'מבחן התשואה', order: 22 };
@@ -14618,7 +14622,6 @@ const App = (() => {
     if (id === '3yr_ann') return { key: 'returns', label: 'מבחן התשואה', order: 25 };
     if (id === '5yr_ann') return { key: 'returns', label: 'מבחן התשואה', order: 25.3 };
     if (id === '7yr_ann') return { key: 'returns', label: 'מבחן התשואה', order: 25.6 };
-    if (id === 'customRange') return { key: 'returns', label: 'מבחן התשואה', order: 27 };
     if (id === 'sharpe') return { key: 'risk', label: 'סיכון ואלוקציה', order: 40 };
     if (id === 'stock') return { key: 'risk', label: 'סיכון ואלוקציה', order: 41 };
     if (id === 'abroad') return { key: 'risk', label: 'סיכון ואלוקציה', order: 42 };
@@ -15071,6 +15074,29 @@ const App = (() => {
     });
   }
 
+  // The desktop drawer is `position: sticky`, so its CSS max-height (calc(100vh - ...)) only
+  // keeps it on-screen once scrolling has actually pinned it near the top. Before that (e.g. right
+  // after opening, at whatever scroll position the page happens to be at), its natural in-flow top
+  // offset can already eat most of the viewport, and a height budget sized for "near the top" then
+  // pushes the panel's bottom past the screen. Measuring the real top and capping height to it
+  // (regardless of sticky state) is what actually guarantees it never runs off-screen.
+  function h2hSyncMetricsDrawerMaxHeight() {
+    const panel = document.getElementById('h2h-mp');
+    if (!panel || !state.h2h.metricsOpen) return;
+    if (window.matchMedia('(max-width: 860px)').matches) {
+      panel.style.maxHeight = '';
+      return;
+    }
+    const rect = panel.getBoundingClientRect();
+    const top = Math.max(rect.top, 0);
+    panel.style.maxHeight = Math.max(200, Math.floor(window.innerHeight - top - 12)) + 'px';
+  }
+
+  if (!state._h2hDrawerHeightHooked) {
+    state._h2hDrawerHeightHooked = true;
+    window.addEventListener('resize', h2hSyncMetricsDrawerMaxHeight);
+  }
+
   function bindH2HCustomRangeControls(root) {
     const panel = root?.querySelector('[data-h2h-custom-range]');
     if (!panel) return;
@@ -15130,6 +15156,10 @@ const App = (() => {
     panel.querySelector('[data-h2h-range-clear]')?.addEventListener('click', clearH2HCustomRangeSelection);
   }
 
+  // Matches the .sbcmp-th-0..11 palette in CSS — cycles so every fund column gets a distinct
+  // background even past 4 funds, instead of leaving later columns uncolored.
+  const H2H_PRINT_COL_COLOR_COUNT = 12;
+
   // בונה טבלת הדפסה נפרדת מה-DOM האינטראקטיבי של הלוח (לא outerHTML של הלוח החי) —
   // באותה צורה בדיוק כמו טבלת ההשוואה בסנדבוקס (mkTable ליד _sbRenderCompare): קופות
   // ככותרות עמודה (ציר ה-X), מדדים כשורות מימין. מכיוון שהמחרוזת נבנית מאפס, אין שום
@@ -15149,7 +15179,7 @@ const App = (() => {
 
     let head = '<tr><th>מדד</th>';
     items.forEach((item, ci) => {
-      const colorCls = ci < 4 ? ` sbcmp-th-${ci}` : '';
+      const colorCls = ` sbcmp-th-${ci % H2H_PRINT_COL_COLOR_COUNT}`;
       head += `<th class="h2h-print-th${colorCls}">`
         + `<div class="h2h-print-col-provider">${escapeHtml(item.provName || '')}</div>`
         + `<div class="h2h-print-col-category">${escapeHtml(item.catLabel || '')}</div>`
@@ -15289,7 +15319,17 @@ const App = (() => {
     if (!ws) return;
     const hasItems = state.h2h.items.length > 0;
     const activeMetricCount = (state.h2h.metrics?.size || 0) + (state.h2h.yearMetrics?.size || 0);
+    // The drawer/table entrance animations should only play the moment the panel actually opens —
+    // not on every re-render while it's already open (metric/year toggles rebuild this markup too,
+    // and replaying a translateX+opacity entrance on each click reads as a jarring "page refresh").
+    // ws itself survives the innerHTML rebuild below, so its classList doubles as "was it open on
+    // the previous render" — comparing that to the new state is enough to detect a true open edge,
+    // no timers needed.
+    const wasMetricsOpen = ws.classList.contains('h2h-metrics-open');
+    const justOpenedMetrics = !wasMetricsOpen && !!state.h2h.metricsOpen;
     ws.classList.toggle('h2h-metrics-open', !!state.h2h.metricsOpen);
+    ws.classList.toggle('h2h-metrics-just-opened', justOpenedMetrics);
+    if (justOpenedMetrics) setTimeout(() => ws.classList.remove('h2h-metrics-just-opened'), 300);
     ws.innerHTML = `
       <div class="h2h-topbar">
         <div class="h2h-topbar-actions">
@@ -15469,6 +15509,7 @@ const App = (() => {
     if (hasItems && h2hNeedsYearData()) ensureH2HYearDataLoaded();
     if (hasItems && h2hNeedsTrailing7Data()) ensureH2HTrailing7DataLoaded();
     if (hasItems && state.h2h.metricsOpen) ensureH2HCustomRangeAvailability();
+    if (state.h2h.metricsOpen) h2hSyncMetricsDrawerMaxHeight();
 
     bindH2HTableInteractions(ws);
     syncMobileAppNav('h2h');
