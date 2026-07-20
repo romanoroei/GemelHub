@@ -308,6 +308,8 @@ const App = (() => {
     metrics:     new Set(H2H_METRICS.filter(m=>m.defaultOn).map(m=>m.id)),
     catCache:    {},
     metricsOpen: false,
+    yearSectionOpen: false,
+    customRangeSectionOpen: false,
     storageLoaded: false,
     pointerDrag: null,
     wizardOrganized: null,
@@ -13321,14 +13323,22 @@ const App = (() => {
     const hasItems = (state.h2h.items || []).length > 0;
     const disabled = !hasItems || range.loading || range.availabilityLoading || !periods.length || (mode === 'year' && !years.length);
     const rangeMonthMeta = getH2HCustomRangeMetaText();
+    // Collapsed by default (expands on clicking the heading) — same reasoning as the year-returns
+    // section below it: this box's fields shouldn't cost permanent vertical space in the panel.
+    // Auto-opens if a custom range is already active, so it doesn't hide an active selection.
+    const customRangeOpen = state.h2h.customRangeSectionOpen || range.active || state.h2h.metrics.has('customRange');
     return `
       <div class="h2h-custom-range-box" data-h2h-custom-range>
         <div class="h2h-custom-range-head">
-          <strong>טווח השקעה מותאם</strong>
-          <button type="button" class="h2h-custom-range-refresh" data-h2h-range-refresh title="רענון תקופות">
+          <button type="button" class="h2h-custom-range-toggle" data-h2h-toggle-custom-range aria-expanded="${customRangeOpen}">
+            <strong>טווח השקעה מותאם</strong>
+            <i class="fas fa-chevron-${customRangeOpen ? 'up' : 'down'}" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="h2h-custom-range-refresh" data-h2h-range-refresh title="רענון תקופות" ${customRangeOpen ? '' : 'hidden'}>
             <i class="fas fa-rotate-right" aria-hidden="true"></i>
           </button>
         </div>
+        <div class="h2h-custom-range-body" ${customRangeOpen ? '' : 'hidden'}>
         <div class="h2h-custom-range-mode" role="group" aria-label="בחירת סוג טווח">
           <button type="button" class="h2h-range-mode-btn ${mode === 'months' ? 'is-active' : ''}" data-h2h-range-mode="months">חודשים</button>
           <button type="button" class="h2h-range-mode-btn ${mode === 'year' ? 'is-active' : ''}" data-h2h-range-mode="year">שנה</button>
@@ -13360,6 +13370,7 @@ const App = (() => {
         </div>
         <div class="h2h-range-meta" data-h2h-range-meta>${rangeMonthMeta ? `${getH2HCustomRangeLabel()} · ${rangeMonthMeta}` : (range.meta || '')}</div>
         <div class="h2h-range-status">${range.status || (!hasItems ? 'בחר קופות כדי להפעיל טווח מותאם.' : '')}</div>
+        </div>
       </div>`;
   }
 
@@ -13371,10 +13382,16 @@ const App = (() => {
     const years = getH2HAvailableYears();
     // Rendered as part of the "תשואות" group (below), not as its own trailing section — per-year
     // returns are still returns, and belong next to the other return metrics, not at the bottom
-    // of the whole panel past unrelated groups like "מדדי סיכון".
+    // of the whole panel past unrelated groups like "מדדי סיכון". Collapsed by default (expands
+    // on clicking its own heading) so the panel doesn't grow taller than the screen just from
+    // listing ~10 years — auto-opens if a year is already selected, so an active pick stays visible.
+    const yearSectionOpen = state.h2h.yearSectionOpen || state.h2h.yearMetrics.size > 0;
     const yearsHtml = `
-      <div class="h2h-mgroup-sublabel">תשואה לפי שנה</div>
-      <div class="h2h-mgroup-items h2h-year-items">
+      <button type="button" class="h2h-mgroup-sublabel h2h-mgroup-sublabel-toggle" data-h2h-toggle-years aria-expanded="${yearSectionOpen}">
+        <span>תשואה לפי שנה</span>
+        <i class="fas fa-chevron-${yearSectionOpen ? 'up' : 'down'}" aria-hidden="true"></i>
+      </button>
+      <div class="h2h-mgroup-items h2h-year-items" ${yearSectionOpen ? '' : 'hidden'}>
         ${years.length ? years.map(year => `
           <label class="h2h-mcheckbox">
             <input type="checkbox" class="h2h-ycb" data-year="${year}" ${state.h2h.yearMetrics.has(String(year)) ? 'checked' : ''} ${!state.h2h.yearMetrics.has(String(year)) && limitReached ? 'disabled' : ''}>
@@ -14525,6 +14542,15 @@ const App = (() => {
     return '';
   }
 
+  // Distinguishes the cumulative/annualized sub-label so it can render as a colored pill
+  // instead of plain text; other sub-labels (e.g. the custom-range date-meta text) stay plain.
+  function getH2HMetricHeadSubLabelKind(metric) {
+    const id = metric?.id || '';
+    if (id === '3yr_cum' || id === '5yr_cum' || id === '7yr_cum') return 'cum';
+    if (id === '3yr_ann' || id === '5yr_ann' || id === '7yr_ann') return 'ann';
+    return '';
+  }
+
   function getH2HRanking(activeMetrics, items) {
     const lowerIsBetter = new Set(['stddev']);
     const bestIdx = {};
@@ -14553,21 +14579,6 @@ const App = (() => {
     };
   }
 
-  function getH2HTopRanks(activeMetrics, items) {
-    const lowerIsBetter = new Set(['stddev']);
-    const ranksByMetric = {};
-    activeMetrics.forEach(metric => {
-      const ranked = items
-        .map((item, index) => ({ value: getH2HMetricRaw(item, metric.id), index }))
-        .filter(entry => Number.isFinite(entry.value))
-        .sort((a, b) => lowerIsBetter.has(metric.id) ? a.value - b.value : b.value - a.value);
-      const map = new Map();
-      ranked.slice(0, 3).forEach((entry, rankIndex) => map.set(entry.index, rankIndex + 1));
-      ranksByMetric[metric.id] = map;
-    });
-    return ranksByMetric;
-  }
-
   function getH2HHeatScales(activeMetrics, items) {
     const scales = {};
     activeMetrics.forEach(metric => {
@@ -14590,44 +14601,46 @@ const App = (() => {
     return { cls, style: ` style="--h2h-heat-alpha:${alpha.toFixed(3)}"` };
   }
 
+  // Shared by the live table and the print table, so both order metrics identically.
+  function getH2HMetricBlockMeta(metric) {
+    const id = metric.id || '';
+    if (id === 'assets') return { key: 'identity', label: 'תעודת זהות', order: 10 };
+    if (id === 'monthly') return { key: 'returns', label: 'מבחן התשואה', order: 20 };
+    if (id === 'ytd') return { key: 'returns', label: 'מבחן התשואה', order: 21 };
+    if (id === '1yr') return { key: 'returns', label: 'מבחן התשואה', order: 22 };
+    // Per-year returns sit right next to monthly/ytd/1yr (22.x) — all short single-period
+    // returns together — before the multi-year cumulative cluster (23-23.6) and its annualized
+    // counterpart cluster (25-25.6), matching the metrics-panel order.
+    if (parseH2HYearMetric(id)) return { key: 'returns', label: 'מבחן התשואה', order: 22 + (3000 - Number(parseH2HYearMetric(id))) / 1000 };
+    if (id === '3yr_cum') return { key: 'returns', label: 'מבחן התשואה', order: 23 };
+    if (id === '5yr_cum') return { key: 'returns', label: 'מבחן התשואה', order: 23.3 };
+    if (id === '7yr_cum') return { key: 'returns', label: 'מבחן התשואה', order: 23.6 };
+    if (id === '3yr_ann') return { key: 'returns', label: 'מבחן התשואה', order: 25 };
+    if (id === '5yr_ann') return { key: 'returns', label: 'מבחן התשואה', order: 25.3 };
+    if (id === '7yr_ann') return { key: 'returns', label: 'מבחן התשואה', order: 25.6 };
+    if (id === 'customRange') return { key: 'returns', label: 'מבחן התשואה', order: 27 };
+    if (id === 'sharpe') return { key: 'risk', label: 'סיכון ואלוקציה', order: 40 };
+    if (id === 'stock') return { key: 'risk', label: 'סיכון ואלוקציה', order: 41 };
+    if (id === 'abroad') return { key: 'risk', label: 'סיכון ואלוקציה', order: 42 };
+    if (id === 'fx') return { key: 'risk', label: 'סיכון ואלוקציה', order: 43 };
+    if (id === 'stddev') return { key: 'risk', label: 'סיכון ואלוקציה', order: 44 };
+    if (id === 'positive') return { key: 'risk', label: 'סיכון ואלוקציה', order: 45 };
+    if (id === 'momentum') return { key: 'risk', label: 'סיכון ואלוקציה', order: 46 };
+    if (id === 'actuarial') return { key: 'risk', label: 'סיכון ואלוקציה', order: 47 };
+    if (id === 'alpha') return { key: 'risk', label: 'סיכון ואלוקציה', order: 48 };
+    return { key: 'risk', label: 'סיכון ואלוקציה', order: 90 };
+  }
+
   renderH2HTable = function() {
     const items = state.h2h.items;
     if (!items.length) return '';
-    const metricBlockMeta = metric => {
-      const id = metric.id || '';
-      if (id === 'assets') return { key: 'identity', label: 'תעודת זהות', order: 10 };
-      if (id === 'monthly') return { key: 'returns', label: 'מבחן התשואה', order: 20 };
-      if (id === 'ytd') return { key: 'returns', label: 'מבחן התשואה', order: 21 };
-      if (id === '1yr') return { key: 'returns', label: 'מבחן התשואה', order: 22 };
-      // Cumulative multi-year returns grouped together (23-24.6), then their annualized
-      // counterparts as their own adjacent cluster (25-26.6) — matches the metrics-panel order.
-      if (id === '3yr_cum') return { key: 'returns', label: 'מבחן התשואה', order: 23 };
-      if (id === '5yr_cum') return { key: 'returns', label: 'מבחן התשואה', order: 23.3 };
-      if (id === '7yr_cum') return { key: 'returns', label: 'מבחן התשואה', order: 23.6 };
-      if (id === '3yr_ann') return { key: 'returns', label: 'מבחן התשואה', order: 25 };
-      if (id === '5yr_ann') return { key: 'returns', label: 'מבחן התשואה', order: 25.3 };
-      if (id === '7yr_ann') return { key: 'returns', label: 'מבחן התשואה', order: 25.6 };
-      if (id === 'customRange') return { key: 'returns', label: 'מבחן התשואה', order: 27 };
-      if (parseH2HYearMetric(id)) return { key: 'returns', label: 'מבחן התשואה', order: 28 + (3000 - Number(parseH2HYearMetric(id))) / 1000 };
-      if (id === 'sharpe') return { key: 'risk', label: 'סיכון ואלוקציה', order: 40 };
-      if (id === 'stock') return { key: 'risk', label: 'סיכון ואלוקציה', order: 41 };
-      if (id === 'abroad') return { key: 'risk', label: 'סיכון ואלוקציה', order: 42 };
-      if (id === 'fx') return { key: 'risk', label: 'סיכון ואלוקציה', order: 43 };
-      if (id === 'stddev') return { key: 'risk', label: 'סיכון ואלוקציה', order: 44 };
-      if (id === 'positive') return { key: 'risk', label: 'סיכון ואלוקציה', order: 45 };
-      if (id === 'momentum') return { key: 'risk', label: 'סיכון ואלוקציה', order: 46 };
-      if (id === 'actuarial') return { key: 'risk', label: 'סיכון ואלוקציה', order: 47 };
-      if (id === 'alpha') return { key: 'risk', label: 'סיכון ואלוקציה', order: 48 };
-      return { key: 'risk', label: 'סיכון ואלוקציה', order: 90 };
-    };
     const activeMetrics = getH2HActiveMetrics()
-      .map(metric => ({ ...metric, _block: metricBlockMeta(metric) }))
+      .map(metric => ({ ...metric, _block: getH2HMetricBlockMeta(metric) }))
       .sort((a, b) => a._block.order - b._block.order)
       .slice(0, 15);
     if (!activeMetrics.length) return '<div class="h2h-no-metrics">בחר לפחות מדד אחד מהחלונית למעלה</div>';
     const displayOptions = state.displayOptions || DEFAULT_DISPLAY_OPTIONS;
     const { bestIdx, worstIdx } = getH2HRanking(activeMetrics, items);
-    const topRanks = getH2HTopRanks(activeMetrics, items);
     const heatScales = getH2HHeatScales(activeMetrics, items);
     const marks = getH2HDisplayOptionMarks();
     const lowerIsBetter = new Set(['stddev']);
@@ -14697,11 +14710,15 @@ const App = (() => {
       const blockStart = prev && prev._block.key !== metric._block.key ? ' h2h-block-start' : '';
       const isSorted = state.h2h.sortMetricId === metric.id;
       const metricSubLabel = getH2HMetricHeadSubLabel(metric);
+      const metricSubLabelKind = getH2HMetricHeadSubLabelKind(metric);
+      const metricSubLabelHtml = metricSubLabel
+        ? (metricSubLabelKind ? `<small class="h2h-sub-pill h2h-sub-pill-${metricSubLabelKind}">${metricSubLabel}</small>` : `<small>${metricSubLabel}</small>`)
+        : '';
       return `
       <div class="h2h-metric-head-card${blockStart}">
         <button type="button" class="h2h-metric-sort-btn${isSorted ? ' is-active' : ''}${metricSubLabel ? ' has-sub' : ''}" data-h2h-sort-metric="${metric.id}" title="מיין ${metric.label} מהגבוה לנמוך">
           <span>${getH2HMetricHeadLabel(metric)}</span>
-          ${metricSubLabel ? `<small>${metricSubLabel}</small>` : ''}
+          ${metricSubLabelHtml}
           <i class="fas fa-arrow-down-wide-short" aria-hidden="true"></i>
         </button>
         <button type="button" class="h2h-metric-remove-btn" data-h2h-remove-metric="${metric.id}" title="הסר עמודה" aria-label="הסר את ${metric.label}">×</button>
@@ -14783,12 +14800,9 @@ const App = (() => {
           ? `<span class="h2h-mini-bar h2h-allocation-bar" aria-hidden="true"><span style="width:${valueBarPct(metric, raw)}%"></span></span>`
           : '';
         const showWinnerMark = isBest && !isAllocationMetric;
-        const cellRank = isAllocationMetric ? null : topRanks[metric.id]?.get(index);
         const winnerMark = showWinnerMark
           ? `<span class="h2h-winner-crown" aria-hidden="true">👑</span>`
-          : (cellRank === 2 || cellRank === 3)
-            ? `<span class="h2h-rank-badge h2h-rank-${cellRank}" aria-hidden="true">${cellRank}</span>`
-            : '<span class="h2h-winner-crown-placeholder" aria-hidden="true"></span>';
+          : '<span class="h2h-winner-crown-placeholder" aria-hidden="true"></span>';
         return `<div class="h2h-val h2h-val-visual${isAllocationMetric ? ' h2h-allocation-val' : ''}${blockStart}${colorCls}${rankCls}${heat.cls}"${styleAttr}>
           <span class="h2h-cell-metric-name">${getH2HMetricShortLabel(metric)}</span>
           <span class="h2h-value-shell h2h-value-shell-visual">
@@ -15107,6 +15121,11 @@ const App = (() => {
       syncVisibleRangeMode();
     });
     panel.querySelector('[data-h2h-range-refresh]')?.addEventListener('click', () => ensureH2HCustomRangeAvailability(true));
+    panel.querySelector('[data-h2h-toggle-custom-range]')?.addEventListener('click', () => {
+      state.h2h.customRangeSectionOpen = !state.h2h.customRangeSectionOpen;
+      panel.outerHTML = renderH2HCustomRangeControls();
+      bindH2HCustomRangeControls(document);
+    });
     panel.querySelector('[data-h2h-range-apply]')?.addEventListener('click', applyH2HCustomRangeSelection);
     panel.querySelector('[data-h2h-range-clear]')?.addEventListener('click', clearH2HCustomRangeSelection);
   }
@@ -15118,10 +15137,12 @@ const App = (() => {
   function _h2hBuildPrintTableHtml() {
     const items = state.h2h.items || [];
     if (!items.length) return '';
-    const activeMetrics = getH2HActiveMetrics();
+    const activeMetrics = getH2HActiveMetrics()
+      .map(metric => ({ ...metric, _block: getH2HMetricBlockMeta(metric) }))
+      .sort((a, b) => a._block.order - b._block.order)
+      .slice(0, 15);
     if (!activeMetrics.length) return '';
     const { bestIdx } = getH2HRanking(activeMetrics, items);
-    const topRanks = getH2HTopRanks(activeMetrics, items);
     const signedMetrics = new Set(['monthly', 'ytd', '1yr', '3yr_cum', '5yr_cum', '3yr_ann', '5yr_ann', '7yr_cum', '7yr_ann', 'customRange', 'sharpe', 'positive', 'momentum', 'alpha', 'actuarial']);
     const lowerIsBetterMetrics = new Set(['stddev']);
     const allocationMetrics = new Set(['stock', 'abroad', 'fx']);
@@ -15138,7 +15159,11 @@ const App = (() => {
     head += '</tr>';
 
     const rows = activeMetrics.map(metric => {
-      let row = `<tr><td class="sbcmp-row-label">${escapeHtml(getH2HMetricShortLabel(metric) || metric.label)}</td>`;
+      const subLabelKind = getH2HMetricHeadSubLabelKind(metric);
+      const subLabelHtml = subLabelKind
+        ? ` <span class="h2h-sub-pill h2h-sub-pill-${subLabelKind}">${escapeHtml(getH2HMetricHeadSubLabel(metric))}</span>`
+        : '';
+      let row = `<tr><td class="sbcmp-row-label">${escapeHtml(getH2HMetricShortLabel(metric) || metric.label)}${subLabelHtml}</td>`;
       items.forEach((item, index) => {
         const raw = getH2HMetricRaw(item, metric.id);
         const isBest = bestIdx[metric.id] === index;
@@ -15147,12 +15172,9 @@ const App = (() => {
           if (signedMetrics.has(metric.id) || parseH2HYearMetric(metric.id)) signCls = raw > 0 ? 'pos' : raw < 0 ? 'neg' : '';
           else if (lowerIsBetterMetrics.has(metric.id)) signCls = isBest ? 'pos' : '';
         }
-        const cellRank = allocationMetrics.has(metric.id) ? null : topRanks[metric.id]?.get(index);
         const rankMark = isBest && !allocationMetrics.has(metric.id)
           ? '<i class="fas fa-crown sbcmp-best-icon" aria-hidden="true"></i>'
-          : (cellRank === 2 || cellRank === 3)
-            ? `<span class="h2h-rank-badge h2h-rank-${cellRank}" aria-hidden="true">${cellRank}</span>`
-            : '';
+          : '';
         row += `<td class="${signCls}"><span class="sbcmp-val-wrap">${rankMark}${getH2HMetricDisplay(item, metric.id)}</span></td>`;
       });
       return row + '</tr>';
@@ -15436,6 +15458,13 @@ const App = (() => {
         restoreH2HDrawerScroll(drawerScrollTop);
         if (h2hNeedsYearData()) ensureH2HYearDataLoaded();
       });
+    });
+    ws.querySelector('[data-h2h-toggle-years]')?.addEventListener('click', () => {
+      const drawerBody = document.querySelector('#h2h-mp .h2h-drawer-body');
+      const drawerScrollTop = drawerBody?.scrollTop || 0;
+      state.h2h.yearSectionOpen = !state.h2h.yearSectionOpen;
+      renderH2H();
+      restoreH2HDrawerScroll(drawerScrollTop);
     });
     if (hasItems && h2hNeedsYearData()) ensureH2HYearDataLoaded();
     if (hasItems && h2hNeedsTrailing7Data()) ensureH2HTrailing7DataLoaded();
