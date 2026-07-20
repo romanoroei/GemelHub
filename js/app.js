@@ -12940,6 +12940,9 @@ const App = (() => {
       }
       if (Array.isArray(parsed?.yearMetrics)) {
         state.h2h.yearMetrics = new Set(parsed.yearMetrics.map(String).filter(year => /^\d{4}$/.test(year)));
+        // One-time default so a returning user still sees their previously-picked years without
+        // having to reopen the section — after this it's purely toggle-driven, never re-forced open.
+        if (state.h2h.yearMetrics.size > 0) state.h2h.yearSectionOpen = true;
       }
       if (['table', 'chart'].includes(parsed?.viewMode)) {
         state.h2h.viewMode = parsed.viewMode;
@@ -13236,6 +13239,7 @@ const App = (() => {
 
   async function applyH2HCustomRangeSelection() {
     const range = getH2HCustomRangeState();
+    state.h2h.customRangeSectionOpen = true;
     if (range.selectionMode === 'year') syncH2HCustomRangeFromYear(range.selectedYear);
     const startPeriod = Number(range.startPeriod);
     const endPeriod = Number(range.endPeriod);
@@ -13324,9 +13328,12 @@ const App = (() => {
     const disabled = !hasItems || range.loading || range.availabilityLoading || !periods.length || (mode === 'year' && !years.length);
     const rangeMonthMeta = getH2HCustomRangeMetaText();
     // Collapsed by default (expands on clicking the heading) — same reasoning as the year-returns
-    // section below it: this box's fields shouldn't cost permanent vertical space in the panel.
-    // Auto-opens if a custom range is already active, so it doesn't hide an active selection.
-    const customRangeOpen = state.h2h.customRangeSectionOpen || range.active || state.h2h.metrics.has('customRange');
+    // section above it: this box's fields shouldn't cost permanent vertical space in the panel.
+    // Purely state-driven, same as the year section: no "auto-open while active" OR here, since
+    // that permanently overrode the toggle and made the box impossible to fold back once a range
+    // was checked/applied. Auto-opening happens as a one-time state write instead (see the
+    // .h2h-mcb change handler and applyH2HCustomRangeSelection).
+    const customRangeOpen = state.h2h.customRangeSectionOpen;
     return `
       <div class="h2h-custom-range-box" data-h2h-custom-range>
         <div class="h2h-custom-range-head">
@@ -13384,8 +13391,12 @@ const App = (() => {
     // returns are still returns, and belong next to the other return metrics, not at the bottom
     // of the whole panel past unrelated groups like "מדדי סיכון". Collapsed by default (expands
     // on clicking its own heading) so the panel doesn't grow taller than the screen just from
-    // listing ~10 years — auto-opens if a year is already selected, so an active pick stays visible.
-    const yearSectionOpen = state.h2h.yearSectionOpen || state.h2h.yearMetrics.size > 0;
+    // listing ~10 years. Purely state-driven (no "auto-open while a year is active" OR here) —
+    // that used to permanently win over the toggle, making the section impossible to fold back
+    // once any year was checked. Auto-opening on first selection is handled as a one-time state
+    // write instead (see the .h2h-ycb change handler and restoreH2HState), so afterward the toggle
+    // is the only thing that controls it.
+    const yearSectionOpen = state.h2h.yearSectionOpen;
     const yearsHtml = `
       <button type="button" class="h2h-mgroup-sublabel h2h-mgroup-sublabel-toggle" data-h2h-toggle-years aria-expanded="${yearSectionOpen}">
         <span>תשואה לפי שנה</span>
@@ -15461,8 +15472,14 @@ const App = (() => {
         if (cb.checked) state.h2h.metrics.add(cb.dataset.metric);
         else state.h2h.metrics.delete(cb.dataset.metric);
         if (cb.dataset.metric === 'customRange') {
-          if (cb.checked && !getH2HCustomRangeState().active) ensureH2HCustomRangeAvailability();
-          if (!cb.checked) invalidateH2HCustomRangeData();
+          if (cb.checked) {
+            state.h2h.customRangeSectionOpen = true;
+            const rangeBox = ws.querySelector('[data-h2h-custom-range]');
+            if (rangeBox) rangeBox.outerHTML = renderH2HCustomRangeControls();
+            if (!getH2HCustomRangeState().active) ensureH2HCustomRangeAvailability();
+          } else {
+            invalidateH2HCustomRangeData();
+          }
         }
         if (cb.checked && (cb.dataset.metric === '7yr_cum' || cb.dataset.metric === '7yr_ann')) {
           ensureH2HTrailing7DataLoaded();
@@ -15491,8 +15508,12 @@ const App = (() => {
           cb.checked = false;
           return;
         }
-        if (cb.checked) state.h2h.yearMetrics.add(year);
-        else state.h2h.yearMetrics.delete(year);
+        if (cb.checked) {
+          state.h2h.yearMetrics.add(year);
+          state.h2h.yearSectionOpen = true;
+        } else {
+          state.h2h.yearMetrics.delete(year);
+        }
         persistH2HState();
         renderH2H();
         restoreH2HDrawerScroll(drawerScrollTop);
