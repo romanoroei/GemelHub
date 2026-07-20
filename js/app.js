@@ -287,9 +287,9 @@ const App = (() => {
     { id:'1yr',       label:'12 חודשים אחורה',       shortLabel:'12 חוד׳', group:'תשואות',      defaultOn:true  },
     { id:'3yr_cum',   label:'3 שנים (מצטבר)',        shortLabel:'3 שנים',  group:'תשואות',      defaultOn:true  },
     { id:'5yr_cum',   label:'5 שנים (מצטבר)',        shortLabel:'5 שנים',  group:'תשואות',      defaultOn:true  },
+    { id:'7yr_cum',   label:'7 שנים (מצטבר)',        shortLabel:'7 שנים',  group:'תשואות',      defaultOn:false },
     { id:'3yr_ann',   label:'3 שנ׳ (שנתי ממוצע)',   shortLabel:'3 שנים',  group:'תשואות',      defaultOn:false },
     { id:'5yr_ann',   label:'5 שנ׳ (שנתי ממוצע)',   shortLabel:'5 שנים',  group:'תשואות',      defaultOn:false },
-    { id:'7yr_cum',   label:'7 שנים (מצטבר)',        shortLabel:'7 שנים',  group:'תשואות',      defaultOn:false },
     { id:'7yr_ann',   label:'7 שנ׳ (שנתי ממוצע)',   shortLabel:'7 שנים',  group:'תשואות',      defaultOn:false },
     { id:'customRange', label:'טווח השקעה מותאם',    shortLabel:'טווח מותאם', group:'תשואות',    defaultOn:false },
     { id:'assets',    label:'סך נכסים',               shortLabel:'נכסים',   group:'מידע כללי',  defaultOn:true  },
@@ -4497,7 +4497,6 @@ const App = (() => {
 
     // קישורי קופה + כפתורי toggle (בנייה ראשונית)
     block.querySelector('.track-name')?.addEventListener('click', e => {
-      if (!(window.matchMedia && window.matchMedia('(max-width: 1024px)').matches)) return;
       e.preventDefault();
       e.stopPropagation();
       scrollToTrackTableFirstRow(block);
@@ -13369,7 +13368,20 @@ const App = (() => {
     const limitReached = selectedCount >= 15;
     const groups = {};
     H2H_METRICS.forEach(m => { if(!groups[m.group]) groups[m.group]=[]; groups[m.group].push(m); });
-    const baseGroups = Object.entries(groups).map(([grp,metrics]) => `
+    const years = getH2HAvailableYears();
+    // Rendered as part of the "תשואות" group (below), not as its own trailing section — per-year
+    // returns are still returns, and belong next to the other return metrics, not at the bottom
+    // of the whole panel past unrelated groups like "מדדי סיכון".
+    const yearsHtml = `
+      <div class="h2h-mgroup-sublabel">תשואה לפי שנה</div>
+      <div class="h2h-mgroup-items h2h-year-items">
+        ${years.length ? years.map(year => `
+          <label class="h2h-mcheckbox">
+            <input type="checkbox" class="h2h-ycb" data-year="${year}" ${state.h2h.yearMetrics.has(String(year)) ? 'checked' : ''} ${!state.h2h.yearMetrics.has(String(year)) && limitReached ? 'disabled' : ''}>
+            <span>${year}</span>
+          </label>`).join('') : '<span class="h2h-years-empty">בחר קופות כדי להציג שנים</span>'}
+      </div>`;
+    return Object.entries(groups).map(([grp,metrics]) => `
       <div class="h2h-mgroup">
         <div class="h2h-mgroup-label">${grp}</div>
         <div class="h2h-mgroup-items">
@@ -13380,20 +13392,8 @@ const App = (() => {
             </label>`).join('')}
         </div>
         ${grp === 'תשואות' ? renderH2HCustomRangeControls() : ''}
+        ${grp === 'תשואות' ? yearsHtml : ''}
       </div>`).join('');
-    const years = getH2HAvailableYears();
-    const yearsGroup = `
-      <div class="h2h-mgroup h2h-year-mgroup">
-        <div class="h2h-mgroup-label">תשואות לפי שנים</div>
-        <div class="h2h-mgroup-items">
-          ${years.length ? years.map(year => `
-            <label class="h2h-mcheckbox">
-              <input type="checkbox" class="h2h-ycb" data-year="${year}" ${state.h2h.yearMetrics.has(String(year)) ? 'checked' : ''} ${!state.h2h.yearMetrics.has(String(year)) && limitReached ? 'disabled' : ''}>
-              <span>${year}</span>
-            </label>`).join('') : '<span class="h2h-years-empty">בחר קופות כדי להציג שנים</span>'}
-        </div>
-      </div>`;
-    return baseGroups + yearsGroup;
   }
 
   function getH2HAvailableYears() {
@@ -14596,17 +14596,19 @@ const App = (() => {
     const metricBlockMeta = metric => {
       const id = metric.id || '';
       if (id === 'assets') return { key: 'identity', label: 'תעודת זהות', order: 10 };
-      if (id === 'customRange') return { key: 'returns', label: 'מבחן התשואה', order: 19 };
       if (id === 'monthly') return { key: 'returns', label: 'מבחן התשואה', order: 20 };
       if (id === 'ytd') return { key: 'returns', label: 'מבחן התשואה', order: 21 };
       if (id === '1yr') return { key: 'returns', label: 'מבחן התשואה', order: 22 };
+      // Cumulative multi-year returns grouped together (23-24.6), then their annualized
+      // counterparts as their own adjacent cluster (25-26.6) — matches the metrics-panel order.
       if (id === '3yr_cum') return { key: 'returns', label: 'מבחן התשואה', order: 23 };
-      if (id === '3yr_ann') return { key: 'returns', label: 'מבחן התשואה', order: 24 };
-      if (id === '5yr_cum') return { key: 'returns', label: 'מבחן התשואה', order: 25 };
-      if (id === '5yr_ann') return { key: 'returns', label: 'מבחן התשואה', order: 26 };
-      if (id === '7yr_cum') return { key: 'returns', label: 'מבחן התשואה', order: 26.2 };
-      if (id === '7yr_ann') return { key: 'returns', label: 'מבחן התשואה', order: 26.4 };
-      if (parseH2HYearMetric(id)) return { key: 'returns', label: 'מבחן התשואה', order: 27 + (3000 - Number(parseH2HYearMetric(id))) / 1000 };
+      if (id === '5yr_cum') return { key: 'returns', label: 'מבחן התשואה', order: 23.3 };
+      if (id === '7yr_cum') return { key: 'returns', label: 'מבחן התשואה', order: 23.6 };
+      if (id === '3yr_ann') return { key: 'returns', label: 'מבחן התשואה', order: 25 };
+      if (id === '5yr_ann') return { key: 'returns', label: 'מבחן התשואה', order: 25.3 };
+      if (id === '7yr_ann') return { key: 'returns', label: 'מבחן התשואה', order: 25.6 };
+      if (id === 'customRange') return { key: 'returns', label: 'מבחן התשואה', order: 27 };
+      if (parseH2HYearMetric(id)) return { key: 'returns', label: 'מבחן התשואה', order: 28 + (3000 - Number(parseH2HYearMetric(id))) / 1000 };
       if (id === 'sharpe') return { key: 'risk', label: 'סיכון ואלוקציה', order: 40 };
       if (id === 'stock') return { key: 'risk', label: 'סיכון ואלוקציה', order: 41 };
       if (id === 'abroad') return { key: 'risk', label: 'סיכון ואלוקציה', order: 42 };
@@ -14781,7 +14783,12 @@ const App = (() => {
           ? `<span class="h2h-mini-bar h2h-allocation-bar" aria-hidden="true"><span style="width:${valueBarPct(metric, raw)}%"></span></span>`
           : '';
         const showWinnerMark = isBest && !isAllocationMetric;
-        const winnerMark = showWinnerMark ? `<span class="h2h-winner-crown" aria-hidden="true">👑</span>` : '<span class="h2h-winner-crown-placeholder" aria-hidden="true"></span>';
+        const cellRank = isAllocationMetric ? null : topRanks[metric.id]?.get(index);
+        const winnerMark = showWinnerMark
+          ? `<span class="h2h-winner-crown" aria-hidden="true">👑</span>`
+          : (cellRank === 2 || cellRank === 3)
+            ? `<span class="h2h-rank-badge h2h-rank-${cellRank}" aria-hidden="true">${cellRank}</span>`
+            : '<span class="h2h-winner-crown-placeholder" aria-hidden="true"></span>';
         return `<div class="h2h-val h2h-val-visual${isAllocationMetric ? ' h2h-allocation-val' : ''}${blockStart}${colorCls}${rankCls}${heat.cls}"${styleAttr}>
           <span class="h2h-cell-metric-name">${getH2HMetricShortLabel(metric)}</span>
           <span class="h2h-value-shell h2h-value-shell-visual">
@@ -15114,6 +15121,7 @@ const App = (() => {
     const activeMetrics = getH2HActiveMetrics();
     if (!activeMetrics.length) return '';
     const { bestIdx } = getH2HRanking(activeMetrics, items);
+    const topRanks = getH2HTopRanks(activeMetrics, items);
     const signedMetrics = new Set(['monthly', 'ytd', '1yr', '3yr_cum', '5yr_cum', '3yr_ann', '5yr_ann', '7yr_cum', '7yr_ann', 'customRange', 'sharpe', 'positive', 'momentum', 'alpha', 'actuarial']);
     const lowerIsBetterMetrics = new Set(['stddev']);
     const allocationMetrics = new Set(['stock', 'abroad', 'fx']);
@@ -15139,8 +15147,13 @@ const App = (() => {
           if (signedMetrics.has(metric.id) || parseH2HYearMetric(metric.id)) signCls = raw > 0 ? 'pos' : raw < 0 ? 'neg' : '';
           else if (lowerIsBetterMetrics.has(metric.id)) signCls = isBest ? 'pos' : '';
         }
-        const crown = isBest && !allocationMetrics.has(metric.id) ? '<i class="fas fa-crown sbcmp-best-icon" aria-hidden="true"></i>' : '';
-        row += `<td class="${signCls}"><span class="sbcmp-val-wrap">${crown}${getH2HMetricDisplay(item, metric.id)}</span></td>`;
+        const cellRank = allocationMetrics.has(metric.id) ? null : topRanks[metric.id]?.get(index);
+        const rankMark = isBest && !allocationMetrics.has(metric.id)
+          ? '<i class="fas fa-crown sbcmp-best-icon" aria-hidden="true"></i>'
+          : (cellRank === 2 || cellRank === 3)
+            ? `<span class="h2h-rank-badge h2h-rank-${cellRank}" aria-hidden="true">${cellRank}</span>`
+            : '';
+        row += `<td class="${signCls}"><span class="sbcmp-val-wrap">${rankMark}${getH2HMetricDisplay(item, metric.id)}</span></td>`;
       });
       return row + '</tr>';
     }).join('');

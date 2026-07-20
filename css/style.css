@@ -1783,6 +1783,12 @@ th.custom-range-col {
 }
 .cat-tab.sandbox-tab {
   color: #047857;
+  /* Extra breathing room before .h2h-tab (its visual neighbor in RTL, since sandbox-tab renders
+     first in DOM order and RTL flex flows right-to-left) — .sandbox-tab-badge sticks out -6px
+     past this button's own visual-left edge, which the default 1px inter-tab margin wasn't
+     enough to clear, causing it to visually overlap the ראש בראש pill's border. In RTL,
+     visual-left is margin-inline-end. */
+  margin-inline-end: 8px;
 }
 .cat-tab.sandbox-tab:hover {
   color: #065f46;
@@ -3147,6 +3153,7 @@ body:not(.advanced-options-open) .custom-range-panel {
   font-size: inherit;
   font-weight: 800;
   line-height: 1.35;
+  cursor: pointer;
 }
 .track-count  {
   font-size: .73rem; background: var(--blue); color: #fff;
@@ -6624,15 +6631,15 @@ body.fund-page table.track-table th {
   text-transform: uppercase; margin-bottom: 8px;
 }
 .h2h-mgroup-items { display: flex; flex-direction: column; gap: 5px; }
+.h2h-mgroup-sublabel {
+  font-size: .68rem; font-weight: 700; color: var(--gray-500, #64748b);
+  margin: 10px 0 6px; padding-top: 8px; border-top: 1px dashed rgba(201, 183, 114, .35);
+}
 .h2h-mcheckbox {
   display: flex; align-items: center; gap: 7px;
   font-size: .88rem; font-weight: 700; color: var(--gray-700); cursor: pointer;
 }
 .h2h-mcheckbox input { accent-color: var(--blue); cursor: pointer; }
-.h2h-year-mgroup {
-  border-right: 1px solid var(--gray-200);
-  padding-right: 16px;
-}
 .h2h-years-empty {
   color: var(--gray-400);
   font-size: .82rem;
@@ -8601,6 +8608,22 @@ body.h2h-active #h2h-section {
   font-weight: 850;
 }
 
+.h2h-fund-line-category span.h2h-category-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #075985;
+  font-size: .68rem;
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .h2h-fund-line-details strong,
 .h2h-fund-line-details b {
   display: inline-flex;
@@ -8702,6 +8725,21 @@ body.h2h-active #h2h-section {
   height: 18px;
   flex: 0 0 18px;
 }
+
+.h2h-rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  border-radius: 999px;
+  font-size: .66rem;
+  font-weight: 900;
+  line-height: 1;
+}
+.h2h-rank-badge.h2h-rank-2 { background: rgba(148, 163, 184, .3); color: #475569; }
+.h2h-rank-badge.h2h-rank-3 { background: rgba(180, 130, 80, .25); color: #92400e; }
 
 .h2h-board,
 .h2h-board-head,
@@ -19778,7 +19816,8 @@ html body .sandbox-track-id {
   }
   body.h2h-active .h2h-board-row .h2h-number { font-size: .88rem !important; }
   body.h2h-active .h2h-winner-crown,
-  body.h2h-active .h2h-winner-crown-placeholder {
+  body.h2h-active .h2h-winner-crown-placeholder,
+  body.h2h-active .h2h-rank-badge {
     width: 17px !important;
     height: 17px !important;
     flex-basis: 17px !important;
