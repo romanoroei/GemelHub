@@ -3340,6 +3340,20 @@ const App = (() => {
     const requestedCategoryId = catId;
     resetYearlyReturnsMode();
 
+    // Kicked off immediately (not awaited) so all three gemel/pension/polisa "current" datasets
+    // start fetching in true parallel with whichever one this category actually needs below —
+    // previously this only fired *after* the current category had already rendered, so switching
+    // to a category needing a different family right after landing on the page could still hit a
+    // fetch that hadn't even started yet. Firing it here instead means that by the time a user
+    // switches tabs, the other families are very likely already cached (fetchCurrentGemelData()/
+    // fetchPensionData()/fetchPolisaData() are single-flight, so this doesn't duplicate whatever
+    // the current category's own fetch below also needs).
+    Promise.all([
+      APIModule.getAllSearchable().catch(() => []),
+      APIModule.getAllSearchablePension().catch(() => []),
+      APIModule.getAllSearchablePolisa().catch(() => [])
+    ]).then(([s, sp, spo]) => { state.searchableRecords = [...s, ...sp, ...spo]; });
+
     try {
       const cat = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === catId);
       const isPensionCat = !!(cat && cat.pensionAPI);
@@ -3382,12 +3396,7 @@ const App = (() => {
       showLoading(false);
       scheduleTrailing7YLoad(requestedCategoryId, trailing7YRequestId);
 
-      // רקע: נתוני חיפוש + טווח מותאם — לא חוסמים את הרינדור
-      Promise.all([
-        APIModule.getAllSearchable().catch(() => []),
-        APIModule.getAllSearchablePension().catch(() => []),
-        APIModule.getAllSearchablePolisa().catch(() => [])
-      ]).then(([s, sp, spo]) => { state.searchableRecords = [...s, ...sp, ...spo]; });
+      // רקע: טווח מותאם — לא חוסם את הרינדור (נתוני חיפוש כבר הופעלו למעלה, מיד עם תחילת הטעינה)
       refreshCustomRangeAvailability()
         .then(() => {
           if (state.activeCategoryId === requestedCategoryId) renderComparisonView();
