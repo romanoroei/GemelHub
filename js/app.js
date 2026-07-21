@@ -13413,7 +13413,7 @@ const App = (() => {
       <div class="h2h-mgroup">
         <div class="h2h-mgroup-label">${grp}</div>
         <div class="h2h-mgroup-items">
-          ${metrics.map(m => `
+          ${metrics.filter(m => m.id !== 'customRange').map(m => `
             <label class="h2h-mcheckbox">
               <input type="checkbox" class="h2h-mcb" data-metric="${m.id}" ${state.h2h.metrics.has(m.id)?'checked':''} ${!state.h2h.metrics.has(m.id) && limitReached ? 'disabled' : ''}>
               <span>${m.label}</span>
@@ -15513,6 +15513,9 @@ const App = (() => {
           state.h2h.yearSectionOpen = true;
         } else {
           state.h2h.yearMetrics.delete(year);
+          // Closed follows "no year selected" as its default, not just its initial state — so
+          // unchecking the last year collapses it again instead of leaving it stuck open forever.
+          if (state.h2h.yearMetrics.size === 0) state.h2h.yearSectionOpen = false;
         }
         persistH2HState();
         renderH2H();
