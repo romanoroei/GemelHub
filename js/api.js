@@ -28,12 +28,131 @@ const APIModule = (() => {
   };
 
   const _staticJsonCache = new Map();
+
+  // ─── Persistent (IndexedDB) cache for the three large "current" files ───────────────────────
+  // gemel/pension/polisa "current" data only changes ~once a month (see scripts/ckan-sync.mjs's
+  // own cheap-check-before-full-refresh logic), but without this, every visitor's browser
+  // re-downloads AND re-parses all three files (up to ~38MB decoded combined) on every single page
+  // load — that's the confirmed cause of the slow initial load. IndexedDB persists the
+  // already-parsed records across visits: only the first-ever visit per browser pays that cost.
+  // Every return visit reads straight from IndexedDB (near-instant) and revalidates against the
+  // tiny sync-state.json (a few hundred bytes) in the background, refreshing the cache for *next*
+  // time if the reporting period actually advanced. Deliberately scoped to just these 3 files —
+  // not the rarely-changing archives — to keep this change's blast radius small.
+  const CKAN_CURRENT_CACHE_DB_NAME = 'gemelhub-ckan-cache';
+  const CKAN_CURRENT_CACHE_STORE = 'current-files';
+  // Bump this to invalidate every previously-cached entry across all browsers (e.g. if this cached
+  // shape ever changes) — entries stored under an older version are simply ignored, never crash.
+  const CKAN_CURRENT_CACHE_SCHEMA_VERSION = 1;
+  const CKAN_CURRENT_FILE_FAMILY = {
+    'data/ckan/gemel-current.json':   'gemel',
+    'data/ckan/pension-current.json': 'pension',
+    'data/ckan/polisa-current.json':  'polisa'
+  };
+
+  function _openCkanCacheDb() {
+    return new Promise((resolve, reject) => {
+      if (!window.indexedDB) { reject(new Error('indexedDB unavailable')); return; }
+      let req;
+      try {
+        req = indexedDB.open(CKAN_CURRENT_CACHE_DB_NAME, 1);
+      } catch (err) { reject(err); return; }
+      req.onupgradeneeded = () => {
+        if (!req.result.objectStoreNames.contains(CKAN_CURRENT_CACHE_STORE)) {
+          req.result.createObjectStore(CKAN_CURRENT_CACHE_STORE);
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function _ckanCacheGet(family) {
+    try {
+      const db = await _openCkanCacheDb();
+      return await new Promise((resolve, reject) => {
+        const tx = db.transaction(CKAN_CURRENT_CACHE_STORE, 'readonly');
+        const req = tx.objectStore(CKAN_CURRENT_CACHE_STORE).get(family);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => reject(req.error);
+      });
+    } catch (err) {
+      return null; // any failure here is a plain cache miss — never blocks the real data load
+    }
+  }
+
+  async function _ckanCacheSet(family, entry) {
+    try {
+      const db = await _openCkanCacheDb();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(CKAN_CURRENT_CACHE_STORE, 'readwrite');
+        tx.objectStore(CKAN_CURRENT_CACHE_STORE).put(entry, family);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    } catch (err) {
+      // Storage full/unavailable/private-mode — caching is a nice-to-have, never fatal.
+    }
+  }
+
+  let _ckanSyncStatePromise = null;
+  function _getCkanSyncState() {
+    if (!_ckanSyncStatePromise) {
+      _ckanSyncStatePromise = fetch('data/ckan/sync-state.json')
+        .then(r => (r.ok ? r.json() : null))
+        .catch(() => null);
+    }
+    return _ckanSyncStatePromise;
+  }
+
+  function _isValidCachedCurrentEntry(entry) {
+    return !!(entry && entry.schemaVersion === CKAN_CURRENT_CACHE_SCHEMA_VERSION
+      && Array.isArray(entry.data?.records) && Number.isFinite(entry.data?.report_period));
+  }
+
+  // Fetches+parses the real file fresh and stores it for next time. Shares the exact fetch/parse
+  // contract _loadStaticJson always had (throws on a non-OK response) so a genuine outage still
+  // surfaces to ckanFetch()'s existing fallback-to-live-API path — caching never masks that.
+  // 'no-cache' forces revalidation with the server (conditional GET) instead of risking a
+  // same-URL response the browser's own HTTP cache already had lying around — the whole point of
+  // this call is to get a version *newer* than whatever we already have cached ourselves.
+  async function _fetchAndCacheCurrentFile(path, family) {
+    const resp = await fetch(path, { cache: 'no-cache' });
+    if (!resp.ok) throw new Error(`static cache HTTP ${resp.status} for ${path}`);
+    const data = await resp.json();
+    _ckanCacheSet(family, { schemaVersion: CKAN_CURRENT_CACHE_SCHEMA_VERSION, data });
+    return data;
+  }
+
+  function _revalidateCurrentFileInBackground(path, family, cachedReportPeriod) {
+    _getCkanSyncState().then(syncState => {
+      const latest = syncState?.[family]?.lastPeriod;
+      // Still current, or the check itself failed/came back unrecognizable — leave the cache as-is
+      // rather than guessing; the next visit's revalidation will get another chance.
+      if (!Number.isFinite(latest) || latest === cachedReportPeriod) return;
+      return _fetchAndCacheCurrentFile(path, family);
+    }).catch(() => {}); // best-effort only — never surfaces, never affects the page that's already rendering
+  }
+
+  async function _loadCurrentFileWithPersistentCache(path, family) {
+    const cached = await _ckanCacheGet(family);
+    if (_isValidCachedCurrentEntry(cached)) {
+      _revalidateCurrentFileInBackground(path, family, cached.data.report_period);
+      return cached.data;
+    }
+    return _fetchAndCacheCurrentFile(path, family);
+  }
+
   function _loadStaticJson(path) {
     if (_staticJsonCache.has(path)) return _staticJsonCache.get(path);
-    const p = fetch(path).then(resp => {
-      if (!resp.ok) throw new Error(`static cache HTTP ${resp.status} for ${path}`);
-      return resp.json();
-    }).catch(err => { _staticJsonCache.delete(path); throw err; });
+    const family = CKAN_CURRENT_FILE_FAMILY[path];
+    const p = (family
+      ? _loadCurrentFileWithPersistentCache(path, family)
+      : fetch(path).then(resp => {
+          if (!resp.ok) throw new Error(`static cache HTTP ${resp.status} for ${path}`);
+          return resp.json();
+        })
+    ).catch(err => { _staticJsonCache.delete(path); throw err; });
     _staticJsonCache.set(path, p);
     return p;
   }
@@ -192,34 +311,22 @@ const APIModule = (() => {
   })();
 
   // ─── localStorage persistence ─────────────────────────────────
+  // Superseded by the IndexedDB cache above (_ckanCacheGet/_ckanCacheSet): storing the full
+  // gemel/pension/polisa "current" datasets (tens of MB combined) as a single JSON string here hit
+  // localStorage's much smaller, less consistent quota across browsers — especially unreliable on
+  // mobile Safari — and used a blind 6-hour TTL instead of checking whether the data actually
+  // changed. Kept as no-ops (rather than removed) since app.js/fund.html still call
+  // loadCachesFromLocalStorage() at init; this also clears out any stale blob a returning visitor's
+  // browser may still be holding under the old key.
   const _LS_KEY = 'gemelhub_api_v1';
-  const _LS_TTL = 6 * 60 * 60 * 1000; // 6 שעות
 
   let _cachedCurrentGemel = null;
   let _currentGemelPromise = null;
 
-  function _saveToLocalStorage() {
-    try {
-      if (!_cachedCurrentGemel && !_cachedPension && !_cachedPolisa) return;
-      localStorage.setItem(_LS_KEY, JSON.stringify({
-        ts: Date.now(),
-        gemel: _cachedCurrentGemel || null,
-        pension: _cachedPension || null,
-        polisa: _cachedPolisa || null
-      }));
-    } catch (e) { /* quota exceeded */ }
-  }
+  function _saveToLocalStorage() {}
 
   function loadCachesFromLocalStorage() {
-    try {
-      const raw = localStorage.getItem(_LS_KEY);
-      if (!raw) return;
-      const { ts, gemel, pension, polisa } = JSON.parse(raw);
-      if (!ts || Date.now() - ts > _LS_TTL) { localStorage.removeItem(_LS_KEY); return; }
-      if (gemel)   { _cachedCurrentGemel = gemel; _resourceCache.set(CONFIG.API.GEMEL_RESOURCE_ID, gemel); }
-      if (pension) { _cachedPension = pension; }
-      if (polisa)  { _cachedPolisa = polisa; }
-    } catch (e) { localStorage.removeItem(_LS_KEY); }
+    try { localStorage.removeItem(_LS_KEY); } catch (e) {}
   }
 
   // ─── helpers לשמירה/קריאה של נתוני Phase 2 ב-localStorage ───
