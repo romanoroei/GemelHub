@@ -43,7 +43,9 @@ const App = (() => {
       autoSaveId: null, // id of the saved-portfolios list entry mirroring the current working portfolio, if any
       compareItems: null,
       returnsMenuOpen: false,
-      selectedReturnFields: ['monthly', 'ytd', '12m', '3y']
+      selectedReturnFields: ['monthly', 'ytd', '12m', '3y'],
+      sortField: null,
+      sortDir: 'desc'
     }
   };
   const ADVANCED_OPTIONS_STORAGE_KEY = 'gemelhubAdvancedOptionsOpenV3';
@@ -6683,6 +6685,15 @@ const App = (() => {
     return items.map(() => 1 / items.length);
   }
 
+  // Sum of every item's own invest amount in a category — the denominator for the "% מהסכום"
+  // column. Includes hidden routes (unlike the weighted-row totals) since the question this column
+  // answers is "what share of the category's money is this", which doesn't change just because a
+  // route is temporarily hidden from the simulation.
+  function _sbCategoryInvestTotal(items) {
+    return items.filter(it => it.investAmount !== '')
+      .reduce((s, it) => s + (parseFloat(String(it.investAmount).replace(/,/g, '')) || 0), 0);
+  }
+
   function _sbWeightedVal(items, weights, getter) {
     let wSum = 0, wTotal = 0;
     items.forEach((it, i) => {
@@ -6749,6 +6760,95 @@ const App = (() => {
   function _sbReturnCell(item, field) {
     const value = _sbReturnFieldValue(item, field);
     return `<td class="sb-td-return sb-td-${field.id} sb-yield-col" data-return-field="${field.id}" style="color:${_sbYieldColor(value)};font-weight:700;font-size:.9rem">${_sbFmtPct(value)}</td>`;
+  }
+
+  // ─── Column sorting for the lab table ──────────────────────────
+  const SB_SORT_TEXT_FIELDS = new Set(['provider', 'track']);
+
+  function _sbSortFieldValue(item, field) {
+    if (field === 'provider') return item.provider || '';
+    if (field === 'track') return item.trackLabel || '';
+    if (field === 'invest' || field === 'pctOfTotal') return parseFloat(String(item.investAmount || '').replace(/,/g, ''));
+    if (field === 'dnCumulative' || field === 'dnDeposit' || field === 'stock' || field === 'abroad' || field === 'fx') {
+      return parseFloat(item[field]);
+    }
+    const returnField = SB_RETURN_FIELDS.find(f => f.id === field);
+    if (returnField) return parseFloat(_sbReturnFieldValue(item, returnField));
+    return null;
+  }
+
+  function _sbSortItems(items) {
+    const field = state.sandbox.sortField;
+    if (!field) return items;
+    const dir = state.sandbox.sortDir === 'asc' ? 1 : -1;
+    const isText = SB_SORT_TEXT_FIELDS.has(field);
+    const sorted = [...items];
+    sorted.sort((a, b) => {
+      const va = _sbSortFieldValue(a, field);
+      const vb = _sbSortFieldValue(b, field);
+      if (isText) return dir * String(va).localeCompare(String(vb), 'he');
+      const na = Number.isFinite(va) ? va : null;
+      const nb = Number.isFinite(vb) ? vb : null;
+      if (na === null && nb === null) return 0;
+      if (na === null) return 1;  // blanks always sort last, regardless of direction
+      if (nb === null) return -1;
+      return dir * (na - nb);
+    });
+    return sorted;
+  }
+
+  // "start" (the default) right-aligns the label to match right-aligned text columns (provider/
+  // track) — without it the flex-centered button drifted the header away from its own column's
+  // actual content below (e.g. "מסלול" centering over empty space instead of the track names).
+  function _sbSortHeaderHtml(label, field, justify = 'flex-start') {
+    const active = state.sandbox.sortField === field;
+    const dir = active ? state.sandbox.sortDir : null;
+    const icon = dir === 'asc' ? 'up' : 'down';
+    return `<button type="button" class="sandbox-sort-btn${active ? ' is-active' : ''}" style="justify-content:${justify}" data-sandbox-sort="${field}">
+      <span>${label}</span><i class="fas fa-arrow-${icon}-wide-short" aria-hidden="true"></i>
+    </button>`;
+  }
+
+  // ─── Per-category weighted summary row ─────────────────────────
+  // Shared by the initial render and _sbRefreshWeightedRows (live input updates) so the two never
+  // drift out of sync with each other or with however many return columns are currently shown.
+  // Hidden routes (the "what if" eye toggle) are excluded from every weighted figure here, matching
+  // how the dashboard already treats them — a hidden route shouldn't count toward the totals.
+  function _sbWeightedRowCellsHtml(items, catId, returnFields) {
+    const visibleItems = items.filter(it => !it.hidden);
+    const isPension = catId.startsWith('pension_');
+    const weights = _sbWeights(visibleItems);
+    const wDn = _sbWeightedVal(visibleItems, weights, it => it.dnCumulative);
+    const wDnDep = _sbWeightedVal(visibleItems, weights, it => it.dnDeposit);
+    const catAmtTotal = visibleItems.filter(it => it.investAmount !== '')
+      .reduce((s, it) => s + (parseFloat(String(it.investAmount).replace(/,/g, '')) || 0), 0);
+    const catInvestDisplay = Math.round(catAmtTotal).toLocaleString('he-IL');
+    // What share of the category's total money the currently-visible rows represent — reads as
+    // "100%" when nothing is hidden, and drops below that while a route is toggled off, which is
+    // useful information rather than a constant (every row's own % already sums to 100% including
+    // hidden ones, so repeating that here would say nothing new).
+    const allItemsTotal = _sbCategoryInvestTotal(items);
+    const visibleSharePct = allItemsTotal > 0 ? (catAmtTotal / allItemsTotal * 100) : null;
+    const returnCells = returnFields.map(field => {
+      const val = _sbWeightedVal(visibleItems, weights, it => _sbReturnFieldValue(it, field));
+      return `<td class="sb-td-return sb-td-${field.id} sb-yield-col" style="color:${_sbYieldColor(val)};font-weight:800;font-size:.9rem">${_sbFmtPct(val)}</td>`;
+    }).join('');
+    const wStock = _sbWeightedVal(visibleItems, weights, it => it.stock);
+    const wAbroad = _sbWeightedVal(visibleItems, weights, it => it.abroad);
+    const wFx = _sbWeightedVal(visibleItems, weights, it => it.fx);
+    return `
+      <td></td>
+      <td></td>
+      <td></td>
+      <td class="sb-weighted-fee">${wDn !== null ? _sbFmtPct(wDn) : '—'}</td>
+      ${isPension ? `<td class="sb-weighted-fee">${wDnDep !== null ? _sbFmtPct(wDnDep) : '—'}</td>` : ''}
+      <td class="sb-weighted-pct">${visibleSharePct !== null ? _sbFmtPct(visibleSharePct, 1) : '—'}</td>
+      <td class="sb-invest-col sb-weighted-invest">${catInvestDisplay}</td>
+      ${returnCells}
+      <td class="sb-td-stock sb-allocation-start sb-weighted-exp">${expCell(wStock != null ? _sbFmtPct(wStock, 1) : '-', 'stock')}</td>
+      <td class="sb-td-abroad sb-weighted-exp">${expCell(wAbroad != null ? _sbFmtPct(wAbroad, 1) : '-', 'abroad')}</td>
+      <td class="sb-td-fx sb-weighted-exp">${expCell(wFx != null ? _sbFmtPct(wFx, 1) : '-', 'fx')}</td>
+    `;
   }
 
   function _sbReturnFieldMenuHtml() {
@@ -6825,31 +6925,16 @@ const App = (() => {
       const sortedKeys = Object.keys(grouped).sort((a, b) => catOrder.indexOf(a) - catOrder.indexOf(b));
 
       for (const catId of sortedKeys) {
-        const items = grouped[catId];
+        const items = _sbSortItems(grouped[catId]);
         const catDef = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === catId) || { label: catId, color: '#0f172a', icon: '📊' };
         const isPension = catId.startsWith('pension_');
-        const weights = _sbWeights(items);
-        const wY1  = _sbWeightedVal(items, weights, it => it.y1);
-        const wY3  = _sbWeightedVal(items, weights, it => it.y3);
-        const wY5  = _sbWeightedVal(items, weights, it => it.y5);
-        const wStock  = _sbWeightedVal(items, weights, it => it.stock);
-        const wAbroad = _sbWeightedVal(items, weights, it => it.abroad);
-        const wFx     = _sbWeightedVal(items, weights, it => it.fx);
-        const wDn  = _sbWeightedVal(items, weights, it => it.dnCumulative);
-        const catAmtTotal = items.filter(it => it.investMode === 'amount' && it.investAmount !== '')
-          .reduce((s, it) => s + (parseFloat(String(it.investAmount).replace(/,/g, '')) || 0), 0);
-        const catPctTotal = items.filter(it => it.investMode === 'percent' && it.investPct !== '')
-          .reduce((s, it) => s + (parseFloat(it.investPct) || 0), 0);
-        const catAmtHas = items.some(it => it.investMode === 'amount' && it.investAmount !== '');
-        const catPctHas = items.some(it => it.investMode === 'percent' && it.investPct !== '');
-        const catInvestDisplay = catAmtHas ? formatCurrencyILS(catAmtTotal) : catPctHas ? `\u200E${catPctTotal.toFixed(0)}%` : '';
-        const catInvestMode = items.every(it => it.investMode === 'percent') ? 'percent' : 'amount';
+        const catAmtTotalForPct = _sbCategoryInvestTotal(grouped[catId]);
 
         const latestPeriod = items.reduce((mx, it) => (it.reportPeriod || '') > mx ? (it.reportPeriod || '') : mx, '');
         const monthlyLabel = (typeof formatReportPeriod === 'function' && latestPeriod) ? formatReportPeriod(latestPeriod) : 'חודשי';
         const returnFields = _sbSelectedReturnFields();
         const returnCols = returnFields.map(field => `<col class="sb-col-yield sb-col-yield-${field.id}">`).join('');
-        const returnHeaders = returnFields.map(field => `<th class="sb-yield-col">${_sbReturnFieldLabel(field, monthlyLabel)}</th>`).join('');
+        const returnHeaders = returnFields.map(field => `<th class="sb-yield-col">${_sbSortHeaderHtml(_sbReturnFieldLabel(field, monthlyLabel), field.id, 'center')}</th>`).join('');
         const catProviderColors = new Map();
 
         const tableRows = items.map(item => {
@@ -6865,6 +6950,8 @@ const App = (() => {
           const fundUrl = `fund.html?id=${encodeURIComponent(item.fundId || '')}&cat=${encodeURIComponent(item.categoryId || '')}`;
           const returnCells = returnFields.map(field => _sbReturnCell(item, field)).join('');
           const isHidden = !!item.hidden;
+          const investAmountNum = parseFloat(String(item.investAmount || '').replace(/,/g, '')) || 0;
+          const pctOfTotal = catAmtTotalForPct > 0 ? (investAmountNum / catAmtTotalForPct * 100) : 0;
           return `<tr data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}"${isHidden ? ' class="sb-row-hidden"' : ''}>
             <td><button type="button" class="sandbox-remove-btn" data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" aria-label="הסר מסלול">
               <i class="fas fa-times" aria-hidden="true"></i></button></td>
@@ -6880,12 +6967,15 @@ const App = (() => {
                 <div class="sandbox-track-id"><span class="sandbox-track-number">#${item.fundId || ''}</span><span class="sandbox-track-id-icons">${allocationIcon}</span></div>
               </div>
             </td>
-            <td><input type="number" step="0.01" min="0" max="5" class="sandbox-fee-input"
+            <td class="sb-td-fee"><input type="number" step="0.01" min="0" max="5" class="sandbox-fee-input"
               data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" data-field="dnCumulative"
               value="${item.dnCumulative}" placeholder="0.75" title="% דמי ניהול מצבירה" /></td>
-            ${isPension ? `<td><input type="number" step="0.01" min="0" max="5" class="sandbox-fee-input"
+            ${isPension ? `<td class="sb-td-fee"><input type="number" step="0.01" min="0" max="5" class="sandbox-fee-input"
               data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" data-field="dnDeposit"
               value="${item.dnDeposit}" placeholder="0.25" title="% דמי ניהול מהפקדה" /></td>` : ''}
+            <td class="sb-td-pct"><input type="number" step="0.1" min="0" max="100" class="sandbox-pct-input"
+              data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" data-category-id="${catId}"
+              value="${pctOfTotal ? pctOfTotal.toFixed(1) : ''}" placeholder="0" title="אחוז מסך ההשקעה בקטגוריה" /></td>
             <td class="sb-invest-col">
               <div class="sandbox-invest-control">
                 <input type="text" inputmode="numeric" class="sandbox-invest-input"
@@ -6918,6 +7008,7 @@ const App = (() => {
                 <col class="sb-col-track">
                 <col class="sb-col-fee">
                 ${isPension ? '<col class="sb-col-fee">' : ''}
+                <col class="sb-col-pct">
                 <col class="sb-col-invest">
                 ${returnCols}
                 <col class="sb-col-exp">
@@ -6925,20 +7016,20 @@ const App = (() => {
                 <col class="sb-col-exp">
               </colgroup>
               <thead><tr>
-                <th></th><th>מנהל</th><th>מסלול</th>
-                <th class="sb-fee-head"><span>דמי ניהול</span><span>מצבירה %</span></th>
-                ${isPension ? '<th class="sb-fee-head"><span>דמי ניהול</span><span>מהפקדה %</span></th>' : ''}
-                <th class="sb-invest-head">
-                  <span>השקעה</span>
-                  <span class="sandbox-invest-toggle sandbox-cat-mode-toggle" aria-label="בחירת אופן הזנת השקעה לקטגוריה">
-                    <button type="button" class="${catInvestMode === 'percent' ? 'active' : ''}" data-sandbox-cat-mode="${catId}" data-mode="percent" title="כדי לחשב חשיפות לפי אחוזים, סכום האחוזים בכל מסלולי הקטגוריה חייב להסתכם ל-100%">%</button>
-                    <button type="button" class="${catInvestMode === 'amount' ? 'active' : ''}" data-sandbox-cat-mode="${catId}" data-mode="amount">₪</button>
-                  </span>
-                </th>
+                <th></th>
+                <th>${_sbSortHeaderHtml('מנהל', 'provider')}</th>
+                <th>${_sbSortHeaderHtml('מסלול', 'track')}</th>
+                <th class="sb-fee-head">${_sbSortHeaderHtml('<span>ד"נ</span><span>מצבירה %</span>', 'dnCumulative', 'center')}</th>
+                ${isPension ? `<th class="sb-fee-head">${_sbSortHeaderHtml('<span>ד"נ</span><span>מהפקדה %</span>', 'dnDeposit', 'center')}</th>` : ''}
+                <th class="sb-pct-head">${_sbSortHeaderHtml('אחוז', 'pctOfTotal', 'center')}</th>
+                <th class="sb-invest-head">${_sbSortHeaderHtml('סך השקעה', 'invest', 'center')}</th>
                 ${returnHeaders}
-                <th class="sb-allocation-start">% מניות</th><th>% חו"ל</th><th>% מט"ח</th>
+                <th class="sb-allocation-start">${_sbSortHeaderHtml('% מניות', 'stock', 'center')}</th>
+                <th>${_sbSortHeaderHtml('% חו"ל', 'abroad', 'center')}</th>
+                <th>${_sbSortHeaderHtml('% מט"ח', 'fx', 'center')}</th>
               </tr></thead>
               <tbody>${tableRows}</tbody>
+              <tfoot><tr class="sandbox-weighted-row">${_sbWeightedRowCellsHtml(items, catId, returnFields)}</tr></tfoot>
             </table>
           </div>
         </div>`;
@@ -9111,16 +9202,17 @@ const App = (() => {
       });
     });
 
-    // category invest mode toggle
-    section.querySelectorAll('[data-sandbox-cat-mode]').forEach(btn => {
+    // column sort headers
+    section.querySelectorAll('[data-sandbox-sort]').forEach(btn => {
       btn.addEventListener('click', () => {
         _sbSyncVisibleInputsToState();
-        const mode = btn.dataset.mode === 'percent' ? 'percent' : 'amount';
-        const catId = btn.dataset.sandboxCatMode;
-        state.sandbox.portfolio.forEach(item => {
-          if (item.categoryId === catId) item.investMode = mode;
-        });
-        saveSandboxPortfolio();
+        const field = btn.dataset.sandboxSort;
+        if (state.sandbox.sortField === field) {
+          state.sandbox.sortDir = state.sandbox.sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          state.sandbox.sortField = field;
+          state.sandbox.sortDir = SB_SORT_TEXT_FIELDS.has(field) ? 'asc' : 'desc';
+        }
         renderSandboxPage();
       });
     });
@@ -9180,6 +9272,7 @@ const App = (() => {
           _sbMarkPortfolioModified();
           saveSandboxPortfolio();
           _sbRefreshWeightedRows(section);
+          _sbRefreshCategoryPercents(section, item.categoryId);
         }
       });
       input.addEventListener('change', () => {
@@ -9189,6 +9282,38 @@ const App = (() => {
         if (item.investMode === 'percent') item.investPct = clean;
         else item.investAmount = clean;
         saveSandboxPortfolio();
+        _sbRefreshWeightedRows(section);
+        _sbRefreshCategoryPercents(section, item.categoryId);
+      });
+    });
+
+    // "% מהסכום" — editable, dynamically computed share of the category's total investment.
+    // Applied on blur (not every keystroke) since typing a multi-digit percentage shouldn't trigger
+    // a recalculation of every other row's percentage mid-type.
+    section.querySelectorAll('.sandbox-pct-input').forEach(input => {
+      input.addEventListener('change', () => {
+        const item = _sbFindPortfolioItemFromElement(input);
+        if (!item) return;
+        const catId = input.dataset.categoryId;
+        const catItems = state.sandbox.portfolio.filter(it => it.categoryId === catId);
+        const ownAmount = parseFloat(String(item.investAmount || '').replace(/,/g, '')) || 0;
+        const totalOthers = _sbCategoryInvestTotal(catItems) - ownAmount;
+        let pct = parseFloat(input.value);
+        if (!Number.isFinite(pct) || pct < 0) pct = 0;
+        pct = Math.min(pct, 99.9); // 100% has no solution (division by zero — no "others" left to be a share of)
+        const p = pct / 100;
+        const newAmount = Math.round(p * totalOthers / (1 - p));
+        item.investAmount = String(newAmount);
+        item.investMode = 'amount';
+        // Update the invest-input's DOM value BEFORE saving — saveSandboxPortfolio() re-syncs
+        // every visible invest-input's current DOM value back into state (to catch in-progress
+        // edits elsewhere), so if this ran first it would read the stale pre-edit DOM value and
+        // clobber the newAmount we just computed.
+        const investInput = input.closest('tr')?.querySelector('.sandbox-invest-input');
+        if (investInput) investInput.value = newAmount.toLocaleString('he-IL');
+        _sbMarkPortfolioModified();
+        saveSandboxPortfolio();
+        _sbRefreshCategoryPercents(section, catId);
         _sbRefreshWeightedRows(section);
       });
     });
@@ -9252,6 +9377,23 @@ const App = (() => {
     });
   }
 
+  // Every row's investAmount contributes to every other row's "% מהסכום" in the same category, so
+  // any single edit (either the amount field or the percent field itself) has to refresh the whole
+  // category's percent column, not just the row that was edited.
+  function _sbRefreshCategoryPercents(section, catId) {
+    const catItems = state.sandbox.portfolio.filter(it => it.categoryId === catId);
+    const total = _sbCategoryInvestTotal(catItems);
+    const matches = section.querySelectorAll(`.sandbox-pct-input[data-category-id="${CSS.escape(String(catId))}"]`);
+    matches.forEach(pctInput => {
+      if (pctInput === document.activeElement) return;
+      const item = _sbFindPortfolioItemFromElement(pctInput);
+      if (!item) return;
+      const amt = parseFloat(String(item.investAmount || '').replace(/,/g, '')) || 0;
+      const pct = total > 0 ? (amt / total * 100) : 0;
+      pctInput.value = pct ? pct.toFixed(1) : '';
+    });
+  }
+
   // Refresh only the weighted-summary rows + dashboard section without full re-render
   function _sbRefreshWeightedRows(section) {
     const portfolio = state.sandbox.portfolio;
@@ -9266,38 +9408,12 @@ const App = (() => {
       if (!catBlock) return;
       const catId = catBlock.dataset.sandboxCatId;
       if (!catId) return;
-      const items = grouped[catId] || [];
-      const weights = _sbWeights(items);
-      const wY1    = _sbWeightedVal(items, weights, it => it.y1);
-      const wY3    = _sbWeightedVal(items, weights, it => it.y3);
-      const wY5    = _sbWeightedVal(items, weights, it => it.y5);
-      const wStock = _sbWeightedVal(items, weights, it => it.stock);
-      const wAbroad= _sbWeightedVal(items, weights, it => it.abroad);
-      const wFx    = _sbWeightedVal(items, weights, it => it.fx);
-      const wDn    = _sbWeightedVal(items, weights, it => it.dnCumulative);
-      const wDnDep = _sbWeightedVal(items, weights, it => it.dnDeposit);
-      const isPension = catId.startsWith('pension_');
-      const tds = row.querySelectorAll('td');
-      const catAmtTotal2 = items.filter(it => it.investMode === 'amount' && it.investAmount !== '')
-        .reduce((s, it) => s + (parseFloat(String(it.investAmount).replace(/,/g, '')) || 0), 0);
-      const catPctTotal2 = items.filter(it => it.investMode === 'percent' && it.investPct !== '')
-        .reduce((s, it) => s + (parseFloat(it.investPct) || 0), 0);
-      const catAmtHas2 = items.some(it => it.investMode === 'amount' && it.investAmount !== '');
-      const catPctHas2 = items.some(it => it.investMode === 'percent' && it.investPct !== '');
-      const catInvDisp2 = catAmtHas2 ? formatCurrencyILS(catAmtTotal2) : catPctHas2 ? `\u200E${catPctTotal2.toFixed(0)}%` : '';
-      // tds: [0]=label, [1]=blank, [2]=dn, [3]=dnDep(pension)|invest-total, [4/5]=y1, ...
-      let i = 0;
-      if (tds[i]) tds[i].innerHTML = `<span class="w-label">משוקלל</span>`; i++;
-      if (tds[i]) tds[i].textContent = ''; i++; // מסלול blank
-      if (tds[i]) { tds[i].style.fontWeight = '800'; tds[i].textContent = wDn !== null ? _sbFmtPct(wDn) : '—'; } i++;
-      if (isPension) { if (tds[i]) { tds[i].style.fontWeight = '800'; tds[i].textContent = wDnDep !== null ? _sbFmtPct(wDnDep) : '—'; } i++; }
-      if (tds[i]) { tds[i].style.fontWeight = '800'; tds[i].style.fontSize = '.78rem'; tds[i].style.color = 'var(--blue)'; tds[i].textContent = catInvDisp2; } i++; // invest total
-      if (tds[i]) { tds[i].style.color = _sbYieldColor(wY1); tds[i].style.fontWeight = '800'; tds[i].textContent = _sbFmtPct(wY1); } i++;
-      if (tds[i]) { tds[i].style.color = _sbYieldColor(wY3); tds[i].style.fontWeight = '800'; tds[i].textContent = _sbFmtPct(wY3); } i++;
-      if (tds[i]) { tds[i].style.color = _sbYieldColor(wY5); tds[i].style.fontWeight = '800'; tds[i].textContent = _sbFmtPct(wY5); } i++;
-      if (tds[i]) { tds[i].classList.add('sb-allocation-start'); tds[i].style.fontWeight = '800'; tds[i].innerHTML = expCell(_sbFmtPct(wStock, 1), 'stock'); } i++;
-      if (tds[i]) { tds[i].style.fontWeight = '800'; tds[i].innerHTML = expCell(_sbFmtPct(wAbroad, 1), 'abroad'); } i++;
-      if (tds[i]) { tds[i].style.fontWeight = '800'; tds[i].innerHTML = expCell(_sbFmtPct(wFx, 1), 'fx'); }
+      const items = _sbSortItems(grouped[catId] || []);
+      const returnFields = _sbSelectedReturnFields();
+      // Regenerated via the same builder the initial render uses, rather than patching individual
+      // <td> elements by position -- that used to drift out of sync whenever the column set changed
+      // (e.g. a dynamic return field added/removed), since it assumed a fixed column count.
+      row.innerHTML = _sbWeightedRowCellsHtml(items, catId, returnFields);
     });
     // Update dashboard section
     const dashEl = section.querySelector('.sb-dashboard');

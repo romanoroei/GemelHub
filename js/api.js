@@ -149,7 +149,16 @@ const APIModule = (() => {
     const p = (family
       ? _loadCurrentFileWithPersistentCache(path, family)
       : fetch(path).then(resp => {
-          if (!resp.ok) throw new Error(`static cache HTTP ${resp.status} for ${path}`);
+          // Only a real "the server answered, and it's a 404/etc" counts as "this file genuinely
+          // doesn't exist" (e.g. a fund with no rows in the archive). A fetch() that never gets a
+          // response at all — blocked by the browser (e.g. opening index.html via file://, where
+          // fetching another local file is disallowed) — throws a plain TypeError instead, which
+          // must NOT be confused with the former: see the catch in _ckanFromShardedArchive below.
+          if (!resp.ok) {
+            const err = new Error(`static cache HTTP ${resp.status} for ${path}`);
+            err.staticFileNotFound = true;
+            throw err;
+          }
           return resp.json();
         })
     ).catch(err => { _staticJsonCache.delete(path); throw err; });
@@ -178,6 +187,7 @@ const APIModule = (() => {
       try {
         records = await _loadStaticJson(`${dir}/${filters.FUND_ID}.json`);
       } catch (e) {
+        if (!e || !e.staticFileNotFound) throw e; // real fetch failure — let the caller fall back to the live API
         records = []; // fund has no rows in this archive — a valid, common case, not a failure
       }
       records = records.filter(r => _recordMatchesFilters(r, filters));
@@ -198,7 +208,10 @@ const APIModule = (() => {
       // for a 278-fund query that the live filtered API answered in ~1.7s; fully parallel takes
       // ~0.8s — faster than the live API, as intended.
       const results = await Promise.all(matchingFundIds.map(fundId =>
-        _loadStaticJson(`${dir}/${fundId}.json`).catch(() => [])
+        _loadStaticJson(`${dir}/${fundId}.json`).catch(e => {
+          if (!e || !e.staticFileNotFound) throw e; // real fetch failure — let the caller fall back to the live API
+          return [];
+        })
       ));
       const all = results.flat();
       const records = all.filter(r => _recordMatchesFilters(r, filters));

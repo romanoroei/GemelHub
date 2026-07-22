@@ -11178,17 +11178,19 @@ body.h2h-active,
   font-size: .83rem;
   table-layout: fixed;
 }
-.sandbox-cat-table .sb-col-provider { width: 100px; }
-.sandbox-cat-table .sb-col-track { width: 108px; }
-.sandbox-cat-table .sb-col-fee { width: 62px; }
-.sandbox-cat-table .sb-col-invest { width: 88px; }
+.sandbox-cat-table .sb-col-provider { width: 96px; }
+.sandbox-cat-table .sb-col-track { width: 100px; }
+.sandbox-cat-table .sb-col-fee { width: 74px; }
+.sandbox-cat-table .sb-col-pct { width: 52px; }
+.sandbox-cat-table .sb-col-invest { width: 86px; }
 .sandbox-cat-table .sb-col-yield { width: 58px; }
 .sandbox-cat-table .sb-col-exp { width: 56px; }
 .sandbox-cat-table .sb-col-remove { width: 28px; }
-.sandbox-cat-table.is-pension-table .sb-col-provider { width: 92px; }
-.sandbox-cat-table.is-pension-table .sb-col-track { width: 118px; }
-.sandbox-cat-table.is-pension-table .sb-col-fee { width: 64px; }
-.sandbox-cat-table.is-pension-table .sb-col-invest { width: 84px; }
+.sandbox-cat-table.is-pension-table .sb-col-provider { width: 84px; }
+.sandbox-cat-table.is-pension-table .sb-col-track { width: 106px; }
+.sandbox-cat-table.is-pension-table .sb-col-fee { width: 76px; }
+.sandbox-cat-table.is-pension-table .sb-col-pct { width: 46px; }
+.sandbox-cat-table.is-pension-table .sb-col-invest { width: 80px; }
 .sandbox-cat-table.is-pension-table .sb-col-yield { width: 56px; }
 .sandbox-cat-table.is-pension-table .sb-col-exp { width: 52px; }
 .sandbox-cat-table th {
@@ -11200,6 +11202,40 @@ body.h2h-active,
   font-weight: 800;
   border-bottom: 2px solid var(--gray-200);
   white-space: nowrap;
+}
+.sandbox-sort-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 100%;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+.sandbox-sort-btn i {
+  font-size: .58rem;
+  color: var(--gray-400);
+  opacity: .55;
+}
+.sandbox-sort-btn.is-active,
+.sandbox-sort-btn:hover {
+  color: var(--blue);
+}
+.sandbox-sort-btn.is-active i,
+.sandbox-sort-btn:hover i {
+  color: var(--blue);
+  opacity: 1;
+}
+.sandbox-sort-btn span {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .sandbox-cat-table th:nth-child(3),
 .sandbox-cat-table td:nth-child(3),
@@ -11221,6 +11257,29 @@ body.h2h-active,
 }
 .sandbox-cat-table td:first-child {
   overflow: visible;
+}
+/* Nudge the fee input toward the track column (right) and the invest input toward the return
+   columns (left), so the two no longer visually cluster together in the middle of the row. */
+.sandbox-cat-table td.sb-td-fee {
+  padding-right: 0;
+  padding-left: 16px;
+}
+.sandbox-cat-table td.sb-invest-col {
+  padding-left: 0;
+  padding-right: 16px;
+}
+.sandbox-cat-table th.sb-fee-head {
+  padding-right: 0;
+  padding-left: 16px;
+}
+.sandbox-cat-table th.sb-invest-head {
+  padding-left: 0;
+  padding-right: 16px;
+}
+.sandbox-cat-table td.sb-td-pct,
+.sandbox-cat-table th.sb-pct-head {
+  padding-left: 5px;
+  padding-right: 1px;
 }
 .sandbox-cat-table td:first-child .table-allocation-icons {
   max-width: 74px;
@@ -11319,12 +11378,27 @@ body.h2h-active,
 .sandbox-weighted-row td {
   background: #f0f4ff !important;
   font-size: .83rem;
+  font-style: italic;
   color: var(--gray-600);
   font-weight: 600;
   padding: 7px 12px;
   border-top: 1px solid #e2e8f0;
 }
-.sandbox-weighted-row .w-label { color: var(--gray-400); font-weight: 500; }
+.sandbox-weighted-row .sb-weighted-fee { font-weight: 800; }
+.sandbox-weighted-row .sb-weighted-invest { font-weight: 800; font-size: .92rem; color: var(--blue); text-align: center; }
+/* Tighter padding than the row's generic 12px — "100.0%" doesn't fit that plus the column's own
+   narrow width (sized for the data rows' plain number input, not this text-with-% summary). */
+.sandbox-weighted-row .sb-weighted-pct {
+  padding-left: 2px;
+  padding-right: 2px;
+  font-size: .74rem;
+}
+/* The row's own 12px horizontal padding (roomy on purpose for the fee/invest/label cells) left too
+   little width for the exposure bar+percentage pair specifically, causing it to overflow the cell
+   and clip off-center. Narrower, matching-the-data-rows padding here fixes both the overflow and
+   the centering in one go. */
+.sandbox-weighted-row .sb-weighted-exp { text-align: center; padding-left: 2px; padding-right: 2px; }
+.sandbox-weighted-row .sb-weighted-exp .exp-wrap { display: inline-flex; justify-content: center; }
 .sandbox-cat-table .exp-bar-bg { width: 30px; }
 .sandbox-cat-table .exp-wrap {
   gap: 4px;
@@ -11378,7 +11452,7 @@ body.h2h-active,
   border-radius: 6px;
   font-family: inherit;
   font-size: .82rem;
-  text-align: left;
+  text-align: center;
   direction: ltr;
   transition: border-color .15s;
 }
@@ -11436,6 +11510,23 @@ body.h2h-active,
   border-color: var(--blue-lt);
   box-shadow: 0 0 0 3px rgba(99,102,241,.1);
 }
+.sandbox-pct-input {
+  width: 50px;
+  max-width: 50px;
+  padding: 5px 5px;
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: .82rem;
+  text-align: center;
+  direction: ltr;
+  transition: border-color .15s;
+}
+.sandbox-pct-input:focus {
+  outline: none;
+  border-color: var(--blue-lt);
+  box-shadow: 0 0 0 3px rgba(99,102,241,.1);
+}
 .sandbox-remove-btn {
   -webkit-appearance: none;
   appearance: none;
@@ -11480,6 +11571,7 @@ tr.sb-row-hidden {
 tr.sb-row-hidden .sandbox-track-link,
 tr.sb-row-hidden .sandbox-provider-link,
 tr.sb-row-hidden .sandbox-fee-input,
+tr.sb-row-hidden .sandbox-pct-input,
 tr.sb-row-hidden .sandbox-invest-input {
   pointer-events: none;
 }
@@ -12145,17 +12237,19 @@ tr.sb-row-hidden .sandbox-invest-input {
   .sandbox-cat-table {
     font-size: .74rem;
   }
-  .sandbox-cat-table .sb-col-provider { width: 60px; }
-  .sandbox-cat-table .sb-col-track { width: 92px; }
-  .sandbox-cat-table .sb-col-fee { width: 58px; }
-  .sandbox-cat-table .sb-col-invest { width: 68px; }
+  .sandbox-cat-table .sb-col-provider { width: 56px; }
+  .sandbox-cat-table .sb-col-track { width: 86px; }
+  .sandbox-cat-table .sb-col-fee { width: 66px; }
+  .sandbox-cat-table .sb-col-pct { width: 40px; }
+  .sandbox-cat-table .sb-col-invest { width: 64px; }
   .sandbox-cat-table .sb-col-yield { width: 48px; }
   .sandbox-cat-table .sb-col-exp { width: 42px; }
   .sandbox-cat-table .sb-col-remove { width: 24px; }
-  .sandbox-cat-table.is-pension-table .sb-col-provider { width: 56px; }
-  .sandbox-cat-table.is-pension-table .sb-col-track { width: 82px; }
-  .sandbox-cat-table.is-pension-table .sb-col-fee { width: 58px; }
-  .sandbox-cat-table.is-pension-table .sb-col-invest { width: 70px; }
+  .sandbox-cat-table.is-pension-table .sb-col-provider { width: 50px; }
+  .sandbox-cat-table.is-pension-table .sb-col-track { width: 76px; }
+  .sandbox-cat-table.is-pension-table .sb-col-fee { width: 68px; }
+  .sandbox-cat-table.is-pension-table .sb-col-pct { width: 36px; }
+  .sandbox-cat-table.is-pension-table .sb-col-invest { width: 64px; }
   .sandbox-cat-table.is-pension-table .sb-col-yield { width: 46px; }
   .sandbox-cat-table.is-pension-table .sb-col-exp { width: 40px; }
   .sandbox-cat-table th,
@@ -21092,6 +21186,13 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     vertical-align: middle !important;
     font-size: .60rem !important;
     line-height: 1.2 !important;
+  }
+  html body.sb-printing .sandbox-sort-btn i {
+    display: none !important;
+  }
+  html body.sb-printing .sandbox-sort-btn {
+    cursor: default !important;
+    color: inherit !important;
   }
   html body.sb-printing .sandbox-cat-table td {
     padding: 1px 3px !important;
