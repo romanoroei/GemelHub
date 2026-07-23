@@ -21412,9 +21412,13 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     border-radius: 2px !important;
   }
   html body.sb-printing .exp-wrap { gap: 2px !important; min-width: 0 !important; align-items: center !important; }
-  /* Returns */
+  /* Returns — with up to 5 of these columns, the screen-tuned 5px/5px padding (bumped up from 3px
+     for on-screen breathing room) quietly cost 20px of print width across the row since print never
+     overrode it. That's exactly the kind of thing that pushed the exposure columns off the page. */
   html body.sb-printing .sandbox-cat-table .sb-yield-col {
     font-size: .60rem !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
   }
   /* Allocation % */
   html body.sb-printing .sandbox-cat-table .sb-td-stock .exp-val,
