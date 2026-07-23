@@ -11536,7 +11536,9 @@ body.h2h-active,
   white-space: normal;
   line-height: 1.08;
 }
-.sandbox-cat-table .sb-fee-head span {
+.sandbox-cat-table .sb-fee-head span,
+.sandbox-cat-table .sb-pct-head span,
+.sandbox-cat-table .sb-invest-head span {
   display: block;
   white-space: nowrap;
 }
@@ -21256,13 +21258,34 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     overflow: visible !important;
     width: 100% !important;
   }
+  /* table-layout:fixed, not auto — auto was the real root cause behind nearly every print sizing
+     bug this session (elliptical badge, cut-off מט"ח, uneven return-year columns): under auto
+     layout, individual cells' width/max-width are only HINTS the browser can override at will, and
+     any leftover horizontal space gets dumped disproportionately into a single column rather than
+     distributed evenly. Fixed layout (matching how the on-screen table already works reliably)
+     takes its column widths from the colgroup <col> elements below, deterministically. */
   html body.sb-printing .sandbox-cat-table {
     width: 100% !important;
-    table-layout: auto !important;
+    table-layout: fixed !important;
     border-collapse: collapse !important;
     break-inside: auto !important;
     page-break-inside: auto !important;
   }
+  html body.sb-printing .sandbox-cat-table .sb-col-remove { width: 0 !important; display: none !important; }
+  html body.sb-printing .sandbox-cat-table .sb-col-provider { width: 64px !important; }
+  html body.sb-printing .sandbox-cat-table .sb-col-track { width: 74px !important; }
+  html body.sb-printing .sandbox-cat-table .sb-col-fee { width: 48px !important; }
+  html body.sb-printing .sandbox-cat-table .sb-col-pct { width: 50px !important; }
+  html body.sb-printing .sandbox-cat-table .sb-col-invest { width: 58px !important; }
+  html body.sb-printing .sandbox-cat-table .sb-col-yield { width: 36px !important; }
+  html body.sb-printing .sandbox-cat-table .sb-col-exp { width: 82px !important; }
+  html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-provider { width: 54px !important; }
+  html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-track { width: 66px !important; }
+  html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-fee { width: 50px !important; }
+  html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-pct { width: 46px !important; }
+  html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-invest { width: 52px !important; }
+  html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-yield { width: 34px !important; }
+  html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-exp { width: 73px !important; }
   html body.sb-printing .sandbox-cat-table thead {
     display: table-header-group !important;
   }
@@ -21293,7 +21316,7 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
      beat it, shifting the header text right to align with the values below instead of floating
      centered over them. */
   html body.sb-printing .sandbox-cat-table th:nth-last-child(-n+3) .sandbox-sort-btn {
-    justify-content: flex-end !important;
+    justify-content: flex-start !important; /* flex-start = right edge in this RTL context */
   }
   html body.sb-printing .sandbox-cat-table td {
     padding: 1px 3px !important;
@@ -21325,6 +21348,14 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     min-width: 44px !important;
     max-width: 78px !important;
   }
+  /* On screen, .sandbox-track-cell is display:flex;flex-direction:column, which is what actually
+     stacks the track name above the #id — that layout is gone in print (forced to display:block
+     above), but the badge and #id div are THEMSELVES inline-flex, so they don't automatically drop
+     to their own line inside a block parent; they just flow inline and wrap unpredictably wherever
+     width runs out. Forcing both to display:block reproduces the screen's clean two-line stack. */
+  html body.sb-printing .sandbox-track-id {
+    display: block !important;
+  }
   html body.sb-printing .prov-dot { display: none !important; }
   html body.sb-printing .sandbox-provider-link {
     font-size: .66rem !important;
@@ -21344,31 +21375,32 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     border: none !important;
     background: none !important;
   }
-  /* The track-name badge printed as an oversized, stretched-out pill. Root cause: the badge is a
-     flex container, and flex ITEMS default to min-width:auto — meaning the link inside refused to
-     shrink below its full unwrapped text width no matter what display/white-space it was given
-     (display:inline was also a dead end: flex items are always "blockified" to a block-level box
-     per spec, so that override could never actually take effect). The real fix is min-width:0 on
-     the flex item, plus a hard max-width + ellipsis truncation so a long track name clips instead
-     of inflating the whole badge/column. */
+  /* No pill in print — just the track name in its color, no background/frame at all. (On screen it
+     stays a filled badge; this is print-only.) display:block here (not inline-flex) so it drops
+     to its own line above the #id div — an inline-flex badge doesn't automatically start a new
+     line inside its now-display:block parent (.sandbox-track-cell), it just flows inline and wraps
+     unpredictably wherever width runs out, which is what caused the track name and #id to overlap.
+     Still constrained to a max-width with ellipsis so a long track name clips instead of blowing
+     out the column — plain block-level ellipsis truncation here, no flex-item min-width quirks to
+     work around. */
   html body.sb-printing .sandbox-track-badge {
-    display: inline-flex !important;
-    max-width: 64px !important;
-    padding: 0 5px !important;
+    display: block !important;
+    max-width: 78px !important;
+    padding: 0 !important;
     margin: 0 !important;
     line-height: 1.3 !important;
-    border-radius: 999px !important;
-    vertical-align: middle !important;
+    background: none !important;
+    border: none !important;
+    border-radius: 0 !important;
     overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
   html body.sb-printing .sandbox-track-badge .sandbox-track-link {
     font-size: .55rem !important;
     line-height: 1.3 !important;
-    min-width: 0 !important;
     max-width: 100% !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
+    display: inline !important;
   }
   html body.sb-printing .sandbox-track-number {
     font-size: .50rem !important;
@@ -21407,18 +21439,27 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   /* Restore allocation bars in table cells — slim 18px bar */
   html body.sb-printing .exp-bar-bg {
     display: block !important;
-    width: 18px !important;
+    width: 10px !important;
     height: 3px !important;
     border-radius: 2px !important;
   }
   html body.sb-printing .exp-wrap { gap: 2px !important; min-width: 0 !important; align-items: center !important; }
+  /* Explicit order, not just DOM order — bar on the left, percentage value on the right, matching
+     the on-screen layout. */
+  html body.sb-printing .sandbox-cat-table .exp-val { order: 1 !important; }
+  html body.sb-printing .sandbox-cat-table .exp-bar-bg { order: 2 !important; }
   /* Returns — with up to 5 of these columns, the screen-tuned 5px/5px padding (bumped up from 3px
      for on-screen breathing room) quietly cost 20px of print width across the row since print never
      overrode it. That's exactly the kind of thing that pushed the exposure columns off the page. */
-  html body.sb-printing .sandbox-cat-table .sb-yield-col {
+  /* Equal, guaranteed width across all 5 return-year columns (table-layout:auto otherwise sizes
+     each independently off its own content, e.g. "-0.96%" vs "48.83%", so pure padding alone can't
+     make the gaps between them look even) — plus a slight rightward shift (a touch more left
+     padding than right) toward the invest column. */
+  html body.sb-printing .sandbox-cat-table th.sb-yield-col,
+  html body.sb-printing .sandbox-cat-table td.sb-yield-col {
     font-size: .60rem !important;
-    padding-left: 2px !important;
-    padding-right: 2px !important;
+    padding-left: 3px !important;
+    padding-right: 1px !important;
   }
   /* Allocation % */
   html body.sb-printing .sandbox-cat-table .sb-td-stock .exp-val,
@@ -21426,19 +21467,20 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   html body.sb-printing .sandbox-cat-table .sb-td-fx .exp-val {
     font-size: .58rem !important;
   }
-  /* Fee — center, nudged slightly right (more left padding than right) since plain text-align:center
-     reads a touch left-of-center in this RTL/direction:ltr-number combination. Class-based (not
-     nth-child) so it correctly covers BOTH fee columns on pension tables (דמי ניהול מצבירה +
-     מהפקדה), not just whichever one happens to land on column 4. */
+  /* Fee header + summary row stay centered (unchanged, per explicit instruction not to touch them).
+     Data rows are genuinely right-aligned (not just center+padding-shift, which was riding a 1-2px
+     margin away from overflowing — that's exactly what triggered the "…" ellipsis on the fee value:
+     the column was JUST narrow enough, after the old asymmetric padding, that the number didn't
+     quite fit). Class-based (not nth-child) so this correctly covers BOTH fee columns on pension
+     tables (דמי ניהול מצבירה + מהפקדה), not just whichever lands on column 4. */
   html body.sb-printing .sandbox-cat-table th.sb-fee-head,
-  html body.sb-printing .sandbox-cat-table td.sb-td-fee,
   html body.sb-printing .sandbox-cat-table td.sb-weighted-fee {
     text-align: center !important;
   }
-  html body.sb-printing .sandbox-cat-table td.sb-td-fee,
-  html body.sb-printing .sandbox-cat-table td.sb-weighted-fee {
-    padding-left: 6px !important;
-    padding-right: 1px !important;
+  html body.sb-printing .sandbox-cat-table td.sb-td-fee {
+    text-align: right !important;
+    padding-left: 4px !important;
+    padding-right: 2px !important;
   }
   /* Percent and invest-total cells — slightly roomier in print than the generic 1px/3px td padding.
      Kept modest: table-layout:auto here means every extra px demanded steals room from the
@@ -21449,11 +21491,22 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     padding-left: 1px !important;
     padding-right: 1px !important;
   }
-  html body.sb-printing .sandbox-cat-table th.sb-invest-head,
   html body.sb-printing .sandbox-cat-table td.sb-invest-col {
     min-width: 28px !important;
     padding-left: 1px !important;
     padding-right: 1px !important;
+  }
+  /* Header nudged slightly right, and separately the summary row's own value nudged slightly right
+     too (data rows untouched, per instruction) — .sb-weighted-invest is the summary cell's own
+     class alongside the shared .sb-invest-col, so this wins just for that one cell. */
+  html body.sb-printing .sandbox-cat-table th.sb-invest-head {
+    min-width: 28px !important;
+    padding-left: 3px !important;
+    padding-right: 0 !important;
+  }
+  html body.sb-printing .sandbox-cat-table td.sb-weighted-invest {
+    padding-left: 3px !important;
+    padding-right: 0 !important;
   }
   /* The invest-input's own width (80px / 76px on pension) is tuned for the screen table, where it
      has plenty of room — print isn't overriding it, so left unchecked it drags that same footprint

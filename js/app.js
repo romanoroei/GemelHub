@@ -7059,8 +7059,8 @@ const App = (() => {
                 <th>${_sbSortHeaderHtml('מסלול', 'track', catId)}</th>
                 <th class="sb-fee-head">${_sbSortHeaderHtml('<span>ד"נ</span><span>מצבירה %</span>', 'dnCumulative', catId, 'center')}</th>
                 ${isPension ? `<th class="sb-fee-head">${_sbSortHeaderHtml('<span>ד"נ</span><span>מהפקדה %</span>', 'dnDeposit', catId, 'center')}</th>` : ''}
-                <th class="sb-pct-head">${_sbSortHeaderHtml('אחוז השקעה', 'pctOfTotal', catId, 'center')}</th>
-                <th class="sb-invest-head">${_sbSortHeaderHtml('סך השקעה', 'invest', catId, 'center')}</th>
+                <th class="sb-pct-head">${_sbSortHeaderHtml('<span>אחוז</span><span>השקעה</span>', 'pctOfTotal', catId, 'center')}</th>
+                <th class="sb-invest-head">${_sbSortHeaderHtml('<span>סכום</span><span>השקעה</span>', 'invest', catId, 'center')}</th>
                 ${returnHeaders}
                 <th class="sb-allocation-start">${_sbSortHeaderHtml('% מניות', 'stock', catId, 'center')}</th>
                 <th>${_sbSortHeaderHtml('% חו"ל', 'abroad', catId, 'center')}</th>
