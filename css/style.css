@@ -11167,6 +11167,46 @@ body.h2h-active,
   border-color: var(--blue-lt);
   transform: translateY(-1px);
 }
+.sandbox-cat-note-btn {
+  -webkit-appearance: none;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--gray-200);
+  background: #fff;
+  color: var(--gray-500);
+  border-radius: 999px;
+  font-size: .74rem;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.sandbox-cat-note-btn:hover { background: var(--gray-50); border-color: var(--gray-300); color: var(--gray-700); }
+.sandbox-cat-note-btn.has-note { background: #fffbea; border-color: #f5d56e; color: #a88618; }
+.sandbox-cat-note-wrap {
+  padding: 8px 16px;
+  background: #fffefa;
+  border-bottom: 1px solid var(--gray-100);
+}
+.sandbox-cat-note-input {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 44px;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-family: inherit;
+  font-size: .8rem;
+  color: var(--gray-700);
+  background: #fff;
+  transition: border-color .15s;
+}
+.sandbox-cat-note-input:focus { outline: none; border-color: var(--blue-lt); box-shadow: 0 0 0 3px rgba(99,102,241,.1); }
+.sandbox-cat-note-print-only { display: none; } /* only shown in print — see @media print rules */
 .sandbox-cat-table-wrap {
   overflow-x: hidden;
   -webkit-overflow-scrolling: auto;
@@ -11178,21 +11218,21 @@ body.h2h-active,
   font-size: .83rem;
   table-layout: fixed;
 }
-.sandbox-cat-table .sb-col-provider { width: 96px; }
-.sandbox-cat-table .sb-col-track { width: 100px; }
+.sandbox-cat-table .sb-col-provider { width: 84px; }
+.sandbox-cat-table .sb-col-track { width: 88px; }
 .sandbox-cat-table .sb-col-fee { width: 74px; }
-.sandbox-cat-table .sb-col-pct { width: 52px; }
-.sandbox-cat-table .sb-col-invest { width: 86px; }
+.sandbox-cat-table .sb-col-pct { width: 80px; }
+.sandbox-cat-table .sb-col-invest { width: 110px; }
 .sandbox-cat-table .sb-col-yield { width: 58px; }
-.sandbox-cat-table .sb-col-exp { width: 56px; }
+.sandbox-cat-table .sb-col-exp { width: 66px; }
 .sandbox-cat-table .sb-col-remove { width: 28px; }
-.sandbox-cat-table.is-pension-table .sb-col-provider { width: 84px; }
-.sandbox-cat-table.is-pension-table .sb-col-track { width: 106px; }
+.sandbox-cat-table.is-pension-table .sb-col-provider { width: 68px; }
+.sandbox-cat-table.is-pension-table .sb-col-track { width: 90px; }
 .sandbox-cat-table.is-pension-table .sb-col-fee { width: 76px; }
-.sandbox-cat-table.is-pension-table .sb-col-pct { width: 46px; }
-.sandbox-cat-table.is-pension-table .sb-col-invest { width: 80px; }
+.sandbox-cat-table.is-pension-table .sb-col-pct { width: 80px; }
+.sandbox-cat-table.is-pension-table .sb-col-invest { width: 104px; }
 .sandbox-cat-table.is-pension-table .sb-col-yield { width: 56px; }
-.sandbox-cat-table.is-pension-table .sb-col-exp { width: 52px; }
+.sandbox-cat-table.is-pension-table .sb-col-exp { width: 66px; }
 .sandbox-cat-table th {
   padding: 6px 4px;
   text-align: right;
@@ -11265,21 +11305,21 @@ body.h2h-active,
   padding-left: 16px;
 }
 .sandbox-cat-table td.sb-invest-col {
-  padding-left: 0;
-  padding-right: 16px;
+  padding-left: 6px;
+  padding-right: 10px;
 }
 .sandbox-cat-table th.sb-fee-head {
   padding-right: 0;
   padding-left: 16px;
 }
 .sandbox-cat-table th.sb-invest-head {
-  padding-left: 0;
-  padding-right: 16px;
+  padding-left: 6px;
+  padding-right: 10px;
 }
 .sandbox-cat-table td.sb-td-pct,
 .sandbox-cat-table th.sb-pct-head {
-  padding-left: 5px;
-  padding-right: 1px;
+  padding-left: 1px;
+  padding-right: 6px;
 }
 .sandbox-cat-table td:first-child .table-allocation-icons {
   max-width: 74px;
@@ -11294,6 +11334,25 @@ body.h2h-active,
   min-width: 0;
   align-items: flex-start;
   text-align: right;
+}
+/* Per-track color badge — filled pill (background+text tint of the same dynamically-assigned
+   color, no border), matching the h2h-category-pill style used in ראש בראש. Sized to read the
+   same as the מנהל text next to it, not larger. */
+.sandbox-track-badge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  border-radius: 999px;
+  padding: 0 6px;
+}
+.sandbox-track-badge .sandbox-track-link {
+  color: inherit;
+  font-size: .8rem;
+  font-weight: 800;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .sandbox-provider-link,
 .sandbox-track-link {
@@ -11360,8 +11419,8 @@ body.h2h-active,
 .sandbox-cat-table td.sb-yield-col {
   width: 58px;
   max-width: 66px;
-  padding-right: 3px;
-  padding-left: 3px;
+  padding-right: 5px;
+  padding-left: 5px;
   text-align: center;
   white-space: nowrap;
 }
@@ -11382,16 +11441,20 @@ body.h2h-active,
   color: var(--gray-600);
   font-weight: 600;
   padding: 7px 12px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 2px solid var(--gray-200); /* same gold divider as the column-header/data-row seam */
 }
 .sandbox-weighted-row .sb-weighted-fee { font-weight: 800; }
 .sandbox-weighted-row .sb-weighted-invest { font-weight: 800; font-size: .92rem; color: var(--blue); text-align: center; }
 /* Tighter padding than the row's generic 12px — "100.0%" doesn't fit that plus the column's own
-   narrow width (sized for the data rows' plain number input, not this text-with-% summary). */
+   narrow width (sized for the data rows' plain number input, not this text-with-% summary). Uses
+   the SAME asymmetric left/right padding as the data rows' own pct cell (td.sb-td-pct) rather than
+   a symmetric one, so the summary text centers on where the input actually sits, not just the
+   column's geometric center. */
 .sandbox-weighted-row .sb-weighted-pct {
-  padding-left: 2px;
-  padding-right: 2px;
+  padding-left: 1px;
+  padding-right: 6px;
   font-size: .74rem;
+  text-align: center;
 }
 /* The row's own 12px horizontal padding (roomy on purpose for the fee/invest/label cells) left too
    little width for the exposure bar+percentage pair specifically, causing it to overflow the cell
@@ -11445,8 +11508,8 @@ body.h2h-active,
   color: #fff;
 }
 .sandbox-invest-input {
-  width: 70px;
-  min-width: 70px;
+  width: 80px;
+  min-width: 80px;
   padding: 5px 6px;
   border: 1px solid var(--gray-200);
   border-radius: 6px;
@@ -11482,8 +11545,8 @@ body.h2h-active,
   padding-inline-start: 0;
 }
 .sandbox-cat-table.is-pension-table .sandbox-invest-input {
-  width: 70px;
-  min-width: 70px;
+  width: 76px;
+  min-width: 76px;
 }
 .sandbox-cat-table.is-pension-table .sandbox-invest-toggle {
   flex: 0 0 auto;
@@ -11510,9 +11573,16 @@ body.h2h-active,
   border-color: var(--blue-lt);
   box-shadow: 0 0 0 3px rgba(99,102,241,.1);
 }
+.sandbox-pct-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.sandbox-pct-print-only { display: none; } /* only shown in print — see @media print rules */
 .sandbox-pct-input {
-  width: 50px;
-  max-width: 50px;
+  width: 58px;
+  max-width: 58px;
   padding: 5px 5px;
   border: 1px solid var(--gray-200);
   border-radius: 6px;
@@ -11527,6 +11597,26 @@ body.h2h-active,
   border-color: var(--blue-lt);
   box-shadow: 0 0 0 3px rgba(99,102,241,.1);
 }
+.sandbox-pct-input.is-locked { background: #fafaf5; color: var(--gray-500); cursor: default; }
+.sandbox-pct-lock-btn {
+  -webkit-appearance: none;
+  appearance: none;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 3px;
+  font-size: .72rem;
+  color: var(--gray-400);
+  cursor: pointer;
+  border-radius: 5px;
+  transition: color .12s, background .12s;
+}
+.sandbox-pct-lock-btn:hover { color: var(--gray-600); background: var(--gray-100); }
+.sandbox-pct-lock-btn.is-locked { color: var(--blue); }
+.sandbox-pct-lock-btn.is-locked:hover { color: var(--blue); background: #eef2ff; }
 .sandbox-remove-btn {
   -webkit-appearance: none;
   appearance: none;
@@ -11572,6 +11662,7 @@ tr.sb-row-hidden .sandbox-track-link,
 tr.sb-row-hidden .sandbox-provider-link,
 tr.sb-row-hidden .sandbox-fee-input,
 tr.sb-row-hidden .sandbox-pct-input,
+tr.sb-row-hidden .sandbox-pct-lock-btn,
 tr.sb-row-hidden .sandbox-invest-input {
   pointer-events: none;
 }
@@ -12240,16 +12331,16 @@ tr.sb-row-hidden .sandbox-invest-input {
   .sandbox-cat-table .sb-col-provider { width: 56px; }
   .sandbox-cat-table .sb-col-track { width: 86px; }
   .sandbox-cat-table .sb-col-fee { width: 66px; }
-  .sandbox-cat-table .sb-col-pct { width: 40px; }
-  .sandbox-cat-table .sb-col-invest { width: 64px; }
+  .sandbox-cat-table .sb-col-pct { width: 62px; }
+  .sandbox-cat-table .sb-col-invest { width: 72px; }
   .sandbox-cat-table .sb-col-yield { width: 48px; }
   .sandbox-cat-table .sb-col-exp { width: 42px; }
   .sandbox-cat-table .sb-col-remove { width: 24px; }
   .sandbox-cat-table.is-pension-table .sb-col-provider { width: 50px; }
   .sandbox-cat-table.is-pension-table .sb-col-track { width: 76px; }
   .sandbox-cat-table.is-pension-table .sb-col-fee { width: 68px; }
-  .sandbox-cat-table.is-pension-table .sb-col-pct { width: 36px; }
-  .sandbox-cat-table.is-pension-table .sb-col-invest { width: 64px; }
+  .sandbox-cat-table.is-pension-table .sb-col-pct { width: 58px; }
+  .sandbox-cat-table.is-pension-table .sb-col-invest { width: 72px; }
   .sandbox-cat-table.is-pension-table .sb-col-yield { width: 46px; }
   .sandbox-cat-table.is-pension-table .sb-col-exp { width: 40px; }
   .sandbox-cat-table th,
@@ -21127,8 +21218,11 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   html body.sb-printing .sandbox-page-header,
   html body.sb-printing .sandbox-remove-btn,
   html body.sb-printing .sandbox-hide-btn,
+  html body.sb-printing .sandbox-pct-lock-btn,
   html body.sb-printing tr.sb-row-hidden,
   html body.sb-printing .sandbox-cat-add-btn,
+  html body.sb-printing .sandbox-cat-note-btn,
+  html body.sb-printing .sandbox-cat-note-wrap,
   html body.sb-printing .sandbox-invest-toggle,
   html body.sb-printing .sandbox-cat-mode-toggle,
   html body.sb-printing .sandbox-print-btn,
@@ -21194,6 +21288,13 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     cursor: default !important;
     color: inherit !important;
   }
+  /* Exposure headers (always the last 3 columns, regardless of pension/non-pension layout) — the
+     sort button's inline justify-content:center (set in JS) needs an !important override here to
+     beat it, shifting the header text right to align with the values below instead of floating
+     centered over them. */
+  html body.sb-printing .sandbox-cat-table th:nth-last-child(-n+3) .sandbox-sort-btn {
+    justify-content: flex-end !important;
+  }
   html body.sb-printing .sandbox-cat-table td {
     padding: 1px 3px !important;
     white-space: nowrap !important;
@@ -21214,15 +21315,15 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     vertical-align: middle !important;
     white-space: normal !important;
     line-height: 1.2 !important;
-    min-width: 50px !important;
-    max-width: 90px !important;
+    min-width: 38px !important;
+    max-width: 78px !important;
   }
   html body.sb-printing .sandbox-track-cell {
     display: block !important;
     white-space: normal !important;
     line-height: 1 !important;
-    min-width: 50px !important;
-    max-width: 90px !important;
+    min-width: 44px !important;
+    max-width: 78px !important;
   }
   html body.sb-printing .prov-dot { display: none !important; }
   html body.sb-printing .sandbox-provider-link {
@@ -21242,6 +21343,32 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     white-space: normal !important;
     border: none !important;
     background: none !important;
+  }
+  /* The track-name badge printed as an oversized, stretched-out pill. Root cause: the badge is a
+     flex container, and flex ITEMS default to min-width:auto — meaning the link inside refused to
+     shrink below its full unwrapped text width no matter what display/white-space it was given
+     (display:inline was also a dead end: flex items are always "blockified" to a block-level box
+     per spec, so that override could never actually take effect). The real fix is min-width:0 on
+     the flex item, plus a hard max-width + ellipsis truncation so a long track name clips instead
+     of inflating the whole badge/column. */
+  html body.sb-printing .sandbox-track-badge {
+    display: inline-flex !important;
+    max-width: 64px !important;
+    padding: 0 5px !important;
+    margin: 0 !important;
+    line-height: 1.3 !important;
+    border-radius: 999px !important;
+    vertical-align: middle !important;
+    overflow: hidden !important;
+  }
+  html body.sb-printing .sandbox-track-badge .sandbox-track-link {
+    font-size: .55rem !important;
+    line-height: 1.3 !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
   html body.sb-printing .sandbox-track-number {
     font-size: .50rem !important;
@@ -21294,13 +21421,59 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   html body.sb-printing .sandbox-cat-table .sb-td-abroad .exp-val,
   html body.sb-printing .sandbox-cat-table .sb-td-fx .exp-val {
     font-size: .58rem !important;
+  }
+  /* Fee — center, nudged slightly right (more left padding than right) since plain text-align:center
+     reads a touch left-of-center in this RTL/direction:ltr-number combination. Class-based (not
+     nth-child) so it correctly covers BOTH fee columns on pension tables (דמי ניהול מצבירה +
+     מהפקדה), not just whichever one happens to land on column 4. */
+  html body.sb-printing .sandbox-cat-table th.sb-fee-head,
+  html body.sb-printing .sandbox-cat-table td.sb-td-fee,
+  html body.sb-printing .sandbox-cat-table td.sb-weighted-fee {
+    text-align: center !important;
+  }
+  html body.sb-printing .sandbox-cat-table td.sb-td-fee,
+  html body.sb-printing .sandbox-cat-table td.sb-weighted-fee {
+    padding-left: 6px !important;
+    padding-right: 1px !important;
+  }
+  /* Percent and invest-total cells — slightly roomier in print than the generic 1px/3px td padding.
+     Kept modest: table-layout:auto here means every extra px demanded steals room from the
+     exposure columns at the far end of the row, which have much less slack to give. */
+  html body.sb-printing .sandbox-cat-table th.sb-pct-head,
+  html body.sb-printing .sandbox-cat-table td.sb-td-pct {
+    min-width: 18px !important;
+    padding-left: 1px !important;
+    padding-right: 1px !important;
+  }
+  html body.sb-printing .sandbox-cat-table th.sb-invest-head,
+  html body.sb-printing .sandbox-cat-table td.sb-invest-col {
+    min-width: 28px !important;
+    padding-left: 1px !important;
+    padding-right: 1px !important;
+  }
+  /* The invest-input's own width (80px / 76px on pension) is tuned for the screen table, where it
+     has plenty of room — print isn't overriding it, so left unchecked it drags that same footprint
+     into the page-width budget where every column is starved. Force a real, much narrower print
+     width for the field itself, not just its cell's padding. */
+  html body.sb-printing .sandbox-invest-input {
+    width: 44px !important;
     min-width: 0 !important;
   }
-  /* Fee — center */
-  html body.sb-printing .sandbox-cat-table th.sb-fee-head,
-  html body.sb-printing .sandbox-cat-table th:nth-child(4),
-  html body.sb-printing .sandbox-cat-table td:nth-child(4) {
-    text-align: center !important;
+  /* Exposure bars must never be the thing that gives way under table-layout:auto's squeeze — they
+     were both getting compressed into a distorted "elliptical" look AND, worst case, having the
+     %-value clipped off outside the printable page entirely. Fixing their flex-basis and disabling
+     shrink guarantees the bar+number always render at their real, undistorted size. */
+  html body.sb-printing .sandbox-cat-table .exp-wrap {
+    flex-shrink: 0 !important;
+  }
+  html body.sb-printing .exp-bar-bg {
+    flex-shrink: 0 !important;
+  }
+  html body.sb-printing .sandbox-cat-table .sb-td-stock .exp-val,
+  html body.sb-printing .sandbox-cat-table .sb-td-abroad .exp-val,
+  html body.sb-printing .sandbox-cat-table .sb-td-fx .exp-val {
+    flex-shrink: 0 !important;
+    min-width: 20px !important;
   }
   html body.sb-printing .sandbox-fee-input {
     display: inline !important;
@@ -21336,6 +21509,18 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   html body.sb-printing .sandbox-cat-table td:nth-child(1) {
     display: none !important;
   }
+  html body.sb-printing .sandbox-cat-note-print-only {
+    display: block !important;
+    font-size: .68rem !important;
+    font-style: italic;
+    color: #566a7c !important;
+    background: #fffefa !important;
+    border: 1px solid #f4f1e4 !important;
+    border-radius: 6px !important;
+    padding: 4px 8px !important;
+    margin: 4px 0 6px !important;
+    line-height: 1.3 !important;
+  }
   body.sb-printing .sandbox-cat-block {
     break-inside: avoid-page !important;
     page-break-inside: avoid !important;
@@ -21359,6 +21544,23 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     background: transparent !important;
     padding: 0 !important;
     font-size: .67rem !important;
+    text-align: center !important;
+  }
+  /* The percent field prints as plain text (like סך השקעה) with a literal "%" appended — the
+     number input itself can't show a suffix, so it's swapped for the always-present sibling span
+     that's kept in sync with it (see _sbRefreshCategoryPercents / render). */
+  html body.sb-printing .sandbox-pct-input {
+    display: none !important;
+  }
+  /* Matches the invest field's REAL effective print size — the earlier html-prefixed
+     .sandbox-invest-input rule above (font-size: .60rem) wins over the later, lower-specificity
+     .67rem rule further down, so .60rem is the size to mirror here, not .67rem. */
+  html body.sb-printing .sandbox-pct-print-only {
+    display: inline !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    font-size: .60rem !important;
     text-align: center !important;
   }
 

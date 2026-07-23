@@ -44,8 +44,9 @@ const App = (() => {
       compareItems: null,
       returnsMenuOpen: false,
       selectedReturnFields: ['monthly', 'ytd', '12m', '3y'],
-      sortField: null,
-      sortDir: 'desc'
+      sortByCategory: {},
+      categoryNotes: {}, // free-text note per category, keyed by categoryId
+      openCategoryNotes: new Set() // which category note boxes are currently expanded (UI-only, not persisted)
     }
   };
   const ADVANCED_OPTIONS_STORAGE_KEY = 'gemelhubAdvancedOptionsOpenV3';
@@ -59,6 +60,7 @@ const App = (() => {
   const SANDBOX_AUTOSAVE_ID_KEY = 'gemelhub_sandbox_autosave_id_v1';
   const SANDBOX_LAST_MOD_KEY = 'gemelhub_sandbox_last_modified_v1';
   const SANDBOX_RETURNS_FIELDS_KEY = 'gemelhub_sandbox_return_fields_v1';
+  const SANDBOX_CATEGORY_NOTES_KEY = 'gemelhub_sandbox_category_notes_v1';
   const ADVANCED_OPTIONS_AUTO_CLOSE_DELAY = 13000;
   const ADVANCED_OPTIONS_HOVER_TARGETS = [
     '#advanced-options-tab',
@@ -418,6 +420,13 @@ const App = (() => {
   function providerColor(name) {
     if (!colorMap.has(name)) { colorMap.set(name, COLORS[colorIdx++ % COLORS.length]); }
     return colorMap.get(name);
+  }
+  // Same idea as providerColor, but for the lab table's track-name badges — a separate map/counter
+  // so track and provider color assignment don't compete over the same index sequence.
+  const _sbTrackColorMap = new Map(); let _sbTrackColorIdx = 0;
+  function _sbTrackColor(key) {
+    if (!_sbTrackColorMap.has(key)) { _sbTrackColorMap.set(key, COLORS[_sbTrackColorIdx++ % COLORS.length]); }
+    return _sbTrackColorMap.get(key);
   }
 
 
@@ -6347,6 +6356,10 @@ const App = (() => {
     state.sandbox.isDirty       = localStorage.getItem(SANDBOX_DIRTY_KEY) === '1';
     state.sandbox.autoSaveId    = localStorage.getItem(SANDBOX_AUTOSAVE_ID_KEY) || null;
     state.sandbox.lastModified  = localStorage.getItem(SANDBOX_LAST_MOD_KEY) || '';
+    try {
+      const savedNotes = localStorage.getItem(SANDBOX_CATEGORY_NOTES_KEY);
+      state.sandbox.categoryNotes = savedNotes ? JSON.parse(savedNotes) : {};
+    } catch(e) { state.sandbox.categoryNotes = {}; }
     // On load: auto-merge any pending selections into portfolio so the bar
     // never reappears for items the user already "added" in a prior session.
     if (state.sandbox.selections.length > 0) {
@@ -6375,6 +6388,7 @@ const App = (() => {
     const _trySave = () => {
       localStorage.setItem(SANDBOX_STORAGE_KEY, pJson);
       localStorage.setItem(SANDBOX_SELECTIONS_KEY, sJson);
+      localStorage.setItem(SANDBOX_CATEGORY_NOTES_KEY, JSON.stringify(state.sandbox.categoryNotes));
       if (state.sandbox.portfolioName) localStorage.setItem(SANDBOX_NAME_KEY, state.sandbox.portfolioName);
       else localStorage.removeItem(SANDBOX_NAME_KEY);
       const _now = new Date().toISOString();
@@ -6685,12 +6699,12 @@ const App = (() => {
     return items.map(() => 1 / items.length);
   }
 
-  // Sum of every item's own invest amount in a category — the denominator for the "% מהסכום"
-  // column. Includes hidden routes (unlike the weighted-row totals) since the question this column
-  // answers is "what share of the category's money is this", which doesn't change just because a
-  // route is temporarily hidden from the simulation.
+  // Sum of every VISIBLE item's own invest amount in a category — the denominator for the "אחוז"
+  // column and the basis that percent edits redistribute against. Excludes hidden routes (matching
+  // the weighted-row totals): hiding a route removes its money from the 100% basis entirely, so
+  // whatever remains visible becomes the new 100%, rather than just capping out below it.
   function _sbCategoryInvestTotal(items) {
-    return items.filter(it => it.investAmount !== '')
+    return items.filter(it => !it.hidden && it.investAmount !== '')
       .reduce((s, it) => s + (parseFloat(String(it.investAmount).replace(/,/g, '')) || 0), 0);
   }
 
@@ -6777,10 +6791,11 @@ const App = (() => {
     return null;
   }
 
-  function _sbSortItems(items) {
-    const field = state.sandbox.sortField;
+  function _sbSortItems(items, catId) {
+    const sortState = state.sandbox.sortByCategory[catId];
+    const field = sortState?.field;
     if (!field) return items;
-    const dir = state.sandbox.sortDir === 'asc' ? 1 : -1;
+    const dir = sortState.dir === 'asc' ? 1 : -1;
     const isText = SB_SORT_TEXT_FIELDS.has(field);
     const sorted = [...items];
     sorted.sort((a, b) => {
@@ -6800,9 +6815,10 @@ const App = (() => {
   // "start" (the default) right-aligns the label to match right-aligned text columns (provider/
   // track) — without it the flex-centered button drifted the header away from its own column's
   // actual content below (e.g. "מסלול" centering over empty space instead of the track names).
-  function _sbSortHeaderHtml(label, field, justify = 'flex-start') {
-    const active = state.sandbox.sortField === field;
-    const dir = active ? state.sandbox.sortDir : null;
+  function _sbSortHeaderHtml(label, field, catId, justify = 'flex-start') {
+    const sortState = state.sandbox.sortByCategory[catId];
+    const active = sortState?.field === field;
+    const dir = active ? sortState.dir : null;
     const icon = dir === 'asc' ? 'up' : 'down';
     return `<button type="button" class="sandbox-sort-btn${active ? ' is-active' : ''}" style="justify-content:${justify}" data-sandbox-sort="${field}">
       <span>${label}</span><i class="fas fa-arrow-${icon}-wide-short" aria-hidden="true"></i>
@@ -6823,12 +6839,9 @@ const App = (() => {
     const catAmtTotal = visibleItems.filter(it => it.investAmount !== '')
       .reduce((s, it) => s + (parseFloat(String(it.investAmount).replace(/,/g, '')) || 0), 0);
     const catInvestDisplay = Math.round(catAmtTotal).toLocaleString('he-IL');
-    // What share of the category's total money the currently-visible rows represent — reads as
-    // "100%" when nothing is hidden, and drops below that while a route is toggled off, which is
-    // useful information rather than a constant (every row's own % already sums to 100% including
-    // hidden ones, so repeating that here would say nothing new).
-    const allItemsTotal = _sbCategoryInvestTotal(items);
-    const visibleSharePct = allItemsTotal > 0 ? (catAmtTotal / allItemsTotal * 100) : null;
+    // The visible rows' own percentages always sum to 100% of catAmtTotal by construction (hidden
+    // routes are excluded from that basis entirely) — so this is just confirming the total adds up.
+    const visibleSharePct = catAmtTotal > 0 ? 100 : null;
     const returnCells = returnFields.map(field => {
       const val = _sbWeightedVal(visibleItems, weights, it => _sbReturnFieldValue(it, field));
       return `<td class="sb-td-return sb-td-${field.id} sb-yield-col" style="color:${_sbYieldColor(val)};font-weight:800;font-size:.9rem">${_sbFmtPct(val)}</td>`;
@@ -6845,9 +6858,9 @@ const App = (() => {
       <td class="sb-weighted-pct">${visibleSharePct !== null ? _sbFmtPct(visibleSharePct, 1) : '—'}</td>
       <td class="sb-invest-col sb-weighted-invest">${catInvestDisplay}</td>
       ${returnCells}
-      <td class="sb-td-stock sb-allocation-start sb-weighted-exp">${expCell(wStock != null ? _sbFmtPct(wStock, 1) : '-', 'stock')}</td>
-      <td class="sb-td-abroad sb-weighted-exp">${expCell(wAbroad != null ? _sbFmtPct(wAbroad, 1) : '-', 'abroad')}</td>
-      <td class="sb-td-fx sb-weighted-exp">${expCell(wFx != null ? _sbFmtPct(wFx, 1) : '-', 'fx')}</td>
+      <td class="sb-td-stock sb-allocation-start sb-weighted-exp">${expCell(wStock != null ? _sbFmtPct(wStock, 0) : '-', 'stock')}</td>
+      <td class="sb-td-abroad sb-weighted-exp">${expCell(wAbroad != null ? _sbFmtPct(wAbroad, 0) : '-', 'abroad')}</td>
+      <td class="sb-td-fx sb-weighted-exp">${expCell(wFx != null ? _sbFmtPct(wFx, 0) : '-', 'fx')}</td>
     `;
   }
 
@@ -6925,16 +6938,18 @@ const App = (() => {
       const sortedKeys = Object.keys(grouped).sort((a, b) => catOrder.indexOf(a) - catOrder.indexOf(b));
 
       for (const catId of sortedKeys) {
-        const items = _sbSortItems(grouped[catId]);
+        const items = _sbSortItems(grouped[catId], catId);
         const catDef = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === catId) || { label: catId, color: '#0f172a', icon: '📊' };
         const isPension = catId.startsWith('pension_');
+        const catNoteText = state.sandbox.categoryNotes[catId] || '';
+        const catNoteOpen = state.sandbox.openCategoryNotes.has(catId);
         const catAmtTotalForPct = _sbCategoryInvestTotal(grouped[catId]);
 
         const latestPeriod = items.reduce((mx, it) => (it.reportPeriod || '') > mx ? (it.reportPeriod || '') : mx, '');
         const monthlyLabel = (typeof formatReportPeriod === 'function' && latestPeriod) ? formatReportPeriod(latestPeriod) : 'חודשי';
         const returnFields = _sbSelectedReturnFields();
         const returnCols = returnFields.map(field => `<col class="sb-col-yield sb-col-yield-${field.id}">`).join('');
-        const returnHeaders = returnFields.map(field => `<th class="sb-yield-col">${_sbSortHeaderHtml(_sbReturnFieldLabel(field, monthlyLabel), field.id, 'center')}</th>`).join('');
+        const returnHeaders = returnFields.map(field => `<th class="sb-yield-col">${_sbSortHeaderHtml(_sbReturnFieldLabel(field, monthlyLabel), field.id, catId, 'center')}</th>`).join('');
         const catProviderColors = new Map();
 
         const tableRows = items.map(item => {
@@ -6948,10 +6963,12 @@ const App = (() => {
           const allocationProfile = ghAllocationProfileFor({ stock: item.stock, abroad: item.abroad, fx: item.fx });
           const allocationIcon = item.fundIdTagIcons || ghAllocationProfileIcons(allocationProfile, item.trackLabel || '');
           const fundUrl = `fund.html?id=${encodeURIComponent(item.fundId || '')}&cat=${encodeURIComponent(item.categoryId || '')}`;
+          const trackBadgeColor = _sbTrackColor(item.trackId || item.trackLabel || '');
           const returnCells = returnFields.map(field => _sbReturnCell(item, field)).join('');
           const isHidden = !!item.hidden;
           const investAmountNum = parseFloat(String(item.investAmount || '').replace(/,/g, '')) || 0;
-          const pctOfTotal = catAmtTotalForPct > 0 ? (investAmountNum / catAmtTotalForPct * 100) : 0;
+          const pctOfTotal = (!isHidden && catAmtTotalForPct > 0) ? (investAmountNum / catAmtTotalForPct * 100) : 0;
+          const pctDisplay = pctOfTotal ? pctOfTotal.toFixed(1) : '';
           return `<tr data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}"${isHidden ? ' class="sb-row-hidden"' : ''}>
             <td><button type="button" class="sandbox-remove-btn" data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" aria-label="הסר מסלול">
               <i class="fas fa-times" aria-hidden="true"></i></button></td>
@@ -6963,7 +6980,9 @@ const App = (() => {
             </div></td>
             <td>
               <div class="sandbox-track-cell">
-                <button type="button" class="sandbox-track-link" data-sandbox-track-cat="${item.categoryId}" data-sandbox-track-id="${item.trackId}">${item.trackLabel}</button>
+                <span class="sandbox-track-badge" style="background:color-mix(in srgb, ${trackBadgeColor} 16%, white); color:${trackBadgeColor};">
+                  <button type="button" class="sandbox-track-link" data-sandbox-track-cat="${item.categoryId}" data-sandbox-track-id="${item.trackId}">${item.trackLabel}</button>
+                </span>
                 <div class="sandbox-track-id"><span class="sandbox-track-number">#${item.fundId || ''}</span><span class="sandbox-track-id-icons">${allocationIcon}</span></div>
               </div>
             </td>
@@ -6973,9 +6992,21 @@ const App = (() => {
             ${isPension ? `<td class="sb-td-fee"><input type="number" step="0.01" min="0" max="5" class="sandbox-fee-input"
               data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" data-field="dnDeposit"
               value="${item.dnDeposit}" placeholder="0.25" title="% דמי ניהול מהפקדה" /></td>` : ''}
-            <td class="sb-td-pct"><input type="number" step="0.1" min="0" max="100" class="sandbox-pct-input"
-              data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" data-category-id="${catId}"
-              value="${pctOfTotal ? pctOfTotal.toFixed(1) : ''}" placeholder="0" title="אחוז מסך ההשקעה בקטגוריה" /></td>
+            <td class="sb-td-pct">
+              <div class="sandbox-pct-cell">
+                <input type="number" step="0.1" min="0" max="100" class="sandbox-pct-input${item.pctLocked ? ' is-locked' : ''}"
+                  data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" data-category-id="${catId}"
+                  value="${pctDisplay}" placeholder="0" title="אחוז מסך ההשקעה בקטגוריה"
+                  ${item.pctLocked ? 'readonly' : ''} />
+                <span class="sandbox-pct-print-only" data-sandbox-key="${itemKey}">${pctDisplay ? pctDisplay + '%' : ''}</span>
+                <button type="button" class="sandbox-pct-lock-btn${item.pctLocked ? ' is-locked' : ''}"
+                  data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}"
+                  title="${item.pctLocked ? 'בטל נעילת האחוז' : 'נעל את האחוז — לא ישתנה כשעורכים מסלולים אחרים'}"
+                  aria-label="${item.pctLocked ? 'בטל נעילת אחוז' : 'נעל אחוז'}">
+                  <i class="fas ${item.pctLocked ? 'fa-lock' : 'fa-lock-open'}" aria-hidden="true"></i>
+                </button>
+              </div>
+            </td>
             <td class="sb-invest-col">
               <div class="sandbox-invest-control">
                 <input type="text" inputmode="numeric" class="sandbox-invest-input"
@@ -6999,7 +7030,14 @@ const App = (() => {
             <button type="button" class="sandbox-cat-add-btn" data-sandbox-add-cat="${catId}">
               <i class="fas fa-plus" aria-hidden="true"></i> הוסף מסלולים
             </button>
+            <button type="button" class="sandbox-cat-note-btn${catNoteText ? ' has-note' : ''}" data-sandbox-note-cat="${catId}" title="הערה לקטגוריה" aria-label="הערה לקטגוריה">
+              <i class="fas fa-pencil-alt" aria-hidden="true"></i>
+            </button>
           </div>
+          ${catNoteOpen ? `<div class="sandbox-cat-note-wrap" data-sandbox-note-wrap="${catId}">
+            <textarea class="sandbox-cat-note-input" data-sandbox-note-cat="${catId}" rows="2" maxlength="300" placeholder="הערה חופשית לקטגוריה...">${escapeHtml(catNoteText)}</textarea>
+          </div>` : ''}
+          ${catNoteText ? `<div class="sandbox-cat-note-print-only">${escapeHtml(catNoteText).replace(/\n/g, '<br>')}</div>` : ''}
           <div class="sandbox-cat-table-wrap">
             <table class="sandbox-cat-table${isPension ? ' is-pension-table' : ''}">
               <colgroup>
@@ -7017,16 +7055,16 @@ const App = (() => {
               </colgroup>
               <thead><tr>
                 <th></th>
-                <th>${_sbSortHeaderHtml('מנהל', 'provider')}</th>
-                <th>${_sbSortHeaderHtml('מסלול', 'track')}</th>
-                <th class="sb-fee-head">${_sbSortHeaderHtml('<span>ד"נ</span><span>מצבירה %</span>', 'dnCumulative', 'center')}</th>
-                ${isPension ? `<th class="sb-fee-head">${_sbSortHeaderHtml('<span>ד"נ</span><span>מהפקדה %</span>', 'dnDeposit', 'center')}</th>` : ''}
-                <th class="sb-pct-head">${_sbSortHeaderHtml('אחוז', 'pctOfTotal', 'center')}</th>
-                <th class="sb-invest-head">${_sbSortHeaderHtml('סך השקעה', 'invest', 'center')}</th>
+                <th>${_sbSortHeaderHtml('מנהל', 'provider', catId)}</th>
+                <th>${_sbSortHeaderHtml('מסלול', 'track', catId)}</th>
+                <th class="sb-fee-head">${_sbSortHeaderHtml('<span>ד"נ</span><span>מצבירה %</span>', 'dnCumulative', catId, 'center')}</th>
+                ${isPension ? `<th class="sb-fee-head">${_sbSortHeaderHtml('<span>ד"נ</span><span>מהפקדה %</span>', 'dnDeposit', catId, 'center')}</th>` : ''}
+                <th class="sb-pct-head">${_sbSortHeaderHtml('אחוז השקעה', 'pctOfTotal', catId, 'center')}</th>
+                <th class="sb-invest-head">${_sbSortHeaderHtml('סך השקעה', 'invest', catId, 'center')}</th>
                 ${returnHeaders}
-                <th class="sb-allocation-start">${_sbSortHeaderHtml('% מניות', 'stock', 'center')}</th>
-                <th>${_sbSortHeaderHtml('% חו"ל', 'abroad', 'center')}</th>
-                <th>${_sbSortHeaderHtml('% מט"ח', 'fx', 'center')}</th>
+                <th class="sb-allocation-start">${_sbSortHeaderHtml('% מניות', 'stock', catId, 'center')}</th>
+                <th>${_sbSortHeaderHtml('% חו"ל', 'abroad', catId, 'center')}</th>
+                <th>${_sbSortHeaderHtml('% מט"ח', 'fx', catId, 'center')}</th>
               </tr></thead>
               <tbody>${tableRows}</tbody>
               <tfoot><tr class="sandbox-weighted-row">${_sbWeightedRowCellsHtml(items, catId, returnFields)}</tr></tfoot>
@@ -9140,6 +9178,38 @@ const App = (() => {
       });
     });
 
+    // Free-text note per category — toggled open/closed via the pencil button, jumping straight
+    // into the textarea (focused + caret at the end) when opening rather than requiring a second click.
+    section.querySelectorAll('[data-sandbox-note-cat]').forEach(btn => {
+      if (btn.tagName !== 'BUTTON') return;
+      btn.addEventListener('click', () => {
+        _sbSyncVisibleInputsToState();
+        const catId = btn.dataset.sandboxNoteCat;
+        if (!catId) return;
+        const opening = !state.sandbox.openCategoryNotes.has(catId);
+        if (opening) state.sandbox.openCategoryNotes.add(catId);
+        else state.sandbox.openCategoryNotes.delete(catId);
+        renderSandboxPage();
+        if (opening) {
+          const freshSection = document.getElementById('sandbox-section');
+          const textarea = freshSection?.querySelector(`.sandbox-cat-note-input[data-sandbox-note-cat="${CSS.escape(catId)}"]`);
+          if (textarea) {
+            textarea.focus();
+            const len = textarea.value.length;
+            textarea.setSelectionRange(len, len);
+          }
+        }
+      });
+    });
+    section.querySelectorAll('.sandbox-cat-note-input').forEach(textarea => {
+      textarea.addEventListener('input', () => {
+        const catId = textarea.dataset.sandboxNoteCat;
+        if (!catId) return;
+        state.sandbox.categoryNotes[catId] = textarea.value;
+        saveSandboxPortfolio();
+      });
+    });
+
     // Save / Load portfolio buttons
     section.querySelector('#sandbox-save-portfolio-btn')?.addEventListener('click', _sbOpenSaveDialog);
     section.querySelector('#sandbox-load-portfolio-btn')?.addEventListener('click', _sbOpenLoadDialog);
@@ -9206,13 +9276,13 @@ const App = (() => {
     section.querySelectorAll('[data-sandbox-sort]').forEach(btn => {
       btn.addEventListener('click', () => {
         _sbSyncVisibleInputsToState();
+        const catId = btn.closest('.sandbox-cat-block')?.dataset.sandboxCatId;
+        if (!catId) return;
         const field = btn.dataset.sandboxSort;
-        if (state.sandbox.sortField === field) {
-          state.sandbox.sortDir = state.sandbox.sortDir === 'asc' ? 'desc' : 'asc';
-        } else {
-          state.sandbox.sortField = field;
-          state.sandbox.sortDir = SB_SORT_TEXT_FIELDS.has(field) ? 'asc' : 'desc';
-        }
+        const current = state.sandbox.sortByCategory[catId];
+        state.sandbox.sortByCategory[catId] = (current?.field === field)
+          ? { field, dir: current.dir === 'asc' ? 'desc' : 'asc' }
+          : { field, dir: SB_SORT_TEXT_FIELDS.has(field) ? 'asc' : 'desc' };
         renderSandboxPage();
       });
     });
@@ -9293,28 +9363,79 @@ const App = (() => {
     section.querySelectorAll('.sandbox-pct-input').forEach(input => {
       input.addEventListener('change', () => {
         const item = _sbFindPortfolioItemFromElement(input);
-        if (!item) return;
+        if (!item || item.hidden || item.pctLocked) return;
         const catId = input.dataset.categoryId;
         const catItems = state.sandbox.portfolio.filter(it => it.categoryId === catId);
-        const ownAmount = parseFloat(String(item.investAmount || '').replace(/,/g, '')) || 0;
-        const totalOthers = _sbCategoryInvestTotal(catItems) - ownAmount;
+        // The category's total (of visible routes only) is held fixed — a percent edit only moves
+        // money between routes within the category, it never changes how much is invested overall.
+        const total = _sbCategoryInvestTotal(catItems);
+        if (total <= 0) return;
+
+        // Locked routes keep their exact current amount — the edit can only move money between
+        // this row and the OTHER unlocked routes, never touch a locked one.
+        const others = catItems.filter(it => it !== item && !it.hidden);
+        const lockedOthers = others.filter(it => it.pctLocked);
+        const unlockedOthers = others.filter(it => !it.pctLocked);
+        const lockedSum = lockedOthers.reduce((s, it) => s + (parseFloat(String(it.investAmount || '').replace(/,/g, '')) || 0), 0);
+        const availablePool = Math.max(0, total - lockedSum);
+
         let pct = parseFloat(input.value);
         if (!Number.isFinite(pct) || pct < 0) pct = 0;
-        pct = Math.min(pct, 99.9); // 100% has no solution (division by zero — no "others" left to be a share of)
-        const p = pct / 100;
-        const newAmount = Math.round(p * totalOthers / (1 - p));
-        item.investAmount = String(newAmount);
+        pct = Math.min(pct, 100);
+        let newOwnAmount = Math.round(pct / 100 * total);
+        newOwnAmount = Math.min(newOwnAmount, availablePool); // can't eat into locked routes' amounts
+        if (!unlockedOthers.length) newOwnAmount = availablePool; // nowhere else for the leftover to go
+        const remainder = availablePool - newOwnAmount;
+
+        // The rest of the available pool is spread across the other UNLOCKED routes, proportionally
+        // to their current amounts, so their relative weights among themselves don't change — only
+        // their share is scaled up/down to make room for this row's new amount.
+        const othersOldSum = unlockedOthers.reduce((s, it) => s + (parseFloat(String(it.investAmount || '').replace(/,/g, '')) || 0), 0);
+        let assigned = 0;
+        unlockedOthers.forEach((it, idx) => {
+          const isLast = idx === unlockedOthers.length - 1;
+          let newAmt;
+          if (isLast) {
+            newAmt = remainder - assigned; // absorb rounding drift on the last route so the total stays exact
+          } else if (othersOldSum > 0) {
+            const oldAmt = parseFloat(String(it.investAmount || '').replace(/,/g, '')) || 0;
+            newAmt = Math.round(oldAmt * remainder / othersOldSum);
+          } else {
+            newAmt = Math.round(remainder / unlockedOthers.length); // all others were at 0 — split evenly
+          }
+          newAmt = Math.max(0, newAmt);
+          assigned += newAmt;
+          it.investAmount = String(newAmt);
+          it.investMode = 'amount';
+        });
+        item.investAmount = String(newOwnAmount);
         item.investMode = 'amount';
-        // Update the invest-input's DOM value BEFORE saving — saveSandboxPortfolio() re-syncs
-        // every visible invest-input's current DOM value back into state (to catch in-progress
-        // edits elsewhere), so if this ran first it would read the stale pre-edit DOM value and
-        // clobber the newAmount we just computed.
-        const investInput = input.closest('tr')?.querySelector('.sandbox-invest-input');
-        if (investInput) investInput.value = newAmount.toLocaleString('he-IL');
+
+        // Update every affected row's invest-input DOM value BEFORE saving — saveSandboxPortfolio()
+        // re-syncs every visible invest-input's current DOM value back into state (to catch
+        // in-progress edits elsewhere), so any row whose DOM wasn't updated first would have its
+        // freshly-computed amount clobbered back to its pre-edit value. Locked routes are untouched
+        // so their DOM already matches — no need to refresh those.
+        [item, ...unlockedOthers].forEach(it => {
+          const row = section.querySelector(`tr[data-sandbox-key="${CSS.escape(_sbItemKey(it))}"]`);
+          const investInput = row?.querySelector('.sandbox-invest-input');
+          if (investInput) investInput.value = Number(it.investAmount).toLocaleString('he-IL');
+        });
         _sbMarkPortfolioModified();
         saveSandboxPortfolio();
         _sbRefreshCategoryPercents(section, catId);
         _sbRefreshWeightedRows(section);
+      });
+    });
+
+    section.querySelectorAll('.sandbox-pct-lock-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = _sbFindPortfolioItemFromElement(btn);
+        if (!item) return;
+        item.pctLocked = !item.pctLocked;
+        _sbMarkPortfolioModified();
+        saveSandboxPortfolio();
+        renderSandboxPage();
       });
     });
 
@@ -9389,8 +9510,11 @@ const App = (() => {
       const item = _sbFindPortfolioItemFromElement(pctInput);
       if (!item) return;
       const amt = parseFloat(String(item.investAmount || '').replace(/,/g, '')) || 0;
-      const pct = total > 0 ? (amt / total * 100) : 0;
-      pctInput.value = pct ? pct.toFixed(1) : '';
+      const pct = (!item.hidden && total > 0) ? (amt / total * 100) : 0;
+      const pctDisplay = pct ? pct.toFixed(1) : '';
+      pctInput.value = pctDisplay;
+      const printSpan = pctInput.closest('.sandbox-pct-cell')?.querySelector('.sandbox-pct-print-only');
+      if (printSpan) printSpan.textContent = pctDisplay ? pctDisplay + '%' : '';
     });
   }
 
@@ -9408,7 +9532,7 @@ const App = (() => {
       if (!catBlock) return;
       const catId = catBlock.dataset.sandboxCatId;
       if (!catId) return;
-      const items = _sbSortItems(grouped[catId] || []);
+      const items = _sbSortItems(grouped[catId] || [], catId);
       const returnFields = _sbSelectedReturnFields();
       // Regenerated via the same builder the initial render uses, rather than patching individual
       // <td> elements by position -- that used to drift out of sync whenever the column set changed
