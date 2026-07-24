@@ -19263,12 +19263,12 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     width: auto !important;
     min-width: 0 !important;
     flex: 0 0 auto !important;
-    padding: 3px 7px !important;
+    padding: 3px 5px !important;
     font-size: .66rem !important;
     line-height: 1 !important;
-    gap: 4px !important;
+    gap: 3px !important;
     white-space: nowrap !important;
-    border-radius: 8px !important;
+    border-radius: 999px !important;
   }
 
   html body .sandbox-cat-table .sb-col-remove { width: 28px !important; }
@@ -19283,6 +19283,19 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   html body .sandbox-cat-table.is-pension-table .sb-col-fee { width: 52px !important; }
   html body .sandbox-cat-table.is-pension-table .sb-col-pct { width: 64px !important; }
   html body .sandbox-cat-table.is-pension-table .sb-col-invest { width: 84px !important; }
+
+  /* Pct (+lock icon) and invest columns nudged further right, toward דמי הניהול, than the shared
+     desktop/mobile baseline — mobile-only, on top of the base th.sb-pct-head/sb-invest-head shift. */
+  html body .sandbox-cat-table td.sb-td-pct,
+  html body .sandbox-cat-table th.sb-pct-head {
+    padding-left: 8px !important;
+    padding-right: 1px !important;
+  }
+  html body .sandbox-cat-table td.sb-invest-col,
+  html body .sandbox-cat-table th.sb-invest-head {
+    padding-left: 13px !important;
+    padding-right: 4px !important;
+  }
 
   html body .sandbox-provider-cell {
     gap: 5px !important;
@@ -19479,11 +19492,19 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
      size it had no mobile override for. */
   html body .sandbox-weighted-row td {
     font-size: .9rem !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
   }
   html body .sandbox-weighted-row .sb-weighted-pct {
     font-size: .9rem !important;
-    padding-left: 4px !important;
-    padding-right: 3px !important;
+    padding-left: 8px !important;
+    padding-right: 1px !important;
+  }
+  /* Invest summary value shifted right to match the data-row nudge above — it's normally just
+     centered (text-align:center, no left/right bias), so it needs its own padding here. */
+  html body .sandbox-weighted-row .sb-weighted-invest {
+    padding-left: 13px !important;
+    padding-right: 4px !important;
   }
 
   /* Summary row's own fee value nudged left to sit centered under its header — the desktop

@@ -9095,6 +9095,27 @@ const App = (() => {
     });
   }
 
+  // Sort/lock clicks trigger a full renderSandboxPage(), which rebuilds each category's
+  // horizontally-scrollable table wrap from scratch (losing its scrollLeft) — these two helpers
+  // snapshot and restore that scroll position around the re-render so mobile users don't get
+  // yanked back to the right edge every time they sort or lock a row.
+  function _sbCaptureTableScroll(section) {
+    const map = {};
+    section.querySelectorAll('.sandbox-cat-block').forEach(block => {
+      const catId = block.dataset.sandboxCatId;
+      const wrap = block.querySelector('.sandbox-cat-table-wrap');
+      if (catId && wrap) map[catId] = wrap.scrollLeft;
+    });
+    return map;
+  }
+  function _sbRestoreTableScroll(section, map) {
+    section.querySelectorAll('.sandbox-cat-block').forEach(block => {
+      const catId = block.dataset.sandboxCatId;
+      const wrap = block.querySelector('.sandbox-cat-table-wrap');
+      if (catId && wrap && map[catId] !== undefined) wrap.scrollLeft = map[catId];
+    });
+  }
+
   function _sbAttachEvents(section) {
     // Add more button
     section.querySelector('#sandbox-add-more-btn')?.addEventListener('click', (e) => {
@@ -9283,7 +9304,9 @@ const App = (() => {
         state.sandbox.sortByCategory[catId] = (current?.field === field)
           ? { field, dir: current.dir === 'asc' ? 'desc' : 'asc' }
           : { field, dir: SB_SORT_TEXT_FIELDS.has(field) ? 'asc' : 'desc' };
+        const scrollMap = _sbCaptureTableScroll(section);
         renderSandboxPage();
+        _sbRestoreTableScroll(section, scrollMap);
       });
     });
 
@@ -9435,7 +9458,9 @@ const App = (() => {
         item.pctLocked = !item.pctLocked;
         _sbMarkPortfolioModified();
         saveSandboxPortfolio();
+        const scrollMap = _sbCaptureTableScroll(section);
         renderSandboxPage();
+        _sbRestoreTableScroll(section, scrollMap);
       });
     });
 
