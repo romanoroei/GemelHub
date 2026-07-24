@@ -11220,7 +11220,7 @@ body.h2h-active,
 }
 .sandbox-cat-table .sb-col-provider { width: 84px; }
 .sandbox-cat-table .sb-col-track { width: 88px; }
-.sandbox-cat-table .sb-col-fee { width: 58px; }
+.sandbox-cat-table .sb-col-fee { width: 72px; }
 .sandbox-cat-table .sb-col-pct { width: 80px; }
 .sandbox-cat-table .sb-col-invest { width: 110px; }
 .sandbox-cat-table .sb-col-yield { width: 58px; }
@@ -11228,7 +11228,7 @@ body.h2h-active,
 .sandbox-cat-table .sb-col-remove { width: 28px; }
 .sandbox-cat-table.is-pension-table .sb-col-provider { width: 68px; }
 .sandbox-cat-table.is-pension-table .sb-col-track { width: 90px; }
-.sandbox-cat-table.is-pension-table .sb-col-fee { width: 60px; }
+.sandbox-cat-table.is-pension-table .sb-col-fee { width: 82px; }
 .sandbox-cat-table.is-pension-table .sb-col-pct { width: 80px; }
 .sandbox-cat-table.is-pension-table .sb-col-invest { width: 104px; }
 .sandbox-cat-table.is-pension-table .sb-col-yield { width: 56px; }
@@ -11299,27 +11299,31 @@ body.h2h-active,
   overflow: visible;
 }
 /* Nudge the fee input toward the track column (right) and the invest input toward the return
-   columns (left), so the two no longer visually cluster together in the middle of the row. */
-.sandbox-cat-table td.sb-td-fee {
-  padding-right: 0;
-  padding-left: 16px;
+   columns (left), so the two no longer visually cluster together in the middle of the row.
+   Raised to html-body specificity + !important: an unrelated "@media (max-width:1024px)" rule
+   (no `screen` qualifier, so it matches any viewport that narrow — including phones) resets ALL
+   th/td padding to a flat 5px 4px !important, which was silently swallowing these values below
+   1024px wide with no visible effect at all. */
+html body .sandbox-cat-table td.sb-td-fee {
+  padding-right: 0 !important;
+  padding-left: 18px !important;
 }
-.sandbox-cat-table td.sb-invest-col {
-  padding-left: 6px;
-  padding-right: 10px;
+html body .sandbox-cat-table td.sb-invest-col {
+  padding-left: 9px !important;
+  padding-right: 7px !important;
 }
-.sandbox-cat-table th.sb-fee-head {
-  padding-right: 0;
-  padding-left: 16px;
+html body .sandbox-cat-table th.sb-fee-head {
+  padding-right: 0 !important;
+  padding-left: 18px !important;
 }
-.sandbox-cat-table th.sb-invest-head {
-  padding-left: 6px;
-  padding-right: 10px;
+html body .sandbox-cat-table th.sb-invest-head {
+  padding-left: 9px !important;
+  padding-right: 7px !important;
 }
-.sandbox-cat-table td.sb-td-pct,
-.sandbox-cat-table th.sb-pct-head {
-  padding-left: 1px;
-  padding-right: 6px;
+html body .sandbox-cat-table td.sb-td-pct,
+html body .sandbox-cat-table th.sb-pct-head {
+  padding-left: 4px !important;
+  padding-right: 3px !important;
 }
 .sandbox-cat-table td:first-child .table-allocation-icons {
   max-width: 74px;
@@ -19264,6 +19268,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     line-height: 1 !important;
     gap: 4px !important;
     white-space: nowrap !important;
+    border-radius: 8px !important;
   }
 
   html body .sandbox-cat-table .sb-col-remove { width: 28px !important; }
@@ -19273,10 +19278,10 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   html body .sandbox-cat-table.is-pension-table .sb-col-track { width: 88px !important; }
   /* Fee narrower (its arrows are gone too, so it no longer needs the room), pct/invest wider. */
   html body .sandbox-cat-table .sb-col-fee { width: 50px !important; }
-  html body .sandbox-cat-table .sb-col-pct { width: 76px !important; }
+  html body .sandbox-cat-table .sb-col-pct { width: 68px !important; }
   html body .sandbox-cat-table .sb-col-invest { width: 86px !important; }
   html body .sandbox-cat-table.is-pension-table .sb-col-fee { width: 52px !important; }
-  html body .sandbox-cat-table.is-pension-table .sb-col-pct { width: 72px !important; }
+  html body .sandbox-cat-table.is-pension-table .sb-col-pct { width: 64px !important; }
   html body .sandbox-cat-table.is-pension-table .sb-col-invest { width: 84px !important; }
 
   html body .sandbox-provider-cell {
@@ -19477,14 +19482,16 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   }
   html body .sandbox-weighted-row .sb-weighted-pct {
     font-size: .9rem !important;
+    padding-left: 4px !important;
+    padding-right: 3px !important;
   }
 
   /* Summary row's own fee value nudged left to sit centered under its header — the desktop
      right-ward nudge (padding-left:16px, pushing fee toward track) is disproportionate on a much
-     narrower mobile column. */
+     narrower mobile column. Shifted back slightly right of that first mobile pass, per feedback. */
   html body .sandbox-weighted-row .sb-weighted-fee {
-    padding-left: 4px !important;
-    padding-right: 10px !important;
+    padding-left: 6px !important;
+    padding-right: 8px !important;
   }
 
   html body .yield-cell,
@@ -21362,15 +21369,15 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   html body.sb-printing .sandbox-cat-table .sb-col-fee { width: 48px !important; }
   html body.sb-printing .sandbox-cat-table .sb-col-pct { width: 50px !important; }
   html body.sb-printing .sandbox-cat-table .sb-col-invest { width: 58px !important; }
-  html body.sb-printing .sandbox-cat-table .sb-col-yield { width: 36px !important; }
-  html body.sb-printing .sandbox-cat-table .sb-col-exp { width: 82px !important; }
+  html body.sb-printing .sandbox-cat-table .sb-col-yield { width: 46px !important; }
+  html body.sb-printing .sandbox-cat-table .sb-col-exp { width: 66px !important; }
   html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-provider { width: 54px !important; }
   html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-track { width: 66px !important; }
   html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-fee { width: 50px !important; }
   html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-pct { width: 46px !important; }
   html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-invest { width: 52px !important; }
-  html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-yield { width: 34px !important; }
-  html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-exp { width: 73px !important; }
+  html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-yield { width: 44px !important; }
+  html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-exp { width: 57px !important; }
   html body.sb-printing .sandbox-cat-table thead {
     display: table-header-group !important;
   }
@@ -21540,9 +21547,9 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   }
   html body.sb-printing .sandbox-cat-table .exp-bar-bg {
     display: block !important;
-    width: 10px !important;
-    min-width: 10px !important;
-    max-width: 10px !important;
+    width: 15px !important;
+    min-width: 15px !important;
+    max-width: 15px !important;
     height: 3px !important;
     min-height: 0 !important;
     border-radius: 2px !important;
@@ -21581,8 +21588,8 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     text-align: center !important;
   }
   html body.sb-printing .sandbox-cat-table td.sb-td-fee {
-    text-align: right !important;
-    padding-left: 4px !important;
+    text-align: center !important;
+    padding-left: 2px !important;
     padding-right: 2px !important;
   }
   /* Percent and invest-total cells — slightly roomier in print than the generic 1px/3px td padding.
@@ -21596,8 +21603,8 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   }
   html body.sb-printing .sandbox-cat-table td.sb-invest-col {
     min-width: 28px !important;
-    padding-left: 1px !important;
-    padding-right: 1px !important;
+    padding-left: 0 !important;
+    padding-right: 8px !important;
   }
   /* Header nudged slightly right, and separately the summary row's own value nudged slightly right
      too (data rows untouched, per instruction) — .sb-weighted-invest is the summary cell's own
@@ -21984,6 +21991,34 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     background: #fff !important;
   }
   .sb-compare-print-return-overlay { display: none !important; }
+}
+
+/* ── Print output produced from a narrow (mobile) viewport — some mobile browsers' "print"/"save as
+   PDF" path renders the page at the device's own CSS width rather than true A4 pagination, so the
+   general print rules above land differently here and need their own, further nudge. ── */
+@media print and (max-width: 640px) {
+  html body.sb-printing .sandbox-cat-table td.sb-td-fee {
+    padding-left: 0 !important;
+    padding-right: 5px !important;
+  }
+  html body.sb-printing .sandbox-cat-table td.sb-invest-col {
+    padding-left: 0 !important;
+    padding-right: 12px !important;
+  }
+  /* Exposure section narrower still, freeing width for more breathing room around the return-year
+     columns next to it. */
+  html body.sb-printing .sandbox-cat-table .sb-col-exp { width: 56px !important; }
+  html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-exp { width: 48px !important; }
+  html body.sb-printing .sandbox-cat-table .sb-col-yield { width: 52px !important; }
+  html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-yield { width: 50px !important; }
+  /* A mobile-screen rule (html body .sandbox-cat-table.is-pension-table .sandbox-invest-input) sets
+     min-width:68px with higher specificity than the general print rule's min-width:0, so on a
+     pension table specifically the invest input was still rendering at its wide mobile-screen size
+     here instead of the narrow print one. */
+  html body.sb-printing .sandbox-cat-table.is-pension-table .sandbox-invest-input {
+    width: 44px !important;
+    min-width: 0 !important;
+  }
 }
 
 /* ── Mobile table row-height squeeze (overrides "polish pass" at ~12420) ── */
