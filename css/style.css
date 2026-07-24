@@ -11220,7 +11220,7 @@ body.h2h-active,
 }
 .sandbox-cat-table .sb-col-provider { width: 84px; }
 .sandbox-cat-table .sb-col-track { width: 88px; }
-.sandbox-cat-table .sb-col-fee { width: 74px; }
+.sandbox-cat-table .sb-col-fee { width: 58px; }
 .sandbox-cat-table .sb-col-pct { width: 80px; }
 .sandbox-cat-table .sb-col-invest { width: 110px; }
 .sandbox-cat-table .sb-col-yield { width: 58px; }
@@ -11228,7 +11228,7 @@ body.h2h-active,
 .sandbox-cat-table .sb-col-remove { width: 28px; }
 .sandbox-cat-table.is-pension-table .sb-col-provider { width: 68px; }
 .sandbox-cat-table.is-pension-table .sb-col-track { width: 90px; }
-.sandbox-cat-table.is-pension-table .sb-col-fee { width: 76px; }
+.sandbox-cat-table.is-pension-table .sb-col-fee { width: 60px; }
 .sandbox-cat-table.is-pension-table .sb-col-pct { width: 80px; }
 .sandbox-cat-table.is-pension-table .sb-col-invest { width: 104px; }
 .sandbox-cat-table.is-pension-table .sb-col-yield { width: 56px; }
@@ -11340,19 +11340,21 @@ body.h2h-active,
    same as the מנהל text next to it, not larger. */
 .sandbox-track-badge {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   max-width: 100%;
   border-radius: 999px;
   padding: 0 6px;
 }
 .sandbox-track-badge .sandbox-track-link {
   color: inherit;
-  font-size: .8rem;
+  font-size: .72rem;
   font-weight: 800;
   max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  word-break: break-word;
 }
 .sandbox-provider-link,
 .sandbox-track-link {
@@ -11559,8 +11561,8 @@ body.h2h-active,
   box-shadow: 0 0 0 3px rgba(99,102,241,.1);
 }
 .sandbox-fee-input {
-  width: 56px;
-  max-width: 56px;
+  width: 42px;
+  max-width: 42px;
   padding: 5px 5px;
   border: 1px solid var(--gray-200);
   border-radius: 6px;
@@ -11569,6 +11571,14 @@ body.h2h-active,
   text-align: center;
   direction: ltr;
   transition: border-color .15s;
+  -webkit-appearance: none;
+  appearance: none;
+  -moz-appearance: textfield;
+}
+.sandbox-fee-input::-webkit-outer-spin-button,
+.sandbox-fee-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 .sandbox-fee-input:focus {
   outline: none;
@@ -19261,6 +19271,13 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   html body .sandbox-cat-table .sb-col-track { width: 94px !important; }
   html body .sandbox-cat-table.is-pension-table .sb-col-provider { width: 66px !important; }
   html body .sandbox-cat-table.is-pension-table .sb-col-track { width: 88px !important; }
+  /* Fee narrower (its arrows are gone too, so it no longer needs the room), pct/invest wider. */
+  html body .sandbox-cat-table .sb-col-fee { width: 50px !important; }
+  html body .sandbox-cat-table .sb-col-pct { width: 76px !important; }
+  html body .sandbox-cat-table .sb-col-invest { width: 86px !important; }
+  html body .sandbox-cat-table.is-pension-table .sb-col-fee { width: 52px !important; }
+  html body .sandbox-cat-table.is-pension-table .sb-col-pct { width: 72px !important; }
+  html body .sandbox-cat-table.is-pension-table .sb-col-invest { width: 84px !important; }
 
   html body .sandbox-provider-cell {
     gap: 5px !important;
@@ -19286,7 +19303,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   }
 
   html body .sandbox-track-link {
-    font-size: .93rem !important;
+    font-size: .72rem !important;
     line-height: 1.12 !important;
     white-space: normal !important;
     overflow-wrap: break-word !important;
@@ -19394,6 +19411,29 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     padding-bottom: 2px !important;
     font-size: .72rem !important;
   }
+  /* Fee narrower (no more up/down arrows eating space), invest/pct wider — matches the column
+     widths above. */
+  html body .sandbox-fee-input {
+    width: 38px !important;
+    max-width: 38px !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    -moz-appearance: textfield !important;
+  }
+  html body .sandbox-fee-input::-webkit-outer-spin-button,
+  html body .sandbox-fee-input::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+  }
+  html body .sandbox-invest-input,
+  html body .sandbox-cat-table.is-pension-table .sandbox-invest-input {
+    width: 68px !important;
+    min-width: 68px !important;
+  }
+  html body .sandbox-pct-input {
+    width: 56px !important;
+    max-width: 56px !important;
+  }
 
   html body .sb-invest-head .sandbox-invest-toggle {
     width: 42px !important;
@@ -19407,6 +19447,44 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     direction: ltr;
     unicode-bidi: isolate;
     font-size: .9rem !important;
+  }
+
+  /* No pill on mobile either — just the track name in its color, no background/frame (matches the
+     print treatment; the desktop screen keeps the filled badge). */
+  html body .sandbox-track-badge {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  /* The percent field never got the same mobile sizing pass as the fee/invest fields, so it stayed
+     at its (larger) desktop font-size/height and read as mismatched next to סכום השקעה.
+     Width/max-width are set separately above (kept out of this rule to avoid a source-order
+     conflict with that later width override). */
+  html body .sandbox-pct-input {
+    height: 30px !important;
+    min-height: 30px !important;
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+    font-size: .72rem !important;
+  }
+
+  /* Summary row reads at the same size as the returns row above it, not the smaller desktop-only
+     size it had no mobile override for. */
+  html body .sandbox-weighted-row td {
+    font-size: .9rem !important;
+  }
+  html body .sandbox-weighted-row .sb-weighted-pct {
+    font-size: .9rem !important;
+  }
+
+  /* Summary row's own fee value nudged left to sit centered under its header — the desktop
+     right-ward nudge (padding-left:16px, pushing fee toward track) is disproportionate on a much
+     narrower mobile column. */
+  html body .sandbox-weighted-row .sb-weighted-fee {
+    padding-left: 4px !important;
+    padding-right: 10px !important;
   }
 
   html body .yield-cell,
@@ -21266,6 +21344,13 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
      takes its column widths from the colgroup <col> elements below, deterministically. */
   html body.sb-printing .sandbox-cat-table {
     width: 100% !important;
+    /* Neutralizes an unrelated "@media (max-width:1024px)" mobile-dashboard rule that forces
+       min-width:760px !important on this table and has no `screen` type qualifier, so it also
+       matches during print (A4's ~733px printable width satisfies max-width:1024px) — min-width
+       always wins over a smaller width, so without this the table rendered ~760px wide regardless
+       of the width:100% above, overflowing the printable page by ~27px no matter how narrow the
+       column/bar widths below were set. */
+    min-width: 0 !important;
     table-layout: fixed !important;
     border-collapse: collapse !important;
     break-inside: auto !important;
@@ -21436,14 +21521,32 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     height: 10px !important;
   }
   /* Track column — align to top so number+icons sit tight under track name */
-  /* Restore allocation bars in table cells — slim 18px bar */
-  html body.sb-printing .exp-bar-bg {
+  /* Restore allocation bars in table cells — slim bar. The extra .sandbox-cat-table qualifier here
+     (matching the specificity trick already used for the order rules below) is load-bearing: an
+     unrelated "@media (max-width:1024px)" mobile-dashboard rule has no `screen` type qualifier, so it
+     also matches during print (A4's ~733px printable width satisfies max-width:1024px) and turns
+     .exp-wrap into a width:100% CSS grid with a `1fr` bar track — same (html body .sandbox-cat-table
+     .exp-bar-bg) specificity and later in the file, so it was silently winning over the old plain
+     print selector here and stretching the bar to fill the whole column no matter what width this
+     rule set. */
+  html body.sb-printing .sandbox-cat-table .exp-wrap {
+    display: flex !important;
+    grid-template-columns: none !important;
+    justify-content: flex-start !important;
+    gap: 2px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    align-items: center !important;
+  }
+  html body.sb-printing .sandbox-cat-table .exp-bar-bg {
     display: block !important;
     width: 10px !important;
+    min-width: 10px !important;
+    max-width: 10px !important;
     height: 3px !important;
+    min-height: 0 !important;
     border-radius: 2px !important;
   }
-  html body.sb-printing .exp-wrap { gap: 2px !important; min-width: 0 !important; align-items: center !important; }
   /* Explicit order, not just DOM order — bar on the left, percentage value on the right, matching
      the on-screen layout. */
   html body.sb-printing .sandbox-cat-table .exp-val { order: 1 !important; }
@@ -22115,13 +22218,16 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     gap: 4px !important;
     width: 100% !important;
     min-width: 0 !important;
-    direction: ltr !important;
+    /* rtl (not ltr) — the grid's first column (30px, holding the percent value, DOM order puts it
+       first) needs to land on the RIGHT so the percent reads to the right of the bar, matching the
+       rest of the app; ltr was putting the value on the left instead. */
+    direction: rtl !important;
   }
 
   html body .sandbox-cat-table .exp-val {
     display: block !important;
     min-width: 30px !important;
-    text-align: left !important;
+    text-align: right !important;
     font-size: .74rem !important;
     font-weight: 800 !important;
     line-height: 1 !important;
