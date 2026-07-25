@@ -6855,7 +6855,7 @@ const App = (() => {
       <td></td>
       <td class="sb-weighted-fee">${wDn !== null ? _sbFmtPct(wDn) : '—'}</td>
       ${isPension ? `<td class="sb-weighted-fee">${wDnDep !== null ? _sbFmtPct(wDnDep) : '—'}</td>` : ''}
-      <td class="sb-weighted-pct">${visibleSharePct !== null ? _sbFmtPct(visibleSharePct, 1) : '—'}</td>
+      <td class="sb-weighted-pct">${visibleSharePct !== null ? _sbFmtPct(visibleSharePct, 0) : '—'}</td>
       <td class="sb-invest-col sb-weighted-invest">${catInvestDisplay}</td>
       ${returnCells}
       <td class="sb-td-stock sb-allocation-start sb-weighted-exp">${expCell(wStock != null ? _sbFmtPct(wStock, 0) : '-', 'stock')}</td>
