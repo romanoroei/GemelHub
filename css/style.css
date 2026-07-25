@@ -19268,7 +19268,11 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     line-height: 1 !important;
     gap: 3px !important;
     white-space: nowrap !important;
-    border-radius: 999px !important;
+    border-radius: 8px !important;
+  }
+
+  html body .sandbox-cat-note-btn {
+    border-radius: 8px !important;
   }
 
   html body .sandbox-cat-table .sb-col-remove { width: 28px !important; }
@@ -19296,7 +19300,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
      do; text-align:center on the cell itself centers the input as a whole instead. */
   html body .sandbox-cat-table td.sb-td-fee {
     text-align: center !important;
-    padding-left: 2px !important;
+    padding-left: 6px !important;
     padding-right: 2px !important;
   }
   html body .sandbox-cat-table th.sb-fee-head {

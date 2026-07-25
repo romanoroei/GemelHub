@@ -6360,6 +6360,11 @@ const App = (() => {
       const savedNotes = localStorage.getItem(SANDBOX_CATEGORY_NOTES_KEY);
       state.sandbox.categoryNotes = savedNotes ? JSON.parse(savedNotes) : {};
     } catch(e) { state.sandbox.categoryNotes = {}; }
+    // A category that already has a saved note starts expanded — no need to click the pencil
+    // again just to see a note you already wrote.
+    Object.keys(state.sandbox.categoryNotes).forEach(catId => {
+      if (state.sandbox.categoryNotes[catId]) state.sandbox.openCategoryNotes.add(catId);
+    });
     // On load: auto-merge any pending selections into portfolio so the bar
     // never reappears for items the user already "added" in a prior session.
     if (state.sandbox.selections.length > 0) {
@@ -6968,7 +6973,7 @@ const App = (() => {
           const isHidden = !!item.hidden;
           const investAmountNum = parseFloat(String(item.investAmount || '').replace(/,/g, '')) || 0;
           const pctOfTotal = (!isHidden && catAmtTotalForPct > 0) ? (investAmountNum / catAmtTotalForPct * 100) : 0;
-          const pctDisplay = pctOfTotal ? pctOfTotal.toFixed(1) : '';
+          const pctDisplay = pctOfTotal ? pctOfTotal.toFixed(1).replace(/\.0$/, '') : '';
           return `<tr data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}"${isHidden ? ' class="sb-row-hidden"' : ''}>
             <td><button type="button" class="sandbox-remove-btn" data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" aria-label="הסר מסלול">
               <i class="fas fa-times" aria-hidden="true"></i></button></td>
@@ -9536,7 +9541,7 @@ const App = (() => {
       if (!item) return;
       const amt = parseFloat(String(item.investAmount || '').replace(/,/g, '')) || 0;
       const pct = (!item.hidden && total > 0) ? (amt / total * 100) : 0;
-      const pctDisplay = pct ? pct.toFixed(1) : '';
+      const pctDisplay = pct ? pct.toFixed(1).replace(/\.0$/, '') : '';
       pctInput.value = pctDisplay;
       const printSpan = pctInput.closest('.sandbox-pct-cell')?.querySelector('.sandbox-pct-print-only');
       if (printSpan) printSpan.textContent = pctDisplay ? pctDisplay + '%' : '';
