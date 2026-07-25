@@ -22747,6 +22747,14 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
 
 /* Final mobile cascade: logo, category rail, then the active route title. */
 @media (max-width: 1024px) {
+  #compare-section {
+    touch-action: pan-y;
+  }
+
+  .track-table-wrapper {
+    touch-action: pan-x pan-y;
+  }
+
   html body .mobile-product-rail {
     position: sticky !important;
     top: var(--mobile-track-logo-h, 52px) !important;

@@ -684,6 +684,7 @@ const App = (() => {
     setupModal();
     setupMobileSidebar();
     setupMobileAppShell();
+    setupMobileCategorySwipe();
     ensureMobileCategoryRail();
     setupExport();
     setupSidebarClearButtons();
@@ -2052,6 +2053,65 @@ const App = (() => {
     });
   }
 
+  function setupMobileCategorySwipe() {
+    const surface = document.getElementById('compare-section');
+    if (!surface || surface.dataset.categorySwipeBound === '1') return;
+    surface.dataset.categorySwipeBound = '1';
+
+    let gesture = null;
+    const isInteractiveTarget = target => !!target.closest(
+      'button, a, input, select, textarea, label, [role="button"], .mobile-product-rail-scroll, .sidebar-right, .advanced-search-overlay'
+    );
+    const hasHorizontalTableScroll = target => {
+      const wrapper = target.closest('.track-table-wrapper');
+      return !!wrapper && wrapper.scrollWidth > wrapper.clientWidth + 3;
+    };
+
+    surface.addEventListener('pointerdown', event => {
+      if (!window.matchMedia?.('(max-width: 1024px)').matches) return;
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      if (state.isHomePage || state.activeCategoryId === 'sandbox' || state.activeCategoryId === 'h2h') return;
+      if (isInteractiveTarget(event.target) || hasHorizontalTableScroll(event.target)) return;
+      gesture = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        lastX: event.clientX,
+        lastY: event.clientY,
+        startedAt: Date.now()
+      };
+    });
+
+    surface.addEventListener('pointermove', event => {
+      if (!gesture || event.pointerId !== gesture.pointerId) return;
+      gesture.lastX = event.clientX;
+      gesture.lastY = event.clientY;
+      const dx = gesture.lastX - gesture.startX;
+      const dy = gesture.lastY - gesture.startY;
+      if (Math.abs(dx) > 18 && Math.abs(dx) > Math.abs(dy) * 1.25) event.preventDefault();
+    }, { passive: false });
+
+    const finishGesture = event => {
+      if (!gesture || (event.pointerId !== undefined && event.pointerId !== gesture.pointerId)) return;
+      const current = gesture;
+      gesture = null;
+      const dx = current.lastX - current.startX;
+      const dy = current.lastY - current.startY;
+      if (Date.now() - current.startedAt > 900 || Math.abs(dx) < 68 || Math.abs(dx) < Math.abs(dy) * 1.35) return;
+
+      const order = readMobileCategoryOrder();
+      const currentIndex = order.indexOf(state.activeCategoryId);
+      if (currentIndex < 0) return;
+      const nextIndex = dx < 0 ? currentIndex + 1 : currentIndex - 1;
+      const nextCategoryId = order[nextIndex];
+      if (!nextCategoryId) return;
+      switchCategory(nextCategoryId);
+    };
+
+    surface.addEventListener('pointerup', finishGesture);
+    surface.addEventListener('pointercancel', () => { gesture = null; });
+  }
+
   // ── Mobile display zoom (options sheet slider) ──────────────────────────
   // Uses the CSS `zoom` property (not transform:scale) specifically because
   // it triggers a real layout recalculation — the rendered size of every
@@ -3285,7 +3345,10 @@ const App = (() => {
       : 0;
     const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
     if (isMobile) {
-      return document.body.classList.contains('mobile-sticky-header-fixed') ? mobileHeaderH : 0;
+      const logoH = document.querySelector('.mobile-table-logo-bar')?.getBoundingClientRect().height || 0;
+      const categoryRail = document.getElementById('mobile-product-rail');
+      const railH = categoryRail && !categoryRail.hidden ? categoryRail.getBoundingClientRect().height : 0;
+      return logoH + railH + (document.body.classList.contains('mobile-sticky-header-fixed') ? mobileHeaderH : 0);
     }
     return heroH + stickyGap + stickyH;
   }
@@ -3305,7 +3368,9 @@ const App = (() => {
     const thead = block.querySelector('.track-table-wrapper thead');
     if (!firstRow || !trackHeader || !thead) return null;
     const logoHeight = document.querySelector('.mobile-table-logo-bar')?.getBoundingClientRect().height || 0;
-    const desiredTop = logoHeight + trackHeader.getBoundingClientRect().height + thead.getBoundingClientRect().height + 2;
+    const categoryRail = document.getElementById('mobile-product-rail');
+    const categoryRailHeight = categoryRail && !categoryRail.hidden ? categoryRail.getBoundingClientRect().height : 0;
+    const desiredTop = logoHeight + categoryRailHeight + trackHeader.getBoundingClientRect().height + thead.getBoundingClientRect().height + 2;
     return {
       desiredTop,
       top: firstRow.getBoundingClientRect().top,
@@ -4246,7 +4311,8 @@ const App = (() => {
     }
 
     const logoBarRect = document.querySelector('.mobile-table-logo-bar')?.getBoundingClientRect();
-    const activeBlockLine = Math.ceil(logoBarRect?.bottom || 0);
+    const categoryRailRect = document.getElementById('mobile-product-rail')?.getBoundingClientRect();
+    const activeBlockLine = Math.ceil(Math.max(logoBarRect?.bottom || 0, categoryRailRect?.bottom || 0));
     const blocks = Array.from(document.querySelectorAll('#tracks-container .track-block'));
     const activeBlock = blocks.find(block => {
       const r = block.getBoundingClientRect();
