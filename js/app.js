@@ -1531,7 +1531,7 @@ const App = (() => {
     scroller.innerHTML = '';
     getOrderedProductCategories().forEach(cat => {
       const button = document.createElement('button');
-      const active = cat.id === state.activeCategoryId;
+      const active = cat.id === state.activeCategoryId && getCurrentCompareMode() !== 'actuarial';
       button.type = 'button';
       button.className = `mobile-product-category${active ? ' is-active' : ''}`;
       button.dataset.mobileRailCat = cat.id;
@@ -1539,6 +1539,25 @@ const App = (() => {
       button.setAttribute('aria-selected', active ? 'true' : 'false');
       button.textContent = MOBILE_CATEGORY_LABELS[cat.id] || cat.label;
       button.addEventListener('click', () => switchCategory(cat.id));
+      scroller.appendChild(button);
+    });
+
+    [
+      { catId: 'pension_mekafit', label: 'איזון אקטוארי מקיפה' },
+      { catId: 'pension_mashlima', label: 'איזון אקטוארי משלימה' }
+    ].forEach(item => {
+      const button = document.createElement('button');
+      const active = item.catId === state.activeCategoryId && getCurrentCompareMode() === 'actuarial';
+      button.type = 'button';
+      button.className = `mobile-product-category mobile-actuarial-category${active ? ' is-active' : ''}`;
+      button.dataset.mobileActuarialCat = item.catId;
+      button.setAttribute('role', 'tab');
+      button.setAttribute('aria-selected', active ? 'true' : 'false');
+      button.textContent = item.label;
+      button.addEventListener('click', () => {
+        state.pendingCompareMode = 'actuarial';
+        switchCategory(item.catId);
+      });
       scroller.appendChild(button);
     });
 
@@ -4868,6 +4887,19 @@ const App = (() => {
     titleShareBtn.innerHTML = '<i class="fas fa-camera" aria-hidden="true"></i>';
     block.querySelector('.track-title-group')?.appendChild(titleShareBtn);
 
+    const advancedFilterBtn = document.createElement('button');
+    advancedFilterBtn.className = 'track-advanced-filter-btn';
+    advancedFilterBtn.type = 'button';
+    advancedFilterBtn.title = 'סינון מתקדם';
+    advancedFilterBtn.setAttribute('aria-label', 'סינון מתקדם');
+    advancedFilterBtn.innerHTML = '<i class="fas fa-sliders-h" aria-hidden="true"></i>';
+    advancedFilterBtn.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      openAdvancedSearch();
+    });
+    block.querySelector('.track-title-group')?.appendChild(advancedFilterBtn);
+
     block.addEventListener('click', e => {
       const th = e.target.closest('th[data-sortfield]');
       if (!th) return;
@@ -5447,6 +5479,7 @@ const App = (() => {
     return `
       <div class="yield-toggle-group">
         <button class="tbl-ctrl-btn yield-mode-btn${!isTrackYearlyActive && state.yieldMode==='cumulative'?' is-active':''}" data-mode="cumulative"><strong>תשואה מצטברת</strong></button>
+        <button class="tbl-ctrl-btn track-custom-range-btn${state.customRange.active || state.customRange.open ? ' is-active' : ''}" type="button">טווח מותאם</button>
         <button class="tbl-ctrl-btn yield-mode-btn${!isTrackYearlyActive && state.yieldMode==='annualized'?' is-active':''}" data-mode="annualized"><strong>ממוצע שנתי</strong></button>
       </div>
       <button class="tbl-ctrl-btn yield-mode-btn yearly-mode-btn${isTrackYearlyActive?' is-active':''}" data-mode="yearly">תשואה לפי שנים</button>
@@ -6368,6 +6401,12 @@ const App = (() => {
   }
 
   function bindTableControls(block) {
+    block.querySelector('.track-custom-range-btn')?.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      ensureMobileCategorySheet().querySelector('.mob-extra-range')?.click();
+    });
+
     // כפתורי מצטבר / ממוצע שנתי — segmented control
     block.querySelectorAll('.yield-mode-btn[data-mode]').forEach(btn => {
       btn.addEventListener('click', e => {
@@ -18195,6 +18234,11 @@ const App = (() => {
       results.innerHTML = '';
       input.focus();
     };
+    const logoSearchButton = document.getElementById('mobile-logo-fund-search');
+    if (logoSearchButton && logoSearchButton.dataset.searchBound !== '1') {
+      logoSearchButton.dataset.searchBound = '1';
+      logoSearchButton.addEventListener('click', () => window.openMobileFundSearch());
+    }
   }
 
   return { init };

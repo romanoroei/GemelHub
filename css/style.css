@@ -43,6 +43,10 @@
   display: none;
 }
 
+.track-advanced-filter-btn {
+  display: none;
+}
+
 @media (max-width: 1024px) {
   html body .sticky-header {
     overflow: visible !important;
@@ -22777,6 +22781,25 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     transform: translateZ(0) !important;
   }
 
+  html body .mobile-logo-fund-search {
+    position: absolute !important;
+    left: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    display: inline-flex !important;
+    width: 36px !important;
+    height: 36px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1px solid rgba(201, 183, 114, .62) !important;
+    border-radius: 50% !important;
+    background: #fff !important;
+    color: #0c2134 !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, .1) !important;
+    font-size: .92rem !important;
+    z-index: 2 !important;
+  }
+
   html body .mobile-product-rail {
     position: fixed !important;
     top: var(--mobile-track-logo-h, 52px) !important;
@@ -22794,6 +22817,35 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
 
   html body .tracks-area {
     padding-top: calc(var(--mobile-track-logo-h, 52px) + 44px) !important;
+  }
+
+  html body #tracks-container .yield-toggle-group,
+  html body #tracks-container .track-block.is-mobile-sticky-compact .yield-toggle-group {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  html body #tracks-container .track-custom-range-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  html body #tracks-container .track-advanced-filter-btn {
+    display: inline-flex !important;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1px solid rgba(201, 183, 114, .62) !important;
+    border-radius: 50% !important;
+    background: #fff !important;
+    color: #0c2134 !important;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, .08) !important;
+    font-size: .72rem !important;
+  }
+
+  html body .mobile-actuarial-category {
+    color: #0f766e !important;
   }
 
   html body:not(.h2h-active):not(.sandbox-active) #tracks-container .track-header,
