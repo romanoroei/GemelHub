@@ -19278,11 +19278,11 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   html body .sandbox-cat-table.is-pension-table .sb-col-track { width: 88px !important; }
   /* Fee narrower (its arrows are gone too, so it no longer needs the room), pct/invest wider. */
   html body .sandbox-cat-table .sb-col-fee { width: 50px !important; }
-  html body .sandbox-cat-table .sb-col-pct { width: 42px !important; }
-  html body .sandbox-cat-table .sb-col-invest { width: 66px !important; }
+  html body .sandbox-cat-table .sb-col-pct { width: 38px !important; }
+  html body .sandbox-cat-table .sb-col-invest { width: 58px !important; }
   html body .sandbox-cat-table.is-pension-table .sb-col-fee { width: 52px !important; }
-  html body .sandbox-cat-table.is-pension-table .sb-col-pct { width: 38px !important; }
-  html body .sandbox-cat-table.is-pension-table .sb-col-invest { width: 64px !important; }
+  html body .sandbox-cat-table.is-pension-table .sb-col-pct { width: 34px !important; }
+  html body .sandbox-cat-table.is-pension-table .sb-col-invest { width: 56px !important; }
 
   /* Pct (+lock icon) and invest columns nudged toward דמי הניהול — mobile-only, on top of the
      shared desktop/mobile baseline. Earlier rounds paired a bigger padding-left with a WIDER
@@ -19292,12 +19292,12 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
      nowhere to go but flush against its near (right) edge. */
   html body .sandbox-cat-table td.sb-td-pct,
   html body .sandbox-cat-table th.sb-pct-head {
-    padding-left: 3px !important;
+    padding-left: 2px !important;
     padding-right: 0 !important;
   }
   html body .sandbox-cat-table td.sb-invest-col,
   html body .sandbox-cat-table th.sb-invest-head {
-    padding-left: 5px !important;
+    padding-left: 3px !important;
     padding-right: 0 !important;
   }
   /* מנהל header nudged slightly left (less padding-left, more padding-right than the shared 6px/4px
@@ -19455,12 +19455,12 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   }
   html body .sandbox-invest-input,
   html body .sandbox-cat-table.is-pension-table .sandbox-invest-input {
-    width: 60px !important;
-    min-width: 60px !important;
+    width: 54px !important;
+    min-width: 54px !important;
   }
   html body .sandbox-pct-input {
-    width: 42px !important;
-    max-width: 42px !important;
+    width: 38px !important;
+    max-width: 38px !important;
   }
 
   html body .sb-invest-head .sandbox-invest-toggle {
@@ -19510,16 +19510,20 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
      middle of it. */
   html body .sandbox-weighted-row .sb-weighted-pct {
     font-size: .74rem !important;
-    padding-left: 3px !important;
+    padding-left: 7px !important;
     padding-right: 0 !important;
   }
   /* Invest summary value shifted right to match the data-row nudge above — it's normally just
-     centered (text-align:center, no left/right bias), so it needs its own padding here. A small
-     padding-right (not 0) keeps the number's own right edge off the cell's overflow:hidden
-     boundary, which is what was clipping a sliver off large (9-digit) totals. */
-  html body .sandbox-weighted-row .sb-weighted-invest {
+     centered (text-align:center, no left/right bias), so it needs its own padding here. A bigger
+     padding-right (not the earlier 3px) — the right edge of the number was still catching the
+     cell's overflow:hidden boundary by a sliver on real devices. Needs the `td.` type token: this
+     cell's markup carries BOTH sb-invest-col and sb-weighted-invest, and an older, unconditional
+     "html body .sandbox-cat-table td.sb-invest-col" rule (padding-left:9/padding-right:7) has
+     higher specificity than a plain-class selector here, so it was winning and silently
+     overriding these values regardless of what was set. */
+  html body .sandbox-weighted-row td.sb-weighted-invest {
     padding-left: 5px !important;
-    padding-right: 3px !important;
+    padding-right: 7px !important;
   }
 
   /* Summary row's own fee value — moved from a left-leaning nudge to genuinely centered under its
