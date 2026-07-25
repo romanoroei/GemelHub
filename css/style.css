@@ -22086,16 +22086,26 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   /* Percent and invest-total cells — slightly roomier in print than the generic 1px/3px td padding.
      Kept modest: table-layout:auto here means every extra px demanded steals room from the
      exposure columns at the far end of the row, which have much less slack to give. */
-  html body.sb-printing .sandbox-cat-table th.sb-pct-head,
-  html body.sb-printing .sandbox-cat-table td.sb-td-pct {
+  html body.sb-printing .sandbox-cat-table th.sb-pct-head {
     min-width: 18px !important;
     padding-left: 1px !important;
     padding-right: 1px !important;
   }
-  html body.sb-printing .sandbox-cat-table td.sb-invest-col {
+  /* Data-row percent value nudged a hair right of the header's own padding above — tbody-scoped so
+     it can't touch th.sb-pct-head or (were it ever to share a class with the summary cell) tfoot. */
+  html body.sb-printing .sandbox-cat-table tbody td.sb-td-pct {
+    min-width: 18px !important;
+    padding-left: 3px !important;
+    padding-right: 0 !important;
+  }
+  /* Data-row invest value — tbody-scoped (not just the shared td.sb-invest-col) so a bigger
+     rightward shift here can never leak into the summary row's own padding the way an earlier,
+     unscoped version of this rule did (td.sb-invest-col ties in specificity with the dedicated
+     td.sb-weighted-invest rule, since both have exactly 2 classes). */
+  html body.sb-printing .sandbox-cat-table tbody td.sb-invest-col {
     min-width: 28px !important;
-    padding-left: 0 !important;
-    padding-right: 8px !important;
+    padding-left: 16px !important;
+    padding-right: 1px !important;
   }
   /* Header nudged slightly right, and separately the summary row's own value nudged slightly right
      too (data rows untouched, per instruction) — .sb-weighted-invest is the summary cell's own
@@ -22494,15 +22504,20 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     padding-right: 5px !important;
   }
   /* Data-row invest value (now a centered plain-text span, not a width-constrained input) nudged
-     slightly right — it was reading a touch left-biased. Scoped to tbody specifically: td.sb-invest-col
-     also matches the summary row's cell (it carries both sb-invest-col and sb-weighted-invest, and
-     that dedicated td.sb-weighted-invest rule elsewhere turned out to have the SAME specificity as a
-     plain td.sb-invest-col rule here — same class count, just different class names — so without
-     this tbody scoping it was overriding the summary row's own padding too, which is explicitly not
+     right — it was reading left-biased. Scoped to tbody specifically: td.sb-invest-col also matches
+     the summary row's cell (it carries both sb-invest-col and sb-weighted-invest, and that dedicated
+     td.sb-weighted-invest rule elsewhere turned out to have the SAME specificity as a plain
+     td.sb-invest-col rule here — same class count, just different class names — so without this
+     tbody scoping it was overriding the summary row's own padding too, which is explicitly not
      supposed to change). The summary row lives in <tfoot>, not <tbody>, so this can't match it. */
   html body.sb-printing .sandbox-cat-table tbody td.sb-invest-col {
-    padding-left: 6px !important;
-    padding-right: 2px !important;
+    padding-left: 16px !important;
+    padding-right: 1px !important;
+  }
+  /* Same idea, a much smaller nudge, for the percent value — tbody-scoped for the same reason. */
+  html body.sb-printing .sandbox-cat-table tbody td.sb-td-pct {
+    padding-left: 3px !important;
+    padding-right: 0 !important;
   }
   /* Exposure section narrower still, freeing width for more breathing room around the return-year
      columns next to it. */
