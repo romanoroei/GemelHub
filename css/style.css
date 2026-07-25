@@ -23139,4 +23139,90 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   body.mobile-category-interactive-swipe #actuarial-container {
     will-change: transform;
   }
+  .mobile-category-transition-cover {
+    position: fixed !important;
+    right: 0 !important;
+    left: 0 !important;
+    z-index: 9040 !important;
+    width: 100vw !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+    background: #fff !important;
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity .18s ease, transform .2s cubic-bezier(.22,.7,.25,1);
+  }
+  .mobile-category-transition-cover.is-leaving {
+    opacity: 0;
+    transform: translateX(var(--mobile-cat-shift, 12px));
+  }
+
+  html body #tracks-container .track-share-image-btn,
+  html body #tracks-container .share-track-image-btn {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    flex: 0 0 34px !important;
+    aspect-ratio: 1 / 1 !important;
+    box-sizing: border-box !important;
+    padding: 0 !important;
+    border-radius: 999px !important;
+  }
+
+  html body.mobile-filter-open #sidebar .provider-filter-name {
+    font-weight: 500 !important;
+  }
+
+  .h2h-mobile-brandbar strong {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .h2h-brand-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #f5c84b 0 48%, #183a66 50% 100%);
+    color: #fff;
+    box-shadow: 0 3px 9px rgba(15, 39, 68, .16);
+    font-size: .9rem;
+  }
+  .h2h-mobile-brandbar img {
+    width: 132px !important;
+    height: 34px !important;
+    padding: 2px 5px;
+    border-radius: 7px;
+    background: #fff !important;
+    object-fit: contain;
+  }
+
+  body.h2h-active .h2h-mgroup-label {
+    font-size: .84rem !important;
+    line-height: 1.25 !important;
+  }
+  body.h2h-active .h2h-mcheckbox {
+    min-height: 28px !important;
+    font-size: .87rem !important;
+    line-height: 1.2 !important;
+  }
+  body.h2h-active .h2h-mcheckbox input {
+    width: 16px !important;
+    height: 16px !important;
+    flex: 0 0 16px !important;
+  }
+  body.h2h-active .h2h-mgroup-sublabel {
+    width: 100%;
+    margin: 7px 0 4px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #10283d !important;
+    font-size: .84rem !important;
+    font-weight: 800 !important;
+    line-height: 1.25 !important;
+    text-align: right !important;
+  }
 }

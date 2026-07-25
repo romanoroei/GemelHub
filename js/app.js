@@ -2153,32 +2153,11 @@ const App = (() => {
     const commitInteractiveSwipe = (current, dx) => {
       const nextItem = getNextItem(dx);
       if (!nextItem) return false;
-      const content = document.querySelector(getCurrentCompareMode() === 'actuarial' ? '#actuarial-container' : '#tracks-container');
-      if (!content) return false;
-      const rect = content.getBoundingClientRect();
-      const ghost = content.cloneNode(true);
-      ghost.removeAttribute('id');
-      ghost.className = 'mobile-category-swipe-ghost';
-      ghost.setAttribute('aria-hidden', 'true');
-      Object.assign(ghost.style, {
-        top: `${Math.max(0, rect.top)}px`,
-        height: `${Math.max(1, window.innerHeight - Math.max(0, rect.top) - 70)}px`
-      });
-      document.body.appendChild(ghost);
       current.committed = true;
-      current.ghost = ghost;
       lastCategorySwipeAt = Date.now();
-      document.body.classList.add('mobile-category-interactive-swipe');
       document.body.classList.toggle('mobile-category-slide-left', dx < 0);
       document.body.classList.toggle('mobile-category-slide-right', dx > 0);
-      updateInteractiveSwipe(current);
-      Promise.resolve(openMobileNavigationItem(nextItem)).then(() => {
-        current.ready = true;
-        current.incoming = document.querySelector(getCurrentCompareMode() === 'actuarial' ? '#actuarial-container' : '#tracks-container');
-        if (current.incoming) current.incoming.style.transition = 'none';
-        updateInteractiveSwipe(current);
-        finalizeInteractiveSwipe(current);
-      });
+      openMobileNavigationItem(nextItem);
       return true;
     };
 
@@ -2909,11 +2888,24 @@ const App = (() => {
       return;
     }
     const animateMobileChange = window.matchMedia?.('(max-width: 1024px)').matches &&
-      state.activeCategoryId && state.activeCategoryId !== catId &&
-      !document.body.classList.contains('mobile-category-interactive-swipe');
+      state.activeCategoryId && state.activeCategoryId !== catId;
+    let transitionCover = null;
     if (animateMobileChange) {
-      document.body.classList.add('mobile-category-changing');
-      await new Promise(resolve => setTimeout(resolve, 90));
+      const visibleContent = document.querySelector(
+        getCurrentCompareMode() === 'actuarial' ? '#actuarial-container' : '#tracks-container'
+      );
+      if (visibleContent) {
+        const rect = visibleContent.getBoundingClientRect();
+        transitionCover = visibleContent.cloneNode(true);
+        transitionCover.removeAttribute('id');
+        transitionCover.className = 'mobile-category-transition-cover';
+        transitionCover.setAttribute('aria-hidden', 'true');
+        Object.assign(transitionCover.style, {
+          top: `${Math.max(0, rect.top)}px`,
+          height: `${Math.max(1, window.innerHeight - Math.max(0, rect.top) - 70)}px`
+        });
+        document.body.appendChild(transitionCover);
+      }
     }
     // Display modes belong to the current category. Carrying mobile exposure
     // mode into the next category leaves it looking like a squeezed partial
@@ -2963,11 +2955,12 @@ const App = (() => {
 
     await loadCategory(catId);
     if (animateMobileChange) {
-      document.body.classList.remove('mobile-category-changing');
       document.body.classList.add('mobile-category-entering');
+      requestAnimationFrame(() => transitionCover?.classList.add('is-leaving'));
       setTimeout(() => {
+        transitionCover?.remove();
         document.body.classList.remove('mobile-category-entering', 'mobile-category-slide-left', 'mobile-category-slide-right');
-      }, 260);
+      }, 220);
     }
     startRotatingCtaPopup(10000);
   }
@@ -14213,7 +14206,7 @@ const App = (() => {
     const yearSectionOpen = state.h2h.yearSectionOpen;
     const yearsHtml = `
       <button type="button" class="h2h-mgroup-sublabel h2h-mgroup-sublabel-toggle" data-h2h-toggle-years aria-expanded="${yearSectionOpen}">
-        <span>תשואה לפי שנה</span>
+        <span>תשואה לפי שנים</span>
         <i class="fas fa-chevron-${yearSectionOpen ? 'up' : 'down'}" aria-hidden="true"></i>
       </button>
       <div class="h2h-mgroup-items h2h-year-items" ${yearSectionOpen ? '' : 'hidden'}>
@@ -16157,8 +16150,8 @@ const App = (() => {
     if (justOpenedMetrics) setTimeout(() => ws.classList.remove('h2h-metrics-just-opened'), 300);
     ws.innerHTML = `
       <div class="h2h-mobile-brandbar">
-        <strong>ראש בראש</strong>
-        <img src="assets/gemelhub-logo.svg" alt="GemelHub">
+        <strong><span class="h2h-brand-icon" aria-hidden="true"><i class="fas fa-balance-scale"></i></span>ראש בראש</strong>
+        <img src="assets/gemelhub-logo-print.svg" alt="GemelHub">
       </div>
       <div class="h2h-topbar">
         <div class="h2h-topbar-actions">
