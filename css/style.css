@@ -22082,12 +22082,16 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     padding-left: 0 !important;
     padding-right: 5px !important;
   }
-  /* Padding trimmed down (from 12px) to free real width for the field itself, now that it fills
-     100% of this cell — a wide padding here would otherwise directly steal from the field's
-     available width, same problem as before just moved up one level. */
-  html body.sb-printing .sandbox-cat-table td.sb-invest-col {
-    padding-left: 0 !important;
-    padding-right: 4px !important;
+  /* Data-row invest value (now a centered plain-text span, not a width-constrained input) nudged
+     slightly right — it was reading a touch left-biased. Scoped to tbody specifically: td.sb-invest-col
+     also matches the summary row's cell (it carries both sb-invest-col and sb-weighted-invest, and
+     that dedicated td.sb-weighted-invest rule elsewhere turned out to have the SAME specificity as a
+     plain td.sb-invest-col rule here — same class count, just different class names — so without
+     this tbody scoping it was overriding the summary row's own padding too, which is explicitly not
+     supposed to change). The summary row lives in <tfoot>, not <tbody>, so this can't match it. */
+  html body.sb-printing .sandbox-cat-table tbody td.sb-invest-col {
+    padding-left: 6px !important;
+    padding-right: 2px !important;
   }
   /* Exposure section narrower still, freeing width for more breathing room around the return-year
      columns next to it. */
