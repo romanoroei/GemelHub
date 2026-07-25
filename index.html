@@ -58,7 +58,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=sandbox-invest-print-shift-20260725" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-gestures-more-20260725" />
   <style>
     @media (max-width: 760px) {
       .advanced-search-overlay { z-index: 9500 !important; }
@@ -280,6 +280,7 @@
       </div>
     </div>
     <div class="custom-range-panel" id="custom-range-panel" hidden>
+      <button type="button" class="custom-range-mobile-close" id="custom-range-mobile-close" aria-label="סגירת טווח מותאם">✕</button>
       <div class="custom-range-panel-inner">
         <div class="custom-range-panel-main">
           <div class="custom-range-fields-actions">
@@ -674,10 +675,41 @@
   <span>בדיקה אישית</span>
 </button>
 
+<section class="mobile-more-section" id="mobile-more-section" style="display:none" aria-label="האזור האישי">
+  <div class="mobile-more-shell">
+    <header class="mobile-more-profile">
+      <button type="button" class="mobile-more-settings" data-future-feature aria-label="הגדרות"><i class="fas fa-cog"></i></button>
+      <div class="mobile-more-identity">
+        <strong>GemelHub אישי</strong>
+        <span>כל הכלים הפיננסיים שלך במקום אחד</span>
+      </div>
+      <div class="mobile-more-avatar"><i class="fas fa-user"></i></div>
+    </header>
+    <button type="button" class="mobile-more-login-card" data-future-feature>
+      <span class="mobile-more-login-icon"><i class="fas fa-shield-alt"></i></span>
+      <span><strong>התחברות לאזור האישי</strong><small>שמירת העדפות וסנכרון בין מכשירים — בקרוב</small></span>
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <h2>גישה מהירה</h2>
+    <div class="mobile-more-grid">
+      <button type="button" data-future-feature><i class="fas fa-calculator"></i><span>מחשבונים</span><small>בקרוב</small></button>
+      <button type="button" data-future-feature><i class="fas fa-chart-line"></i><span>סקירות</span><small>בקרוב</small></button>
+      <button type="button" data-future-feature><i class="fas fa-calendar-alt"></i><span>יומנים</span><small>בקרוב</small></button>
+      <button type="button" data-future-feature><i class="fas fa-video"></i><span>סרטונים</span><small>בקרוב</small></button>
+    </div>
+    <h2>מעקב והגדרות</h2>
+    <div class="mobile-more-list">
+      <button type="button" data-future-feature><i class="fas fa-bell"></i><span>התראות</span><em>בקרוב</em><i class="fas fa-chevron-left"></i></button>
+      <button type="button" data-future-feature><i class="fas fa-bookmark"></i><span>פריטים שמורים</span><em>בקרוב</em><i class="fas fa-chevron-left"></i></button>
+      <button type="button" data-future-feature><i class="fas fa-sliders-h"></i><span>העדפות והגדרות</span><em>בקרוב</em><i class="fas fa-chevron-left"></i></button>
+    </div>
+  </div>
+</section>
+
 <nav class="mobile-app-nav" aria-label="ניווט תחתון במובייל">
-  <button type="button" class="mobile-app-nav-item" data-mobile-app-action="categories" data-mobile-app-target="categories" aria-label="אפשרויות">
-    <i class="fas fa-layer-group" aria-hidden="true"></i>
-    <span>אפשרויות</span>
+  <button type="button" class="mobile-app-nav-item" data-mobile-app-action="funds" data-mobile-app-target="funds" aria-label="קופות">
+    <i class="fas fa-coins" aria-hidden="true"></i>
+    <span>קופות</span>
   </button>
   <button type="button" class="mobile-app-nav-item" data-mobile-app-action="sidebar-filter" data-mobile-app-target="sidebar-filter" aria-label="סינון">
     <span class="mob-nav-icon-wrap"><i class="fas fa-filter" aria-hidden="true"></i></span>
@@ -691,8 +723,8 @@
     <span class="mob-nav-icon-wrap"><i class="fas fa-flask" aria-hidden="true"></i><span class="mob-nav-badge" id="sandbox-nav-badge" hidden></span></span>
     <span>המעבדה</span>
   </button>
-  <button type="button" class="mobile-app-nav-item mobile-app-nav-lock" data-mobile-app-action="login" data-mobile-app-target="login" aria-label="התחברות">
-    <i class="fas fa-user-lock" aria-hidden="true"></i>
+  <button type="button" class="mobile-app-nav-item mobile-app-nav-lock" data-mobile-app-action="more" data-mobile-app-target="more" aria-label="התחברות">
+    <i class="fas fa-user-circle" aria-hidden="true"></i>
     <span>התחברות</span>
   </button>
 </nav>
@@ -754,6 +786,6 @@
 
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
-  <script src="js/app.js?v=mobile-header-actions-20260725"></script>
+  <script src="js/app.js?v=mobile-gestures-more-20260725"></script>
 </body>
 </html>

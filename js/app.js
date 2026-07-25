@@ -681,6 +681,12 @@ const App = (() => {
     setupMobileRecentFundsDrawer();
     setupAdvancedSearch();
     setupCustomRange();
+    document.getElementById('custom-range-mobile-close')?.addEventListener('click', () => {
+      state.customRange.open = false;
+      const panel = document.getElementById('custom-range-panel');
+      if (panel) panel.hidden = true;
+      syncCustomRangeControls();
+    });
     setupModal();
     setupMobileSidebar();
     setupMobileAppShell();
@@ -778,7 +784,7 @@ const App = (() => {
       state.pendingTrackId = null;
       state.pendingCompareTopScroll = false;
       state.pendingTrackFocusOnly = false;
-      switchCategory(getDefaultProductCategoryId());
+      openMobileNavigationItem(getDefaultProductCategoryId());
     }
     if (urlParams.get('openAdvanced') === '1') {
       const cleanUrl = new URL(window.location.href);
@@ -1477,6 +1483,10 @@ const App = (() => {
   }
 
   const PENSION_ACTUARIAL_CATS = new Set(['pension_mekafit', 'pension_mashlima']);
+  const MOBILE_ACTUARIAL_CATEGORIES = Object.freeze([
+    { id: 'actuarial:pension_mekafit', catId: 'pension_mekafit', label: 'איזון אקטוארי מקיפה', actuarial: true },
+    { id: 'actuarial:pension_mashlima', catId: 'pension_mashlima', label: 'איזון אקטוארי משלימה', actuarial: true }
+  ]);
   const MOBILE_CATEGORY_LABELS = Object.freeze({
     pension_mashlima: 'פנסיה משלימה'
   });
@@ -1485,8 +1495,17 @@ const App = (() => {
     return CONFIG.PRODUCT_CATEGORIES.filter(cat => !REMOVED_CATEGORY_IDS.has(cat.id));
   }
 
+  function getMobileNavigationItems() {
+    return [
+      ...getAvailableProductCategories().map(cat => ({
+        id: cat.id, catId: cat.id, label: MOBILE_CATEGORY_LABELS[cat.id] || cat.label, actuarial: false
+      })),
+      ...MOBILE_ACTUARIAL_CATEGORIES
+    ];
+  }
+
   function readMobileCategoryOrder() {
-    const availableIds = getAvailableProductCategories().map(cat => cat.id);
+    const availableIds = getMobileNavigationItems().map(item => item.id);
     let saved = [];
     try {
       const parsed = JSON.parse(localStorage.getItem(MOBILE_CATEGORY_ORDER_STORAGE_KEY) || '[]');
@@ -1500,12 +1519,25 @@ const App = (() => {
   }
 
   function getOrderedProductCategories() {
-    const byId = new Map(getAvailableProductCategories().map(cat => [cat.id, cat]));
+    const byId = new Map(getMobileNavigationItems().map(item => [item.id, item]));
     return readMobileCategoryOrder().map(id => byId.get(id)).filter(Boolean);
   }
 
   function getDefaultProductCategoryId() {
     return readMobileCategoryOrder()[0] || getAvailableProductCategories()[0]?.id || 'gemel_tagmulim';
+  }
+
+  function getCurrentMobileNavigationId() {
+    return getCurrentCompareMode() === 'actuarial'
+      ? `actuarial:${state.activeCategoryId}`
+      : state.activeCategoryId;
+  }
+
+  function openMobileNavigationItem(itemId) {
+    const item = getMobileNavigationItems().find(candidate => candidate.id === itemId);
+    if (!item) return;
+    if (item.actuarial) state.pendingCompareMode = 'actuarial';
+    return switchCategory(item.catId);
   }
 
   function ensureMobileCategoryRail() {
@@ -1531,33 +1563,14 @@ const App = (() => {
     scroller.innerHTML = '';
     getOrderedProductCategories().forEach(cat => {
       const button = document.createElement('button');
-      const active = cat.id === state.activeCategoryId && getCurrentCompareMode() !== 'actuarial';
+      const active = cat.id === getCurrentMobileNavigationId();
       button.type = 'button';
-      button.className = `mobile-product-category${active ? ' is-active' : ''}`;
+      button.className = `mobile-product-category${cat.actuarial ? ' mobile-actuarial-category' : ''}${active ? ' is-active' : ''}`;
       button.dataset.mobileRailCat = cat.id;
       button.setAttribute('role', 'tab');
       button.setAttribute('aria-selected', active ? 'true' : 'false');
-      button.textContent = MOBILE_CATEGORY_LABELS[cat.id] || cat.label;
-      button.addEventListener('click', () => switchCategory(cat.id));
-      scroller.appendChild(button);
-    });
-
-    [
-      { catId: 'pension_mekafit', label: 'איזון אקטוארי מקיפה' },
-      { catId: 'pension_mashlima', label: 'איזון אקטוארי משלימה' }
-    ].forEach(item => {
-      const button = document.createElement('button');
-      const active = item.catId === state.activeCategoryId && getCurrentCompareMode() === 'actuarial';
-      button.type = 'button';
-      button.className = `mobile-product-category mobile-actuarial-category${active ? ' is-active' : ''}`;
-      button.dataset.mobileActuarialCat = item.catId;
-      button.setAttribute('role', 'tab');
-      button.setAttribute('aria-selected', active ? 'true' : 'false');
-      button.textContent = item.label;
-      button.addEventListener('click', () => {
-        state.pendingCompareMode = 'actuarial';
-        switchCategory(item.catId);
-      });
+      button.textContent = cat.label;
+      button.addEventListener('click', () => openMobileNavigationItem(cat.id));
       scroller.appendChild(button);
     });
 
@@ -1615,7 +1628,7 @@ const App = (() => {
       renderMobileCategoryRail({ centerActive: true });
     });
     overlay.querySelector('.mobile-category-editor-reset')?.addEventListener('click', () => {
-      overlay._draftOrder = getAvailableProductCategories().map(cat => cat.id);
+      overlay._draftOrder = getMobileNavigationItems().map(item => item.id);
       renderMobileCategoryEditorList(overlay);
     });
     return overlay;
@@ -1623,14 +1636,14 @@ const App = (() => {
 
   function renderMobileCategoryEditorList(overlay) {
     const list = overlay.querySelector('.mobile-category-editor-list');
-    const byId = new Map(getAvailableProductCategories().map(cat => [cat.id, cat]));
+    const byId = new Map(getMobileNavigationItems().map(item => [item.id, item]));
     const order = overlay._draftOrder || readMobileCategoryOrder();
     list.innerHTML = order.map((id, index) => {
       const cat = byId.get(id);
       if (!cat) return '';
       return `<div class="mobile-category-editor-row" data-editor-cat="${id}">
         <span class="mobile-category-editor-position">${index + 1}</span>
-        <span class="mobile-category-editor-label">${MOBILE_CATEGORY_LABELS[id] || cat.label}</span>
+        <span class="mobile-category-editor-label">${cat.label}</span>
         <button type="button" class="mobile-category-drag-handle" aria-label="גרור לשינוי מיקום" aria-describedby="mobile-category-editor-title">
           <i class="fas fa-grip-lines" aria-hidden="true"></i>
         </button>
@@ -1861,30 +1874,7 @@ const App = (() => {
 
     sheet.querySelector('.mob-extra-range')?.addEventListener('click', () => {
       closeMobileCategorySheet();
-      if (!state.activeCategoryId || state.isHomePage) return;
-      state.advancedOptionsOpen = true;
-      state.customRange.open = true;
-      syncAdvancedOptionsUi();
-      // hoist panel to root so position:fixed works inside sticky-header on iOS
-      const panel = document.getElementById('custom-range-panel');
-      if (panel && panel.parentElement !== document.documentElement) {
-        document.documentElement.appendChild(panel);
-      }
-      syncCustomRangeControls();
-      if (panel) {
-        panel.removeAttribute('hidden');
-        Object.assign(panel.style, {
-          position: 'fixed',
-          top: '50px',
-          left: '8px',
-          right: '8px',
-          zIndex: '9200',
-          background: '#fff',
-          borderRadius: '12px',
-          boxShadow: '0 10px 32px rgba(15,39,68,0.22)',
-          padding: '12px',
-        });
-      }
+      openMobileCustomRangePanel();
     });
 
     sheet.querySelector('.mob-extra-search')?.addEventListener('click', () => {
@@ -1952,14 +1942,35 @@ const App = (() => {
     });
   }
 
+  function openMobileCustomRangePanel() {
+    if (!state.activeCategoryId || state.isHomePage) return;
+    state.advancedOptionsOpen = true;
+    state.customRange.open = true;
+    syncAdvancedOptionsUi();
+    const panel = document.getElementById('custom-range-panel');
+    if (!panel) return;
+    if (panel.parentElement !== document.documentElement) document.documentElement.appendChild(panel);
+    syncCustomRangeControls();
+    const yellowHeader = document.querySelector('.mobile-sticky-thead-clone:not([hidden])') ||
+      document.querySelector('.track-block:not([hidden]) thead');
+    const top = Math.max(0, Math.round(yellowHeader?.getBoundingClientRect().top ?? 96));
+    panel.removeAttribute('hidden');
+    Object.assign(panel.style, {
+      position: 'fixed', top: `${top}px`, left: '8px', right: '8px', zIndex: '9200',
+      background: '#fff', borderRadius: '12px',
+      boxShadow: '0 10px 32px rgba(15,39,68,0.22)', padding: '38px 12px 12px'
+    });
+  }
+
   function syncMobileAppNav(activeTarget = state.activeCategoryId) {
     const nav = document.querySelector('.mobile-app-nav');
     if (!nav) return;
     const current = state.isHomePage ? 'home' : String(activeTarget || '');
     nav.querySelectorAll('[data-mobile-app-target]').forEach(item => {
       const target = item.dataset.mobileAppTarget;
-      const active = (target !== 'categories' && target !== 'sidebar-filter' && target === current) ||
-        (target === 'categories' && document.body.classList.contains('mobile-category-sheet-open')) ||
+      const isFundPage = !state.isHomePage && !['h2h', 'sandbox', 'more'].includes(current);
+      const active = (target !== 'funds' && target !== 'sidebar-filter' && target === current) ||
+        (target === 'funds' && isFundPage) ||
         (target === 'sidebar-filter' && (current === 'h2h' ? !!state.h2h.metricsOpen : document.body.classList.contains('mobile-filter-open'))) ||
         (target === 'filter' && !!state.advancedOptionsOpen && !state.isHomePage) ||
         (target === 'h2h' && current === 'h2h') ||
@@ -1995,10 +2006,10 @@ const App = (() => {
       event.preventDefault();
       const action = item.dataset.mobileAppAction;
       // close any open sheet/drawer when switching nav items
-      if (action !== 'categories') closeMobileCategorySheet();
+      closeMobileCategorySheet();
       if (action !== 'sidebar-filter' && document.body.classList.contains('mobile-filter-open')) closeMobileFilterDrawer();
-      if (action === 'categories') {
-        openMobileCategorySheet();
+      if (action === 'funds') {
+        openMobileNavigationItem(readMobileCategoryOrder()[0]);
       } else if (action === 'sidebar-filter') {
         if (state.activeCategoryId === 'h2h' && !state.isHomePage) {
           state.h2h.metricsOpen = !state.h2h.metricsOpen;
@@ -2013,8 +2024,8 @@ const App = (() => {
         switchToH2H();
       } else if (action === 'sandbox') {
         switchToSandbox();
-      } else if (action === 'login') {
-        showFeatureLockMessage();
+      } else if (action === 'more') {
+        switchToMobileMorePage();
       }
     });
     syncMobileAppNav('home');
@@ -2092,7 +2103,7 @@ const App = (() => {
     const switchFromSwipe = dx => {
       if (Date.now() - lastCategorySwipeAt < 550) return false;
       const order = readMobileCategoryOrder();
-      const currentIndex = order.indexOf(state.activeCategoryId);
+      const currentIndex = order.indexOf(getCurrentMobileNavigationId());
       if (currentIndex < 0) return false;
       // Physical swipe direction follows the content: left reveals the
       // category to the right, right reveals the category to the left.
@@ -2100,7 +2111,9 @@ const App = (() => {
       const nextCategoryId = order[nextIndex];
       if (!nextCategoryId) return false;
       lastCategorySwipeAt = Date.now();
-      switchCategory(nextCategoryId);
+      document.body.classList.toggle('mobile-category-slide-left', dx < 0);
+      document.body.classList.toggle('mobile-category-slide-right', dx > 0);
+      openMobileNavigationItem(nextCategoryId);
       return true;
     };
 
@@ -2125,7 +2138,7 @@ const App = (() => {
       gesture.lastY = event.clientY;
       const dx = gesture.lastX - gesture.startX;
       const dy = gesture.lastY - gesture.startY;
-      if (Math.abs(dx) > 34 && Math.abs(dx) > Math.abs(dy) * 1.12) {
+      if (Math.abs(dx) > 28 && Math.abs(dx) > Math.abs(dy) * 1.05) {
         event.preventDefault();
         if (switchFromSwipe(dx)) gesture = null;
       }
@@ -2137,7 +2150,7 @@ const App = (() => {
       gesture = null;
       const dx = current.lastX - current.startX;
       const dy = current.lastY - current.startY;
-      if (Math.abs(dx) < 34 || Math.abs(dx) < Math.abs(dy) * 1.12) return;
+      if (Math.abs(dx) < 28 || Math.abs(dx) < Math.abs(dy) * 1.05) return;
       switchFromSwipe(dx);
     };
 
@@ -2157,7 +2170,7 @@ const App = (() => {
       const touch = event.touches[0];
       const dx = touch.clientX - touchGesture.startX;
       const dy = touch.clientY - touchGesture.startY;
-      if (Math.abs(dx) > 34 && Math.abs(dx) > Math.abs(dy) * 1.12) {
+      if (Math.abs(dx) > 28 && Math.abs(dx) > Math.abs(dy) * 1.05) {
         event.preventDefault();
         switchFromSwipe(dx);
         touchGesture = null;
@@ -2844,6 +2857,12 @@ const App = (() => {
       showHomePage();
       return;
     }
+    const animateMobileChange = window.matchMedia?.('(max-width: 1024px)').matches &&
+      state.activeCategoryId && state.activeCategoryId !== catId;
+    if (animateMobileChange) {
+      document.body.classList.add('mobile-category-changing');
+      await new Promise(resolve => setTimeout(resolve, 90));
+    }
     // Display modes belong to the current category. Carrying mobile exposure
     // mode into the next category leaves it looking like a squeezed partial
     // table, so every category transition starts in the normal returns view.
@@ -2891,6 +2910,13 @@ const App = (() => {
     document.documentElement.style.scrollBehavior = '';
 
     await loadCategory(catId);
+    if (animateMobileChange) {
+      document.body.classList.remove('mobile-category-changing');
+      document.body.classList.add('mobile-category-entering');
+      setTimeout(() => {
+        document.body.classList.remove('mobile-category-entering', 'mobile-category-slide-left', 'mobile-category-slide-right');
+      }, 260);
+    }
     startRotatingCtaPopup(10000);
   }
 
@@ -3053,12 +3079,29 @@ const App = (() => {
     document.getElementById('h2h-section').style.display     = section==='h2h'        ? 'block' : 'none';
     const sandboxEl = document.getElementById('sandbox-section');
     if (sandboxEl) sandboxEl.style.display = section==='sandbox' ? 'block' : 'none';
+    const moreEl = document.getElementById('mobile-more-section');
+    if (moreEl) moreEl.style.display = section==='more' ? 'block' : 'none';
     if (section !== 'sandbox') _sbHideValueBar();
     // הסתר את שורת החיפוש/סינון בקטגוריית ראש בראש
     document.body.classList.toggle('h2h-active', section === 'h2h');
     document.body.classList.toggle('sandbox-active', section === 'sandbox');
+    document.body.classList.toggle('mobile-more-active', section === 'more');
     if (section === 'sandbox') hideSandboxSearchControls();
     syncHeaderContext(section);
+  }
+
+  function switchToMobileMorePage() {
+    state.isHomePage = false;
+    state.activeCategoryId = 'more';
+    closeMobileCategorySheet();
+    showSection('more');
+    document.querySelectorAll('[data-future-feature]').forEach(button => {
+      if (button.dataset.futureBound === '1') return;
+      button.dataset.futureBound = '1';
+      button.addEventListener('click', showFeatureLockMessage);
+    });
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    syncMobileAppNav('more');
   }
 
   function setupCompareModeToggle() {
@@ -3178,7 +3221,7 @@ const App = (() => {
   async function showHomePage() {
     state.pendingTrackId = null;
     state.pendingCompareTopScroll = false;
-    return switchCategory(getDefaultProductCategoryId());
+    return openMobileNavigationItem(getDefaultProductCategoryId());
     window.scrollTo({ top: 0, behavior: 'smooth' });
     updateHeroContent('home');
     state.isHomePage = true;
@@ -6404,7 +6447,7 @@ const App = (() => {
     block.querySelector('.track-custom-range-btn')?.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
-      ensureMobileCategorySheet().querySelector('.mob-extra-range')?.click();
+      openMobileCustomRangePanel();
     });
 
     // כפתורי מצטבר / ממוצע שנתי — segmented control
@@ -18051,67 +18094,59 @@ const App = (() => {
       renderMobileRecentFunds();
     });
 
-    let startY = 0;
-    let dragDelta = 0;
-    let dragged = false;
-
-    const beginDrag = y => {
-      startY = y;
-      dragDelta = 0;
-      dragged = false;
+    let drag = null;
+    let suppressClick = false;
+    const closedOffset = () => Math.max(0, drawer.offsetHeight - handle.offsetHeight);
+    const beginDrag = (y, pointerId) => {
+      drag = {
+        pointerId, startY: y, lastY: y, startedAt: performance.now(),
+        startOffset: drawer.classList.contains('is-open') ? 0 : closedOffset()
+      };
+      drawer.classList.add('is-dragging');
     };
-
     const moveDrag = y => {
-      if (!startY) return;
-      dragDelta = y - startY;
-      if (Math.abs(dragDelta) > 10) dragged = true;
+      if (!drag) return;
+      drag.lastY = y;
+      const offset = Math.max(0, Math.min(closedOffset(), drag.startOffset + y - drag.startY));
+      drawer.style.transform = `translateY(${offset}px)`;
+      handle.setAttribute('aria-expanded', offset < closedOffset() / 2 ? 'true' : 'false');
+      if (Math.abs(y - drag.startY) > 5) suppressClick = true;
     };
-
     const endDrag = () => {
-      if (dragged) {
-        setOpen(dragDelta < 0);
-        setTimeout(() => { dragged = false; }, 0);
-      }
-      startY = 0;
-      dragDelta = 0;
+      if (!drag) return;
+      const delta = drag.lastY - drag.startY;
+      const elapsed = Math.max(1, performance.now() - drag.startedAt);
+      const velocity = delta / elapsed;
+      const matrix = new DOMMatrixReadOnly(getComputedStyle(drawer).transform);
+      const offset = matrix.m42;
+      const open = velocity < -0.25 || (velocity <= 0.25 && offset < closedOffset() / 2);
+      drag = null;
+      drawer.classList.remove('is-dragging');
+      drawer.style.removeProperty('transform');
+      setOpen(open);
+      setTimeout(() => { suppressClick = false; }, 80);
     };
 
     handle.addEventListener('pointerdown', event => {
-      beginDrag(event.clientY);
+      beginDrag(event.clientY, event.pointerId);
       handle.setPointerCapture?.(event.pointerId);
     });
 
     handle.addEventListener('pointermove', event => {
-      moveDrag(event.clientY);
+      if (drag?.pointerId === event.pointerId) {
+        event.preventDefault();
+        moveDrag(event.clientY);
+      }
     });
 
     handle.addEventListener('pointerup', event => {
       handle.releasePointerCapture?.(event.pointerId);
       endDrag();
     });
-
-    handle.addEventListener('touchstart', event => {
-      beginDrag(event.touches?.[0]?.clientY || 0);
-    }, { passive: true });
-
-    handle.addEventListener('touchmove', event => {
-      moveDrag(event.touches?.[0]?.clientY || 0);
-    }, { passive: true });
-
-    handle.addEventListener('touchend', endDrag);
-
-    handle.addEventListener('mousedown', event => {
-      beginDrag(event.clientY);
-    });
-
-    document.addEventListener('mousemove', event => {
-      moveDrag(event.clientY);
-    });
-
-    document.addEventListener('mouseup', endDrag);
+    handle.addEventListener('pointercancel', endDrag);
 
     handle.addEventListener('click', () => {
-      if (dragged) return;
+      if (suppressClick) return;
       setOpen(!drawer.classList.contains('is-open'));
     });
 
