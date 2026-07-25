@@ -19259,20 +19259,31 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     flex: 0 1 auto !important;
   }
 
+  /* Round frame (a full pill, not a rounded square), just tight/narrow around the text. Same
+     min-height accessibility rule as the note button below was clamping this to ~38px tall
+     regardless of its padding, so it's overridden here too. */
   html body .sandbox-cat-add-btn {
     width: auto !important;
     min-width: 0 !important;
+    min-height: 0 !important;
     flex: 0 0 auto !important;
-    padding: 3px 5px !important;
+    padding: 3px 4px !important;
     font-size: .66rem !important;
     line-height: 1 !important;
-    gap: 3px !important;
+    gap: 2px !important;
     white-space: nowrap !important;
-    border-radius: 8px !important;
+    border-radius: 999px !important;
   }
 
+  /* Same idea for the note pencil icon — stays a full circle, just a smaller one. Needs an
+     explicit min-height override: a generic accessibility rule ("a, button, input, select, ...
+     { min-height: var(--mobile-touch) }" at max-width:1024px) was clamping this back up to a
+     ~38-44px touch-target size regardless of the height set here. */
   html body .sandbox-cat-note-btn {
-    border-radius: 8px !important;
+    width: 22px !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    border-radius: 999px !important;
   }
 
   html body .sandbox-cat-table .sb-col-remove { width: 28px !important; }
@@ -19283,10 +19294,10 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   /* Fee narrower (its arrows are gone too, so it no longer needs the room), pct/invest wider. */
   html body .sandbox-cat-table .sb-col-fee { width: 50px !important; }
   html body .sandbox-cat-table .sb-col-pct { width: 38px !important; }
-  html body .sandbox-cat-table .sb-col-invest { width: 82px !important; }
+  html body .sandbox-cat-table .sb-col-invest { width: 90px !important; }
   html body .sandbox-cat-table.is-pension-table .sb-col-fee { width: 52px !important; }
   html body .sandbox-cat-table.is-pension-table .sb-col-pct { width: 34px !important; }
-  html body .sandbox-cat-table.is-pension-table .sb-col-invest { width: 80px !important; }
+  html body .sandbox-cat-table.is-pension-table .sb-col-invest { width: 88px !important; }
 
   /* Pct (+lock icon) and invest columns nudged toward דמי הניהול — mobile-only, on top of the
      shared desktop/mobile baseline. Earlier rounds paired a bigger padding-left with a WIDER
@@ -19300,7 +19311,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
      do; text-align:center on the cell itself centers the input as a whole instead. */
   html body .sandbox-cat-table td.sb-td-fee {
     text-align: center !important;
-    padding-left: 6px !important;
+    padding-left: 14px !important;
     padding-right: 2px !important;
   }
   html body .sandbox-cat-table th.sb-fee-head {
@@ -19470,11 +19481,13 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     -webkit-appearance: none !important;
     margin: 0 !important;
   }
-  /* Widened so a 10-million-shekel (8-digit + 2 commas) invest amount doesn't clip at the edge. */
+  /* Sized for the largest realistic invest amount, 99,999,999 (8 digits + 2 commas), with a
+     safety margin — the exact-fit width was measuring 0px of slack, one font-rendering quirk away
+     from clipping on a real device. */
   html body .sandbox-invest-input,
   html body .sandbox-cat-table.is-pension-table .sandbox-invest-input {
-    width: 78px !important;
-    min-width: 78px !important;
+    width: 86px !important;
+    min-width: 86px !important;
   }
   html body .sandbox-pct-input {
     width: 38px !important;
