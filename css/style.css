@@ -19290,6 +19290,23 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
      so the extra padding became a bigger empty gap on the invest-facing side instead of actually
      closing the distance between the two columns. Kept narrow here on purpose so the content has
      nowhere to go but flush against its near (right) edge. */
+  /* Real root cause of the persistent "gap" complaint: unlike the pct/invest cells, the fee
+     <input> isn't wrapped in a flex container — it just sits at its natural RTL flush-right
+     position within the cell, so padding-LEFT never actually moved it (verified: driving the
+     declared column width down did NOT shrink the rendered width either — table-layout:fixed's
+     redistribution just re-inflated it back to ~50px regardless). The only thing that actually
+     closes the gap for a plain flush-right input is padding-RIGHT: gap = column_width -
+     padding-right - input_width, confirmed by direct measurement (50 - 0 - 37 = 13, matching the
+     observed gap exactly). The header uses a flex-centered sort button instead, so it keeps the
+     padding-left convention used elsewhere in this file. */
+  html body .sandbox-cat-table td.sb-td-fee {
+    padding-left: 2px !important;
+    padding-right: 13px !important;
+  }
+  html body .sandbox-cat-table th.sb-fee-head {
+    padding-left: 6px !important;
+    padding-right: 0 !important;
+  }
   html body .sandbox-cat-table td.sb-td-pct,
   html body .sandbox-cat-table th.sb-pct-head {
     padding-left: 2px !important;
@@ -19510,7 +19527,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
      middle of it. */
   html body .sandbox-weighted-row .sb-weighted-pct {
     font-size: .74rem !important;
-    padding-left: 7px !important;
+    padding-left: 27px !important;
     padding-right: 0 !important;
   }
   /* Invest summary value shifted right to match the data-row nudge above — it's normally just
