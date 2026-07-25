@@ -359,6 +359,10 @@ const App = (() => {
     { id: 'yieldYtd', label: 'תשואה מתחילת שנה' },
     { id: 'yield3y', label: 'תשואה מצטברת 3 שנים' },
     { id: 'yield5y', label: 'תשואה מצטברת 5 שנים' },
+    { id: 'yield7y', label: 'תשואה מצטברת 7 שנים' },
+    { id: 'yield3yAnn', label: 'תשואה ממוצעת 3 שנים' },
+    { id: 'yield5yAnn', label: 'תשואה ממוצעת 5 שנים' },
+    { id: 'yield7yAnn', label: 'תשואה ממוצעת 7 שנים' },
     { id: 'assets', label: 'היקף נכסים' },
     { id: 'stock', label: 'חשיפה למניות' },
     { id: 'abroad', label: 'חשיפה לחו"ל' },
@@ -1942,7 +1946,7 @@ const App = (() => {
     });
   }
 
-  function openMobileCustomRangePanel() {
+  function openMobileCustomRangePanel(sourceBlock = null) {
     if (!state.activeCategoryId || state.isHomePage) return;
     state.advancedOptionsOpen = true;
     state.customRange.open = true;
@@ -1951,9 +1955,17 @@ const App = (() => {
     if (!panel) return;
     if (panel.parentElement !== document.documentElement) document.documentElement.appendChild(panel);
     syncCustomRangeControls();
-    const yellowHeader = document.querySelector('.mobile-sticky-thead-clone:not([hidden])') ||
-      document.querySelector('.track-block:not([hidden]) thead');
-    const top = Math.max(0, Math.round(yellowHeader?.getBoundingClientRect().top ?? 96));
+    const sourceHeader = sourceBlock?.querySelector('thead') ||
+      document.querySelector('#tracks-container .track-block:not([hidden]) thead');
+    const stickyHeader = document.querySelector('.mobile-sticky-thead-clone:not([hidden])');
+    const railBottom = document.getElementById('mobile-product-rail')?.getBoundingClientRect().bottom || 0;
+    const sourceTop = sourceHeader?.getBoundingClientRect().top;
+    const stickyTop = stickyHeader?.getBoundingClientRect().top;
+    const top = Math.max(
+      Math.round(railBottom),
+      Math.round(Number.isFinite(sourceTop) && sourceTop > railBottom ? sourceTop : (stickyTop ?? railBottom))
+    );
+    document.documentElement.style.setProperty('--mobile-custom-range-top', `${top}px`);
     panel.removeAttribute('hidden');
     Object.assign(panel.style, {
       position: 'fixed', top: `${top}px`, left: '8px', right: '8px', zIndex: '9200',
@@ -2089,7 +2101,6 @@ const App = (() => {
     surface.dataset.categorySwipeBound = '1';
 
     let gesture = null;
-    let touchGesture = null;
     let lastCategorySwipeAt = 0;
     const isInteractiveTarget = target => !!target.closest(
       'input, select, textarea, label, .mobile-product-rail-scroll, .sidebar-right, .advanced-search-overlay, .mobile-category-editor'
@@ -2100,20 +2111,74 @@ const App = (() => {
       const overflow = wrapper.scrollWidth - wrapper.clientWidth;
       return overflow > Math.max(36, wrapper.clientWidth * 0.08);
     };
-    const switchFromSwipe = dx => {
-      if (Date.now() - lastCategorySwipeAt < 550) return false;
+    const getNextItem = dx => {
+      if (Date.now() - lastCategorySwipeAt < 400) return null;
       const order = readMobileCategoryOrder();
       const currentIndex = order.indexOf(getCurrentMobileNavigationId());
-      if (currentIndex < 0) return false;
-      // Physical swipe direction follows the content: left reveals the
-      // category to the right, right reveals the category to the left.
+      if (currentIndex < 0) return null;
       const nextIndex = dx < 0 ? currentIndex - 1 : currentIndex + 1;
-      const nextCategoryId = order[nextIndex];
-      if (!nextCategoryId) return false;
+      return order[nextIndex] || null;
+    };
+    const updateInteractiveSwipe = current => {
+      if (!current?.committed || !current.ghost) return;
+      const width = window.innerWidth;
+      const dx = Math.max(-width, Math.min(width, current.lastX - current.startX));
+      current.ghost.style.transform = `translate3d(${dx}px,0,0)`;
+      if (current.incoming) {
+        const incomingX = dx + (dx < 0 ? width : -width);
+        current.incoming.style.transform = `translate3d(${incomingX}px,0,0)`;
+      }
+    };
+    const finalizeInteractiveSwipe = current => {
+      if (!current || current.finalized || !current.ready || !current.ended) return;
+      current.finalized = true;
+      const width = window.innerWidth;
+      const dx = current.lastX - current.startX;
+      const direction = dx < 0 ? -1 : 1;
+      if (current.ghost) {
+        current.ghost.style.transition = 'transform .28s cubic-bezier(.22,.7,.25,1)';
+        current.ghost.style.transform = `translate3d(${direction * width}px,0,0)`;
+      }
+      if (current.incoming) {
+        current.incoming.style.transition = 'transform .28s cubic-bezier(.22,.7,.25,1)';
+        current.incoming.style.transform = 'translate3d(0,0,0)';
+      }
+      setTimeout(() => {
+        current.ghost?.remove();
+        current.incoming?.style.removeProperty('transition');
+        current.incoming?.style.removeProperty('transform');
+        document.body.classList.remove('mobile-category-interactive-swipe');
+      }, 300);
+    };
+    const commitInteractiveSwipe = (current, dx) => {
+      const nextItem = getNextItem(dx);
+      if (!nextItem) return false;
+      const content = document.querySelector(getCurrentCompareMode() === 'actuarial' ? '#actuarial-container' : '#tracks-container');
+      if (!content) return false;
+      const rect = content.getBoundingClientRect();
+      const ghost = content.cloneNode(true);
+      ghost.removeAttribute('id');
+      ghost.className = 'mobile-category-swipe-ghost';
+      ghost.setAttribute('aria-hidden', 'true');
+      Object.assign(ghost.style, {
+        top: `${Math.max(0, rect.top)}px`,
+        height: `${Math.max(1, window.innerHeight - Math.max(0, rect.top) - 70)}px`
+      });
+      document.body.appendChild(ghost);
+      current.committed = true;
+      current.ghost = ghost;
       lastCategorySwipeAt = Date.now();
+      document.body.classList.add('mobile-category-interactive-swipe');
       document.body.classList.toggle('mobile-category-slide-left', dx < 0);
       document.body.classList.toggle('mobile-category-slide-right', dx > 0);
-      openMobileNavigationItem(nextCategoryId);
+      updateInteractiveSwipe(current);
+      Promise.resolve(openMobileNavigationItem(nextItem)).then(() => {
+        current.ready = true;
+        current.incoming = document.querySelector(getCurrentCompareMode() === 'actuarial' ? '#actuarial-container' : '#tracks-container');
+        if (current.incoming) current.incoming.style.transition = 'none';
+        updateInteractiveSwipe(current);
+        finalizeInteractiveSwipe(current);
+      });
       return true;
     };
 
@@ -2128,8 +2193,11 @@ const App = (() => {
         startY: event.clientY,
         lastX: event.clientX,
         lastY: event.clientY,
-        startedAt: Date.now()
+        startedAt: Date.now(),
+        committed: false,
+        ended: false
       };
+      try { surface.setPointerCapture?.(event.pointerId); } catch (_) {}
     });
 
     surface.addEventListener('pointermove', event => {
@@ -2138,9 +2206,10 @@ const App = (() => {
       gesture.lastY = event.clientY;
       const dx = gesture.lastX - gesture.startX;
       const dy = gesture.lastY - gesture.startY;
-      if (Math.abs(dx) > 28 && Math.abs(dx) > Math.abs(dy) * 1.05) {
+      if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy) * 1.05) {
         event.preventDefault();
-        if (switchFromSwipe(dx)) gesture = null;
+        if (!gesture.committed && Math.abs(dx) > 22) commitInteractiveSwipe(gesture, dx);
+        updateInteractiveSwipe(gesture);
       }
     }, { passive: false });
 
@@ -2148,37 +2217,19 @@ const App = (() => {
       if (!gesture || (event.pointerId !== undefined && event.pointerId !== gesture.pointerId)) return;
       const current = gesture;
       gesture = null;
+      current.ended = true;
       const dx = current.lastX - current.startX;
       const dy = current.lastY - current.startY;
-      if (Math.abs(dx) < 28 || Math.abs(dx) < Math.abs(dy) * 1.05) return;
-      switchFromSwipe(dx);
+      if (!current.committed && Math.abs(dx) >= 22 && Math.abs(dx) >= Math.abs(dy) * 1.05) {
+        commitInteractiveSwipe(current, dx);
+      }
+      if (!current.committed) return;
+      finalizeInteractiveSwipe(current);
     };
 
     surface.addEventListener('pointerup', finishGesture);
     surface.addEventListener('pointercancel', finishGesture);
 
-    surface.addEventListener('touchstart', event => {
-      if (event.touches.length !== 1 || !window.matchMedia?.('(max-width: 1024px)').matches) return;
-      if (state.isHomePage || state.activeCategoryId === 'sandbox' || state.activeCategoryId === 'h2h') return;
-      if (isInteractiveTarget(event.target) || hasHorizontalTableScroll(event.target)) return;
-      const touch = event.touches[0];
-      touchGesture = { startX: touch.clientX, startY: touch.clientY };
-    }, { passive: true });
-
-    surface.addEventListener('touchmove', event => {
-      if (!touchGesture || event.touches.length !== 1) return;
-      const touch = event.touches[0];
-      const dx = touch.clientX - touchGesture.startX;
-      const dy = touch.clientY - touchGesture.startY;
-      if (Math.abs(dx) > 28 && Math.abs(dx) > Math.abs(dy) * 1.05) {
-        event.preventDefault();
-        switchFromSwipe(dx);
-        touchGesture = null;
-      }
-    }, { passive: false });
-
-    surface.addEventListener('touchend', () => { touchGesture = null; }, { passive: true });
-    surface.addEventListener('touchcancel', () => { touchGesture = null; }, { passive: true });
   }
 
   // ── Mobile display zoom (options sheet slider) ──────────────────────────
@@ -2858,7 +2909,8 @@ const App = (() => {
       return;
     }
     const animateMobileChange = window.matchMedia?.('(max-width: 1024px)').matches &&
-      state.activeCategoryId && state.activeCategoryId !== catId;
+      state.activeCategoryId && state.activeCategoryId !== catId &&
+      !document.body.classList.contains('mobile-category-interactive-swipe');
     if (animateMobileChange) {
       document.body.classList.add('mobile-category-changing');
       await new Promise(resolve => setTimeout(resolve, 90));
@@ -4029,9 +4081,9 @@ const App = (() => {
   function appendProviderFilterRow(container, { key, providerName, labelText, color, isSub = false }) {
     const row = document.createElement('div');
     row.className = 'filter-checkbox provider-filter-row' + (isSub ? ' filter-checkbox-sub' : '');
+    row.style.setProperty('--provider-filter-color', color);
     row.innerHTML = `
       <input type="checkbox" value="${key}" aria-label="הצג ${labelText}" />
-      <span class="fc-dot" style="background:${color}"></span>
       <span class="provider-filter-name" role="button" tabindex="0" title="לחץ להסרה מהטבלאות">${labelText}</span>
     `;
     const cb = row.querySelector('input');
@@ -6447,7 +6499,7 @@ const App = (() => {
     block.querySelector('.track-custom-range-btn')?.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
-      openMobileCustomRangePanel();
+      openMobileCustomRangePanel(block);
     });
 
     // כפתורי מצטבר / ממוצע שנתי — segmented control
@@ -11327,6 +11379,18 @@ const App = (() => {
         return Number.parseFloat(record.YIELD_TRAILING_3_YRS);
       case 'yield5y':
         return Number.parseFloat(record.YIELD_TRAILING_5_YRS);
+      case 'yield7y': {
+        const value = getActive7YMap()?.get(String(record.FUND_ID));
+        return value == null ? NaN : Number(value);
+      }
+      case 'yield3yAnn':
+        return annualizeAdvancedYield(record.YIELD_TRAILING_3_YRS, 3);
+      case 'yield5yAnn':
+        return annualizeAdvancedYield(record.YIELD_TRAILING_5_YRS, 5);
+      case 'yield7yAnn': {
+        const value = getActive7YMap()?.get(String(record.FUND_ID));
+        return annualizeAdvancedYield(value, 7);
+      }
       case 'assets': {
         const value = Number.parseFloat(record.TOTAL_ASSETS);
         return Number.isFinite(value) && value > 0 ? value : NaN;
@@ -16092,6 +16156,10 @@ const App = (() => {
     ws.classList.toggle('h2h-metrics-just-opened', justOpenedMetrics);
     if (justOpenedMetrics) setTimeout(() => ws.classList.remove('h2h-metrics-just-opened'), 300);
     ws.innerHTML = `
+      <div class="h2h-mobile-brandbar">
+        <strong>ראש בראש</strong>
+        <img src="assets/gemelhub-logo.svg" alt="GemelHub">
+      </div>
       <div class="h2h-topbar">
         <div class="h2h-topbar-actions">
           <button class="h2h-add-btn" id="h2h-add-btn">
@@ -18274,6 +18342,12 @@ const App = (() => {
       logoSearchButton.dataset.searchBound = '1';
       logoSearchButton.addEventListener('click', () => window.openMobileFundSearch());
     }
+  }
+
+  function annualizeAdvancedYield(value, years) {
+    const cumulative = Number.parseFloat(value);
+    if (!Number.isFinite(cumulative) || cumulative <= -100 || !years) return NaN;
+    return (Math.pow(1 + cumulative / 100, 1 / years) - 1) * 100;
   }
 
   return { init };
