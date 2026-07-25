@@ -7018,6 +7018,7 @@ const App = (() => {
                   data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" data-field="invest"
                   value="${displayInvest}"
                   placeholder="${item.investMode==='percent'?'הכנס אחוז':'הכנס סכום'}" />
+                <span class="sandbox-invest-print-only" data-sandbox-key="${itemKey}">${displayInvest}${item.investMode==='percent' && displayInvest ? '%' : ''}</span>
               </div>
             </td>
             ${returnCells}
@@ -9350,8 +9351,10 @@ const App = (() => {
         if (raw.length > 8 && (!item || item.investMode !== 'percent')) {
           raw = raw.slice(0, 8);
         }
+        const printSpan = input.closest('.sandbox-invest-control')?.querySelector('.sandbox-invest-print-only');
         if (raw === '' || isNaN(Number(raw))) {
           // still save empty
+          if (printSpan) printSpan.textContent = '';
           if (item) {
             if (item.investMode === 'percent') item.investPct = '';
             else item.investAmount = '';
@@ -9363,6 +9366,7 @@ const App = (() => {
         }
         const formatted = Number(raw).toLocaleString('he-IL');
         input.value = formatted;
+        if (printSpan) printSpan.textContent = formatted + ((item && item.investMode === 'percent') ? '%' : '');
         let seen = 0, newPos = formatted.length;
         for (let i = 0; i < formatted.length; i++) {
           if (formatted[i] !== ',') seen++;

@@ -11596,6 +11596,7 @@ html body .sandbox-cat-table th.sb-pct-head {
   gap: 2px;
 }
 .sandbox-pct-print-only { display: none; } /* only shown in print — see @media print rules */
+.sandbox-invest-print-only { display: none; } /* only shown in print — see @media print rules */
 .sandbox-pct-input {
   width: 58px;
   max-width: 58px;
@@ -21697,13 +21698,13 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     padding-left: 3px !important;
     padding-right: 0 !important;
   }
-  /* The invest-input's own width (80px / 76px on pension) is tuned for the screen table, where it
-     has plenty of room — print isn't overriding it, so left unchecked it drags that same footprint
-     into the page-width budget where every column is starved. Force a real, much narrower print
-     width for the field itself, not just its cell's padding. */
+  /* The invest input kept clipping in real printed PDFs across several rounds of width tweaks
+     (fixed px, then width:100%) that all measured fine in this environment's print simulation but
+     evidently didn't hold on a real device — form controls can have print-rendering quirks plain
+     text doesn't. Same fix as the percent field: hide the input in print and show a plain-text
+     sibling span instead (kept in sync on every edit — see the invest-input handler / render). */
   html body.sb-printing .sandbox-invest-input {
-    width: 44px !important;
-    min-width: 0 !important;
+    display: none !important;
   }
   /* Exposure bars must never be the thing that gives way under table-layout:auto's squeeze — they
      were both getting compressed into a distorted "elliptical" look AND, worst case, having the
@@ -21729,11 +21730,11 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     font-size: .60rem !important;
     text-align: center !important;
   }
-  html body.sb-printing .sandbox-invest-input {
-    height: auto !important;
-    min-height: 0 !important;
-    line-height: 1 !important;
-    padding: 0 2px !important;
+  html body.sb-printing .sandbox-invest-print-only {
+    display: inline !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
     font-size: .60rem !important;
     text-align: center !important;
   }
@@ -21743,6 +21744,7 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   html body.sb-printing .sandbox-invest-control {
     display: block !important;
     line-height: 1 !important;
+    text-align: center !important;
   }
   /* מסלול column header + cells shift left */
   html body.sb-printing .sandbox-cat-table th:nth-child(3),
@@ -22093,26 +22095,6 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-exp { width: 48px !important; }
   html body.sb-printing .sandbox-cat-table .sb-col-yield { width: 52px !important; }
   html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-yield { width: 50px !important; }
-  /* A mobile-screen rule (html body .sandbox-cat-table.is-pension-table .sandbox-invest-input) sets
-     min-width:86px with higher specificity than the general print rule's min-width:0, so on a
-     pension table specifically the invest input was still rendering at its wide mobile-screen size
-     here instead of the narrow print one. Fixed px widths kept clipping real printed PDFs even when
-     simulation showed room to spare (real print font metrics evidently differ from this
-     environment's rendering) — instead of guessing another number, the data-row field now fills
-     100% of its cell, same as the summary row's plain-text value does, so they're structurally
-     guaranteed to have the same available width rather than two independently-guessed numbers. */
-  html body.sb-printing .sandbox-cat-table .sandbox-invest-input {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    box-sizing: border-box !important;
-  }
-  html body.sb-printing .sandbox-cat-table.is-pension-table .sandbox-invest-input {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    box-sizing: border-box !important;
-  }
   html body.sb-printing .sandbox-cat-table .sb-col-invest { width: 80px !important; }
   html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-invest { width: 74px !important; }
 }
