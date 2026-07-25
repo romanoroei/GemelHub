@@ -9341,10 +9341,15 @@ const App = (() => {
         // whenever a comma is inserted/removed and previously caused digits typed afterwards to land
         // in the wrong slot (e.g. typing 150342 landing as 150423).
         const digitsBeforeCaret = oldValue.slice(0, oldSelStart).replace(/[^\d.]/g, '').length;
-        const raw = oldValue.replace(/,/g, '').replace(/[^\d.]/g, '');
+        let raw = oldValue.replace(/,/g, '').replace(/[^\d.]/g, '');
+        const item = _sbFindPortfolioItemFromElement(input);
+        // Cap invest AMOUNTS (not percent-mode) at 99,999,999 — beyond that the number no longer
+        // fits its table column without clipping, on screen or in print.
+        if (raw !== '' && !isNaN(Number(raw)) && (!item || item.investMode !== 'percent') && Number(raw) > 99999999) {
+          raw = '99999999';
+        }
         if (raw === '' || isNaN(Number(raw))) {
           // still save empty
-          const item = _sbFindPortfolioItemFromElement(input);
           if (item) {
             if (item.investMode === 'percent') item.investPct = '';
             else item.investAmount = '';
@@ -9363,7 +9368,6 @@ const App = (() => {
         }
         try { input.setSelectionRange(newPos, newPos); } catch(e) {}
         // live save
-        const item = _sbFindPortfolioItemFromElement(input);
         if (item) {
           if (item.investMode === 'percent') item.investPct = raw;
           else item.investAmount = raw;

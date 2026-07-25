@@ -19332,7 +19332,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
      base) so it reads a little closer to the track column next to it. */
   html body .sandbox-cat-table thead th:nth-child(2) {
     padding-left: 0 !important;
-    padding-right: 14px !important;
+    padding-right: 32px !important;
   }
 
   html body .sandbox-provider-cell {
@@ -21619,9 +21619,9 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   }
   html body.sb-printing .sandbox-cat-table .exp-bar-bg {
     display: block !important;
-    width: 15px !important;
-    min-width: 15px !important;
-    max-width: 15px !important;
+    width: 20px !important;
+    min-width: 20px !important;
+    max-width: 20px !important;
     height: 3px !important;
     min-height: 0 !important;
     border-radius: 2px !important;
@@ -21630,6 +21630,10 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
      the on-screen layout. */
   html body.sb-printing .sandbox-cat-table .exp-val { order: 1 !important; }
   html body.sb-printing .sandbox-cat-table .exp-bar-bg { order: 2 !important; }
+  /* Summary row's gold top divider, a touch thicker in print than the screen's 2px. */
+  html body.sb-printing .sandbox-weighted-row td {
+    border-top: 3px solid var(--gray-200) !important;
+  }
   /* Returns — with up to 5 of these columns, the screen-tuned 5px/5px padding (bumped up from 3px
      for on-screen breathing room) quietly cost 20px of print width across the row since print never
      overrode it. That's exactly the kind of thing that pushed the exposure columns off the page. */
@@ -22084,13 +22088,21 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   html body.sb-printing .sandbox-cat-table .sb-col-yield { width: 52px !important; }
   html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-yield { width: 50px !important; }
   /* A mobile-screen rule (html body .sandbox-cat-table.is-pension-table .sandbox-invest-input) sets
-     min-width:68px with higher specificity than the general print rule's min-width:0, so on a
+     min-width:86px with higher specificity than the general print rule's min-width:0, so on a
      pension table specifically the invest input was still rendering at its wide mobile-screen size
-     here instead of the narrow print one. */
-  html body.sb-printing .sandbox-cat-table.is-pension-table .sandbox-invest-input {
-    width: 44px !important;
+     here instead of the narrow print one. Widened from the general print rule's 44px (which was
+     clipping any invest amount from about 1,000,000 up) to fit the full 99,999,999 the input is
+     now capped at, with a bit of room freed from the exposure/yield columns above. */
+  html body.sb-printing .sandbox-cat-table .sandbox-invest-input {
+    width: 62px !important;
     min-width: 0 !important;
   }
+  html body.sb-printing .sandbox-cat-table.is-pension-table .sandbox-invest-input {
+    width: 62px !important;
+    min-width: 0 !important;
+  }
+  html body.sb-printing .sandbox-cat-table .sb-col-invest { width: 80px !important; }
+  html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-invest { width: 74px !important; }
 }
 
 /* ── Mobile table row-height squeeze (overrides "polish pass" at ~12420) ── */
