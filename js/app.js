@@ -9343,10 +9343,12 @@ const App = (() => {
         const digitsBeforeCaret = oldValue.slice(0, oldSelStart).replace(/[^\d.]/g, '').length;
         let raw = oldValue.replace(/,/g, '').replace(/[^\d.]/g, '');
         const item = _sbFindPortfolioItemFromElement(input);
-        // Cap invest AMOUNTS (not percent-mode) at 99,999,999 — beyond that the number no longer
-        // fits its table column without clipping, on screen or in print.
-        if (raw !== '' && !isNaN(Number(raw)) && (!item || item.investMode !== 'percent') && Number(raw) > 99999999) {
-          raw = '99999999';
+        // Invest AMOUNTS (not percent-mode) are capped at 8 digits (99,999,999) — beyond that the
+        // number no longer fits its table column without clipping, on screen or in print. Simply
+        // refuse the extra digit (truncate) rather than snapping the whole value to 99,999,999,
+        // which would silently rewrite whatever the customer typed into a different number.
+        if (raw.length > 8 && (!item || item.investMode !== 'percent')) {
+          raw = raw.slice(0, 8);
         }
         if (raw === '' || isNaN(Number(raw))) {
           // still save empty

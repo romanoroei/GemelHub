@@ -21630,9 +21630,12 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
      the on-screen layout. */
   html body.sb-printing .sandbox-cat-table .exp-val { order: 1 !important; }
   html body.sb-printing .sandbox-cat-table .exp-bar-bg { order: 2 !important; }
-  /* Summary row's gold top divider, a touch thicker in print than the screen's 2px. */
+  /* Summary row's gold top divider, a touch thicker in print than the screen's 2px — and a bit
+     taller overall (more vertical padding than the base 7px). */
   html body.sb-printing .sandbox-weighted-row td {
     border-top: 3px solid var(--gray-200) !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
   }
   /* Returns — with up to 5 of these columns, the screen-tuned 5px/5px padding (bumped up from 3px
      for on-screen breathing room) quietly cost 20px of print width across the row since print never
@@ -22077,9 +22080,12 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     padding-left: 0 !important;
     padding-right: 5px !important;
   }
+  /* Padding trimmed down (from 12px) to free real width for the field itself, now that it fills
+     100% of this cell — a wide padding here would otherwise directly steal from the field's
+     available width, same problem as before just moved up one level. */
   html body.sb-printing .sandbox-cat-table td.sb-invest-col {
     padding-left: 0 !important;
-    padding-right: 12px !important;
+    padding-right: 4px !important;
   }
   /* Exposure section narrower still, freeing width for more breathing room around the return-year
      columns next to it. */
@@ -22090,16 +22096,22 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   /* A mobile-screen rule (html body .sandbox-cat-table.is-pension-table .sandbox-invest-input) sets
      min-width:86px with higher specificity than the general print rule's min-width:0, so on a
      pension table specifically the invest input was still rendering at its wide mobile-screen size
-     here instead of the narrow print one. Widened from the general print rule's 44px (which was
-     clipping any invest amount from about 1,000,000 up) to fit the full 99,999,999 the input is
-     now capped at, with a bit of room freed from the exposure/yield columns above. */
+     here instead of the narrow print one. Fixed px widths kept clipping real printed PDFs even when
+     simulation showed room to spare (real print font metrics evidently differ from this
+     environment's rendering) — instead of guessing another number, the data-row field now fills
+     100% of its cell, same as the summary row's plain-text value does, so they're structurally
+     guaranteed to have the same available width rather than two independently-guessed numbers. */
   html body.sb-printing .sandbox-cat-table .sandbox-invest-input {
-    width: 62px !important;
+    width: 100% !important;
     min-width: 0 !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
   }
   html body.sb-printing .sandbox-cat-table.is-pension-table .sandbox-invest-input {
-    width: 62px !important;
+    width: 100% !important;
     min-width: 0 !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
   }
   html body.sb-printing .sandbox-cat-table .sb-col-invest { width: 80px !important; }
   html body.sb-printing .sandbox-cat-table.is-pension-table .sb-col-invest { width: 74px !important; }
