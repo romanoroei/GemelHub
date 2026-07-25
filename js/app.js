@@ -2064,7 +2064,9 @@ const App = (() => {
     );
     const hasHorizontalTableScroll = target => {
       const wrapper = target.closest('.track-table-wrapper');
-      return !!wrapper && wrapper.scrollWidth > wrapper.clientWidth + 3;
+      if (!wrapper) return false;
+      const overflow = wrapper.scrollWidth - wrapper.clientWidth;
+      return overflow > Math.max(36, wrapper.clientWidth * 0.08);
     };
 
     surface.addEventListener('pointerdown', event => {
@@ -2109,7 +2111,7 @@ const App = (() => {
     };
 
     surface.addEventListener('pointerup', finishGesture);
-    surface.addEventListener('pointercancel', () => { gesture = null; });
+    surface.addEventListener('pointercancel', finishGesture);
   }
 
   // ── Mobile display zoom (options sheet slider) ──────────────────────────
@@ -5049,7 +5051,13 @@ const App = (() => {
           el.style.setProperty('min-height', '7px', 'important');
         });
       }
-      setupMobileTableScrollbar(table.closest('.track-table-wrapper'));
+      const mobileWrapper = table.closest('.track-table-wrapper');
+      setupMobileTableScrollbar(mobileWrapper);
+      requestAnimationFrame(() => {
+        if (!mobileWrapper) return;
+        const overflow = mobileWrapper.scrollWidth - mobileWrapper.clientWidth;
+        mobileWrapper.classList.toggle('has-horizontal-data-scroll', overflow > Math.max(36, mobileWrapper.clientWidth * 0.08));
+      });
       return;
 
       const tableFont = 'clamp(.76rem, 2.55vw, .88rem)';

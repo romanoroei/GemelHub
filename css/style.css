@@ -92,7 +92,7 @@
     background: transparent;
     color: #64748b;
     font-family: 'Heebo', sans-serif;
-    font-size: .84rem;
+    font-size: .94rem;
     font-weight: 650;
     white-space: nowrap;
     scroll-snap-align: center;
@@ -22752,13 +22752,33 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   }
 
   .track-table-wrapper {
+    touch-action: pan-y;
+  }
+
+  .track-table-wrapper.has-horizontal-data-scroll {
     touch-action: pan-x pan-y;
+  }
+
+  html body .mobile-table-logo-bar {
+    position: sticky !important;
+    top: max(0px, env(safe-area-inset-top, 0px)) !important;
+    z-index: 3600 !important;
+    margin-top: 0 !important;
+    overflow: visible !important;
+    transform: translateZ(0) !important;
+    backface-visibility: hidden !important;
+    background: #fff !important;
+  }
+
+  html body .mobile-table-logo-bar img {
+    transform: translateZ(0) !important;
   }
 
   html body .mobile-product-rail {
     position: sticky !important;
     top: var(--mobile-track-logo-h, 52px) !important;
     z-index: 3550 !important;
+    background: #fff !important;
   }
 
   html body:not(.h2h-active):not(.sandbox-active) #tracks-container .track-header,
