@@ -2095,7 +2095,7 @@ const App = (() => {
     });
   }
 
-  function setupMobileCategorySwipe() {
+  function setupMobileCategorySwipeLegacy() {
     const surface = document.getElementById('compare-section');
     if (!surface || surface.dataset.categorySwipeBound === '1') return;
     surface.dataset.categorySwipeBound = '1';
@@ -2209,6 +2209,79 @@ const App = (() => {
     surface.addEventListener('pointerup', finishGesture);
     surface.addEventListener('pointercancel', finishGesture);
 
+  }
+
+  function setupMobileCategorySwipe() {
+    const surface = document.getElementById('compare-section');
+    if (!surface || surface.dataset.categorySwipeBound === '2') return;
+    surface.dataset.categorySwipeBound = '2';
+
+    let gesture = null;
+    let switching = false;
+    let lastSwitchAt = 0;
+    const blockedTarget = target => !!target.closest(
+      'input, select, textarea, label, .mobile-product-rail-scroll, .sidebar-right, ' +
+      '.advanced-search-overlay, .mobile-category-editor, .custom-range-panel'
+    );
+    const navigate = dx => {
+      if (switching || Date.now() - lastSwitchAt < 220) return false;
+      const order = readMobileCategoryOrder();
+      const currentIndex = order.indexOf(getCurrentMobileNavigationId());
+      if (currentIndex < 0) return false;
+      const nextIndex = dx < 0 ? currentIndex - 1 : currentIndex + 1;
+      const nextItem = order[nextIndex];
+      if (!nextItem) return false;
+      switching = true;
+      lastSwitchAt = Date.now();
+      document.body.classList.toggle('mobile-category-slide-left', dx < 0);
+      document.body.classList.toggle('mobile-category-slide-right', dx > 0);
+      Promise.resolve(openMobileNavigationItem(nextItem)).finally(() => {
+        switching = false;
+      });
+      return true;
+    };
+    const begin = (x, y, pointerId, target) => {
+      if (!window.matchMedia?.('(max-width: 1024px)').matches) return;
+      if (state.isHomePage || ['sandbox', 'h2h', 'more'].includes(state.activeCategoryId)) return;
+      if (blockedTarget(target)) return;
+      gesture = { pointerId, startX: x, startY: y, lastX: x, lastY: y, startedAt: performance.now() };
+    };
+    const move = (x, y, event) => {
+      if (!gesture) return;
+      gesture.lastX = x;
+      gesture.lastY = y;
+      const dx = x - gesture.startX;
+      const dy = y - gesture.startY;
+      if (Math.abs(dy) > 22 && Math.abs(dy) > Math.abs(dx) * 1.2) {
+        gesture = null;
+        return;
+      }
+      if (Math.abs(dx) >= 18 && Math.abs(dx) > Math.abs(dy) * 1.08) {
+        event?.preventDefault?.();
+        if (navigate(dx)) gesture = null;
+      }
+    };
+    const end = event => {
+      if (!gesture || (event?.pointerId != null && event.pointerId !== gesture.pointerId)) return;
+      const current = gesture;
+      gesture = null;
+      const dx = current.lastX - current.startX;
+      const dy = current.lastY - current.startY;
+      const elapsed = Math.max(1, performance.now() - current.startedAt);
+      const velocity = Math.abs(dx) / elapsed;
+      if (Math.abs(dx) >= 14 && Math.abs(dx) > Math.abs(dy) && velocity >= .12) navigate(dx);
+    };
+
+    surface.addEventListener('pointerdown', event => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      begin(event.clientX, event.clientY, event.pointerId, event.target);
+    }, true);
+    surface.addEventListener('pointermove', event => {
+      if (!gesture || gesture.pointerId !== event.pointerId) return;
+      move(event.clientX, event.clientY, event);
+    }, { capture: true, passive: false });
+    surface.addEventListener('pointerup', end, true);
+    surface.addEventListener('pointercancel', () => { gesture = null; }, true);
   }
 
   // ── Mobile display zoom (options sheet slider) ──────────────────────────
@@ -2889,24 +2962,6 @@ const App = (() => {
     }
     const animateMobileChange = window.matchMedia?.('(max-width: 1024px)').matches &&
       state.activeCategoryId && state.activeCategoryId !== catId;
-    let transitionCover = null;
-    if (animateMobileChange) {
-      const visibleContent = document.querySelector(
-        getCurrentCompareMode() === 'actuarial' ? '#actuarial-container' : '#tracks-container'
-      );
-      if (visibleContent) {
-        const rect = visibleContent.getBoundingClientRect();
-        transitionCover = visibleContent.cloneNode(true);
-        transitionCover.removeAttribute('id');
-        transitionCover.className = 'mobile-category-transition-cover';
-        transitionCover.setAttribute('aria-hidden', 'true');
-        Object.assign(transitionCover.style, {
-          top: `${Math.max(0, rect.top)}px`,
-          height: `${Math.max(1, window.innerHeight - Math.max(0, rect.top) - 70)}px`
-        });
-        document.body.appendChild(transitionCover);
-      }
-    }
     // Display modes belong to the current category. Carrying mobile exposure
     // mode into the next category leaves it looking like a squeezed partial
     // table, so every category transition starts in the normal returns view.
@@ -2955,12 +3010,10 @@ const App = (() => {
 
     await loadCategory(catId);
     if (animateMobileChange) {
-      document.body.classList.add('mobile-category-entering');
-      requestAnimationFrame(() => transitionCover?.classList.add('is-leaving'));
+      document.body.classList.add('mobile-category-soft-enter');
       setTimeout(() => {
-        transitionCover?.remove();
-        document.body.classList.remove('mobile-category-entering', 'mobile-category-slide-left', 'mobile-category-slide-right');
-      }, 220);
+        document.body.classList.remove('mobile-category-soft-enter', 'mobile-category-slide-left', 'mobile-category-slide-right');
+      }, 170);
     }
     startRotatingCtaPopup(10000);
   }
@@ -3824,7 +3877,9 @@ const App = (() => {
   }
   async function loadCategory(catId) {
     document.getElementById('sidebar-filters').style.display = '';
-    showLoading(true);
+    const quietMobileCategorySwitch = window.matchMedia?.('(max-width: 1024px)').matches &&
+      Array.isArray(state.organizedData) && state.organizedData.length > 0;
+    if (!quietMobileCategorySwitch) showLoading(true);
     const requestedCategoryId = catId;
     resetYearlyReturnsMode();
 

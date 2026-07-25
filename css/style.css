@@ -23225,4 +23225,16 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     line-height: 1.25 !important;
     text-align: right !important;
   }
+  #compare-section {
+    touch-action: pan-y pinch-zoom !important;
+    overscroll-behavior-x: contain;
+  }
+  body.mobile-category-soft-enter #tracks-container,
+  body.mobile-category-soft-enter #actuarial-container {
+    animation: mobile-category-soft-enter .16s ease-out both !important;
+  }
+  @keyframes mobile-category-soft-enter {
+    from { opacity: .88; }
+    to { opacity: 1; }
+  }
 }
