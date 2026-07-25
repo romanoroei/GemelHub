@@ -52,6 +52,7 @@ const App = (() => {
   const ADVANCED_OPTIONS_STORAGE_KEY = 'gemelhubAdvancedOptionsOpenV3';
   const DISPLAY_OPTIONS_STORAGE_KEY = 'gemelhubDisplayOptionsV3';
   const FILTER_STATE_STORAGE_KEY = 'gemelhub_filter_state_v1';
+  const MOBILE_CATEGORY_ORDER_STORAGE_KEY = 'gemelhub_mobile_category_order_v1';
   const DEFAULT_TARGET_POPULATION = 'כלל האוכלוסיה';
   const SANDBOX_STORAGE_KEY = 'gemelhub_sandbox_portfolio_v1';
   const SANDBOX_SELECTIONS_KEY = 'gemelhub_sandbox_selections_v1';
@@ -683,6 +684,7 @@ const App = (() => {
     setupModal();
     setupMobileSidebar();
     setupMobileAppShell();
+    ensureMobileCategoryRail();
     setupExport();
     setupSidebarClearButtons();
     setupPopulationFilter();
@@ -775,7 +777,7 @@ const App = (() => {
       state.pendingTrackId = null;
       state.pendingCompareTopScroll = false;
       state.pendingTrackFocusOnly = false;
-      switchCategory('hashtalamot');
+      switchCategory(getDefaultProductCategoryId());
     }
     if (urlParams.get('openAdvanced') === '1') {
       const cleanUrl = new URL(window.location.href);
@@ -1474,6 +1476,266 @@ const App = (() => {
   }
 
   const PENSION_ACTUARIAL_CATS = new Set(['pension_mekafit', 'pension_mashlima']);
+  const MOBILE_CATEGORY_LABELS = Object.freeze({
+    pension_mashlima: 'פנסיה משלימה'
+  });
+
+  function getAvailableProductCategories() {
+    return CONFIG.PRODUCT_CATEGORIES.filter(cat => !REMOVED_CATEGORY_IDS.has(cat.id));
+  }
+
+  function readMobileCategoryOrder() {
+    const availableIds = getAvailableProductCategories().map(cat => cat.id);
+    let saved = [];
+    try {
+      const parsed = JSON.parse(localStorage.getItem(MOBILE_CATEGORY_ORDER_STORAGE_KEY) || '[]');
+      if (Array.isArray(parsed)) saved = parsed.filter(id => availableIds.includes(id));
+    } catch (_) {}
+    return [...new Set([...saved, ...availableIds])];
+  }
+
+  function writeMobileCategoryOrder(order) {
+    localStorage.setItem(MOBILE_CATEGORY_ORDER_STORAGE_KEY, JSON.stringify(order));
+  }
+
+  function getOrderedProductCategories() {
+    const byId = new Map(getAvailableProductCategories().map(cat => [cat.id, cat]));
+    return readMobileCategoryOrder().map(id => byId.get(id)).filter(Boolean);
+  }
+
+  function getDefaultProductCategoryId() {
+    return readMobileCategoryOrder()[0] || getAvailableProductCategories()[0]?.id || 'gemel_tagmulim';
+  }
+
+  function ensureMobileCategoryRail() {
+    let rail = document.getElementById('mobile-product-rail');
+    if (!rail) {
+      const logoBar = document.querySelector('.mobile-table-logo-bar');
+      if (!logoBar) return null;
+      rail = document.createElement('div');
+      rail.id = 'mobile-product-rail';
+      rail.className = 'mobile-product-rail';
+      rail.setAttribute('aria-label', 'קטגוריות מוצרים');
+      rail.innerHTML = '<div class="mobile-product-rail-scroll" role="tablist"></div>';
+      logoBar.insertAdjacentElement('afterend', rail);
+    }
+    renderMobileCategoryRail();
+    return rail;
+  }
+
+  function renderMobileCategoryRail({ centerActive = false } = {}) {
+    const rail = document.getElementById('mobile-product-rail');
+    const scroller = rail?.querySelector('.mobile-product-rail-scroll');
+    if (!scroller) return;
+    scroller.innerHTML = '';
+    getOrderedProductCategories().forEach(cat => {
+      const button = document.createElement('button');
+      const active = cat.id === state.activeCategoryId;
+      button.type = 'button';
+      button.className = `mobile-product-category${active ? ' is-active' : ''}`;
+      button.dataset.mobileRailCat = cat.id;
+      button.setAttribute('role', 'tab');
+      button.setAttribute('aria-selected', active ? 'true' : 'false');
+      button.textContent = MOBILE_CATEGORY_LABELS[cat.id] || cat.label;
+      button.addEventListener('click', () => switchCategory(cat.id));
+      scroller.appendChild(button);
+    });
+
+    const editButton = document.createElement('button');
+    editButton.type = 'button';
+    editButton.className = 'mobile-product-category-edit';
+    editButton.setAttribute('aria-label', 'התאמת סדר הקטגוריות');
+    editButton.title = 'התאמת סדר הקטגוריות';
+    editButton.innerHTML = '<i class="fas fa-pen" aria-hidden="true"></i>';
+    editButton.addEventListener('click', openMobileCategoryEditor);
+    scroller.appendChild(editButton);
+
+    if (centerActive) {
+      requestAnimationFrame(() => {
+        scroller.querySelector('.mobile-product-category.is-active')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      });
+    }
+  }
+
+  function syncMobileCategoryRail() {
+    const rail = ensureMobileCategoryRail();
+    if (!rail) return;
+    const hidden = state.isHomePage || state.activeCategoryId === 'sandbox' || state.activeCategoryId === 'h2h';
+    rail.hidden = hidden;
+    if (!hidden) renderMobileCategoryRail({ centerActive: true });
+  }
+
+  function ensureMobileCategoryEditor() {
+    let overlay = document.getElementById('mobile-category-editor');
+    if (overlay) return overlay;
+    overlay = document.createElement('div');
+    overlay.id = 'mobile-category-editor';
+    overlay.className = 'mobile-category-editor';
+    overlay.hidden = true;
+    overlay.innerHTML = `
+      <div class="mobile-category-editor-panel" role="dialog" aria-modal="true" aria-labelledby="mobile-category-editor-title">
+        <div class="mobile-category-editor-head">
+          <button type="button" class="mobile-category-editor-close" aria-label="סגירה"><i class="fas fa-times" aria-hidden="true"></i></button>
+          <h2 id="mobile-category-editor-title">התאמת כרטיסיות הקטגוריות</h2>
+          <button type="button" class="mobile-category-editor-save">שמירה</button>
+        </div>
+        <p class="mobile-category-editor-help">הקטגוריה העליונה תיפתח כברירת המחדל. לחץ על ידית הגרירה והעבר כל קטגוריה ישירות למיקום הרצוי.</p>
+        <div class="mobile-category-editor-list"></div>
+        <button type="button" class="mobile-category-editor-reset"><i class="fas fa-undo-alt" aria-hidden="true"></i> איפוס לסדר המקורי</button>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', event => {
+      if (event.target === overlay || event.target.closest('.mobile-category-editor-close')) closeMobileCategoryEditor();
+    });
+    overlay.querySelector('.mobile-category-editor-save')?.addEventListener('click', () => {
+      const order = [...overlay.querySelectorAll('[data-editor-cat]')].map(row => row.dataset.editorCat);
+      writeMobileCategoryOrder(order);
+      closeMobileCategoryEditor();
+      renderMobileCategoryRail({ centerActive: true });
+    });
+    overlay.querySelector('.mobile-category-editor-reset')?.addEventListener('click', () => {
+      overlay._draftOrder = getAvailableProductCategories().map(cat => cat.id);
+      renderMobileCategoryEditorList(overlay);
+    });
+    return overlay;
+  }
+
+  function renderMobileCategoryEditorList(overlay) {
+    const list = overlay.querySelector('.mobile-category-editor-list');
+    const byId = new Map(getAvailableProductCategories().map(cat => [cat.id, cat]));
+    const order = overlay._draftOrder || readMobileCategoryOrder();
+    list.innerHTML = order.map((id, index) => {
+      const cat = byId.get(id);
+      if (!cat) return '';
+      return `<div class="mobile-category-editor-row" data-editor-cat="${id}">
+        <span class="mobile-category-editor-position">${index + 1}</span>
+        <span class="mobile-category-editor-label">${MOBILE_CATEGORY_LABELS[id] || cat.label}</span>
+        <button type="button" class="mobile-category-drag-handle" aria-label="גרור לשינוי מיקום" aria-describedby="mobile-category-editor-title">
+          <i class="fas fa-grip-lines" aria-hidden="true"></i>
+        </button>
+      </div>`;
+    }).join('');
+    setupMobileCategoryDrag(overlay);
+  }
+
+  function setupMobileCategoryDrag(overlay) {
+    const list = overlay.querySelector('.mobile-category-editor-list');
+    const panel = overlay.querySelector('.mobile-category-editor-panel');
+    if (!list || !panel) return;
+
+    const syncDraftFromRows = () => {
+      overlay._draftOrder = [...list.querySelectorAll('[data-editor-cat]')].map(row => row.dataset.editorCat);
+      list.querySelectorAll('[data-editor-cat]').forEach((row, index) => {
+        const position = row.querySelector('.mobile-category-editor-position');
+        if (position) position.textContent = String(index + 1);
+      });
+    };
+
+    list.querySelectorAll('.mobile-category-drag-handle').forEach(handle => {
+      handle.addEventListener('keydown', event => {
+        if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+        event.preventDefault();
+        const row = handle.closest('[data-editor-cat]');
+        const sibling = event.key === 'ArrowUp' ? row.previousElementSibling : row.nextElementSibling;
+        if (!sibling) return;
+        if (event.key === 'ArrowUp') list.insertBefore(row, sibling);
+        else list.insertBefore(sibling, row);
+        syncDraftFromRows();
+        handle.focus();
+      });
+
+      handle.addEventListener('pointerdown', event => {
+        if (event.button !== undefined && event.button !== 0) return;
+        const row = handle.closest('[data-editor-cat]');
+        if (!row) return;
+        event.preventDefault();
+        handle.setPointerCapture?.(event.pointerId);
+        document.body.classList.add('mobile-category-is-dragging');
+        row.classList.add('is-dragging');
+
+        const rowRect = row.getBoundingClientRect();
+        const ghost = row.cloneNode(true);
+        ghost.classList.add('mobile-category-drag-ghost');
+        ghost.classList.remove('is-dragging');
+        Object.assign(ghost.style, {
+          width: `${rowRect.width}px`,
+          left: `${rowRect.left}px`,
+          top: `${event.clientY - rowRect.height / 2}px`
+        });
+        document.body.appendChild(ghost);
+
+        let autoScrollFrame = null;
+        let autoScrollVelocity = 0;
+        const runAutoScroll = () => {
+          if (!autoScrollVelocity) {
+            autoScrollFrame = null;
+            return;
+          }
+          panel.scrollTop += autoScrollVelocity;
+          autoScrollFrame = requestAnimationFrame(runAutoScroll);
+        };
+
+        const onPointerMove = moveEvent => {
+          if (moveEvent.pointerId !== event.pointerId) return;
+          moveEvent.preventDefault();
+          ghost.style.top = `${moveEvent.clientY - rowRect.height / 2}px`;
+
+          const panelRect = panel.getBoundingClientRect();
+          const edge = 72;
+          autoScrollVelocity = moveEvent.clientY < panelRect.top + edge
+            ? -Math.max(4, (panelRect.top + edge - moveEvent.clientY) / 5)
+            : moveEvent.clientY > panelRect.bottom - edge
+              ? Math.max(4, (moveEvent.clientY - (panelRect.bottom - edge)) / 5)
+              : 0;
+          if (autoScrollVelocity && !autoScrollFrame) autoScrollFrame = requestAnimationFrame(runAutoScroll);
+
+          const target = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY)?.closest('[data-editor-cat]');
+          if (!target || target === row || !list.contains(target)) return;
+          const targetRect = target.getBoundingClientRect();
+          list.insertBefore(row, moveEvent.clientY < targetRect.top + targetRect.height / 2 ? target : target.nextElementSibling);
+          syncDraftFromRows();
+        };
+
+        const finishDrag = finishEvent => {
+          if (finishEvent.pointerId !== undefined && finishEvent.pointerId !== event.pointerId) return;
+          window.removeEventListener('pointermove', onPointerMove);
+          window.removeEventListener('pointerup', finishDrag);
+          window.removeEventListener('pointercancel', finishDrag);
+          window.removeEventListener('mouseup', finishDrag);
+          if (autoScrollFrame) cancelAnimationFrame(autoScrollFrame);
+          ghost.remove();
+          row.classList.remove('is-dragging');
+          document.body.classList.remove('mobile-category-is-dragging');
+          syncDraftFromRows();
+          handle.releasePointerCapture?.(event.pointerId);
+          handle.focus();
+        };
+
+        window.addEventListener('pointermove', onPointerMove, { passive: false });
+        window.addEventListener('pointerup', finishDrag);
+        window.addEventListener('pointercancel', finishDrag);
+        window.addEventListener('mouseup', finishDrag);
+      });
+    });
+  }
+
+  function openMobileCategoryEditor() {
+    const overlay = ensureMobileCategoryEditor();
+    overlay._draftOrder = readMobileCategoryOrder();
+    renderMobileCategoryEditorList(overlay);
+    overlay.hidden = false;
+    document.body.classList.add('mobile-category-editor-open');
+    requestAnimationFrame(() => overlay.classList.add('is-open'));
+  }
+
+  function closeMobileCategoryEditor() {
+    const overlay = document.getElementById('mobile-category-editor');
+    if (!overlay) return;
+    overlay.classList.remove('is-open');
+    document.body.classList.remove('mobile-category-editor-open');
+    setTimeout(() => { if (!overlay.classList.contains('is-open')) overlay.hidden = true; }, 180);
+  }
 
   function ensureMobileCategorySheet() {
     let sheet = document.getElementById('mobile-category-sheet');
@@ -1644,6 +1906,7 @@ const App = (() => {
   }
 
   function syncMobileCategorySheet() {
+    syncMobileCategoryRail();
     const sheet = document.getElementById('mobile-category-sheet');
     if (!sheet) return;
     sheet.querySelectorAll('[data-mobile-cat]').forEach(btn => {
@@ -2794,7 +3057,7 @@ const App = (() => {
   async function showHomePage() {
     state.pendingTrackId = null;
     state.pendingCompareTopScroll = false;
-    return switchCategory('hashtalamot');
+    return switchCategory(getDefaultProductCategoryId());
     window.scrollTo({ top: 0, behavior: 'smooth' });
     updateHeroContent('home');
     state.isHomePage = true;
