@@ -19278,25 +19278,26 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   html body .sandbox-cat-table.is-pension-table .sb-col-track { width: 88px !important; }
   /* Fee narrower (its arrows are gone too, so it no longer needs the room), pct/invest wider. */
   html body .sandbox-cat-table .sb-col-fee { width: 50px !important; }
-  html body .sandbox-cat-table .sb-col-pct { width: 70px !important; }
-  html body .sandbox-cat-table .sb-col-invest { width: 112px !important; }
+  html body .sandbox-cat-table .sb-col-pct { width: 48px !important; }
+  html body .sandbox-cat-table .sb-col-invest { width: 78px !important; }
   html body .sandbox-cat-table.is-pension-table .sb-col-fee { width: 52px !important; }
-  html body .sandbox-cat-table.is-pension-table .sb-col-pct { width: 66px !important; }
-  html body .sandbox-cat-table.is-pension-table .sb-col-invest { width: 110px !important; }
+  html body .sandbox-cat-table.is-pension-table .sb-col-pct { width: 44px !important; }
+  html body .sandbox-cat-table.is-pension-table .sb-col-invest { width: 76px !important; }
 
-  /* Pct (+lock icon) and invest columns nudged further right, toward דמי הניהול, than the shared
-     desktop/mobile baseline — mobile-only, on top of the base th.sb-pct-head/sb-invest-head shift.
-     A small (not zero) padding-right is kept on purpose: at padding-right:0 the value sits flush
-     against the cell's very right edge, and the shared td rule's overflow:hidden clips it by a
-     sliver on real devices even when scrollWidth/clientWidth read as equal in this environment. */
+  /* Pct (+lock icon) and invest columns nudged toward דמי הניהול — mobile-only, on top of the
+     shared desktop/mobile baseline. Earlier rounds paired a bigger padding-left with a WIDER
+     declared column, which was self-defeating: the column just auto-grows to fit padding+content,
+     so the extra padding became a bigger empty gap on the invest-facing side instead of actually
+     closing the distance between the two columns. Kept narrow here on purpose so the content has
+     nowhere to go but flush against its near (right) edge. */
   html body .sandbox-cat-table td.sb-td-pct,
   html body .sandbox-cat-table th.sb-pct-head {
-    padding-left: 36px !important;
+    padding-left: 10px !important;
     padding-right: 2px !important;
   }
   html body .sandbox-cat-table td.sb-invest-col,
   html body .sandbox-cat-table th.sb-invest-head {
-    padding-left: 48px !important;
+    padding-left: 14px !important;
     padding-right: 2px !important;
   }
   /* מנהל header nudged slightly left (less padding-left, more padding-right than the shared 6px/4px
@@ -19506,7 +19507,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   }
   html body .sandbox-weighted-row .sb-weighted-pct {
     font-size: .9rem !important;
-    padding-left: 36px !important;
+    padding-left: 10px !important;
     padding-right: 2px !important;
   }
   /* Invest summary value shifted right to match the data-row nudge above — it's normally just
@@ -19514,7 +19515,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
      padding-right (not 0) keeps the number's own right edge off the cell's overflow:hidden
      boundary, which is what was clipping a sliver off large (9-digit) totals. */
   html body .sandbox-weighted-row .sb-weighted-invest {
-    padding-left: 48px !important;
+    padding-left: 16px !important;
     padding-right: 3px !important;
   }
 
