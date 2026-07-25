@@ -19279,10 +19279,10 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
   /* Fee narrower (its arrows are gone too, so it no longer needs the room), pct/invest wider. */
   html body .sandbox-cat-table .sb-col-fee { width: 50px !important; }
   html body .sandbox-cat-table .sb-col-pct { width: 38px !important; }
-  html body .sandbox-cat-table .sb-col-invest { width: 58px !important; }
+  html body .sandbox-cat-table .sb-col-invest { width: 82px !important; }
   html body .sandbox-cat-table.is-pension-table .sb-col-fee { width: 52px !important; }
   html body .sandbox-cat-table.is-pension-table .sb-col-pct { width: 34px !important; }
-  html body .sandbox-cat-table.is-pension-table .sb-col-invest { width: 56px !important; }
+  html body .sandbox-cat-table.is-pension-table .sb-col-invest { width: 80px !important; }
 
   /* Pct (+lock icon) and invest columns nudged toward דמי הניהול — mobile-only, on top of the
      shared desktop/mobile baseline. Earlier rounds paired a bigger padding-left with a WIDER
@@ -19290,18 +19290,14 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
      so the extra padding became a bigger empty gap on the invest-facing side instead of actually
      closing the distance between the two columns. Kept narrow here on purpose so the content has
      nowhere to go but flush against its near (right) edge. */
-  /* Real root cause of the persistent "gap" complaint: unlike the pct/invest cells, the fee
-     <input> isn't wrapped in a flex container — it just sits at its natural RTL flush-right
-     position within the cell, so padding-LEFT never actually moved it (verified: driving the
-     declared column width down did NOT shrink the rendered width either — table-layout:fixed's
-     redistribution just re-inflated it back to ~50px regardless). The only thing that actually
-     closes the gap for a plain flush-right input is padding-RIGHT: gap = column_width -
-     padding-right - input_width, confirmed by direct measurement (50 - 0 - 37 = 13, matching the
-     observed gap exactly). The header uses a flex-centered sort button instead, so it keeps the
-     padding-left convention used elsewhere in this file. */
+  /* Fee data cell centered under its (flex-centered) header — the previous padding-right trick
+     pulled the value too far left, off-center from the header above it. The fee <input> isn't
+     wrapped in a flex container, so it doesn't respond to padding the way pct/invest's flex cells
+     do; text-align:center on the cell itself centers the input as a whole instead. */
   html body .sandbox-cat-table td.sb-td-fee {
+    text-align: center !important;
     padding-left: 2px !important;
-    padding-right: 13px !important;
+    padding-right: 2px !important;
   }
   html body .sandbox-cat-table th.sb-fee-head {
     padding-left: 6px !important;
@@ -19470,10 +19466,11 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
     -webkit-appearance: none !important;
     margin: 0 !important;
   }
+  /* Widened so a 10-million-shekel (8-digit + 2 commas) invest amount doesn't clip at the edge. */
   html body .sandbox-invest-input,
   html body .sandbox-cat-table.is-pension-table .sandbox-invest-input {
-    width: 54px !important;
-    min-width: 54px !important;
+    width: 78px !important;
+    min-width: 78px !important;
   }
   html body .sandbox-pct-input {
     width: 38px !important;
