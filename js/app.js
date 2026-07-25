@@ -2059,14 +2059,30 @@ const App = (() => {
     surface.dataset.categorySwipeBound = '1';
 
     let gesture = null;
+    let touchGesture = null;
+    let lastCategorySwipeAt = 0;
     const isInteractiveTarget = target => !!target.closest(
-      'button, a, input, select, textarea, label, [role="button"], .mobile-product-rail-scroll, .sidebar-right, .advanced-search-overlay'
+      'input, select, textarea, label, .mobile-product-rail-scroll, .sidebar-right, .advanced-search-overlay, .mobile-category-editor'
     );
     const hasHorizontalTableScroll = target => {
       const wrapper = target.closest('.track-table-wrapper');
       if (!wrapper) return false;
       const overflow = wrapper.scrollWidth - wrapper.clientWidth;
       return overflow > Math.max(36, wrapper.clientWidth * 0.08);
+    };
+    const switchFromSwipe = dx => {
+      if (Date.now() - lastCategorySwipeAt < 550) return false;
+      const order = readMobileCategoryOrder();
+      const currentIndex = order.indexOf(state.activeCategoryId);
+      if (currentIndex < 0) return false;
+      // Physical swipe direction follows the content: left reveals the
+      // category to the right, right reveals the category to the left.
+      const nextIndex = dx < 0 ? currentIndex - 1 : currentIndex + 1;
+      const nextCategoryId = order[nextIndex];
+      if (!nextCategoryId) return false;
+      lastCategorySwipeAt = Date.now();
+      switchCategory(nextCategoryId);
+      return true;
     };
 
     surface.addEventListener('pointerdown', event => {
@@ -2090,7 +2106,10 @@ const App = (() => {
       gesture.lastY = event.clientY;
       const dx = gesture.lastX - gesture.startX;
       const dy = gesture.lastY - gesture.startY;
-      if (Math.abs(dx) > 18 && Math.abs(dx) > Math.abs(dy) * 1.25) event.preventDefault();
+      if (Math.abs(dx) > 34 && Math.abs(dx) > Math.abs(dy) * 1.12) {
+        event.preventDefault();
+        if (switchFromSwipe(dx)) gesture = null;
+      }
     }, { passive: false });
 
     const finishGesture = event => {
@@ -2099,19 +2118,35 @@ const App = (() => {
       gesture = null;
       const dx = current.lastX - current.startX;
       const dy = current.lastY - current.startY;
-      if (Date.now() - current.startedAt > 900 || Math.abs(dx) < 68 || Math.abs(dx) < Math.abs(dy) * 1.35) return;
-
-      const order = readMobileCategoryOrder();
-      const currentIndex = order.indexOf(state.activeCategoryId);
-      if (currentIndex < 0) return;
-      const nextIndex = dx < 0 ? currentIndex + 1 : currentIndex - 1;
-      const nextCategoryId = order[nextIndex];
-      if (!nextCategoryId) return;
-      switchCategory(nextCategoryId);
+      if (Math.abs(dx) < 34 || Math.abs(dx) < Math.abs(dy) * 1.12) return;
+      switchFromSwipe(dx);
     };
 
     surface.addEventListener('pointerup', finishGesture);
     surface.addEventListener('pointercancel', finishGesture);
+
+    surface.addEventListener('touchstart', event => {
+      if (event.touches.length !== 1 || !window.matchMedia?.('(max-width: 1024px)').matches) return;
+      if (state.isHomePage || state.activeCategoryId === 'sandbox' || state.activeCategoryId === 'h2h') return;
+      if (isInteractiveTarget(event.target) || hasHorizontalTableScroll(event.target)) return;
+      const touch = event.touches[0];
+      touchGesture = { startX: touch.clientX, startY: touch.clientY };
+    }, { passive: true });
+
+    surface.addEventListener('touchmove', event => {
+      if (!touchGesture || event.touches.length !== 1) return;
+      const touch = event.touches[0];
+      const dx = touch.clientX - touchGesture.startX;
+      const dy = touch.clientY - touchGesture.startY;
+      if (Math.abs(dx) > 34 && Math.abs(dx) > Math.abs(dy) * 1.12) {
+        event.preventDefault();
+        switchFromSwipe(dx);
+        touchGesture = null;
+      }
+    }, { passive: false });
+
+    surface.addEventListener('touchend', () => { touchGesture = null; }, { passive: true });
+    surface.addEventListener('touchcancel', () => { touchGesture = null; }, { passive: true });
   }
 
   // ── Mobile display zoom (options sheet slider) ──────────────────────────
@@ -4343,8 +4378,10 @@ const App = (() => {
     let controlsRect = activeBlock.querySelector('.track-header-controls')?.getBoundingClientRect();
     let stickyHeaderBottom = Math.max(headerRect.bottom, controlsRect?.bottom || 0);
     const stickyExitBuffer = 2;
+    const averageRowRect = activeBlock.querySelector('tr.average-row')?.getBoundingClientRect();
     const shouldShow =
-      activeBlock.getBoundingClientRect().bottom > activeBlockLine + stickyExitBuffer;
+      activeBlock.getBoundingClientRect().bottom > activeBlockLine + stickyExitBuffer &&
+      (!averageRowRect || averageRowRect.top > stickyHeaderBottom + Math.max(theadRect.height, 24));
     if (!shouldShow) {
       hideMobileStickyThead();
       return;
