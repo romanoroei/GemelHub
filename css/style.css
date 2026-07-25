@@ -22787,6 +22787,11 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     background: #fff !important;
   }
 
+  html body .mobile-sticky-thead-clone {
+    border-bottom: 1px solid rgba(201, 183, 114, .72) !important;
+    box-shadow: 0 1px 0 rgba(12, 33, 52, .08) !important;
+  }
+
   html body .tracks-area {
     padding-top: calc(var(--mobile-track-logo-h, 52px) + 44px) !important;
   }

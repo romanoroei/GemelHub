@@ -2825,6 +2825,11 @@ const App = (() => {
       showHomePage();
       return;
     }
+    // Display modes belong to the current category. Carrying mobile exposure
+    // mode into the next category leaves it looking like a squeezed partial
+    // table, so every category transition starts in the normal returns view.
+    state.showExposure = false;
+    document.querySelectorAll('.exp-toggle-btn').forEach(button => button.classList.remove('is-active'));
     updateHeroContent(catId);
     state.isHomePage = false;
     state.activeCategoryId = catId;
