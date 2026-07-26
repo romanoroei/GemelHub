@@ -83,6 +83,12 @@ const App = (() => {
   });
 
   const REMOVED_CATEGORY_IDS = new Set(['removed_legacy_category']);
+  const categoryViewCache = new Map();
+  const categoryViewPromiseCache = new Map();
+  const categoryPrefetchTargets = new Set();
+  let categoryLoadSequence = 0;
+  let searchableWarmupPromise = null;
+  let searchableRecordsFullyWarmed = false;
 
   const ghEscapeAttr = (value) => String(value ?? '')
     .replace(/&/g, '&amp;')
@@ -3946,12 +3952,81 @@ const App = (() => {
     if ('requestIdleCallback' in window) window.requestIdleCallback(run, { timeout: 1200 });
     else setTimeout(run, 0);
   }
+
+  function getCategoryViewCacheKey(catId, targetPopulation = state.targetPopulation) {
+    return `${catId}|${targetPopulation || DEFAULT_TARGET_POPULATION}`;
+  }
+
+  function getCategoryViewBundle(catId, targetPopulation = state.targetPopulation) {
+    const key = getCategoryViewCacheKey(catId, targetPopulation);
+    if (categoryViewCache.has(key)) return Promise.resolve(categoryViewCache.get(key));
+    if (categoryViewPromiseCache.has(key)) return categoryViewPromiseCache.get(key);
+
+    const cat = CONFIG.PRODUCT_CATEGORIES.find(item => item.id === catId);
+    const isPensionCat = !!cat?.pensionAPI;
+    const isPolisaCat = !!cat?.polisaAPI;
+    const isExternalCat = isPensionCat || isPolisaCat;
+    const promise = Promise.all([
+      APIModule.getOrganizedData({
+        categoryId: catId,
+        targetPopulation,
+        selectedProviders: new Set()
+      }),
+      isExternalCat ? Promise.resolve(null) : APIModule.get12MYields(),
+      isPensionCat ? APIModule.get12MYieldsPension() : Promise.resolve(null),
+      isPolisaCat ? APIModule.get12MYieldsPolisa() : Promise.resolve(null)
+    ]).then(([organized, yields12M, yields12MPension, yields12MPolisa]) => {
+      const bundle = { organized, yields12M, yields12MPension, yields12MPolisa };
+      categoryViewCache.set(key, bundle);
+      return bundle;
+    }).finally(() => categoryViewPromiseCache.delete(key));
+
+    categoryViewPromiseCache.set(key, promise);
+    return promise;
+  }
+
+  function warmSearchableRecords() {
+    if (searchableRecordsFullyWarmed || searchableWarmupPromise) return;
+    searchableWarmupPromise = Promise.all([
+      APIModule.getAllSearchable().catch(() => []),
+      APIModule.getAllSearchablePension().catch(() => []),
+      APIModule.getAllSearchablePolisa().catch(() => [])
+    ]).then(([gemel, pension, polisa]) => {
+      state.searchableRecords = [...gemel, ...pension, ...polisa];
+      searchableRecordsFullyWarmed = true;
+    }).finally(() => { searchableWarmupPromise = null; });
+  }
+
+  function scheduleCategoryViewPrefetch(activeCategoryId, targetPopulation = state.targetPopulation) {
+    const targetKey = String(targetPopulation || DEFAULT_TARGET_POPULATION);
+    if (categoryPrefetchTargets.has(targetKey)) return;
+    categoryPrefetchTargets.add(targetKey);
+    const queue = CONFIG.PRODUCT_CATEGORIES
+      .map(category => category.id)
+      .filter(categoryId => categoryId !== activeCategoryId && !REMOVED_CATEGORY_IDS.has(categoryId));
+
+    const warmNext = () => {
+      const categoryId = queue.shift();
+      if (!categoryId) return;
+      const run = () => getCategoryViewBundle(categoryId, targetPopulation)
+        .catch(() => {})
+        .finally(warmNext);
+      if ('requestIdleCallback' in window) window.requestIdleCallback(run, { timeout: 250 });
+      else setTimeout(run, 40);
+    };
+    warmNext();
+  }
+
   async function loadCategory(catId) {
     document.getElementById('sidebar-filters').style.display = '';
-    const quietMobileCategorySwitch = window.matchMedia?.('(max-width: 1024px)').matches &&
-      Array.isArray(state.organizedData) && state.organizedData.length > 0;
-    if (!quietMobileCategorySwitch) showLoading(true);
     const requestedCategoryId = catId;
+    const requestedTargetPopulation = state.targetPopulation;
+    const loadSequence = ++categoryLoadSequence;
+    const cacheKey = getCategoryViewCacheKey(catId, requestedTargetPopulation);
+    const cachedBundle = categoryViewCache.get(cacheKey);
+    const hasRenderedCategory = Array.isArray(state.organizedData) && state.organizedData.length > 0;
+    if (!cachedBundle && !hasRenderedCategory) showLoading(true);
+    else showLoading(false);
     resetYearlyReturnsMode();
 
     // Kicked off immediately (not awaited) so all three gemel/pension/polisa "current" datasets
@@ -3962,35 +4037,20 @@ const App = (() => {
     // switches tabs, the other families are very likely already cached (fetchCurrentGemelData()/
     // fetchPensionData()/fetchPolisaData() are single-flight, so this doesn't duplicate whatever
     // the current category's own fetch below also needs).
-    Promise.all([
-      APIModule.getAllSearchable().catch(() => []),
-      APIModule.getAllSearchablePension().catch(() => []),
-      APIModule.getAllSearchablePolisa().catch(() => [])
-    ]).then(([s, sp, spo]) => { state.searchableRecords = [...s, ...sp, ...spo]; });
+    warmSearchableRecords();
 
     try {
-      const cat = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === catId);
-      const isPensionCat = !!(cat && cat.pensionAPI);
-      const isPolisaCat  = !!(cat && cat.polisaAPI);
-      const isExternalCat = isPensionCat || isPolisaCat;
+      const bundle = cachedBundle || await getCategoryViewBundle(catId, requestedTargetPopulation);
+      if (loadSequence !== categoryLoadSequence || state.activeCategoryId !== requestedCategoryId) return;
       state.trailing7Y.categoryId = catId;
-      state.trailing7Y.targetPopulation = state.targetPopulation;
+      state.trailing7Y.targetPopulation = requestedTargetPopulation;
       state.trailing7Y.map = null;
       state.trailing7Y.loading = true;
       state.trailing7Y.error = null;
       state.trailing7Y.requestId += 1;
       const trailing7YRequestId = state.trailing7Y.requestId;
 
-      const [organized, yields12M, yields12MPension, yields12MPolisa] = await Promise.all([
-        APIModule.getOrganizedData({
-          categoryId:       catId,
-          targetPopulation: state.targetPopulation,
-          selectedProviders: new Set()
-        }),
-        isExternalCat  ? Promise.resolve(null) : APIModule.get12MYields(),
-        isPensionCat   ? APIModule.get12MYieldsPension()  : Promise.resolve(null),
-        isPolisaCat    ? APIModule.get12MYieldsPolisa()   : Promise.resolve(null),
-      ]);
+      const { organized, yields12M, yields12MPension, yields12MPolisa } = bundle;
       state.organizedData    = organized;
       state.yields12M        = yields12M;
       state.yields12MPension = yields12MPension;
@@ -4009,6 +4069,7 @@ const App = (() => {
       renderComparisonView();
       showLoading(false);
       scheduleTrailing7YLoad(requestedCategoryId, trailing7YRequestId);
+      scheduleCategoryViewPrefetch(requestedCategoryId, requestedTargetPopulation);
 
       // רקע: טווח מותאם — לא חוסם את הרינדור (נתוני חיפוש כבר הופעלו למעלה, מיד עם תחילת הטעינה)
       refreshCustomRangeAvailability()
@@ -4049,11 +4110,12 @@ const App = (() => {
       }
       state.pendingInitialTableTopScroll = false;
     } catch(e) {
+      if (loadSequence !== categoryLoadSequence || state.activeCategoryId !== requestedCategoryId) return;
       console.error(e);
       document.getElementById('tracks-container').innerHTML =
         `<div class="error-state"><i class="fas fa-exclamation-triangle"></i><p>שגיאה בטעינת הנתונים. ${e.message}</p></div>`;
     } finally {
-      showLoading(false);
+      if (loadSequence === categoryLoadSequence) showLoading(false);
     }
   }
 
