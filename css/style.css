@@ -2692,6 +2692,22 @@ body:not(.advanced-options-open) .custom-range-panel {
 }
 .track-filter-title-actions { margin-right: auto; }
 .track-filter-title-actions .btn-clear-filter { margin-right: 0; }
+.track-filter-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #f59e0b;
+  color: #1e293b;
+  font-size: .62rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
+}
+.track-filter-count-badge[hidden] { display: none !important; }
 .track-filter-chevron {
   width: 14px;
   text-align: center;

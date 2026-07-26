@@ -961,7 +961,7 @@ const App = (() => {
       clearTracks.textContent = 'נקה';
       clearTracks.setAttribute('aria-label', 'נקה סינון מסלולים');
       const label = document.querySelector('#track-filter-toggle .sidebar-section-label');
-      if (label) label.innerHTML = '<i class="fas fa-road"></i> מסלולי השקעה';
+      if (label) label.innerHTML = '<i class="fas fa-road"></i> מסלולי השקעה <span class="track-filter-count-badge" id="track-filter-count-badge" hidden></span>';
     }
 
     const clearProviders = document.getElementById('clear-providers');
@@ -3163,6 +3163,14 @@ const App = (() => {
 
   function updateFilterBadge() {
     const count = getActiveFilterCount();
+    const trackCount = state.selectedTracks.size;
+    const trackBadge = document.getElementById('track-filter-count-badge');
+    if (trackBadge) {
+      trackBadge.textContent = trackCount > 0 ? String(trackCount) : '';
+      trackBadge.hidden = trackCount === 0;
+      trackBadge.setAttribute('aria-label', `${trackCount} מסלולי השקעה מסוננים`);
+      trackBadge.title = `${trackCount} מסלולי השקעה מסוננים`;
+    }
     ['sidebar-toggle-btn', 'main-filter-tab', 'mobile-filter-btn'].forEach(id => {
       const btn = document.getElementById(id);
       if (!btn) return;
