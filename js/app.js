@@ -9660,7 +9660,7 @@ const App = (() => {
       ${canShowPortfolioExposures ? `<div class="sb-allocation-section">
         ${_sbAllocationBar('חשיפה מנייתית', 'stock', mkSegs)}
         ${_sbAllocationBar('חשיפה גיאוגרפית', 'geo', geoSegs)}
-        ${_sbAllocationBar('מטבע', 'currency', fxSegs)}
+        ${_sbAllocationBar('חשיפת מט"ח', 'currency', fxSegs)}
       </div>
       <div class="sb-distribution-section">
         ${_sbManagerDonut(provSegs)}
