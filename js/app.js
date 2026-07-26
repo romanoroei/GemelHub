@@ -2221,10 +2221,14 @@ const App = (() => {
     let touchGesture = null;
     let switching = false;
     let lastSwitchAt = 0;
-    const blockedTarget = target => !!target.closest(
-      'input, select, textarea, label, .mobile-product-rail-scroll, .sidebar-right, ' +
-      '.advanced-search-overlay, .mobile-category-editor, .custom-range-panel'
-    );
+    const blockedTarget = target => {
+      if (target.closest(
+        'input, select, textarea, label, .mobile-product-rail-scroll, .sidebar-right, ' +
+        '.advanced-search-overlay, .mobile-category-editor, .custom-range-panel'
+      )) return true;
+      const tableWrapper = target.closest('.track-table-wrapper');
+      return !!tableWrapper && tableWrapper.scrollWidth - tableWrapper.clientWidth > 2;
+    };
     const navigate = dx => {
       if (switching || Date.now() - lastSwitchAt < 220) return false;
       const order = readMobileCategoryOrder();

@@ -23252,9 +23252,11 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     from { opacity: .88; }
     to { opacity: 1; }
   }
-  html body #tracks-container .track-table-wrapper,
-  html body #tracks-container .track-table-wrapper.has-horizontal-data-scroll {
+  html body #tracks-container .track-table-wrapper {
     touch-action: pan-y pinch-zoom !important;
+  }
+  html body #tracks-container .track-table-wrapper.has-horizontal-data-scroll {
+    touch-action: pan-x pan-y pinch-zoom !important;
   }
   html body .mobile-user-account {
     position: absolute !important;
