@@ -703,6 +703,7 @@ const App = (() => {
     setupMobileCategorySwipe();
     ensureMobileCategoryRail();
     setupExport();
+    setupTrackFilterAccordion();
     setupSidebarClearButtons();
     setupPopulationFilter();
     setupCompareModeToggle();
@@ -959,8 +960,8 @@ const App = (() => {
     if (clearTracks) {
       clearTracks.textContent = 'נקה';
       clearTracks.setAttribute('aria-label', 'נקה סינון מסלולים');
-      const title = clearTracks.parentElement;
-      if (title) title.innerHTML = '<i class="fas fa-road"></i> מסלולי השקעה <button class="btn-clear-filter" id="clear-tracks" aria-label="נקה סינון מסלולים">נקה</button>';
+      const label = document.querySelector('#track-filter-toggle .sidebar-section-label');
+      if (label) label.innerHTML = '<i class="fas fa-road"></i> מסלולי השקעה';
     }
 
     const clearProviders = document.getElementById('clear-providers');
@@ -12015,6 +12016,33 @@ const App = (() => {
   }
 
   // ─── CLEAR BUTTONS ────────────────────────────────────────────
+  function setupTrackFilterAccordion() {
+    const section = document.getElementById('track-filter-section');
+    const toggle = document.getElementById('track-filter-toggle');
+    const options = document.getElementById('filter-tracks');
+    if (!section || !toggle || !options) return;
+
+    const setExpanded = expanded => {
+      section.classList.toggle('is-collapsed', !expanded);
+      toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      options.hidden = !expanded;
+    };
+
+    const toggleExpanded = event => {
+      if (event?.target?.closest?.('#clear-tracks')) return;
+      setExpanded(toggle.getAttribute('aria-expanded') !== 'true');
+    };
+
+    toggle.addEventListener('click', toggleExpanded);
+    toggle.addEventListener('keydown', event => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      toggleExpanded(event);
+    });
+
+    setExpanded(false);
+  }
+
   function setupSidebarClearButtons() {
     document.getElementById('clear-tracks').addEventListener('click', () => {
       state.selectedTracks.clear();

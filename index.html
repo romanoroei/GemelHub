@@ -58,7 +58,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=phoenix-invest-20260726" />
+  <link rel="stylesheet" href="css/style.css?v=track-filter-accordion-20260804" />
   <style>
     @media (max-width: 760px) {
       .advanced-search-overlay { z-index: 9500 !important; }
@@ -456,12 +456,16 @@
               </div>
 
               <!-- Tracks -->
-              <div class="sidebar-section">
-                <div class="sidebar-section-title">
-                  <i class="fas fa-road"></i> מסלולי השקעה
-                  <button class="btn-clear-filter" id="clear-tracks" aria-label="נקה סינון מסלולים">נקה</button>
+              <div class="sidebar-section track-filter-section is-collapsed" id="track-filter-section">
+                <div class="sidebar-section-title track-filter-toggle" id="track-filter-toggle"
+                     role="button" tabindex="0" aria-expanded="false" aria-controls="filter-tracks">
+                  <span class="sidebar-section-label"><i class="fas fa-road"></i> מסלולי השקעה</span>
+                  <span class="track-filter-title-actions">
+                    <button class="btn-clear-filter" id="clear-tracks" aria-label="נקה סינון מסלולים">נקה</button>
+                    <i class="fas fa-chevron-down track-filter-chevron" aria-hidden="true"></i>
+                  </span>
                 </div>
-                <div class="filter-checkboxes" id="filter-tracks"></div>
+                <div class="filter-checkboxes" id="filter-tracks" hidden></div>
               </div>
 
               <!-- Target population -->
@@ -807,6 +811,6 @@
 
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
-  <script src="js/app.js?v=mobile-title-actions-20260726"></script>
+  <script src="js/app.js?v=track-filter-accordion-20260804"></script>
 </body>
 </html>

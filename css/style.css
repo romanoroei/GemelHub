@@ -2673,6 +2673,35 @@ body:not(.advanced-options-open) .custom-range-panel {
 }
 .sidebar-section-title i { color: var(--blue); }
 
+.track-filter-toggle {
+  width: 100%;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 7px;
+}
+.track-filter-toggle:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+.sidebar-section-label,
+.track-filter-title-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.track-filter-title-actions { margin-right: auto; }
+.track-filter-title-actions .btn-clear-filter { margin-right: 0; }
+.track-filter-chevron {
+  width: 14px;
+  text-align: center;
+  transition: transform .18s ease;
+}
+.track-filter-toggle[aria-expanded="true"] .track-filter-chevron { transform: rotate(180deg); }
+.track-filter-section.is-collapsed .sidebar-section-title { margin-bottom: 0; }
+.track-filter-section.is-collapsed .btn-clear-filter { display: none; }
+#filter-tracks[hidden] { display: none !important; }
+
 .provider-filter-hint {
   margin: -4px 0 8px; font-size: .68rem; font-weight: 500;
   color: var(--gray-400); line-height: 1.3;
