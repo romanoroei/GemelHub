@@ -64,7 +64,7 @@ const App = (() => {
   const SANDBOX_CATEGORY_NOTES_KEY = 'gemelhub_sandbox_category_notes_v1';
   const ADVANCED_OPTIONS_AUTO_CLOSE_DELAY = 13000;
   const ADVANCED_OPTIONS_HOVER_TARGETS = [
-    '#advanced-options-tab',
+    '#main-filter-tab',
     '.title-search-bar',
     '#display-options-panel:not([hidden])',
     '#custom-range-panel:not([hidden])',
@@ -1276,16 +1276,7 @@ const App = (() => {
 
   function scheduleAdvancedOptionsAutoClose() {
     clearAdvancedOptionsTimer();
-    if (!state.advancedOptionsOpen || state.isHomePage) return;
-    advancedOptionsAutoCloseTimer = setTimeout(() => {
-      if (state.displayOptionsOpen || isAdvancedOptionsAreaHovered() || isFilterPanelPinnedOpen()) {
-        scheduleAdvancedOptionsAutoClose();
-        return;
-      }
-      state.advancedOptionsOpen = false;
-      state.displayOptionsOpen = false;
-      syncAdvancedOptionsUi();
-    }, ADVANCED_OPTIONS_AUTO_CLOSE_DELAY);
+    // The search/display bar stays open on category pages.
   }
 
   function syncDisplayOptionsUi() {
@@ -1450,11 +1441,13 @@ const App = (() => {
 
   function syncAdvancedOptionsUi() {
     document.body.classList.toggle('advanced-options-open', !!state.advancedOptionsOpen);
-    const advancedBtn = document.getElementById('advanced-options-tab');
-    if (advancedBtn) {
-      advancedBtn.classList.toggle('is-active', !!state.advancedOptionsOpen);
-      advancedBtn.style.display = (state.isHomePage || state.activeCategoryId === 'sandbox' || state.activeCategoryId === 'h2h') ? 'none' : '';
-      advancedBtn.setAttribute('aria-pressed', state.advancedOptionsOpen ? 'true' : 'false');
+    const mainFilterBtn = document.getElementById('main-filter-tab');
+    if (mainFilterBtn) {
+      const sidebar = document.getElementById('sidebar');
+      const filterOpen = !!sidebar && !sidebar.classList.contains('sidebar-collapsed');
+      mainFilterBtn.classList.toggle('is-active', filterOpen);
+      mainFilterBtn.style.display = (state.isHomePage || state.activeCategoryId === 'sandbox' || state.activeCategoryId === 'h2h') ? 'none' : '';
+      mainFilterBtn.setAttribute('aria-pressed', filterOpen ? 'true' : 'false');
     }
     if (!state.advancedOptionsOpen) {
       clearAdvancedOptionsTimer();
@@ -1965,13 +1958,24 @@ const App = (() => {
       Math.round(railBottom),
       Math.round(Number.isFinite(sourceTop) && sourceTop > railBottom ? sourceTop : (stickyTop ?? railBottom))
     );
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
     document.documentElement.style.setProperty('--mobile-custom-range-top', `${top}px`);
     panel.removeAttribute('hidden');
-    Object.assign(panel.style, {
-      position: 'fixed', top: `${top}px`, left: '8px', right: '8px', zIndex: '9200',
-      background: '#fff', borderRadius: '12px',
-      boxShadow: '0 10px 32px rgba(15,39,68,0.22)', padding: '38px 12px 12px'
-    });
+    if (isMobile) {
+      Object.assign(panel.style, {
+        position: 'fixed', top: `${top}px`, left: '8px', right: '8px', width: 'auto',
+        transform: 'none', zIndex: '9200', background: '#fff', borderRadius: '14px',
+        boxShadow: '0 12px 34px rgba(15,39,68,0.22)', padding: '36px 12px 12px'
+      });
+    } else {
+      const desktopTop = Math.max(132, Math.min(top, window.innerHeight - 310));
+      Object.assign(panel.style, {
+        position: 'fixed', top: `${desktopTop}px`, left: '50%', right: 'auto',
+        width: 'min(820px, calc(100vw - 40px))', transform: 'translateX(-50%)',
+        zIndex: '9200', background: '#fff', borderRadius: '20px',
+        boxShadow: '0 24px 70px rgba(15,39,68,0.24)', padding: '0'
+      });
+    }
   }
 
   function syncMobileAppNav(activeTarget = state.activeCategoryId) {
@@ -2470,12 +2474,12 @@ const App = (() => {
     const isComparison = section === 'comparison';
     const isSandbox = section === 'sandbox' || state.activeCategoryId === 'sandbox';
 
-    if (filterBtn) filterBtn.style.display = isComparison && state.advancedOptionsOpen && !isSandbox ? '' : 'none';
+    if (filterBtn) filterBtn.style.display = 'none';
     if (searchWrap) {
       const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
       const fundSearchPending = !!state._pendingFundSearch;
       state._pendingFundSearch = false;
-      searchWrap.style.display = isSandbox || (isMobile && state.advancedOptionsOpen && !fundSearchPending) ? 'none' : '';
+      searchWrap.style.display = isSandbox ? 'none' : '';
       if (fundSearchPending) {
         setTimeout(() => {
           searchWrap.style.display = '';
@@ -2484,8 +2488,9 @@ const App = (() => {
         }, 80);
       }
     }
-    if (customRangeEntry && !isComparison) customRangeEntry.hidden = true;
-    if (advancedSearchBtn) advancedSearchBtn.hidden = isSandbox || !isComparison || !state.advancedOptionsOpen;
+    if (customRangeEntry) customRangeEntry.hidden = true;
+    // Advanced search now lives in each table header beside the camera button.
+    if (advancedSearchBtn) advancedSearchBtn.hidden = true;
     syncCompactViewToggle();
     updateFilterBadge();
     syncDisplayOptionsUi();
@@ -2959,18 +2964,17 @@ const App = (() => {
     homeBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); showHomePage(); });
     bar.appendChild(homeBtn);
 
-    const advancedBtn = document.createElement('button');
-    advancedBtn.type = 'button';
-    advancedBtn.className = 'cat-tab advanced-options-tab';
-    advancedBtn.id = 'advanced-options-tab';
-    advancedBtn.innerHTML = '<span class="tab-icon"><i class="fas fa-sliders-h" aria-hidden="true"></i></span><span>אפשרויות מתקדמות</span>';
-    advancedBtn.setAttribute('aria-pressed', state.advancedOptionsOpen ? 'true' : 'false');
-    advancedBtn.addEventListener('click', () => {
-      state.advancedOptionsOpen = !state.advancedOptionsOpen;
+    const mainFilterBtn = document.createElement('button');
+    mainFilterBtn.type = 'button';
+    mainFilterBtn.className = 'cat-tab main-filter-tab';
+    mainFilterBtn.id = 'main-filter-tab';
+    mainFilterBtn.innerHTML = '<span class="tab-icon"><i class="fas fa-sliders-h" aria-hidden="true"></i></span><span>סינון</span>';
+    mainFilterBtn.setAttribute('aria-pressed', 'false');
+    mainFilterBtn.addEventListener('click', () => {
+      document.getElementById('sidebar-toggle-btn')?.click();
       syncAdvancedOptionsUi();
-      if (state.advancedOptionsOpen) scheduleAdvancedOptionsAutoClose();
     });
-    bar.appendChild(advancedBtn);
+    bar.appendChild(mainFilterBtn);
 
     CONFIG.PRODUCT_CATEGORIES.filter(cat => !REMOVED_CATEGORY_IDS.has(cat.id)).forEach(cat => {
       const btn = document.createElement('button');
@@ -3029,6 +3033,7 @@ const App = (() => {
     updateHeroContent(catId);
     state.isHomePage = false;
     state.activeCategoryId = catId;
+    state.advancedOptionsOpen = true;
     const requestedCompareMode = state.pendingCompareMode;
     state.compareMode = requestedCompareMode === 'actuarial' && isActuarialModeAvailable(catId) ? 'actuarial' : 'tracks';
     state.pendingCompareMode = null;
@@ -3048,13 +3053,18 @@ const App = (() => {
 
     // sticky header
     const filterBtn = document.getElementById('sidebar-toggle-btn');
-    if (filterBtn) filterBtn.style.display = '';
+    if (filterBtn) filterBtn.style.display = 'none';
 
     // פתח את סרגל הסינון אוטומטית בכניסה לדף השוואה
     const sidebar = document.getElementById('sidebar');
     if (sidebar) {
-      sidebar.classList.toggle('sidebar-collapsed', !state.advancedOptionsOpen);
-      if (filterBtn) filterBtn.classList.toggle('active', state.advancedOptionsOpen);
+      sidebar.classList.add('sidebar-collapsed');
+      if (filterBtn) filterBtn.classList.remove('active');
+      const mainFilterBtn = document.getElementById('main-filter-tab');
+      if (mainFilterBtn) {
+        mainFilterBtn.classList.remove('is-active');
+        mainFilterBtn.setAttribute('aria-pressed', 'false');
+      }
     }
     syncTracksDensityClasses();
 
@@ -3144,7 +3154,7 @@ const App = (() => {
 
   function updateFilterBadge() {
     const count = getActiveFilterCount();
-    ['sidebar-toggle-btn', 'mobile-filter-btn'].forEach(id => {
+    ['sidebar-toggle-btn', 'main-filter-tab', 'mobile-filter-btn'].forEach(id => {
       const btn = document.getElementById(id);
       if (!btn) return;
       let badge = btn.querySelector('.filter-count-badge');
@@ -3157,7 +3167,9 @@ const App = (() => {
       badge.textContent = hasFilters ? String(count) : '';
       badge.hidden = !hasFilters;
       btn.classList.toggle('has-active-filters', hasFilters);
-      const base = id === 'mobile-filter-btn' ? 'פתח/סגור סינון' : 'הצג/הסתר פילטרים';
+      const base = id === 'mobile-filter-btn' ? 'פתח/סגור סינון'
+        : id === 'main-filter-tab' ? 'סינון'
+        : 'הצג/הסתר פילטרים';
       btn.setAttribute('aria-label', hasFilters ? `${base}, ${count} סינונים פעילים` : base);
       btn.title = hasFilters ? `${base} (${count} סינונים פעילים)` : base;
     });
@@ -5100,8 +5112,8 @@ const App = (() => {
     const advancedFilterBtn = document.createElement('button');
     advancedFilterBtn.className = 'track-advanced-filter-btn';
     advancedFilterBtn.type = 'button';
-    advancedFilterBtn.title = 'סינון מתקדם';
-    advancedFilterBtn.setAttribute('aria-label', 'סינון מתקדם');
+    advancedFilterBtn.title = 'חיפוש מתקדם';
+    advancedFilterBtn.setAttribute('aria-label', 'חיפוש מתקדם');
     advancedFilterBtn.innerHTML = '<i class="fas fa-sliders-h" aria-hidden="true"></i>';
     advancedFilterBtn.addEventListener('click', event => {
       event.preventDefault();
@@ -7042,6 +7054,12 @@ const App = (() => {
     _sbShowAutosaveIndicator();
   }
 
+  function _sbClearCategoryNotes() {
+    state.sandbox.categoryNotes = {};
+    state.sandbox.openCategoryNotes.clear();
+    localStorage.removeItem(SANDBOX_CATEGORY_NOTES_KEY);
+  }
+
   let _sbAutosaveTimer = null;
   function _sbShowAutosaveIndicator() {
     const el = document.getElementById('sb-autosave-status');
@@ -8397,6 +8415,7 @@ const App = (() => {
       _sbDiscardAutoSavedDraft();
       state.sandbox.portfolio = [];
       state.sandbox.portfolioName = '';
+      _sbClearCategoryNotes();
       _sbSetDirty(false);
       _sbSetAutoSaveId(null);
       localStorage.removeItem(SANDBOX_NAME_KEY);
@@ -9877,6 +9896,7 @@ const App = (() => {
       _sbDiscardAutoSavedDraft();
       state.sandbox.portfolio = [];
       state.sandbox.portfolioName = '';
+      _sbClearCategoryNotes();
       _sbSetDirty(false);
       _sbSetAutoSaveId(null);
       _sbHideValueBar();
@@ -9906,6 +9926,7 @@ const App = (() => {
         // corrupt the old saved entry on the next auto-persist.
         if (state.sandbox.portfolio.length === 0) {
           state.sandbox.portfolioName = '';
+          _sbClearCategoryNotes();
           localStorage.removeItem(SANDBOX_NAME_KEY);
           _sbSetDirty(false);
           _sbSetAutoSaveId(null);
@@ -11843,6 +11864,11 @@ const App = (() => {
     function toggleSidebar() {
       const isCollapsed = sidebar.classList.toggle('sidebar-collapsed');
       if (toggleBtn) toggleBtn.classList.toggle('active', !isCollapsed);
+      const mainFilterBtn = document.getElementById('main-filter-tab');
+      if (mainFilterBtn) {
+        mainFilterBtn.classList.toggle('is-active', !isCollapsed);
+        mainFilterBtn.setAttribute('aria-pressed', isCollapsed ? 'false' : 'true');
+      }
       syncMobileSidebarStyle();
       const compareModeToggle = document.getElementById('compare-mode-toggle');
       if (compareModeToggle && isActuarialModeAvailable()) {
