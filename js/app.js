@@ -3138,7 +3138,9 @@ const App = (() => {
       selectedTracks: Array.isArray(raw.selectedTracks) ? raw.selectedTracks.map(String) : [],
       selectedProviders: Array.isArray(raw.selectedProviders) ? raw.selectedProviders.map(String) : [],
       excludedProviders: Array.isArray(raw.excludedProviders) ? raw.excludedProviders.map(String) : [],
-      targetPopulation: raw.targetPopulation || DEFAULT_TARGET_POPULATION
+      targetPopulation: raw.targetPopulation === ''
+        ? ''
+        : (raw.targetPopulation ?? DEFAULT_TARGET_POPULATION)
     };
   }
 
@@ -3209,7 +3211,9 @@ const App = (() => {
       selectedTracks: [...state.selectedTracks],
       selectedProviders: [...state.selectedProviders],
       excludedProviders: [...state.excludedProviders],
-      targetPopulation: state.targetPopulation || DEFAULT_TARGET_POPULATION
+      targetPopulation: state.targetPopulation === ''
+        ? ''
+        : (state.targetPopulation ?? DEFAULT_TARGET_POPULATION)
     };
     const isEmpty = entry.selectedTracks.length === 0 &&
       entry.selectedProviders.length === 0 &&
@@ -3954,7 +3958,10 @@ const App = (() => {
   }
 
   function getCategoryViewCacheKey(catId, targetPopulation = state.targetPopulation) {
-    return `${catId}|${targetPopulation || DEFAULT_TARGET_POPULATION}`;
+    const populationKey = targetPopulation === ''
+      ? '__all_populations__'
+      : String(targetPopulation ?? DEFAULT_TARGET_POPULATION);
+    return `${catId}|${populationKey}`;
   }
 
   function getCategoryViewBundle(catId, targetPopulation = state.targetPopulation) {
@@ -3998,7 +4005,9 @@ const App = (() => {
   }
 
   function scheduleCategoryViewPrefetch(activeCategoryId, targetPopulation = state.targetPopulation) {
-    const targetKey = String(targetPopulation || DEFAULT_TARGET_POPULATION);
+    const targetKey = targetPopulation === ''
+      ? '__all_populations__'
+      : String(targetPopulation ?? DEFAULT_TARGET_POPULATION);
     if (categoryPrefetchTargets.has(targetKey)) return;
     categoryPrefetchTargets.add(targetKey);
     const queue = CONFIG.PRODUCT_CATEGORIES

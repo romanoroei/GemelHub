@@ -148,7 +148,7 @@ const CONFIG = {
       trackList: ['ad_gil_50','gil_50_60','gil_60_plus','maniот','sp500','halachti',
                   'ashrai_agach','ashrai_agach_maniот','okev_mimdim','ksafi_shekel','okev_maniот',
                   'meshulab_sahar','maniот_sahar','agach_mimshalot','agach_sahar',
-                  'okev_agach','kaklali']
+                  'okev_agach','kayamut','kaklali']
     },
     {
       id: 'gemel_hashkaa',
@@ -163,7 +163,7 @@ const CONFIG = {
       // הגבל רק למסלולים הרלוונטיים (ללא מסלולי ילד/הלכה/סיכון)
       trackList: ['kaklali','maniот','sp500','halachti','ashrai_agach','ashrai_agach_maniот','okev_mimdim',
                   'ksafi_shekel','okev_maniот','meshulab_sahar','maniот_sahar',
-                  'agach_mimshalot','agach_sahar','okev_agach']
+                  'agach_mimshalot','agach_sahar','okev_agach','kayamut']
     },
     {
       id: 'hashtalamot',
@@ -178,7 +178,7 @@ const CONFIG = {
       excludedFundIds: ['1290'],
       trackList: ['kaklali','maniот','sp500','halachti','ashrai_agach','ashrai_agach_maniот','okev_mimdim',
                   'ksafi_shekel','okev_maniот','meshulab_sahar','maniот_sahar',
-                  'agach_mimshalot','agach_sahar','okev_agach']
+                  'agach_mimshalot','agach_sahar','okev_agach','kayamut']
     },
     {
       id: 'hisachon_yeled',
@@ -296,6 +296,11 @@ const CONFIG = {
       id: 'halachti',
       label: 'הלכתי',
       subSpecializationKeys: ['הלכה יהודית']
+    },
+    {
+      id: 'kayamut',
+      label: 'קיימות',
+      subSpecializationKeys: ['קיימות']
     },
     {
       id: 'ashrai_agach',
