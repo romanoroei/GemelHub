@@ -2237,8 +2237,8 @@ th.custom-range-col {
   padding-right: 2px;
 }
 .category-tabs-inner {
-  max-width: 1500px; margin: 0 auto;
-  display: flex; align-items: center; overflow-x: auto; scrollbar-width: none; padding: 0 10px;
+  width: 100%; max-width: 1440px; margin: 0 auto;
+  display: flex; align-items: center; overflow-x: auto; scrollbar-width: none; padding: 0 12px;
   min-height: var(--tabs-h);
 }
 .category-tabs-inner::-webkit-scrollbar { display: none; }
@@ -2272,6 +2272,7 @@ th.custom-range-col {
 .cat-tab.main-filter-tab {
   position: relative;
   overflow: visible !important;
+  margin-inline-end: 10px;
   border: none;
   color: #b45309;
   font-weight: 800;
@@ -2444,7 +2445,7 @@ body:not(.advanced-options-open) .custom-range-panel {
 }
 .cat-tab.main-filter-tab .filter-count-badge {
   position: absolute;
-  top: 1px;
+  top: -3px;
   left: -6px;
   min-width: 16px;
   height: 16px;
@@ -2454,6 +2455,20 @@ body:not(.advanced-options-open) .custom-range-panel {
   font-size: .62rem;
   z-index: 2;
   pointer-events: none;
+}
+
+@media (min-width: 1400px) {
+  .category-tabs-inner {
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .category-tabs-inner > .cat-tab {
+    flex: 0 0 auto;
+    margin-inline: 0;
+  }
+  .category-tabs-inner > .cat-tab.sandbox-tab {
+    margin-inline-end: 0;
+  }
 }
 
 .compact-view-toggle {
@@ -9049,9 +9064,9 @@ body.h2h-active #h2h-section {
 }
 
 .h2h-board-row .h2h-fund-row-th {
-  position: relative;
-  right: auto;
-  z-index: 1;
+  position: sticky;
+  right: 0;
+  z-index: 6;
   min-width: 0;
   max-width: none;
   padding: 7px 8px 7px 8px;
@@ -9179,6 +9194,40 @@ body.h2h-active #h2h-section {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.h2h-fund-line-category .h2h-category-pill.h2h-cat-gemel_tagmulim {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.h2h-fund-line-category .h2h-category-pill.h2h-cat-gemel_hashkaa {
+  background: #dcfce7;
+  color: #166534;
+}
+.h2h-fund-line-category .h2h-category-pill.h2h-cat-hashtalamot {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+.h2h-fund-line-category .h2h-category-pill.h2h-cat-hisachon_yeled {
+  background: #fef3c7;
+  color: #92400e;
+}
+.h2h-fund-line-category .h2h-category-pill.h2h-cat-polisa_chisachon {
+  background: #cffafe;
+  color: #0e7490;
+}
+.h2h-fund-line-category .h2h-category-pill.h2h-cat-pension_mekafit {
+  background: #ffe4e6;
+  color: #be123c;
+}
+.h2h-fund-line-category .h2h-category-pill.h2h-cat-pension_mashlima {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.h2h-board-row .h2h-fund-line-details strong {
+  font-size: .74rem;
+  line-height: 1.25;
 }
 
 .h2h-fund-line-details strong,
@@ -20593,12 +20642,13 @@ html body .sandbox-track-id {
     line-height: 1.05 !important;
     white-space: nowrap !important;
   }
-  body.h2h-active .h2h-cat-gemel_tagmulim { background: #dcfce7 !important; color: #166534 !important; }
-  body.h2h-active .h2h-cat-gemel_hashkaa { background: #fef3c7 !important; color: #92400e !important; }
+  body.h2h-active .h2h-cat-gemel_tagmulim { background: #dbeafe !important; color: #1d4ed8 !important; }
+  body.h2h-active .h2h-cat-gemel_hashkaa { background: #dcfce7 !important; color: #166534 !important; }
   body.h2h-active .h2h-cat-hashtalamot { background: #ede9fe !important; color: #6d28d9 !important; }
-  body.h2h-active .h2h-cat-pension_mekafit,
-  body.h2h-active .h2h-cat-pension_mashlima { background: #fee2e2 !important; color: #be123c !important; }
-  body.h2h-active .h2h-cat-polisa_hisachon { background: #cffafe !important; color: #0e7490 !important; }
+  body.h2h-active .h2h-cat-hisachon_yeled { background: #fef3c7 !important; color: #92400e !important; }
+  body.h2h-active .h2h-cat-polisa_chisachon { background: #cffafe !important; color: #0e7490 !important; }
+  body.h2h-active .h2h-cat-pension_mekafit { background: #ffe4e6 !important; color: #be123c !important; }
+  body.h2h-active .h2h-cat-pension_mashlima { background: #e0e7ff !important; color: #4338ca !important; }
   body.h2h-active .h2h-fund-line {
     gap: 4px !important;
     font-size: .64rem !important;
@@ -20613,7 +20663,7 @@ html body .sandbox-track-id {
   }
   body.h2h-active .h2h-fund-line-details strong {
     max-width: 100% !important;
-    font-size: .7rem !important;
+    font-size: .74rem !important;
     line-height: 1.1 !important;
   }
   body.h2h-active .h2h-fund-line-details b {

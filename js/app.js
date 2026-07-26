@@ -10845,7 +10845,11 @@ const App = (() => {
     });
 
     function doSearch(q) {
-      if (!q || q.length < 1) { closeDropdown(); return; }
+      if (!q || q.length < 1) {
+        closeDropdown();
+        if (!state.isHomePage) renderComparisonView();
+        return;
+      }
       const ql = q.toLowerCase();
 
       if (!state.isHomePage) renderComparisonView();
