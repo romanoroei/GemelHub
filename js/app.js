@@ -2221,6 +2221,20 @@ const App = (() => {
     let touchGesture = null;
     let switching = false;
     let lastSwitchAt = 0;
+    const commitDistance = 52;
+    let preview = document.getElementById('mobile-category-swipe-preview');
+    if (!preview) {
+      preview = document.createElement('div');
+      preview.id = 'mobile-category-swipe-preview';
+      preview.className = 'mobile-category-swipe-preview';
+      preview.setAttribute('aria-hidden', 'true');
+      preview.innerHTML = `
+        <i class="fas fa-chevron-left" aria-hidden="true"></i>
+        <span class="mobile-category-swipe-preview-text"></span>
+        <span class="mobile-category-swipe-preview-progress"><span></span></span>
+      `;
+      document.body.appendChild(preview);
+    }
     const blockedTarget = target => {
       if (target.closest(
         'input, select, textarea, label, .mobile-product-rail-scroll, .sidebar-right, ' +
@@ -2228,6 +2242,35 @@ const App = (() => {
       )) return true;
       const tableWrapper = target.closest('.track-table-wrapper');
       return !!tableWrapper && tableWrapper.scrollWidth - tableWrapper.clientWidth > 2;
+    };
+    const getTargetItem = dx => {
+      const order = readMobileCategoryOrder();
+      const currentIndex = order.indexOf(getCurrentMobileNavigationId());
+      const nextId = order[currentIndex + (dx < 0 ? -1 : 1)];
+      return getMobileNavigationItems().find(item => item.id === nextId) || null;
+    };
+    const hidePreview = () => {
+      preview.classList.remove('is-visible', 'is-ready', 'is-left', 'is-right');
+      preview.setAttribute('aria-hidden', 'true');
+      preview.style.removeProperty('--swipe-progress');
+    };
+    const updatePreview = dx => {
+      const item = getTargetItem(dx);
+      if (!item || Math.abs(dx) < 10) {
+        hidePreview();
+        return;
+      }
+      const ready = Math.abs(dx) >= commitDistance;
+      preview.querySelector('.mobile-category-swipe-preview-text').textContent =
+        ready ? `שחרור למעבר אל ${item.label}` : `המשך להחליק אל ${item.label}`;
+      preview.querySelector('i').className =
+        `fas fa-chevron-${dx < 0 ? 'left' : 'right'}`;
+      preview.classList.toggle('is-left', dx < 0);
+      preview.classList.toggle('is-right', dx > 0);
+      preview.classList.toggle('is-ready', ready);
+      preview.classList.add('is-visible');
+      preview.setAttribute('aria-hidden', 'false');
+      preview.style.setProperty('--swipe-progress', Math.min(1, Math.abs(dx) / commitDistance));
     };
     const navigate = dx => {
       if (switching || Date.now() - lastSwitchAt < 220) return false;
@@ -2260,11 +2303,12 @@ const App = (() => {
       const dy = y - gesture.startY;
       if (Math.abs(dy) > 22 && Math.abs(dy) > Math.abs(dx) * 1.2) {
         gesture = null;
+        hidePreview();
         return;
       }
-      if (Math.abs(dx) >= 18 && Math.abs(dx) > Math.abs(dy) * 1.08) {
+      if (Math.abs(dx) >= 10 && Math.abs(dx) > Math.abs(dy) * 1.08) {
         event?.preventDefault?.();
-        if (navigate(dx)) gesture = null;
+        updatePreview(dx);
       }
     };
     const end = event => {
@@ -2273,9 +2317,8 @@ const App = (() => {
       gesture = null;
       const dx = current.lastX - current.startX;
       const dy = current.lastY - current.startY;
-      const elapsed = Math.max(1, performance.now() - current.startedAt);
-      const velocity = Math.abs(dx) / elapsed;
-      if (Math.abs(dx) >= 14 && Math.abs(dx) > Math.abs(dy) && velocity >= .12) navigate(dx);
+      hidePreview();
+      if (Math.abs(dx) >= commitDistance && Math.abs(dx) > Math.abs(dy)) navigate(dx);
     };
 
     surface.addEventListener('pointerdown', event => {
@@ -2287,7 +2330,7 @@ const App = (() => {
       move(event.clientX, event.clientY, event);
     }, { capture: true, passive: false });
     surface.addEventListener('pointerup', end, true);
-    surface.addEventListener('pointercancel', () => { gesture = null; }, true);
+    surface.addEventListener('pointercancel', () => { gesture = null; hidePreview(); }, true);
 
     surface.addEventListener('touchstart', event => {
       if (event.touches.length !== 1 || blockedTarget(event.target)) return;
@@ -2307,17 +2350,29 @@ const App = (() => {
       const dy = touch.clientY - touchGesture.startY;
       if (Math.abs(dy) > 22 && Math.abs(dy) > Math.abs(dx) * 1.2) {
         touchGesture = null;
+        hidePreview();
         return;
       }
-      if (Math.abs(dx) >= 18 && Math.abs(dx) > Math.abs(dy) * 1.08) {
+      if (Math.abs(dx) >= 10 && Math.abs(dx) > Math.abs(dy) * 1.08) {
         event.preventDefault();
-        navigate(dx);
-        touchGesture = null;
-        gesture = null;
+        updatePreview(dx);
       }
     }, { capture: true, passive: false });
-    surface.addEventListener('touchend', () => { touchGesture = null; }, true);
-    surface.addEventListener('touchcancel', () => { touchGesture = null; }, true);
+    surface.addEventListener('touchend', () => {
+      if (!touchGesture) return;
+      const current = touchGesture;
+      touchGesture = null;
+      const dx = current.lastX - current.startX;
+      const dy = current.lastY - current.startY;
+      hidePreview();
+      if (Math.abs(dx) >= commitDistance && Math.abs(dx) > Math.abs(dy)) navigate(dx);
+      gesture = null;
+    }, true);
+    surface.addEventListener('touchcancel', () => {
+      touchGesture = null;
+      gesture = null;
+      hidePreview();
+    }, true);
   }
 
   window.updateGemelHubMobileUser = profile => {
