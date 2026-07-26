@@ -7434,10 +7434,26 @@ const App = (() => {
   function _sbWeightedVal(items, weights, getter) {
     let wSum = 0, wTotal = 0;
     items.forEach((it, i) => {
-      const v = parseFloat(getter(it));
-      if (!isNaN(v) && String(getter(it)) !== '') { wSum += v * weights[i]; wTotal += weights[i]; }
+      const raw = getter(it);
+      const v = parseFloat(raw);
+      if (!isNaN(v) && String(raw) !== '') { wSum += v * weights[i]; wTotal += weights[i]; }
     });
     return wTotal > 0 ? wSum / wTotal : null;
+  }
+
+  // Exposure fields can arrive from the regulator/API as an empty value when the
+  // reported exposure is zero. In the sandbox that is a real 0% allocation, not
+  // missing data: its investment weight must remain in the weighted denominator.
+  function _sbExposureVal(value) {
+    if (value === '' || value == null) return 0;
+    const parsed = parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  function _sbWeightedExposureVal(items, weights, getter) {
+    return items.reduce((sum, item, index) => (
+      sum + (_sbExposureVal(getter(item)) * (weights[index] || 0))
+    ), 0);
   }
 
   function _sbFmtPct(val, decimals = 2) {
@@ -7569,9 +7585,9 @@ const App = (() => {
       const val = _sbWeightedVal(visibleItems, weights, it => _sbReturnFieldValue(it, field));
       return `<td class="sb-td-return sb-td-${field.id} sb-yield-col" style="color:${_sbYieldColor(val)};font-weight:800;font-size:.9rem">${_sbFmtPct(val)}</td>`;
     }).join('');
-    const wStock = _sbWeightedVal(visibleItems, weights, it => it.stock);
-    const wAbroad = _sbWeightedVal(visibleItems, weights, it => it.abroad);
-    const wFx = _sbWeightedVal(visibleItems, weights, it => it.fx);
+    const wStock = _sbWeightedExposureVal(visibleItems, weights, it => it.stock);
+    const wAbroad = _sbWeightedExposureVal(visibleItems, weights, it => it.abroad);
+    const wFx = _sbWeightedExposureVal(visibleItems, weights, it => it.fx);
     return `
       <td></td>
       <td></td>
@@ -7740,9 +7756,9 @@ const App = (() => {
               </div>
             </td>
             ${returnCells}
-            <td class="sb-td-stock sb-allocation-start">${expCell(item.stock !== '' ? _sbFmtPct(item.stock, 0) : '-', 'stock')}</td>
-            <td class="sb-td-abroad">${expCell(item.abroad !== '' ? _sbFmtPct(item.abroad, 0) : '-', 'abroad')}</td>
-            <td class="sb-td-fx">${expCell(item.fx !== '' ? _sbFmtPct(item.fx, 0) : '-', 'fx')}</td>
+            <td class="sb-td-stock sb-allocation-start">${expCell(_sbFmtPct(_sbExposureVal(item.stock), 0), 'stock')}</td>
+            <td class="sb-td-abroad">${expCell(_sbFmtPct(_sbExposureVal(item.abroad), 0), 'abroad')}</td>
+            <td class="sb-td-fx">${expCell(_sbFmtPct(_sbExposureVal(item.fx), 0), 'fx')}</td>
           </tr>`;
         }).join('');
 
@@ -9662,9 +9678,9 @@ const App = (() => {
     const wY12m  = _sbWeightedVal(portfolio, weights, it => it.y12m);
     const wY5yr  = _sbWeightedVal(portfolio, weights, it => it.y5yr);
     const wDn    = _sbWeightedVal(portfolio, weights, it => it.dnCumulative);
-    const wStock = _sbWeightedVal(portfolio, weights, it => it.stock);
-    const wAbroad= _sbWeightedVal(portfolio, weights, it => it.abroad);
-    const wFx    = _sbWeightedVal(portfolio, weights, it => it.fx);
+    const wStock = _sbWeightedExposureVal(portfolio, weights, it => it.stock);
+    const wAbroad= _sbWeightedExposureVal(portfolio, weights, it => it.abroad);
+    const wFx    = _sbWeightedExposureVal(portfolio, weights, it => it.fx);
 
     // total value
     const hasAmounts = portfolio.some(it => it.investMode === 'amount' && it.investAmount !== '');
