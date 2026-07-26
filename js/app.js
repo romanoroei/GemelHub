@@ -1002,6 +1002,9 @@ const App = (() => {
   }
 
   function getCategoryLabel(categoryId = state.activeCategoryId) {
+    if (getCurrentCompareMode() === 'actuarial') {
+      return ACTUARIAL_CATEGORIES.find(item => item.catId === categoryId)?.label || '';
+    }
     const cat = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === categoryId);
     return cat?.label || '';
   }
@@ -1487,7 +1490,7 @@ const App = (() => {
   }
 
   const PENSION_ACTUARIAL_CATS = new Set(['pension_mekafit', 'pension_mashlima']);
-  const MOBILE_ACTUARIAL_CATEGORIES = Object.freeze([
+  const ACTUARIAL_CATEGORIES = Object.freeze([
     { id: 'actuarial:pension_mekafit', catId: 'pension_mekafit', label: 'איזון אקטוארי מקיפה', actuarial: true },
     { id: 'actuarial:pension_mashlima', catId: 'pension_mashlima', label: 'איזון אקטוארי משלימה', actuarial: true }
   ]);
@@ -1504,7 +1507,7 @@ const App = (() => {
       ...getAvailableProductCategories().map(cat => ({
         id: cat.id, catId: cat.id, label: MOBILE_CATEGORY_LABELS[cat.id] || cat.label, actuarial: false
       })),
-      ...MOBILE_ACTUARIAL_CATEGORIES
+      ...ACTUARIAL_CATEGORIES
     ];
   }
 
@@ -2602,7 +2605,7 @@ const App = (() => {
 
   function formatCustomRangeToggleLabel() {
     const baseLabel = getCurrentCompareMode() === 'actuarial'
-      ? 'בחר טווח איזון אקטוארי'
+      ? 'בחר טווח מותאם'
       : 'בחר טווח השקעה מותאם';
     if (!state.customRange.active) return baseLabel;
     if (state.customRange.startPeriod && state.customRange.endPeriod) {
@@ -2983,13 +2986,14 @@ const App = (() => {
     });
     bar.appendChild(mainFilterBtn);
 
-    CONFIG.PRODUCT_CATEGORIES.filter(cat => !REMOVED_CATEGORY_IDS.has(cat.id)).forEach(cat => {
+    getMobileNavigationItems().forEach(cat => {
       const btn = document.createElement('button');
       btn.className = 'cat-tab';
       btn.dataset.cat = cat.id;
-      btn.innerHTML = `<span class="tab-icon">${cat.icon}</span><span>${cat.label}</span>`;
+      const icon = cat.actuarial ? '<i class="fas fa-balance-scale" aria-hidden="true"></i>' : (cat.icon || '');
+      btn.innerHTML = `<span class="tab-icon">${icon}</span><span>${cat.label}</span>`;
       btn.addEventListener('click', () => {
-        switchCategory(cat.id);
+        openMobileNavigationItem(cat.id);
       });
       bar.appendChild(btn);
     });
@@ -3095,8 +3099,11 @@ const App = (() => {
   }
 
   function setActiveTab(catId) {
+    const activeNavigationId = getCurrentCompareMode() === 'actuarial'
+      ? `actuarial:${catId}`
+      : catId;
     document.querySelectorAll('.cat-tab[data-cat]').forEach(t =>
-      t.classList.toggle('active', t.dataset.cat === catId));
+      t.classList.toggle('active', t.dataset.cat === activeNavigationId));
     document.querySelectorAll('.nav-link').forEach(l =>
       l.classList.toggle('active', l.dataset.cat === catId));
     syncMobileAppNav(catId);
@@ -3104,13 +3111,16 @@ const App = (() => {
   }
 
   function updateSidebarBadge(catId) {
-    const cat = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === catId);
-    if (!cat) return;
+    const label = getCategoryLabel(catId);
+    if (!label) return;
     // כותרת ב-sticky header
-    document.getElementById('page-main-title').textContent = cat.label;
+    document.getElementById('page-main-title').textContent = label;
   }
 
   function getFilterStorageCategoryKey(catId = state.activeCategoryId) {
+    if (catId === state.activeCategoryId && getCurrentCompareMode() === 'actuarial') {
+      return `actuarial:${catId}`;
+    }
     return String(catId || '');
   }
 
@@ -3211,7 +3221,7 @@ const App = (() => {
 
   function saveCurrentFilterState(catId = state.activeCategoryId) {
     const key = getFilterStorageCategoryKey(catId);
-    if (!key || !CONFIG.PRODUCT_CATEGORIES.some(c => c.id === key)) {
+    if (!key || !getMobileNavigationItems().some(item => item.id === key)) {
       updateFilterBadge();
       return;
     }
@@ -3321,9 +3331,10 @@ const App = (() => {
     const actuarialAvailable = isActuarialModeAvailable();
 
     if (toggle) {
-      const sidebarCollapsed = !!document.getElementById('sidebar')?.classList.contains('sidebar-collapsed');
-      toggle.hidden = !actuarialAvailable || sidebarCollapsed;
-      toggle.style.display = (actuarialAvailable && !sidebarCollapsed) ? '' : 'none';
+      // Actuarial balance is exposed as two standalone categories. Keep the old
+      // in-category mode switch hidden so pension categories contain tracks only.
+      toggle.hidden = true;
+      toggle.style.display = 'none';
       toggle.querySelectorAll('[data-compare-mode]').forEach(btn => {
         const active = btn.dataset.compareMode === mode;
         btn.classList.toggle('is-active', active);
