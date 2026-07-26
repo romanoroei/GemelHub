@@ -2012,6 +2012,7 @@ const App = (() => {
   function setupMobileAppShell() {
     const nav = document.querySelector('.mobile-app-nav');
     if (!nav) return;
+    document.getElementById('mobile-user-account')?.addEventListener('click', switchToMobileMorePage);
     nav.addEventListener('click', event => {
       const item = event.target.closest('[data-mobile-app-action]');
       if (!item || !nav.contains(item)) return;
@@ -2217,6 +2218,7 @@ const App = (() => {
     surface.dataset.categorySwipeBound = '2';
 
     let gesture = null;
+    let touchGesture = null;
     let switching = false;
     let lastSwitchAt = 0;
     const blockedTarget = target => !!target.closest(
@@ -2282,7 +2284,54 @@ const App = (() => {
     }, { capture: true, passive: false });
     surface.addEventListener('pointerup', end, true);
     surface.addEventListener('pointercancel', () => { gesture = null; }, true);
+
+    surface.addEventListener('touchstart', event => {
+      if (event.touches.length !== 1 || blockedTarget(event.target)) return;
+      const touch = event.touches[0];
+      touchGesture = {
+        startX: touch.clientX, startY: touch.clientY,
+        lastX: touch.clientX, lastY: touch.clientY,
+        startedAt: performance.now()
+      };
+    }, { capture: true, passive: true });
+    surface.addEventListener('touchmove', event => {
+      if (!touchGesture || event.touches.length !== 1) return;
+      const touch = event.touches[0];
+      touchGesture.lastX = touch.clientX;
+      touchGesture.lastY = touch.clientY;
+      const dx = touch.clientX - touchGesture.startX;
+      const dy = touch.clientY - touchGesture.startY;
+      if (Math.abs(dy) > 22 && Math.abs(dy) > Math.abs(dx) * 1.2) {
+        touchGesture = null;
+        return;
+      }
+      if (Math.abs(dx) >= 18 && Math.abs(dx) > Math.abs(dy) * 1.08) {
+        event.preventDefault();
+        navigate(dx);
+        touchGesture = null;
+        gesture = null;
+      }
+    }, { capture: true, passive: false });
+    surface.addEventListener('touchend', () => { touchGesture = null; }, true);
+    surface.addEventListener('touchcancel', () => { touchGesture = null; }, true);
   }
+
+  window.updateGemelHubMobileUser = profile => {
+    const button = document.getElementById('mobile-user-account');
+    if (!button) return;
+    const photo = button.querySelector('.mobile-user-account-photo');
+    const icon = button.querySelector('i');
+    const authenticated = !!profile;
+    button.dataset.authenticated = authenticated ? 'true' : 'false';
+    button.setAttribute('aria-label', authenticated
+      ? `פתיחת החשבון של ${profile.name || 'המשתמש'} או התנתקות`
+      : 'התחברות או פתיחת האזור האישי');
+    if (photo) {
+      photo.src = authenticated && profile.photoUrl ? profile.photoUrl : '';
+      photo.hidden = !(authenticated && profile.photoUrl);
+    }
+    if (icon) icon.hidden = !!(authenticated && profile.photoUrl);
+  };
 
   // ── Mobile display zoom (options sheet slider) ──────────────────────────
   // Uses the CSS `zoom` property (not transform:scale) specifically because
