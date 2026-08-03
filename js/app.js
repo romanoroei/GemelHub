@@ -86,79 +86,9 @@ const App = (() => {
   const categoryViewCache = new Map();
   const categoryViewPromiseCache = new Map();
   const categoryPrefetchTargets = new Set();
-  const trackDomViewCache = new Map();
-  const MAX_CACHED_TRACK_DOM_VIEWS = 2; // active view + two detached views = three recent categories
   let categoryLoadSequence = 0;
-  let renderedTrackDomKey = null;
-  let renderedTrackDomCategoryId = null;
   let searchableWarmupPromise = null;
   let searchableRecordsFullyWarmed = false;
-
-  function getTrackDomViewKey(catId = state.activeCategoryId) {
-    if (!catId || state.isHomePage || getCurrentCompareMode() !== 'tracks') return null;
-    const searchValue = document.getElementById('global-search')?.value?.trim() || '';
-    return JSON.stringify({
-      catId,
-      targetPopulation: state.targetPopulation,
-      selectedTracks: [...state.selectedTracks].sort(),
-      selectedProviders: [...state.selectedProviders].sort(),
-      excludedProviders: [...state.excludedProviders].sort(),
-      searchValue,
-      compactTracksView: !!state.compactTracksView,
-      showExposure: !!state.showExposure,
-      yieldMode: state.yieldMode || 'cumulative',
-      displayOptions: state.displayOptions || DEFAULT_DISPLAY_OPTIONS,
-      customRangeActive: !!state.customRange?.active
-    });
-  }
-
-  function rememberDetachedTrackDom(key, entry) {
-    if (!key || !entry?.fragment?.childNodes?.length) return;
-    trackDomViewCache.delete(key);
-    trackDomViewCache.set(key, entry);
-    while (trackDomViewCache.size > MAX_CACHED_TRACK_DOM_VIEWS) {
-      const oldestKey = trackDomViewCache.keys().next().value;
-      trackDomViewCache.delete(oldestKey);
-    }
-  }
-
-  function cacheRenderedTrackDomBeforeCategoryChange(incomingCategoryId) {
-    if (!renderedTrackDomKey || !renderedTrackDomCategoryId || renderedTrackDomCategoryId === incomingCategoryId) return;
-    const container = document.getElementById('tracks-container');
-    if (!container?.childNodes?.length) return;
-    const fragment = document.createDocumentFragment();
-    while (container.firstChild) fragment.appendChild(container.firstChild);
-    rememberDetachedTrackDom(renderedTrackDomKey, {
-      fragment,
-      blockRenderers: Array.isArray(state._blockRenderers) ? state._blockRenderers : [],
-      trailing7YMap: state.trailing7Y?.map || null,
-      trailing7YError: state.trailing7Y?.error || null
-    });
-    renderedTrackDomKey = null;
-    renderedTrackDomCategoryId = null;
-  }
-
-  function restoreTrackDomView(catId) {
-    const key = getTrackDomViewKey(catId);
-    const entry = key ? trackDomViewCache.get(key) : null;
-    const container = document.getElementById('tracks-container');
-    if (!entry || !container) {
-      return false;
-    }
-    trackDomViewCache.delete(key);
-    container.replaceChildren(entry.fragment);
-    state._blockRenderers = entry.blockRenderers || [];
-    state.trailing7Y.map = entry.trailing7YMap || null;
-    state.trailing7Y.loading = !state.trailing7Y.map;
-    state.trailing7Y.error = entry.trailing7YError || null;
-    renderedTrackDomKey = key;
-    renderedTrackDomCategoryId = catId;
-    syncTracksDensityClasses();
-    applyMobileTheadSticky();
-    guardDisplayOptionsAfterRender();
-    requestAnimationFrame(updateMobileStickyThead);
-    return true;
-  }
 
   const ghEscapeAttr = (value) => String(value ?? '')
     .replace(/&/g, '&amp;')
@@ -3447,13 +3377,13 @@ const App = (() => {
     history.replaceState({ app: appId || 'home' }, '', url.toString());
   }
 
-  async function renderComparisonView({ reuseTrackDom = false } = {}) {
+  async function renderComparisonView() {
     updateFilterBadge();
     updateCompareModeUi();
     if (getCurrentCompareMode() === 'actuarial') {
       await loadActuarialComparisonData();
       renderActuarialComparison();
-    } else if (!reuseTrackDom) {
+    } else {
       renderTracks();
     }
     updateComparisonUrl();
@@ -4121,7 +4051,6 @@ const App = (() => {
     try {
       const bundle = cachedBundle || await getCategoryViewBundle(catId, requestedTargetPopulation);
       if (loadSequence !== categoryLoadSequence || state.activeCategoryId !== requestedCategoryId) return;
-      cacheRenderedTrackDomBeforeCategoryChange(requestedCategoryId);
       state.trailing7Y.categoryId = catId;
       state.trailing7Y.targetPopulation = requestedTargetPopulation;
       state.trailing7Y.map = null;
@@ -4146,18 +4075,15 @@ const App = (() => {
           input.closest('.filter-checkbox')?.classList.remove('checked');
         });
       }
-      const reusedTrackDom = state.compareMode === 'tracks' && restoreTrackDomView(requestedCategoryId);
-      renderComparisonView({ reuseTrackDom: reusedTrackDom });
+      renderComparisonView();
       showLoading(false);
-      if (!reusedTrackDom || !state.trailing7Y.map) {
-        scheduleTrailing7YLoad(requestedCategoryId, trailing7YRequestId);
-      }
+      scheduleTrailing7YLoad(requestedCategoryId, trailing7YRequestId);
       scheduleCategoryViewPrefetch(requestedCategoryId, requestedTargetPopulation);
 
       // רקע: טווח מותאם — לא חוסם את הרינדור (נתוני חיפוש כבר הופעלו למעלה, מיד עם תחילת הטעינה)
       refreshCustomRangeAvailability()
         .then(() => {
-          if (state.activeCategoryId === requestedCategoryId && !reusedTrackDom) renderComparisonView();
+          if (state.activeCategoryId === requestedCategoryId) renderComparisonView();
           if (state.activeCategoryId === requestedCategoryId && state.pendingCompareTopScroll) {
             setTimeout(scrollToComparisonTableTop, 0);
           }
@@ -4547,8 +4473,6 @@ const App = (() => {
     }
     guardDisplayOptionsAfterRender();
     requestAnimationFrame(updateMobileStickyThead);
-    renderedTrackDomKey = getTrackDomViewKey(state.activeCategoryId);
-    renderedTrackDomCategoryId = state.activeCategoryId;
   }
 
   function syncTracksDensityClasses() {
