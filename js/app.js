@@ -89,77 +89,6 @@ const App = (() => {
   let categoryLoadSequence = 0;
   let searchableWarmupPromise = null;
   let searchableRecordsFullyWarmed = false;
-  const BACKGROUND_WARMUP_QUIET_MS = 2500;
-  const backgroundWarmupQueue = [];
-  const backgroundWarmupKeys = new Set();
-  let backgroundWarmupTimer = null;
-  let backgroundWarmupIdleId = null;
-  let backgroundWarmupRunning = false;
-  let lastUserActivityAt = performance.now();
-
-  function scheduleBackgroundWarmupPump() {
-    clearTimeout(backgroundWarmupTimer);
-    if (backgroundWarmupRunning || backgroundWarmupQueue.length === 0 || document.hidden) return;
-    const quietFor = performance.now() - lastUserActivityAt;
-    const delay = Math.max(200, BACKGROUND_WARMUP_QUIET_MS - quietFor);
-    backgroundWarmupTimer = setTimeout(() => {
-      const runNext = () => {
-        backgroundWarmupIdleId = null;
-        if (document.hidden || performance.now() - lastUserActivityAt < BACKGROUND_WARMUP_QUIET_MS) {
-          scheduleBackgroundWarmupPump();
-          return;
-        }
-        const entry = backgroundWarmupQueue.shift();
-        if (!entry) return;
-        backgroundWarmupKeys.delete(entry.key);
-        backgroundWarmupRunning = true;
-        Promise.resolve()
-          .then(entry.task)
-          .catch(() => {})
-          .finally(() => {
-            backgroundWarmupRunning = false;
-            lastUserActivityAt = performance.now();
-            scheduleBackgroundWarmupPump();
-          });
-      };
-      if ('requestIdleCallback' in window) {
-        backgroundWarmupIdleId = window.requestIdleCallback(runNext, { timeout: 5000 });
-      } else {
-        runNext();
-      }
-    }, delay);
-  }
-
-  function enqueueBackgroundWarmup(key, task, { priority = false } = {}) {
-    if (!key || typeof task !== 'function' || backgroundWarmupKeys.has(key)) return;
-    backgroundWarmupKeys.add(key);
-    const entry = { key, task };
-    if (priority) backgroundWarmupQueue.unshift(entry);
-    else backgroundWarmupQueue.push(entry);
-    scheduleBackgroundWarmupPump();
-  }
-
-  function noteUserActivityForBackgroundWork() {
-    lastUserActivityAt = performance.now();
-    clearTimeout(backgroundWarmupTimer);
-    if (backgroundWarmupIdleId !== null && 'cancelIdleCallback' in window) {
-      window.cancelIdleCallback(backgroundWarmupIdleId);
-      backgroundWarmupIdleId = null;
-    }
-    if (!backgroundWarmupRunning) scheduleBackgroundWarmupPump();
-  }
-
-  function setupBackgroundWarmupScheduling() {
-    ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'].forEach(eventName => {
-      window.addEventListener(eventName, noteUserActivityForBackgroundWork, { passive: true, capture: true });
-    });
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) {
-        lastUserActivityAt = performance.now();
-        scheduleBackgroundWarmupPump();
-      }
-    });
-  }
 
   const ghEscapeAttr = (value) => String(value ?? '')
     .replace(/&/g, '&amp;')
@@ -749,7 +678,6 @@ const App = (() => {
   // ─── INIT ─────────────────────────────────────────────────────
   async function init() {
     APIModule.loadCachesFromLocalStorage();
-    setupBackgroundWarmupScheduling();
     _sbRestoreMobileZoom();
     loadDisplayOptions();
     state.advancedOptionsOpen = false;
@@ -4008,23 +3936,25 @@ const App = (() => {
   }
 
   function scheduleTrailing7YLoad(catId, requestId) {
-    enqueueBackgroundWarmup(`trailing-7y:${catId}:${requestId}`, async () => {
-      if (state.activeCategoryId !== catId || state.trailing7Y.requestId !== requestId) return;
-      try {
-        const map = await APIModule.getTrailing7Yields(catId, state.targetPopulation);
-        if (state.activeCategoryId !== catId || state.trailing7Y.requestId !== requestId) return;
-        state.trailing7Y.map = map;
-        state.trailing7Y.loading = false;
-        state.trailing7Y.error = null;
-        renderComparisonView();
-      } catch (error) {
-        console.warn('7 year trailing yield load failed', error);
-        if (state.activeCategoryId !== catId || state.trailing7Y.requestId !== requestId) return;
-        state.trailing7Y.loading = false;
-        state.trailing7Y.error = 'failed';
-        renderComparisonView();
-      }
-    }, { priority: true });
+    const run = () => {
+      APIModule.getTrailing7Yields(catId, state.targetPopulation)
+        .then(map => {
+          if (state.activeCategoryId !== catId || state.trailing7Y.requestId !== requestId) return;
+          state.trailing7Y.map = map;
+          state.trailing7Y.loading = false;
+          state.trailing7Y.error = null;
+          renderComparisonView();
+        })
+        .catch(error => {
+          console.warn('7 year trailing yield load failed', error);
+          if (state.activeCategoryId !== catId || state.trailing7Y.requestId !== requestId) return;
+          state.trailing7Y.loading = false;
+          state.trailing7Y.error = 'failed';
+          renderComparisonView();
+        });
+    };
+    if ('requestIdleCallback' in window) window.requestIdleCallback(run, { timeout: 1200 });
+    else setTimeout(run, 0);
   }
 
   function getCategoryViewCacheKey(catId, targetPopulation = state.targetPopulation) {
@@ -4063,26 +3993,15 @@ const App = (() => {
   }
 
   function warmSearchableRecords() {
-    if (searchableRecordsFullyWarmed) return Promise.resolve(state.searchableRecords);
-    if (searchableWarmupPromise) return searchableWarmupPromise;
-    searchableWarmupPromise = APIModule.getAllSearchable()
-      .catch(() => [])
-      .then(gemel => {
-        // Gemel is already the active data family on the default screen, so expose those
-        // results immediately while the heavier pension and policy indexes continue quietly.
-        state.searchableRecords = [...gemel];
-        return Promise.all([
-          APIModule.getAllSearchablePension().catch(() => []),
-          APIModule.getAllSearchablePolisa().catch(() => [])
-        ]);
-      })
-      .then(([pension, polisa]) => {
-        state.searchableRecords = [...state.searchableRecords, ...pension, ...polisa];
-        searchableRecordsFullyWarmed = true;
-        return state.searchableRecords;
-      })
-      .finally(() => { searchableWarmupPromise = null; });
-    return searchableWarmupPromise;
+    if (searchableRecordsFullyWarmed || searchableWarmupPromise) return;
+    searchableWarmupPromise = Promise.all([
+      APIModule.getAllSearchable().catch(() => []),
+      APIModule.getAllSearchablePension().catch(() => []),
+      APIModule.getAllSearchablePolisa().catch(() => [])
+    ]).then(([gemel, pension, polisa]) => {
+      state.searchableRecords = [...gemel, ...pension, ...polisa];
+      searchableRecordsFullyWarmed = true;
+    }).finally(() => { searchableWarmupPromise = null; });
   }
 
   function scheduleCategoryViewPrefetch(activeCategoryId, targetPopulation = state.targetPopulation) {
@@ -4095,12 +4014,16 @@ const App = (() => {
       .map(category => category.id)
       .filter(categoryId => categoryId !== activeCategoryId && !REMOVED_CATEGORY_IDS.has(categoryId));
 
-    queue.forEach(categoryId => {
-      enqueueBackgroundWarmup(
-        `category:${targetKey}:${categoryId}`,
-        () => getCategoryViewBundle(categoryId, targetPopulation)
-      );
-    });
+    const warmNext = () => {
+      const categoryId = queue.shift();
+      if (!categoryId) return;
+      const run = () => getCategoryViewBundle(categoryId, targetPopulation)
+        .catch(() => {})
+        .finally(warmNext);
+      if ('requestIdleCallback' in window) window.requestIdleCallback(run, { timeout: 250 });
+      else setTimeout(run, 40);
+    };
+    warmNext();
   }
 
   async function loadCategory(catId) {
@@ -4115,9 +4038,15 @@ const App = (() => {
     else showLoading(false);
     resetYearlyReturnsMode();
 
-    // The global search index spans every product family. Build it only after the user has
-    // stopped interacting so its downloads and JSON parsing cannot compete with navigation.
-    enqueueBackgroundWarmup('searchable-records', warmSearchableRecords);
+    // Kicked off immediately (not awaited) so all three gemel/pension/polisa "current" datasets
+    // start fetching in true parallel with whichever one this category actually needs below —
+    // previously this only fired *after* the current category had already rendered, so switching
+    // to a category needing a different family right after landing on the page could still hit a
+    // fetch that hadn't even started yet. Firing it here instead means that by the time a user
+    // switches tabs, the other families are very likely already cached (fetchCurrentGemelData()/
+    // fetchPensionData()/fetchPolisaData() are single-flight, so this doesn't duplicate whatever
+    // the current category's own fetch below also needs).
+    warmSearchableRecords();
 
     try {
       const bundle = cachedBundle || await getCategoryViewBundle(catId, requestedTargetPopulation);
@@ -4152,14 +4081,14 @@ const App = (() => {
       scheduleCategoryViewPrefetch(requestedCategoryId, requestedTargetPopulation);
 
       // רקע: טווח מותאם — לא חוסם את הרינדור (נתוני חיפוש כבר הופעלו למעלה, מיד עם תחילת הטעינה)
-      enqueueBackgroundWarmup(`custom-range:${requestedCategoryId}:${loadSequence}`, async () => {
-        if (state.activeCategoryId !== requestedCategoryId || loadSequence !== categoryLoadSequence) return;
-        await refreshCustomRangeAvailability();
-        if (state.activeCategoryId === requestedCategoryId && loadSequence === categoryLoadSequence) {
-          renderComparisonView();
-          if (state.pendingCompareTopScroll) setTimeout(scrollToComparisonTableTop, 0);
-        }
-      }, { priority: true });
+      refreshCustomRangeAvailability()
+        .then(() => {
+          if (state.activeCategoryId === requestedCategoryId) renderComparisonView();
+          if (state.activeCategoryId === requestedCategoryId && state.pendingCompareTopScroll) {
+            setTimeout(scrollToComparisonTableTop, 0);
+          }
+        })
+        .catch(() => {});
 
       // Restored to the exact pre-session implementation (manual pixel math + repeated retries) —
       // every attempt this session at a "smarter" version (scrollIntoView, scroll-margin-top,
@@ -10996,13 +10925,7 @@ const App = (() => {
 
       if (!state.isHomePage) renderComparisonView();
 
-      if (!state.searchableRecords.length) {
-        closeDropdown();
-        warmSearchableRecords().then(() => {
-          if (input.value.trim() === q) doSearch(q);
-        });
-        return;
-      }
+      if (!state.searchableRecords.length) { closeDropdown(); return; }
 
       const seen = new Set();
       const results = [];
@@ -11024,15 +10947,7 @@ const App = (() => {
         }
       });
 
-      if (results.length === 0) {
-        closeDropdown();
-        if (!searchableRecordsFullyWarmed) {
-          warmSearchableRecords().then(() => {
-            if (input.value.trim() === q) doSearch(q);
-          });
-        }
-        return;
-      }
+      if (results.length === 0) { closeDropdown(); return; }
 
       dropdown.innerHTML = results.map((res, i) => `
         <div class="sd-item" data-idx="${i}" data-catid="${res.catId || ''}" data-fundid="${res.fundId}">
