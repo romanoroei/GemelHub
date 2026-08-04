@@ -446,13 +446,24 @@
             <div id="sidebar-filters" style="display:none;">
 
               <!-- Providers -->
-              <div class="sidebar-section">
+              <div class="sidebar-section" id="provider-filter-section">
                 <div class="sidebar-section-title">
                   <i class="fas fa-building"></i> מנהלי השקעות
                   <button class="btn-clear-filter" id="clear-providers" aria-label="נקה סינון מנהלים">נקה</button>
                 </div>
                 <p class="provider-filter-hint">לחיצה על שם מנהל מסירה אותו מהטבלה</p>
                 <div class="filter-checkboxes" id="filter-providers"></div>
+              </div>
+
+              <!-- Actuarial-only controls -->
+              <div class="sidebar-section" id="actuarial-filter-section" hidden>
+                <div class="sidebar-section-title">
+                  <i class="fas fa-calendar-alt"></i> טווח איזון אקטוארי
+                </div>
+                <button type="button" class="actuarial-sidebar-range-btn" id="actuarial-sidebar-range-btn">
+                  <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                  <span>בחר טווח מותאם</span>
+                </button>
               </div>
 
               <!-- Tracks -->

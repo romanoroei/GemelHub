@@ -2708,6 +2708,22 @@ body:not(.advanced-options-open) .custom-range-panel {
   letter-spacing: 0;
 }
 .track-filter-count-badge[hidden] { display: none !important; }
+.actuarial-sidebar-range-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 10px;
+  border: 1px solid var(--blue);
+  border-radius: 8px;
+  background: var(--blue-bg);
+  color: var(--blue);
+  font: 800 .78rem var(--font);
+  cursor: pointer;
+}
+.actuarial-sidebar-range-btn:hover { background: var(--blue); color: #fff; }
+#compare-mode-toggle { display: none !important; }
 .track-filter-chevron {
   width: 14px;
   text-align: center;
@@ -23531,5 +23547,24 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   html body .mobile-table-logo-bar .mobile-user-account-photo[hidden],
   html body .mobile-user-account i[hidden] {
     display: none !important;
+  }
+}
+
+/* Desktop category navigation: keep every category reachable after adding
+   the standalone actuarial views. */
+@media (min-width: 1025px) {
+  .category-tabs-inner {
+    max-width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2px 4px;
+    overflow: visible;
+    padding-block: 3px;
+  }
+  .category-tabs-inner > .cat-tab {
+    flex: 0 0 auto;
+    margin: 2px 0;
+    padding: 5px 9px;
+    font-size: .8rem;
   }
 }

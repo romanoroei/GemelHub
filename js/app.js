@@ -707,6 +707,10 @@ const App = (() => {
     setupSidebarClearButtons();
     setupPopulationFilter();
     setupCompareModeToggle();
+    document.getElementById('actuarial-sidebar-range-btn')?.addEventListener('click', () => {
+      const rangeToggle = document.getElementById('custom-range-toggle');
+      if (rangeToggle && !rangeToggle.disabled) rangeToggle.click();
+    });
     setupCompactViewToggle();
     setupDisplayOptions();
     setupTwoColStickyHeaders();
@@ -3325,6 +3329,8 @@ const App = (() => {
     const actuarialContainer = document.getElementById('actuarial-container');
     const tracksContainer = document.getElementById('tracks-container');
     const trackSection = document.getElementById('filter-tracks')?.closest('.sidebar-section');
+    const actuarialFilterSection = document.getElementById('actuarial-filter-section');
+    const populationSection = document.getElementById('population-filter-section');
     const countBar = document.getElementById('tracks-count-bar');
     const exportBtn = document.getElementById('btn-export');
     const mode = getCurrentCompareMode();
@@ -3350,6 +3356,11 @@ const App = (() => {
       tracksContainer.classList.toggle('mode-toggle-hidden', actuarialAvailable && sidebarCollapsed);
     }
     if (trackSection) trackSection.style.display = mode === 'actuarial' ? 'none' : '';
+    if (actuarialFilterSection) {
+      actuarialFilterSection.hidden = mode !== 'actuarial';
+      actuarialFilterSection.style.display = mode === 'actuarial' ? '' : 'none';
+    }
+    if (populationSection && mode === 'actuarial') populationSection.hidden = true;
     if (countBar) countBar.style.display = 'none';
     if (exportBtn) {
       exportBtn.innerHTML = mode === 'actuarial'
