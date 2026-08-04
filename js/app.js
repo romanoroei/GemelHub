@@ -2990,7 +2990,7 @@ const App = (() => {
     const homeBtn = document.createElement('button');
     homeBtn.className = 'cat-tab active';
     homeBtn.dataset.cat = 'home';
-    homeBtn.innerHTML = '<span class="tab-icon">🏠</span><span>דף בית</span>';
+    homeBtn.innerHTML = '<span class="tab-icon"><i class="fas fa-home" aria-hidden="true"></i></span><span>דף בית</span>';
     homeBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); showHomePage(); });
     primaryNav.appendChild(homeBtn);
 
@@ -3007,9 +3007,13 @@ const App = (() => {
       trigger.className = 'cat-tab category-menu-trigger';
       trigger.dataset.categoryGroup = id;
       trigger.setAttribute('aria-expanded', 'false');
+      trigger.setAttribute('aria-haspopup', 'menu');
+      trigger.setAttribute('aria-controls', `category-menu-${id}`);
       trigger.innerHTML = `<span class="tab-icon">${icon}</span><span>${label}</span><i class="fas fa-chevron-down category-menu-chevron" aria-hidden="true"></i>`;
       const panel = document.createElement('div');
+      panel.id = `category-menu-${id}`;
       panel.className = `category-menu-panel category-menu-panel-${id}`;
+      panel.setAttribute('role', 'menu');
       panel.hidden = true;
       itemIds.forEach(itemId => {
         const cat = byId.get(itemId);
@@ -3018,6 +3022,7 @@ const App = (() => {
           className: 'category-menu-item',
           icon: cat.actuarial ? '<i class="fas fa-balance-scale" aria-hidden="true"></i>' : (cat.icon || '')
         });
+        item.setAttribute('role', 'menuitem');
         item.innerHTML += `<small>${descriptions[itemId] || ''}</small>`;
         item.addEventListener('click', () => {
           panel.hidden = true;
@@ -3055,22 +3060,24 @@ const App = (() => {
     const sandboxBtn = document.createElement('button');
     sandboxBtn.className = 'cat-tab sandbox-tab';
     sandboxBtn.dataset.cat = 'sandbox';
-    sandboxBtn.innerHTML = '<span class="tab-icon">🧪</span><span>המעבדה שלי</span><span class="sandbox-tab-badge" style="display:none"></span>';
+    sandboxBtn.innerHTML = '<span class="tab-icon"><i class="fas fa-flask" aria-hidden="true"></i></span><span>המעבדה שלי</span><span class="sandbox-tab-badge" style="display:none"></span>';
     sandboxBtn.addEventListener('click', () => { window.scrollTo({top:0,behavior:'smooth'}); switchToSandbox(); });
     actionNav.appendChild(sandboxBtn);
 
     const h2hBtn = document.createElement('button');
     h2hBtn.className = 'cat-tab h2h-tab';
     h2hBtn.dataset.cat = 'h2h';
-    h2hBtn.innerHTML = '<span class="tab-icon">⚖️</span><span>ראש בראש</span><span class="h2h-tab-badge" style="display:none"></span>';
+    h2hBtn.innerHTML = '<span class="tab-icon"><i class="fas fa-balance-scale" aria-hidden="true"></i></span><span>ראש בראש</span><span class="h2h-tab-badge" style="display:none"></span>';
     h2hBtn.addEventListener('click', () => { window.scrollTo({top:0,behavior:'smooth'}); switchToH2H(); });
     actionNav.appendChild(h2hBtn);
     updateH2HTabBadge(getPersistedH2HItemCount());
 
-    document.addEventListener('click', () => {
+    const closeCategoryMenus = () => {
       document.querySelectorAll('.category-menu-panel').forEach(panel => { panel.hidden = true; });
       document.querySelectorAll('.category-menu-trigger').forEach(trigger => trigger.setAttribute('aria-expanded', 'false'));
-    });
+    };
+    document.addEventListener('click', closeCategoryMenus);
+    window.addEventListener('scroll', closeCategoryMenus, { passive: true });
 
     // Header nav links
     document.querySelectorAll('.nav-link').forEach(link => {
@@ -3174,7 +3181,9 @@ const App = (() => {
     const label = getCategoryLabel(catId);
     if (!label) return;
     // כותרת ב-sticky header
-    document.getElementById('page-main-title').textContent = label;
+    document.getElementById('page-main-title').textContent = getCurrentCompareMode() === 'actuarial'
+      ? label
+      : `השוואת ${label}`;
   }
 
   function getFilterStorageCategoryKey(catId = state.activeCategoryId) {
