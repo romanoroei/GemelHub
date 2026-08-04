@@ -58,7 +58,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=desktop-toolbar-polish-20260805" />
+  <link rel="stylesheet" href="css/style.css?v=track-filter-accordion-20260804" />
   <style>
     @media (max-width: 760px) {
       .advanced-search-overlay { z-index: 9500 !important; }
@@ -243,7 +243,6 @@
   <!-- שורה 2: [סינון] [כותרת קטגוריה] .... [חיפוש] -->
   <div class="title-search-bar">
     <div class="tsb-inner">
-      <div class="tsb-main-controls">
       <button class="sidebar-toggle-btn" id="sidebar-toggle-btn"
               title="הצג/הסתר פילטרים" aria-expanded="false" aria-controls="sidebar" aria-label="הצג/הסתר פילטרים" style="display:none;">
         <i class="fas fa-sliders-h"></i>
@@ -257,6 +256,10 @@
       <button type="button" class="advanced-search-open-btn" id="advanced-search-open-btn" hidden>
         <i class="fas fa-sliders" aria-hidden="true"></i>
         <span>חיפוש מתקדם</span>
+      </button>
+      <button type="button" class="display-options-toggle" id="display-options-toggle" aria-expanded="false" aria-controls="display-options-panel" style="display:none;">
+        <i class="fas fa-eye" aria-hidden="true"></i>
+        <span>אפשרויות תצוגה</span>
       </button>
       <div class="hero-search" role="search">
         <i class="fas fa-search" aria-hidden="true"></i>
@@ -275,11 +278,6 @@
           <span id="custom-range-toggle-label">בחר טווח השקעה מותאם</span>
         </button>
       </div>
-      </div>
-      <button type="button" class="display-options-toggle" id="display-options-toggle" aria-expanded="false" aria-controls="display-options-panel" style="display:none;">
-        <i class="fas fa-eye" aria-hidden="true"></i>
-        <span>אפשרויות תצוגה</span>
-      </button>
     </div>
     <div class="custom-range-panel" id="custom-range-panel" hidden>
       <button type="button" class="custom-range-mobile-close" id="custom-range-mobile-close" aria-label="סגירת טווח מותאם">✕</button>
@@ -824,6 +822,6 @@
 
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
-  <script src="js/app.js?v=desktop-toolbar-polish-20260805"></script>
+  <script src="js/app.js?v=track-filter-accordion-20260804"></script>
 </body>
 </html>
