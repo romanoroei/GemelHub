@@ -2286,8 +2286,7 @@ th.custom-range-col {
   background: var(--blue);
 }
 
-#custom-range-entry,
-#sidebar-toggle-btn {
+#custom-range-entry {
   display: none !important;
 }
 .cat-tab.sandbox-tab {
@@ -23554,17 +23553,138 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
    the standalone actuarial views. */
 @media (min-width: 1025px) {
   .category-tabs-inner {
-    max-width: 100%;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 2px 4px;
+    max-width: 1320px;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 20px;
     overflow: visible;
-    padding-block: 3px;
+    padding: 5px 16px;
   }
-  .category-tabs-inner > .cat-tab {
+  .category-primary-nav,
+  .category-action-nav {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    min-width: 0;
+  }
+  .category-action-nav {
+    gap: 8px;
     flex: 0 0 auto;
-    margin: 2px 0;
-    padding: 5px 9px;
-    font-size: .8rem;
+    padding-inline-start: 14px;
+    border-inline-start: 1px solid rgba(201, 183, 114, .45);
+  }
+  .category-tabs-inner .cat-tab {
+    position: relative;
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 7px 10px 9px;
+    border-radius: 9px;
+    border-bottom: 0;
+    font-size: .79rem;
+  }
+  .category-tabs-inner .cat-tab.active:not(.sandbox-tab):not(.h2h-tab) {
+    background: #0c2134 !important;
+    color: #fff !important;
+  }
+  .category-tabs-inner .cat-tab.active:not(.sandbox-tab):not(.h2h-tab)::after {
+    content: '';
+    position: absolute;
+    right: 50%;
+    bottom: 3px;
+    width: 22px;
+    height: 2px;
+    border-radius: 2px;
+    background: #c9b772;
+    transform: translateX(50%);
+  }
+  .category-menu-wrap { position: relative; }
+  .category-menu-trigger { gap: 6px !important; }
+  .category-menu-chevron {
+    font-size: .58rem;
+    transition: transform .18s ease;
+  }
+  .category-menu-trigger[aria-expanded="true"] .category-menu-chevron { transform: rotate(180deg); }
+  .category-menu-panel {
+    position: absolute;
+    top: calc(100% + 7px);
+    right: 0;
+    z-index: 2200;
+    width: 290px;
+    padding: 8px;
+    border: 1px solid rgba(201, 183, 114, .6);
+    border-radius: 13px;
+    background: #fff;
+    box-shadow: 0 14px 36px rgba(12, 33, 52, .18);
+  }
+  .category-menu-panel[hidden] { display: none !important; }
+  .category-menu-item {
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: 24px 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 8px !important;
+    padding: 9px 10px !important;
+    text-align: right;
+    white-space: normal !important;
+  }
+  .category-menu-item .tab-icon { grid-row: 1 / 3; align-self: center; }
+  .category-menu-item > span:not(.tab-icon) { font-weight: 850; }
+  .category-menu-item small {
+    grid-column: 2;
+    color: #64748b;
+    font-size: .68rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .category-menu-item.active small { color: rgba(255,255,255,.74); }
+  .category-action-nav .sandbox-tab {
+    margin-inline-end: 0;
+    color: #087f72 !important;
+    background: #ecfdf5 !important;
+    border: 1px solid #99f6e4 !important;
+  }
+  .category-action-nav .sandbox-tab.active {
+    color: #fff !important;
+    background: #0f766e !important;
+  }
+  .category-action-nav .h2h-tab {
+    color: #6d4aa5 !important;
+    background: #f5f0ff !important;
+    border: 1px solid #d8c6f3 !important;
+  }
+  .category-action-nav .h2h-tab.active {
+    color: #fff !important;
+    background: linear-gradient(135deg, #7c3aed, #b08a2e) !important;
+  }
+  .hero-banner {
+    padding: 22px 16px 16px !important;
+  }
+  .hero-title {
+    font-size: 1.58rem !important;
+    margin-bottom: 4px;
+  }
+  .hero-sub {
+    margin-bottom: 8px;
+    font-size: .86rem;
+  }
+  .tsb-inner {
+    max-width: 1320px;
+    gap: 8px;
+  }
+  .tsb-inner .tsb-page-title {
+    display: inline-flex !important;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tsb-inner .hero-search {
+    flex: 0 1 320px;
+    width: 320px;
+    margin-inline-start: auto;
+    transition: width .25s ease, flex-basis .25s ease, border-color var(--tr), box-shadow var(--tr);
+  }
+  .tsb-inner .hero-search:focus-within {
+    flex-basis: 500px;
+    width: 500px;
   }
 }

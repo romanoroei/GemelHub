@@ -1310,7 +1310,7 @@ const App = (() => {
       if (label && isMobile) label.textContent = state.displayOptions.heatmap ? 'הסר מפת חום' : 'מפת חום';
       if (icon && isMobile) icon.className = state.displayOptions.heatmap ? 'fas fa-droplet-slash' : 'fas fa-circle-half-stroke';
     }
-    if (title) title.style.display = isVisible ? 'none' : '';
+    if (title) title.style.display = state.isHomePage ? 'none' : '';
     if (!isVisible || isMobile) {
       state.displayOptionsOpen = false;
       clearDisplayOptionsTimers();
@@ -2488,7 +2488,7 @@ const App = (() => {
     const isComparison = section === 'comparison';
     const isSandbox = section === 'sandbox' || state.activeCategoryId === 'sandbox';
 
-    if (filterBtn) filterBtn.style.display = 'none';
+    if (filterBtn) filterBtn.style.display = isComparison ? '' : 'none';
     if (searchWrap) {
       const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
       const fundSearchPending = !!state._pendingFundSearch;
@@ -2970,54 +2970,107 @@ const App = (() => {
   function buildCategoryTabs() {
     const bar = document.getElementById('category-tabs');
     bar.innerHTML = '';
-    // "דף בית" כרטיסייה ראשונה
+    const categories = getMobileNavigationItems();
+    const byId = new Map(categories.map(cat => [cat.id, cat]));
+    const primaryNav = document.createElement('div');
+    primaryNav.className = 'category-primary-nav';
+    const actionNav = document.createElement('div');
+    actionNav.className = 'category-action-nav';
+    bar.append(primaryNav, actionNav);
+
+    const makeCategoryButton = (cat, { className = '', label = cat.label, icon = cat.icon || '' } = {}) => {
+      const btn = document.createElement('button');
+      btn.className = `cat-tab ${className}`.trim();
+      btn.dataset.cat = cat.id;
+      btn.innerHTML = `<span class="tab-icon">${icon}</span><span>${label}</span>`;
+      btn.addEventListener('click', () => openMobileNavigationItem(cat.id));
+      return btn;
+    };
+
     const homeBtn = document.createElement('button');
     homeBtn.className = 'cat-tab active';
     homeBtn.dataset.cat = 'home';
     homeBtn.innerHTML = '<span class="tab-icon">🏠</span><span>דף בית</span>';
     homeBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); showHomePage(); });
-    bar.appendChild(homeBtn);
+    primaryNav.appendChild(homeBtn);
 
-    const mainFilterBtn = document.createElement('button');
-    mainFilterBtn.type = 'button';
-    mainFilterBtn.className = 'cat-tab main-filter-tab';
-    mainFilterBtn.id = 'main-filter-tab';
-    mainFilterBtn.innerHTML = '<span class="tab-icon"><i class="fas fa-sliders-h" aria-hidden="true"></i></span><span>סינון</span>';
-    mainFilterBtn.setAttribute('aria-pressed', 'false');
-    mainFilterBtn.addEventListener('click', () => {
-      document.getElementById('sidebar-toggle-btn')?.click();
-      syncAdvancedOptionsUi();
+    ['gemel_tagmulim', 'gemel_hashkaa', 'hashtalamot', 'polisa_chisachon'].forEach(id => {
+      const cat = byId.get(id);
+      if (cat) primaryNav.appendChild(makeCategoryButton(cat));
     });
-    bar.appendChild(mainFilterBtn);
 
-    getMobileNavigationItems().forEach(cat => {
-      const btn = document.createElement('button');
-      btn.className = 'cat-tab';
-      btn.dataset.cat = cat.id;
-      const icon = cat.actuarial ? '<i class="fas fa-balance-scale" aria-hidden="true"></i>' : (cat.icon || '');
-      btn.innerHTML = `<span class="tab-icon">${icon}</span><span>${cat.label}</span>`;
-      btn.addEventListener('click', () => {
-        openMobileNavigationItem(cat.id);
+    const makeMenu = ({ id, label, icon, itemIds, descriptions }) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'category-menu-wrap';
+      const trigger = document.createElement('button');
+      trigger.type = 'button';
+      trigger.className = 'cat-tab category-menu-trigger';
+      trigger.dataset.categoryGroup = id;
+      trigger.setAttribute('aria-expanded', 'false');
+      trigger.innerHTML = `<span class="tab-icon">${icon}</span><span>${label}</span><i class="fas fa-chevron-down category-menu-chevron" aria-hidden="true"></i>`;
+      const panel = document.createElement('div');
+      panel.className = `category-menu-panel category-menu-panel-${id}`;
+      panel.hidden = true;
+      itemIds.forEach(itemId => {
+        const cat = byId.get(itemId);
+        if (!cat) return;
+        const item = makeCategoryButton(cat, {
+          className: 'category-menu-item',
+          icon: cat.actuarial ? '<i class="fas fa-balance-scale" aria-hidden="true"></i>' : (cat.icon || '')
+        });
+        item.innerHTML += `<small>${descriptions[itemId] || ''}</small>`;
+        item.addEventListener('click', () => {
+          panel.hidden = true;
+          trigger.setAttribute('aria-expanded', 'false');
+        });
+        panel.appendChild(item);
       });
-      bar.appendChild(btn);
+      trigger.addEventListener('click', event => {
+        event.stopPropagation();
+        document.querySelectorAll('.category-menu-panel').forEach(other => { if (other !== panel) other.hidden = true; });
+        document.querySelectorAll('.category-menu-trigger').forEach(other => { if (other !== trigger) other.setAttribute('aria-expanded', 'false'); });
+        panel.hidden = !panel.hidden;
+        trigger.setAttribute('aria-expanded', panel.hidden ? 'false' : 'true');
+      });
+      panel.addEventListener('click', event => event.stopPropagation());
+      wrap.append(trigger, panel);
+      primaryNav.appendChild(wrap);
+    };
+
+    makeMenu({
+      id: 'pension', label: 'פנסיה', icon: '<i class="fas fa-umbrella" aria-hidden="true"></i>',
+      itemIds: ['pension_mekafit', 'pension_mashlima'],
+      descriptions: { pension_mekafit: 'קרנות פנסיה מקיפות', pension_mashlima: 'קרנות פנסיה משלימות' }
+    });
+    makeMenu({
+      id: 'more', label: 'עוד', icon: '<i class="fas fa-ellipsis-h" aria-hidden="true"></i>',
+      itemIds: ['hisachon_yeled', 'actuarial:pension_mekafit', 'actuarial:pension_mashlima'],
+      descriptions: {
+        hisachon_yeled: 'השוואת מסלולי חיסכון לילדים',
+        'actuarial:pension_mekafit': 'עודף או גירעון בקרנות מקיפות',
+        'actuarial:pension_mashlima': 'עודף או גירעון בקרנות משלימות'
+      }
     });
 
-    // ── כפתור המעבדה ──
     const sandboxBtn = document.createElement('button');
     sandboxBtn.className = 'cat-tab sandbox-tab';
     sandboxBtn.dataset.cat = 'sandbox';
     sandboxBtn.innerHTML = '<span class="tab-icon">🧪</span><span>המעבדה שלי</span><span class="sandbox-tab-badge" style="display:none"></span>';
     sandboxBtn.addEventListener('click', () => { window.scrollTo({top:0,behavior:'smooth'}); switchToSandbox(); });
-    bar.appendChild(sandboxBtn);
+    actionNav.appendChild(sandboxBtn);
 
-    // ── כפתור ראש בראש ──
     const h2hBtn = document.createElement('button');
     h2hBtn.className = 'cat-tab h2h-tab';
     h2hBtn.dataset.cat = 'h2h';
     h2hBtn.innerHTML = '<span class="tab-icon">⚖️</span><span>ראש בראש</span><span class="h2h-tab-badge" style="display:none"></span>';
     h2hBtn.addEventListener('click', () => { window.scrollTo({top:0,behavior:'smooth'}); switchToH2H(); });
-    bar.appendChild(h2hBtn);
+    actionNav.appendChild(h2hBtn);
     updateH2HTabBadge(getPersistedH2HItemCount());
+
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.category-menu-panel').forEach(panel => { panel.hidden = true; });
+      document.querySelectorAll('.category-menu-trigger').forEach(trigger => trigger.setAttribute('aria-expanded', 'false'));
+    });
 
     // Header nav links
     document.querySelectorAll('.nav-link').forEach(link => {
@@ -3068,7 +3121,7 @@ const App = (() => {
 
     // sticky header
     const filterBtn = document.getElementById('sidebar-toggle-btn');
-    if (filterBtn) filterBtn.style.display = 'none';
+    if (filterBtn) filterBtn.style.display = '';
 
     // פתח את סרגל הסינון אוטומטית בכניסה לדף השוואה
     const sidebar = document.getElementById('sidebar');
@@ -3108,6 +3161,9 @@ const App = (() => {
       : catId;
     document.querySelectorAll('.cat-tab[data-cat]').forEach(t =>
       t.classList.toggle('active', t.dataset.cat === activeNavigationId));
+    const pensionActive = catId === 'pension_mekafit' || catId === 'pension_mashlima';
+    document.querySelector('[data-category-group="pension"]')?.classList.toggle('active', pensionActive && getCurrentCompareMode() !== 'actuarial');
+    document.querySelector('[data-category-group="more"]')?.classList.toggle('active', activeNavigationId === 'hisachon_yeled' || activeNavigationId.startsWith('actuarial:'));
     document.querySelectorAll('.nav-link').forEach(l =>
       l.classList.toggle('active', l.dataset.cat === catId));
     syncMobileAppNav(catId);
