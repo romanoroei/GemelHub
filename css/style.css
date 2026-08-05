@@ -23559,7 +23559,7 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   .category-tabs-inner {
     max-width: 1480px;
     flex-wrap: nowrap;
-    justify-content: flex-start;
+    justify-content: center;
     gap: 10px;
     overflow: visible;
     padding: 7px 14px;
@@ -23600,7 +23600,7 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     flex: 0 0 auto;
     padding-inline-start: 10px;
     border-inline-start: 1px solid rgba(201, 183, 114, .45);
-    margin-inline-start: auto;
+    margin-inline-start: 12px;
   }
   .category-tabs-inner .cat-tab {
     position: relative;
@@ -23732,6 +23732,17 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     border-radius: 50%;
     background: #f4f1e4;
     color: #0c2134;
+  }
+  .category-menu-primary .tab-icon:empty,
+  .category-menu-item .tab-icon:empty {
+    display: none !important;
+  }
+  .category-menu-item:has(.tab-icon:empty) {
+    grid-template-columns: 1fr;
+  }
+  .category-menu-item:has(.tab-icon:empty) .cat-label,
+  .category-menu-item:has(.tab-icon:empty) small {
+    grid-column: 1;
   }
   .category-menu-item:hover {
     background: #f8f6ee !important;

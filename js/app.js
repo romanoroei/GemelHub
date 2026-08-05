@@ -3076,7 +3076,7 @@ const App = (() => {
       menuAriaLabel: 'בחירת סוג איזון אקטוארי',
       itemIds: ['actuarial:pension_mekafit', 'actuarial:pension_mashlima'],
       descriptions: {
-        'actuarial:pension_mekafit': 'איזון אקטוארי בקרנות מקיפות',
+        'actuarial:pension_mekafit': 'איזון אקטוארי בקרנות פנסיה מקיפות',
         'actuarial:pension_mashlima': 'איזון אקטוארי בקרנות פנסיה משלימות'
       }
     });

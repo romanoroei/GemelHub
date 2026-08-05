@@ -3819,7 +3819,7 @@ body.fund-page #peers-table-wrap table.track-table tr.average-row .peer-yield-nu
     max-width: 1480px;
     min-height: 76px;
     padding: 7px 14px;
-    justify-content: flex-start;
+    justify-content: center;
     gap: 10px;
     overflow: visible;
   }
@@ -3833,6 +3833,17 @@ body.fund-page #peers-table-wrap table.track-table tr.average-row .peer-yield-nu
     z-index: 2400;
   }
   body.fund-page .category-menu-item {
-    text-decoration: none;
+    grid-template-columns: 1fr !important;
+    text-decoration: none !important;
+  }
+  body.fund-page .category-menu-item .cat-label,
+  body.fund-page .category-menu-item small {
+    grid-column: 1 !important;
+  }
+  body.fund-page .category-tabs-inner .cat-tab {
+    text-decoration: none !important;
+  }
+  body.fund-page .category-tabs-inner .cat-tab::after {
+    display: none !important;
   }
 }
