@@ -2976,25 +2976,24 @@ const App = (() => {
     primaryNav.className = 'category-primary-nav';
     const actionNav = document.createElement('div');
     actionNav.className = 'category-action-nav';
-    bar.append(primaryNav, actionNav);
+    const brandButton = document.createElement('button');
+    brandButton.type = 'button';
+    brandButton.className = 'category-brand';
+    brandButton.setAttribute('aria-label', 'GemelHub — דף הבית');
+    brandButton.innerHTML = '<img src="assets/gemelhub-logo-print.svg" alt="GemelHub">';
+    brandButton.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); showHomePage(); });
+    bar.append(brandButton, primaryNav, actionNav);
 
     const makeCategoryButton = (cat, { className = '', label = cat.label, icon = cat.icon || '' } = {}) => {
       const btn = document.createElement('button');
       btn.className = `cat-tab ${className}`.trim();
       btn.dataset.cat = cat.id;
-      btn.innerHTML = `<span class="tab-icon">${icon}</span><span>${label}</span>`;
+      btn.innerHTML = `<span class="tab-icon">${icon}</span><span class="cat-label">${label}</span>`;
       btn.addEventListener('click', () => openMobileNavigationItem(cat.id));
       return btn;
     };
 
-    const homeBtn = document.createElement('button');
-    homeBtn.className = 'cat-tab active';
-    homeBtn.dataset.cat = 'home';
-    homeBtn.innerHTML = '<span class="tab-icon"><i class="fas fa-home" aria-hidden="true"></i></span><span>דף בית</span>';
-    homeBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); showHomePage(); });
-    primaryNav.appendChild(homeBtn);
-
-    ['gemel_tagmulim', 'gemel_hashkaa', 'hashtalamot', 'polisa_chisachon'].forEach(id => {
+    ['gemel_tagmulim', 'gemel_hashkaa', 'hashtalamot', 'polisa_chisachon', 'pension_mekafit', 'pension_mashlima'].forEach(id => {
       const cat = byId.get(id);
       if (cat) primaryNav.appendChild(makeCategoryButton(cat));
     });
@@ -3009,7 +3008,7 @@ const App = (() => {
       }
     };
 
-    const makeMenu = ({ id, label, icon, itemIds, descriptions, primaryId = '' }) => {
+    const makeMenu = ({ id, label, icon, itemIds, descriptions, primaryId = '', menuAriaLabel = `בחירת ${label}` }) => {
       const wrap = document.createElement('div');
       wrap.className = `category-menu-wrap${primaryId ? ' category-split-menu' : ''}`;
       if (primaryId) {
@@ -3032,9 +3031,9 @@ const App = (() => {
       trigger.setAttribute('aria-haspopup', 'menu');
       trigger.setAttribute('aria-controls', `category-menu-${id}`);
       trigger.innerHTML = primaryId
-        ? '<i class="fas fa-chevron-down category-menu-chevron" aria-hidden="true"></i><span class="sr-only">בחירת סוג פנסיה</span>'
-        : `<span class="tab-icon">${icon}</span><span>${label}</span><i class="fas fa-chevron-down category-menu-chevron" aria-hidden="true"></i>`;
-      if (primaryId) trigger.setAttribute('aria-label', 'בחירת סוג פנסיה');
+        ? `<i class="fas fa-chevron-down category-menu-chevron" aria-hidden="true"></i><span class="sr-only">${menuAriaLabel}</span>`
+        : `<span class="tab-icon">${icon}</span><span class="cat-label">${label}</span><i class="fas fa-chevron-down category-menu-chevron" aria-hidden="true"></i>`;
+      if (primaryId) trigger.setAttribute('aria-label', menuAriaLabel);
       const panel = document.createElement('div');
       panel.id = `category-menu-${id}`;
       panel.className = `category-menu-panel category-menu-panel-${id}`;
@@ -3080,18 +3079,20 @@ const App = (() => {
     };
 
     makeMenu({
-      id: 'pension', label: 'פנסיה', icon: '<i class="fas fa-umbrella" aria-hidden="true"></i>',
-      primaryId: 'pension_mekafit',
-      itemIds: ['pension_mekafit', 'pension_mashlima'],
-      descriptions: { pension_mekafit: 'קרנות פנסיה מקיפות', pension_mashlima: 'קרנות פנסיה משלימות' }
+      id: 'actuarial', label: 'איזון אקטוארי', icon: '<i class="fas fa-balance-scale" aria-hidden="true"></i>',
+      primaryId: 'actuarial:pension_mekafit',
+      menuAriaLabel: 'בחירת סוג איזון אקטוארי',
+      itemIds: ['actuarial:pension_mekafit', 'actuarial:pension_mashlima'],
+      descriptions: {
+        'actuarial:pension_mekafit': 'איזון אקטוארי בקרנות מקיפות',
+        'actuarial:pension_mashlima': 'איזון אקטוארי בקרנות משלימות'
+      }
     });
     makeMenu({
       id: 'more', label: 'עוד', icon: '<i class="fas fa-ellipsis-h" aria-hidden="true"></i>',
-      itemIds: ['hisachon_yeled', 'actuarial:pension_mekafit', 'actuarial:pension_mashlima'],
+      itemIds: ['hisachon_yeled'],
       descriptions: {
-        hisachon_yeled: 'השוואת מסלולי חיסכון לילדים',
-        'actuarial:pension_mekafit': 'עודף או גירעון בקרנות מקיפות',
-        'actuarial:pension_mashlima': 'עודף או גירעון בקרנות משלימות'
+        hisachon_yeled: 'השוואת מסלולי חיסכון לילדים'
       }
     });
 
@@ -3202,9 +3203,8 @@ const App = (() => {
       : catId;
     document.querySelectorAll('.cat-tab[data-cat]').forEach(t =>
       t.classList.toggle('active', t.dataset.cat === activeNavigationId));
-    const pensionActive = catId === 'pension_mekafit' || catId === 'pension_mashlima';
-    document.querySelector('[data-category-group="pension"]')?.classList.toggle('active', pensionActive && getCurrentCompareMode() !== 'actuarial');
-    document.querySelector('[data-category-group="more"]')?.classList.toggle('active', activeNavigationId === 'hisachon_yeled' || activeNavigationId.startsWith('actuarial:'));
+    document.querySelector('[data-category-group="actuarial"]')?.classList.toggle('active', activeNavigationId.startsWith('actuarial:'));
+    document.querySelector('[data-category-group="more"]')?.classList.toggle('active', activeNavigationId === 'hisachon_yeled');
     document.querySelectorAll('.nav-link').forEach(l =>
       l.classList.toggle('active', l.dataset.cat === catId));
     syncMobileAppNav(catId);
