@@ -3041,7 +3041,7 @@ const App = (() => {
         const item = makeCategoryButton(cat, {
           className: 'category-menu-item',
           icon: cat.actuarial
-            ? '<i class="fas fa-balance-scale" aria-hidden="true"></i>'
+            ? ''
             : itemId.startsWith('pension_')
               ? '<i class="fas fa-umbrella" aria-hidden="true"></i>'
               : itemId === 'hisachon_yeled'
@@ -3071,13 +3071,13 @@ const App = (() => {
     };
 
     makeMenu({
-      id: 'actuarial', label: 'איזון אקטוארי', icon: '<i class="fas fa-balance-scale" aria-hidden="true"></i>',
+      id: 'actuarial', label: 'איזון אקטוארי', icon: '',
       primaryId: 'actuarial:pension_mekafit',
       menuAriaLabel: 'בחירת סוג איזון אקטוארי',
       itemIds: ['actuarial:pension_mekafit', 'actuarial:pension_mashlima'],
       descriptions: {
         'actuarial:pension_mekafit': 'איזון אקטוארי בקרנות מקיפות',
-        'actuarial:pension_mashlima': 'איזון אקטוארי בקרנות משלימות'
+        'actuarial:pension_mashlima': 'איזון אקטוארי בקרנות פנסיה משלימות'
       }
     });
     const sandboxBtn = document.createElement('button');

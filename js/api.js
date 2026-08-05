@@ -894,7 +894,9 @@ const APIModule = (() => {
   async function getAllSearchable() {
     const allRaw = await fetchCurrentGemelData();
     let records  = getLatestRecords(allRaw);
-    records = filterByAllowedProviders(records);
+    // Search spans the complete category, including sector funds whose
+    // managing corporation is not part of the main provider-filter list.
+    records = records.filter(r => !(r.FUND_NAME || '').includes('בניהול אישי'));
     records = filterLatestPeriodOnly(records);
     return records;
   }

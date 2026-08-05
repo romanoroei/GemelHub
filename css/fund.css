@@ -3807,3 +3807,32 @@ body.fund-page #peers-table-wrap table.track-table tr.average-row .peer-yield-nu
     max-width: none !important;
   }
 }
+
+/* Keep the desktop fund-detail navigation identical to the comparison pages. */
+@media (min-width: 1025px) {
+  body.fund-page .category-tabs-bar {
+    position: relative;
+    z-index: 32;
+    background: #fff !important;
+  }
+  body.fund-page .category-tabs-inner {
+    max-width: 1480px;
+    min-height: 76px;
+    padding: 7px 14px;
+    justify-content: flex-start;
+    gap: 10px;
+    overflow: visible;
+  }
+  body.fund-page .category-primary-nav,
+  body.fund-page .category-action-nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  body.fund-page .category-menu-panel {
+    z-index: 2400;
+  }
+  body.fund-page .category-menu-item {
+    text-decoration: none;
+  }
+}

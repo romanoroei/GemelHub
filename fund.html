@@ -45,8 +45,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=h2h-followup5-20260721" />
-  <link rel="stylesheet" href="css/fund.css?v=wide-mobile-tables-20260708" />
+  <link rel="stylesheet" href="css/style.css?v=top-nav-20260806-2" />
+  <link rel="stylesheet" href="css/fund.css?v=unified-nav-20260806" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="fund-page">
@@ -333,7 +333,7 @@
 
   <script src="js/config.js?v=minus-format-20260627"></script>
   <script src="js/analytics.js?v=ga-20260704"></script>
-  <script src="js/api.js?v=ckan-indexeddb-cache-20260721"></script>
+  <script src="js/api.js?v=full-category-search-20260806"></script>
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
 <script>
@@ -2758,42 +2758,73 @@ function buildFundPageHeader() {
   if (!bar) return;
   bar.innerHTML = '';
 
+  const byId = new Map(CONFIG.PRODUCT_CATEGORIES.map(cat => [cat.id, cat]));
   const brandLink = document.createElement('a');
   brandLink.href = 'index.html';
-  brandLink.className = 'fund-nav-brand';
-  brandLink.innerHTML = '<img src="assets/gemelhub-logo-light.svg?v=fund-nav-20260704-1" alt="GemelHub" class="fund-nav-logo-img" />';
-  brandLink.addEventListener('click', () => { sessionStorage.setItem('gemelhubScrollTop', '1'); });
-  bar.appendChild(brandLink);
+  brandLink.className = 'category-brand';
+  brandLink.innerHTML = '<img src="assets/gemelhub-logo-print.svg" alt="GemelHub">';
+  const primaryNav = document.createElement('div');
+  primaryNav.className = 'category-primary-nav';
+  const actionNav = document.createElement('div');
+  actionNav.className = 'category-action-nav';
+  bar.append(brandLink, primaryNav, actionNav);
 
-  const backBtn = document.createElement('button');
-  backBtn.type = 'button';
-  backBtn.className = 'fund-nav-back';
-  backBtn.innerHTML = '<i class="fas fa-arrow-right"></i><span>חזרה</span>';
-  backBtn.addEventListener('click', () => {
-    window.scrollTo(0, 0);
-    history.back();
+  const makeLink = (cat, { label = cat.label, className = '', href = `index.html?cat=${cat.id}` } = {}) => {
+    const link = document.createElement('a');
+    link.href = href;
+    link.className = `cat-tab ${className}${_fundCatId === cat.id ? ' active' : ''}`.trim();
+    link.innerHTML = `<span class="cat-label">${label}</span>`;
+    link.addEventListener('click', () => sessionStorage.setItem('gemelhubScrollTop', '1'));
+    return link;
+  };
+
+  ['gemel_tagmulim', 'gemel_hashkaa', 'hashtalamot', 'polisa_chisachon', 'pension_mekafit', 'pension_mashlima', 'hisachon_yeled'].forEach(id => {
+    const cat = byId.get(id);
+    if (cat) primaryNav.appendChild(makeLink(cat));
   });
-  bar.appendChild(backBtn);
 
-  // home tab
-  const homeLink = document.createElement('a');
-  homeLink.href = 'index.html';
-  homeLink.className = 'cat-tab';
-  homeLink.style.textDecoration = 'none';
-  homeLink.innerHTML = '<span>דף בית</span>';
-  homeLink.addEventListener('click', () => { sessionStorage.setItem('gemelhubScrollTop', '1'); });
-  bar.appendChild(homeLink);
-
-  // category tabs — navigate to index.html?cat=xxx
-  CONFIG.PRODUCT_CATEGORIES.forEach(cat => {
-    const a = document.createElement('a');
-    a.href = `index.html?cat=${cat.id}`;
-    a.className = 'cat-tab' + (_fundCatId === cat.id ? ' active' : '');
-    a.style.textDecoration = 'none';
-    a.innerHTML = `<span>${cat.label}</span>`;
-    a.addEventListener('click', () => { sessionStorage.setItem('gemelhubScrollTop', '1'); });
-    bar.appendChild(a);
+  const actuarialWrap = document.createElement('div');
+  actuarialWrap.className = 'category-menu-wrap category-split-menu';
+  const actuarialCat = byId.get('pension_mekafit');
+  const actuarialPrimary = makeLink(actuarialCat, {
+    label: 'איזון<br>אקטוארי',
+    className: 'category-menu-primary',
+    href: 'index.html?cat=pension_mekafit&view=actuarial'
   });
+  actuarialPrimary.classList.remove('active');
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'cat-tab category-menu-trigger';
+  trigger.setAttribute('aria-expanded', 'false');
+  trigger.setAttribute('aria-label', 'בחירת סוג איזון אקטוארי');
+  trigger.innerHTML = '<i class="fas fa-chevron-down category-menu-chevron" aria-hidden="true"></i>';
+  const panel = document.createElement('div');
+  panel.className = 'category-menu-panel category-menu-panel-actuarial';
+  panel.hidden = true;
+  panel.innerHTML = `
+    <a class="cat-tab category-menu-item" href="index.html?cat=pension_mekafit&view=actuarial"><span class="cat-label">איזון אקטוארי מקיפה</span><small>איזון אקטוארי בקרנות פנסיה מקיפות</small></a>
+    <a class="cat-tab category-menu-item" href="index.html?cat=pension_mashlima&view=actuarial"><span class="cat-label">איזון אקטוארי משלימה</span><small>איזון אקטוארי בקרנות פנסיה משלימות</small></a>`;
+  trigger.addEventListener('click', event => {
+    event.stopPropagation();
+    panel.hidden = !panel.hidden;
+    trigger.setAttribute('aria-expanded', panel.hidden ? 'false' : 'true');
+  });
+  document.addEventListener('click', () => {
+    panel.hidden = true;
+    trigger.setAttribute('aria-expanded', 'false');
+  });
+  actuarialWrap.append(actuarialPrimary, trigger, panel);
+  primaryNav.appendChild(actuarialWrap);
+
+  const sandboxLink = makeLink({ id: 'sandbox', label: '' }, {
+    label: 'המעבדה<br>שלי', className: 'sandbox-tab', href: 'index.html?app=sandbox'
+  });
+  sandboxLink.innerHTML = '<span class="tab-icon"><i class="fas fa-flask" aria-hidden="true"></i></span><span class="cat-label">המעבדה<br>שלי</span>';
+  const h2hLink = makeLink({ id: 'h2h', label: '' }, {
+    label: 'ראש<br>בראש', className: 'h2h-tab', href: 'index.html?app=h2h'
+  });
+  h2hLink.innerHTML = '<span class="tab-icon"><i class="fas fa-balance-scale" aria-hidden="true"></i></span><span class="cat-label">ראש<br>בראש</span>';
+  actionNav.append(sandboxLink, h2hLink);
 
   // show category name in title bar
   const cat = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === _fundCatId);
