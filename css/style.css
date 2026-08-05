@@ -23552,17 +23552,15 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
 /* Desktop category navigation: keep every category reachable after adding
    the standalone actuarial views. */
 @media (min-width: 1025px) {
-  .category-tabs-bar {
-    transition: padding-bottom .2s ease;
-  }
-  .category-tabs-bar.has-open-menu {
-    padding-bottom: var(--category-menu-space, 150px);
+  body:not(.advanced-options-open),
+  body.advanced-options-open {
+    --sticky-total-h: 129px;
   }
   .category-tabs-inner {
     max-width: 1480px;
     flex-wrap: nowrap;
     justify-content: space-between;
-    gap: 12px;
+    gap: 10px;
     overflow: visible;
     padding: 7px 14px;
     min-height: 76px;
@@ -23571,19 +23569,19 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex: 0 0 126px;
-    width: 126px;
+    flex: 0 0 105px;
+    width: 105px;
     height: 58px;
-    padding: 4px 8px;
-    border: 1px solid rgba(201, 183, 114, .48);
-    border-radius: 11px;
-    background: #fff;
-    box-shadow: 0 3px 10px rgba(12, 33, 52, .08);
+    padding: 2px 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
     cursor: pointer;
   }
   .category-brand img {
     display: block;
-    width: 112px;
+    width: 102px;
     height: 44px;
     object-fit: contain;
   }
@@ -23591,7 +23589,7 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   .category-action-nav {
     display: flex;
     align-items: center;
-    gap: 3px;
+    gap: 6px;
     min-width: 0;
   }
   .category-action-nav {
@@ -23621,6 +23619,8 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     white-space: normal;
     text-align: center;
     overflow-wrap: normal;
+    line-height: 1.24;
+    letter-spacing: .01em;
   }
   .category-tabs-inner .cat-tab .tab-icon {
     font-size: .86rem;
@@ -23712,6 +23712,12 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     background: transparent !important;
     width: 100% !important;
   }
+  .category-menu-item .cat-label {
+    max-width: none !important;
+    white-space: nowrap !important;
+    text-align: right !important;
+    line-height: 1.2 !important;
+  }
   .category-menu-item .tab-icon {
     grid-row: 1 / 3;
     align-self: center;
@@ -23752,7 +23758,7 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     color: #087f72 !important;
     background: #f1fbf8 !important;
     border: 1px solid #99f6e4 !important;
-    width: 96px;
+    width: 90px;
   }
   .category-action-nav .sandbox-tab.active {
     color: #fff !important;
@@ -23762,7 +23768,7 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     color: #6d4aa5 !important;
     background: #faf7ff !important;
     border: 1px solid #d8c6f3 !important;
-    width: 96px;
+    width: 90px;
   }
   .category-action-nav .h2h-tab.active {
     color: #fff !important;

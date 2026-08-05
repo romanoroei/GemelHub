@@ -2993,7 +2993,7 @@ const App = (() => {
       return btn;
     };
 
-    ['gemel_tagmulim', 'gemel_hashkaa', 'hashtalamot', 'polisa_chisachon', 'pension_mekafit', 'pension_mashlima'].forEach(id => {
+    ['gemel_tagmulim', 'gemel_hashkaa', 'hashtalamot', 'polisa_chisachon', 'pension_mekafit', 'pension_mashlima', 'hisachon_yeled'].forEach(id => {
       const cat = byId.get(id);
       if (cat) primaryNav.appendChild(makeCategoryButton(cat));
     });
@@ -3002,10 +3002,6 @@ const App = (() => {
     const closeCategoryMenus = () => {
       document.querySelectorAll('.category-menu-panel').forEach(panel => { panel.hidden = true; });
       document.querySelectorAll('.category-menu-trigger').forEach(trigger => trigger.setAttribute('aria-expanded', 'false'));
-      if (categoryTabsBar) {
-        categoryTabsBar.classList.remove('has-open-menu');
-        categoryTabsBar.style.removeProperty('--category-menu-space');
-      }
     };
 
     const makeMenu = ({ id, label, icon, itemIds, descriptions, primaryId = '', menuAriaLabel = `בחירת ${label}` }) => {
@@ -3068,10 +3064,6 @@ const App = (() => {
         document.querySelectorAll('.category-menu-trigger').forEach(other => { if (other !== trigger) other.setAttribute('aria-expanded', 'false'); });
         panel.hidden = !willOpen;
         trigger.setAttribute('aria-expanded', panel.hidden ? 'false' : 'true');
-        if (!panel.hidden && categoryTabsBar) {
-          categoryTabsBar.classList.add('has-open-menu');
-          categoryTabsBar.style.setProperty('--category-menu-space', `${panel.scrollHeight + 20}px`);
-        }
       });
       panel.addEventListener('click', event => event.stopPropagation());
       wrap.append(trigger, panel);
@@ -3088,25 +3080,17 @@ const App = (() => {
         'actuarial:pension_mashlima': 'איזון אקטוארי בקרנות משלימות'
       }
     });
-    makeMenu({
-      id: 'more', label: 'עוד', icon: '<i class="fas fa-ellipsis-h" aria-hidden="true"></i>',
-      itemIds: ['hisachon_yeled'],
-      descriptions: {
-        hisachon_yeled: 'השוואת מסלולי חיסכון לילדים'
-      }
-    });
-
     const sandboxBtn = document.createElement('button');
     sandboxBtn.className = 'cat-tab sandbox-tab';
     sandboxBtn.dataset.cat = 'sandbox';
-    sandboxBtn.innerHTML = '<span class="tab-icon"><i class="fas fa-flask" aria-hidden="true"></i></span><span>המעבדה שלי</span><span class="sandbox-tab-badge" style="display:none"></span>';
+    sandboxBtn.innerHTML = '<span class="tab-icon"><i class="fas fa-flask" aria-hidden="true"></i></span><span class="cat-label">המעבדה<br>שלי</span><span class="sandbox-tab-badge" style="display:none"></span>';
     sandboxBtn.addEventListener('click', () => { window.scrollTo({top:0,behavior:'smooth'}); switchToSandbox(); });
     actionNav.appendChild(sandboxBtn);
 
     const h2hBtn = document.createElement('button');
     h2hBtn.className = 'cat-tab h2h-tab';
     h2hBtn.dataset.cat = 'h2h';
-    h2hBtn.innerHTML = '<span class="tab-icon"><i class="fas fa-balance-scale" aria-hidden="true"></i></span><span>ראש בראש</span><span class="h2h-tab-badge" style="display:none"></span>';
+    h2hBtn.innerHTML = '<span class="tab-icon"><i class="fas fa-balance-scale" aria-hidden="true"></i></span><span class="cat-label">ראש<br>בראש</span><span class="h2h-tab-badge" style="display:none"></span>';
     h2hBtn.addEventListener('click', () => { window.scrollTo({top:0,behavior:'smooth'}); switchToH2H(); });
     actionNav.appendChild(h2hBtn);
     updateH2HTabBadge(getPersistedH2HItemCount());
@@ -3204,7 +3188,6 @@ const App = (() => {
     document.querySelectorAll('.cat-tab[data-cat]').forEach(t =>
       t.classList.toggle('active', t.dataset.cat === activeNavigationId));
     document.querySelector('[data-category-group="actuarial"]')?.classList.toggle('active', activeNavigationId.startsWith('actuarial:'));
-    document.querySelector('[data-category-group="more"]')?.classList.toggle('active', activeNavigationId === 'hisachon_yeled');
     document.querySelectorAll('.nav-link').forEach(l =>
       l.classList.toggle('active', l.dataset.cat === catId));
     syncMobileAppNav(catId);
