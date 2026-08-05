@@ -1785,7 +1785,7 @@ const App = (() => {
     let sheet = document.getElementById('mobile-category-sheet');
     if (sheet) return sheet;
 
-    const ACTUARIAL_LABELS = { pension_mekafit: 'איזון אקטוארי – מקיפה', pension_mashlima: 'איזון אקטוארי – כללית' };
+    const ACTUARIAL_LABELS = { pension_mekafit: 'איזון אקטוארי – מקיפה', pension_mashlima: 'איזון אקטוארי – משלימה' };
 
     sheet = document.createElement('div');
     sheet.id = 'mobile-category-sheet';
@@ -2999,9 +2999,31 @@ const App = (() => {
       if (cat) primaryNav.appendChild(makeCategoryButton(cat));
     });
 
-    const makeMenu = ({ id, label, icon, itemIds, descriptions }) => {
+    const categoryTabsBar = bar.closest('.category-tabs-bar');
+    const closeCategoryMenus = () => {
+      document.querySelectorAll('.category-menu-panel').forEach(panel => { panel.hidden = true; });
+      document.querySelectorAll('.category-menu-trigger').forEach(trigger => trigger.setAttribute('aria-expanded', 'false'));
+      if (categoryTabsBar) {
+        categoryTabsBar.classList.remove('has-open-menu');
+        categoryTabsBar.style.removeProperty('--category-menu-space');
+      }
+    };
+
+    const makeMenu = ({ id, label, icon, itemIds, descriptions, primaryId = '' }) => {
       const wrap = document.createElement('div');
-      wrap.className = 'category-menu-wrap';
+      wrap.className = `category-menu-wrap${primaryId ? ' category-split-menu' : ''}`;
+      if (primaryId) {
+        const primaryCat = byId.get(primaryId);
+        if (primaryCat) {
+          const primaryButton = makeCategoryButton(primaryCat, {
+            className: 'category-menu-primary',
+            label,
+            icon
+          });
+          primaryButton.title = `${label} — מעבר ישיר`;
+          wrap.appendChild(primaryButton);
+        }
+      }
       const trigger = document.createElement('button');
       trigger.type = 'button';
       trigger.className = 'cat-tab category-menu-trigger';
@@ -3009,7 +3031,10 @@ const App = (() => {
       trigger.setAttribute('aria-expanded', 'false');
       trigger.setAttribute('aria-haspopup', 'menu');
       trigger.setAttribute('aria-controls', `category-menu-${id}`);
-      trigger.innerHTML = `<span class="tab-icon">${icon}</span><span>${label}</span><i class="fas fa-chevron-down category-menu-chevron" aria-hidden="true"></i>`;
+      trigger.innerHTML = primaryId
+        ? '<i class="fas fa-chevron-down category-menu-chevron" aria-hidden="true"></i><span class="sr-only">בחירת סוג פנסיה</span>'
+        : `<span class="tab-icon">${icon}</span><span>${label}</span><i class="fas fa-chevron-down category-menu-chevron" aria-hidden="true"></i>`;
+      if (primaryId) trigger.setAttribute('aria-label', 'בחירת סוג פנסיה');
       const panel = document.createElement('div');
       panel.id = `category-menu-${id}`;
       panel.className = `category-menu-panel category-menu-panel-${id}`;
@@ -3020,7 +3045,13 @@ const App = (() => {
         if (!cat) return;
         const item = makeCategoryButton(cat, {
           className: 'category-menu-item',
-          icon: cat.actuarial ? '<i class="fas fa-balance-scale" aria-hidden="true"></i>' : (cat.icon || '')
+          icon: cat.actuarial
+            ? '<i class="fas fa-balance-scale" aria-hidden="true"></i>'
+            : itemId.startsWith('pension_')
+              ? '<i class="fas fa-umbrella" aria-hidden="true"></i>'
+              : itemId === 'hisachon_yeled'
+                ? '<i class="fas fa-piggy-bank" aria-hidden="true"></i>'
+                : (cat.icon || '')
         });
         item.setAttribute('role', 'menuitem');
         item.innerHTML += `<small>${descriptions[itemId] || ''}</small>`;
@@ -3032,10 +3063,16 @@ const App = (() => {
       });
       trigger.addEventListener('click', event => {
         event.stopPropagation();
+        const willOpen = panel.hidden;
+        closeCategoryMenus();
         document.querySelectorAll('.category-menu-panel').forEach(other => { if (other !== panel) other.hidden = true; });
         document.querySelectorAll('.category-menu-trigger').forEach(other => { if (other !== trigger) other.setAttribute('aria-expanded', 'false'); });
-        panel.hidden = !panel.hidden;
+        panel.hidden = !willOpen;
         trigger.setAttribute('aria-expanded', panel.hidden ? 'false' : 'true');
+        if (!panel.hidden && categoryTabsBar) {
+          categoryTabsBar.classList.add('has-open-menu');
+          categoryTabsBar.style.setProperty('--category-menu-space', `${panel.scrollHeight + 20}px`);
+        }
       });
       panel.addEventListener('click', event => event.stopPropagation());
       wrap.append(trigger, panel);
@@ -3044,6 +3081,7 @@ const App = (() => {
 
     makeMenu({
       id: 'pension', label: 'פנסיה', icon: '<i class="fas fa-umbrella" aria-hidden="true"></i>',
+      primaryId: 'pension_mekafit',
       itemIds: ['pension_mekafit', 'pension_mashlima'],
       descriptions: { pension_mekafit: 'קרנות פנסיה מקיפות', pension_mashlima: 'קרנות פנסיה משלימות' }
     });
@@ -3072,10 +3110,6 @@ const App = (() => {
     actionNav.appendChild(h2hBtn);
     updateH2HTabBadge(getPersistedH2HItemCount());
 
-    const closeCategoryMenus = () => {
-      document.querySelectorAll('.category-menu-panel').forEach(panel => { panel.hidden = true; });
-      document.querySelectorAll('.category-menu-trigger').forEach(trigger => trigger.setAttribute('aria-expanded', 'false'));
-    };
     document.addEventListener('click', closeCategoryMenus);
     window.addEventListener('scroll', closeCategoryMenus, { passive: true });
 
@@ -3400,6 +3434,7 @@ const App = (() => {
     const exportBtn = document.getElementById('btn-export');
     const mode = getCurrentCompareMode();
     const actuarialAvailable = isActuarialModeAvailable();
+    document.body.classList.toggle('actuarial-mode', mode === 'actuarial');
 
     if (toggle) {
       // Actuarial balance is exposed as two standalone categories. Keep the old

@@ -232,8 +232,8 @@ const CONFIG = {
     },
     {
       id: 'pension_mashlima',
-      label: 'פנסיה כללית',
-      subLabel: 'קרנות פנסיה כללית ומשלימה',
+      label: 'פנסיה משלימה',
+      subLabel: 'קרנות פנסיה משלימות',
       apiClassifications: ['קרנות כלליות'],
       icon: '🏧',
       color: '#0891b2',
