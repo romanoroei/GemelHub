@@ -8496,7 +8496,17 @@ const App = (() => {
   function _sbRenderLoadList() {
     const container = document.getElementById('sb-load-list');
     if (!container) return;
-    const list = _sbGetSavedPortfolios();
+    const list = _sbGetSavedPortfolios().slice().sort((a, b) => {
+      const timeOf = item => {
+        const savedAt = Date.parse(item?.savedAt || '');
+        if (Number.isFinite(savedAt)) return savedAt;
+        const savedDate = Date.parse(item?.date || '');
+        if (Number.isFinite(savedDate)) return savedDate;
+        const numericId = Number(item?.id);
+        return Number.isFinite(numericId) ? numericId : 0;
+      };
+      return timeOf(b) - timeOf(a);
+    });
     if (!list.length) {
       container.innerHTML = '<p class="sb-load-empty">אין תיקים שמורים עדיין.</p>';
       return;

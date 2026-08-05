@@ -45,8 +45,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=top-nav-20260806-3" />
-  <link rel="stylesheet" href="css/fund.css?v=unified-nav-20260806-2" />
+  <link rel="stylesheet" href="css/style.css?v=sandbox-fund-actions-20260806" />
+  <link rel="stylesheet" href="css/fund.css?v=fund-destinations-20260806" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="fund-page">
@@ -115,6 +115,15 @@
               <span class="fh-meta-chip fh-meta-period" id="fh-period"></span>
               <span class="fund-allocation-tag" id="fh-allocation-tag" hidden></span>
               <span class="fund-stock-outlier-tag" id="fh-stock-outlier-tag" hidden></span>
+            </div>
+            <div class="fund-destination-actions" id="fund-destination-actions" aria-label="הוספת הקופה להשוואה">
+              <button type="button" class="fund-destination-btn fund-destination-sandbox" id="fund-add-sandbox-btn">
+                <i class="fas fa-flask" aria-hidden="true"></i><span>הוסף למעבדה</span>
+              </button>
+              <button type="button" class="fund-destination-btn fund-destination-h2h" id="fund-add-h2h-btn">
+                <i class="fas fa-balance-scale" aria-hidden="true"></i><span>הוסף לראש בראש</span>
+              </button>
+              <span class="fund-destination-status" id="fund-destination-status" aria-live="polite"></span>
             </div>
           </div>
         </div>
@@ -376,6 +385,90 @@ let _fundCatId         = null;
 let _myFundId          = null;
 let _fundTrackFullLabel = '';
 let _fundTrackId       = '';
+const FUND_SANDBOX_STORAGE_KEY = 'gemelhub_sandbox_portfolio_v1';
+const FUND_SANDBOX_SELECTIONS_KEY = 'gemelhub_sandbox_selections_v1';
+const FUND_H2H_STORAGE_KEY = 'gemelhubH2HComparison';
+
+function readFundStorageArray(key) {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(key) || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (_) { return []; }
+}
+
+function setupFundDestinationActions(record, category, track, providerName, yields12M) {
+  const sandboxBtn = document.getElementById('fund-add-sandbox-btn');
+  const h2hBtn = document.getElementById('fund-add-h2h-btn');
+  const status = document.getElementById('fund-destination-status');
+  if (!sandboxBtn || !h2hBtn) return;
+
+  const fundId = String(record.FUND_ID || _myFundId || '');
+  const categoryId = category?.id || _fundCatId || '';
+  const trackId = track?.id || _fundTrackId || '';
+  const trackLabel = track?.label || record.SUB_SPECIALIZATION || record.FUND_NAME || '';
+  const keyMatches = item => String(item?.fundId || '') === fundId &&
+    String(item?.categoryId || item?.catId || '') === categoryId;
+  const sandboxEntry = {
+    fundId,
+    fundName: record.FUND_NAME || '',
+    provider: providerName,
+    trackId,
+    trackLabel,
+    categoryId,
+    categoryLabel: category?.label || '',
+    y1: record.MONTHLY_YIELD ?? '',
+    y3: record.YEAR_TO_DATE_YIELD ?? '',
+    y5: record.YIELD_TRAILING_3_YRS ?? '',
+    y12m: yields12M?.get?.(fundId) ?? '',
+    y5yr: record.YIELD_TRAILING_5_YRS ?? '',
+    reportPeriod: record.REPORT_PERIOD || '',
+    stock: calcExposurePct(record, 'STOCK_MARKET_EXPOSURE') ?? '',
+    abroad: calcExposurePct(record, 'FOREIGN_EXPOSURE') ?? '',
+    fx: calcExposurePct(record, 'FOREIGN_CURRENCY_EXPOSURE') ?? '',
+    color: providerColor(providerName)
+  };
+
+  const refresh = () => {
+    const inSandbox = [...readFundStorageArray(FUND_SANDBOX_STORAGE_KEY), ...readFundStorageArray(FUND_SANDBOX_SELECTIONS_KEY)].some(keyMatches);
+    let inH2H = false;
+    try {
+      const saved = JSON.parse(localStorage.getItem(FUND_H2H_STORAGE_KEY) || '{}');
+      inH2H = Array.isArray(saved.items) && saved.items.some(item => String(item.fundId || '') === fundId && String(item.catId || '') === categoryId);
+    } catch (_) {}
+    sandboxBtn.classList.toggle('is-added', inSandbox);
+    h2hBtn.classList.toggle('is-added', inH2H);
+    sandboxBtn.querySelector('span').textContent = inSandbox ? 'נוסף למעבדה' : 'הוסף למעבדה';
+    h2hBtn.querySelector('span').textContent = inH2H ? 'נוסף לראש בראש' : 'הוסף לראש בראש';
+  };
+
+  sandboxBtn.addEventListener('click', () => {
+    const portfolio = readFundStorageArray(FUND_SANDBOX_STORAGE_KEY);
+    const selections = readFundStorageArray(FUND_SANDBOX_SELECTIONS_KEY);
+    if (![...portfolio, ...selections].some(keyMatches)) {
+      selections.push(sandboxEntry);
+      localStorage.setItem(FUND_SANDBOX_SELECTIONS_KEY, JSON.stringify(selections));
+      status.textContent = 'הקופה נוספה למעבדה';
+    } else {
+      status.textContent = 'הקופה כבר נמצאת במעבדה';
+    }
+    refresh();
+  });
+
+  h2hBtn.addEventListener('click', () => {
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(FUND_H2H_STORAGE_KEY) || '{}') || {}; } catch (_) {}
+    if (!Array.isArray(saved.items)) saved.items = [];
+    if (!saved.items.some(item => String(item.fundId || '') === fundId && String(item.catId || '') === categoryId)) {
+      saved.items.push({ catId: categoryId, trackId, fundId });
+      localStorage.setItem(FUND_H2H_STORAGE_KEY, JSON.stringify(saved));
+      status.textContent = 'הקופה נוספה לראש בראש';
+    } else {
+      status.textContent = 'הקופה כבר נמצאת בראש בראש';
+    }
+    refresh();
+  });
+  refresh();
+}
 
 // ── task 15: Leader Lines plugin לעוגות ──────────────────────
 const PieLeaderLines = {
@@ -532,6 +625,8 @@ async function loadFundPage() {
     _heroObs.observe(document.getElementById('fund-hero'));
 
     const color = providerColor(provName);
+
+    setupFundDestinationActions(latest, cat || _fundCat, matchedTrack, provName, yields12M);
 
     // ── Sticky tabs + search ──
     buildFundPageHeader();

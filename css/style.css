@@ -5395,6 +5395,13 @@ table.track-table tr.average-row td.exp-col:nth-last-child(3) {
   color: #f5d56e;
   font-size: 1.05rem;
 }
+@media (min-width: 1025px) {
+  html body .whatsapp-float {
+    right: 20px;
+    left: auto;
+    bottom: 20px;
+  }
+}
 
 @keyframes gemelhubCtaAttention {
   0%, 100% {

@@ -1115,6 +1115,43 @@ body.fund-page .category-tabs-inner {
   animation: gemelhubCtaAttention 3.4s ease-in-out 1s 2;
 }
 
+.fund-destination-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 13px;
+}
+
+.fund-destination-btn {
+  min-height: 36px;
+  padding: 7px 13px;
+  border: 1px solid rgba(201, 183, 114, .72);
+  border-radius: 999px;
+  background: #fff;
+  color: #0c2134;
+  font-family: var(--font);
+  font-size: .8rem;
+  font-weight: 850;
+  cursor: pointer;
+  transition: transform .16s ease, background .16s ease, color .16s ease;
+}
+
+.fund-destination-btn:hover { transform: translateY(-1px); }
+.fund-destination-sandbox { color: #087f72; border-color: #7dd3c7; }
+.fund-destination-h2h { color: #6d4aa5; border-color: #cbb8e9; }
+.fund-destination-btn.is-added {
+  background: #0c2134;
+  border-color: #0c2134;
+  color: #fff;
+}
+.fund-destination-btn i { margin-inline-end: 5px; }
+.fund-destination-status {
+  color: #64748b;
+  font-size: .74rem;
+  font-weight: 700;
+}
+
 .fund-inline-cta-btn:hover {
   background: linear-gradient(135deg, #102b46 0%, #1d4c7e 58%, #d7b342 160%);
   transform: translateY(-1px);
