@@ -4737,7 +4737,7 @@ table.track-table tr.average-row td.exp-col:nth-last-child(3) {
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow-md);
-  z-index: 800;
+  z-index: 2147483000;
   opacity: 0;
   pointer-events: none;
   transition: opacity .25s, transform .25s;
@@ -5408,6 +5408,22 @@ table.track-table tr.average-row td.exp-col:nth-last-child(3) {
     bottom: 20px;
   }
 }
+.sd-category-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 5px;
+  padding: 3px 8px;
+  border: 1px solid rgba(201, 183, 114, .72);
+  border-radius: 999px;
+  background: #fffdf5;
+  color: #0c2134;
+  font: inherit;
+  font-size: .72rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+.sd-category-link:hover { background: #f4f1e4; }
 
 @keyframes gemelhubCtaAttention {
   0%, 100% {
@@ -9320,8 +9336,8 @@ body.h2h-active #h2h-section {
 }
 
 .h2h-board-row .h2h-drag-handle {
-  top: 50%;
-  transform: translateY(-50%);
+  top: -2px;
+  transform: none;
   right: auto;
   left: 31px;
   width: 18px;
@@ -9330,8 +9346,8 @@ body.h2h-active #h2h-section {
 }
 
 .h2h-board-row .h2h-rm-btn {
-  top: 50%;
-  transform: translateY(-50%);
+  top: -2px;
+  transform: none;
   left: 7px;
   right: auto;
   width: 18px;
@@ -11990,7 +12006,9 @@ html body .sandbox-cat-table th.sb-pct-head {
   align-items: flex-start;
   max-width: 100%;
   border-radius: 999px;
-  padding: 0 6px;
+  padding: 0;
+  background: transparent !important;
+  border-radius: 0;
 }
 .sandbox-track-badge .sandbox-track-link {
   color: inherit;
@@ -15638,7 +15656,7 @@ tr.sb-row-hidden .sandbox-invest-input {
 
   html body .scroll-top-btn,
   html body #scroll-top-btn {
-    z-index: 8050 !important;
+    z-index: 2147483000 !important;
   }
 }
 
@@ -23850,16 +23868,16 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     padding-inline: 11px;
   }
   .tsb-inner .hero-search {
-    flex: 0 1 290px;
-    width: 290px;
+    flex: 0 1 190px;
+    width: 190px;
     height: 36px;
     min-height: 36px;
     margin: 0;
     transition: width .25s ease, flex-basis .25s ease, border-color var(--tr), box-shadow var(--tr);
   }
   .tsb-inner .hero-search:focus-within {
-    flex-basis: 390px;
-    width: 390px;
+    flex-basis: 250px;
+    width: 250px;
   }
   .tsb-inner .hero-search input {
     height: 100%;
@@ -23875,7 +23893,7 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   body.actuarial-mode #custom-range-entry:not([hidden]) {
     display: inline-flex !important;
   }
-  body.actuarial-mode .custom-range-panel:not([hidden]) {
+body.actuarial-mode .custom-range-panel:not([hidden]) {
     width: min(760px, calc(100vw - 32px));
     max-width: 760px;
     margin-inline: auto;
@@ -23927,4 +23945,10 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     align-items: center;
     gap: 12px;
   }
+}
+
+/* The back-to-top control must remain reachable above tables, floating CTA and dialogs. */
+html body .scroll-top-btn,
+html body #scroll-top-btn {
+  z-index: 2147483000 !important;
 }

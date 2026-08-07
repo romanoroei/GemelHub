@@ -897,7 +897,7 @@ const App = (() => {
 
     const searchInput = document.getElementById('global-search');
     if (searchInput) {
-      searchInput.placeholder = 'חפש לפי מנהל, מספר קופה או מסלול...';
+      searchInput.placeholder = 'חיפוש חופשי';
       searchInput.setAttribute('aria-label', 'חיפוש קופות לפי מנהל, מספר קופה או מסלול');
     }
     const searchLabel = document.querySelector('label[for="global-search"]');
@@ -10785,9 +10785,14 @@ const App = (() => {
     let rows = '';
     records.forEach((r, idx) => {
       const baseName = getProviderDisplayName(r.CONTROLLING_CORPORATION, r.MANAGING_CORPORATION);
-      const _suffix = (_nameCount.get(baseName) > 1 && !baseName.startsWith('קרנות השתלמות למורים'))
-        ? extractFundSuffix(r.FUND_NAME || '')
+      const fundName = String(r.FUND_NAME || '');
+      const isSectorNameWithoutSubManager = baseName === 'עגור' || baseName.startsWith('קרנות השתלמות למורים');
+      const armyAudience = baseName === 'הראל' && /צבא\s*הקבע|משרתי\s*הקבע/.test(fundName)
+        ? 'צבא הקבע'
         : null;
+      const _suffix = armyAudience || ((_nameCount.get(baseName) > 1 && !isSectorNameWithoutSubManager)
+        ? extractFundSuffix(fundName)
+        : null);
       const name = _suffix ? baseName + ' — ' + _suffix : baseName;
       const color = providerColor(baseName);
       const fundId = r.FUND_ID || '';
@@ -11098,12 +11103,16 @@ const App = (() => {
 
       if (results.length === 0) { closeDropdown(); return; }
 
-      dropdown.innerHTML = results.map((res, i) => `
+      dropdown.innerHTML = results.map((res, i) => {
+        const catLabel = CONFIG.PRODUCT_CATEGORIES.find(cat => cat.id === res.catId)?.label || '';
+        return `
         <div class="sd-item" data-idx="${i}" data-catid="${res.catId || ''}" data-fundid="${res.fundId}">
           <div class="sd-name">${highlight(res.name, q)}</div>
           <div class="sd-sub">${highlight(res.sub, q)} · ${shortCls(res.cls)} · <span class="sd-id">#${highlight(res.fundId, q)}</span></div>
+          ${res.catId && res.catId !== state.activeCategoryId ? `<button type="button" class="sd-category-link" data-search-category="${res.catId}">מעבר לטבלת ${catLabel}</button>` : ''}
         </div>
-      `).join('');
+      `;
+      }).join('');
 
       dropdown.style.display = 'block';
 
@@ -11118,6 +11127,15 @@ const App = (() => {
           } else if (catId) {
             switchCategory(catId);
           }
+        });
+      });
+      dropdown.querySelectorAll('[data-search-category]').forEach(button => {
+        button.addEventListener('click', event => {
+          event.stopPropagation();
+          const catId = button.dataset.searchCategory;
+          closeDropdown();
+          input.value = '';
+          if (catId) switchCategory(catId);
         });
       });
     }

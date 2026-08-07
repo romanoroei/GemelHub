@@ -45,7 +45,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=toolbar-scrolltop-20260807" />
+  <link rel="stylesheet" href="css/style.css?v=search-actions-20260807" />
   <link rel="stylesheet" href="css/fund.css?v=fund-destinations-20260806" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -67,7 +67,7 @@
         <i class="fas fa-search" aria-hidden="true"></i>
         <label for="fund-global-search" class="sr-only">חיפוש קופות</label>
         <input type="text" id="fund-global-search"
-               placeholder="חפש קופה לפי שם, מנהל או מספר..."
+               placeholder="חיפוש חופשי"
                autocomplete="off"
                aria-label="חיפוש קופה לפי שם, מנהל או מספר"
                aria-haspopup="listbox"
@@ -1903,7 +1903,13 @@ function renderPeersTable(myFundId, myName) {
 
   const rows = sorted.map((r, di) => {
     const baseName = getProviderDisplayName(r.CONTROLLING_CORPORATION, r.MANAGING_CORPORATION);
-    const _suffix = (_peerNameCount.get(baseName) > 1) ? extractFundSuffix(r.FUND_NAME || '') : null;
+    const peerFundName = String(r.FUND_NAME || '');
+    const peerAudience = baseName === 'הראל' && /צבא\s*הקבע|משרתי\s*הקבע/.test(peerFundName)
+      ? 'צבא הקבע'
+      : null;
+    const _suffix = peerAudience || ((_peerNameCount.get(baseName) > 1 && baseName !== 'עגור' && !baseName.startsWith('קרנות השתלמות למורים'))
+      ? extractFundSuffix(peerFundName)
+      : null);
     const name = _suffix ? baseName + ' — ' + _suffix : baseName;
     const color = providerColor(baseName);
     const isMe  = String(r.FUND_ID) === String(myFundId);
@@ -2972,17 +2978,27 @@ async function setupFundSearch() {
       }
     });
     if (!results.length) { dropdown.style.display = 'none'; dropdown.innerHTML = ''; return; }
-    dropdown.innerHTML = results.map(res => `
+    dropdown.innerHTML = results.map(res => {
+      const catLabel = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === res.catId)?.label || '';
+      return `
       <div class="sd-item" data-fundid="${res.id}" data-catid="${res.catId}">
         <div class="sd-name">${res.name}</div>
         <div class="sd-sub">${res.fname || res.sub} · <span class="sd-id">#${res.id}</span></div>
-      </div>`).join('');
+        ${res.catId ? `<button type="button" class="sd-category-link" data-search-category="${res.catId}">מעבר לטבלת ${catLabel}</button>` : ''}
+      </div>`;
+    }).join('');
     dropdown.style.display = 'block';
     dropdown.querySelectorAll('.sd-item').forEach(item => {
       item.addEventListener('click', () => {
         const fid = item.dataset.fundid;
         const cid = item.dataset.catid;
         if (fid) window.location.href = `fund.html?id=${fid}&cat=${cid || ''}`;
+      });
+    });
+    dropdown.querySelectorAll('[data-search-category]').forEach(button => {
+      button.addEventListener('click', event => {
+        event.stopPropagation();
+        window.location.href = `index.html?cat=${encodeURIComponent(button.dataset.searchCategory)}`;
       });
     });
   }
