@@ -3832,10 +3832,17 @@ const App = (() => {
       const y = row.getBoundingClientRect().top + window.scrollY - getTrackScrollOffset() - 12;
       window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
     }
+    // Let the smooth navigation finish before starting the highlight. Starting
+    // both together makes most of the animation run while the row is still
+    // outside the viewport.
     row.classList.remove('search-fund-highlight');
-    void row.offsetWidth;
-    row.classList.add('search-fund-highlight');
-    setTimeout(() => row.classList.remove('search-fund-highlight'), 1900);
+    setTimeout(() => {
+      if (!row.isConnected) return;
+      row.classList.remove('search-fund-highlight');
+      void row.offsetWidth;
+      row.classList.add('search-fund-highlight');
+      setTimeout(() => row.classList.remove('search-fund-highlight'), 2600);
+    }, 520);
     state.pendingSearchFundId = null;
     state.pendingSearchPopulation = null;
     return true;
