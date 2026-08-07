@@ -5401,6 +5401,12 @@ table.track-table tr.average-row td.exp-col:nth-last-child(3) {
     left: auto;
     bottom: 20px;
   }
+  html body .scroll-top-btn,
+  html body #scroll-top-btn {
+    right: 176px;
+    left: auto;
+    bottom: 20px;
+  }
 }
 
 @keyframes gemelhubCtaAttention {
@@ -23622,7 +23628,11 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     font-size: .88rem;
     line-height: 1.08;
     background: #fff;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
+  .category-primary-nav > .cat-tab > .tab-icon:empty { display: none; }
   .category-tabs-inner .cat-tab .cat-label {
     display: block;
     max-width: 62px;
@@ -23631,6 +23641,7 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     overflow-wrap: normal;
     line-height: 1.24;
     letter-spacing: .01em;
+    margin-inline: auto;
   }
   .category-tabs-inner .cat-tab .tab-icon {
     font-size: .86rem;
@@ -23813,7 +23824,8 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
   }
   .tsb-inner {
     position: relative;
-    max-width: 1180px;
+    width: max-content;
+    max-width: calc(100vw - 32px);
     min-height: 42px;
     justify-content: center;
     gap: 8px;
@@ -23856,11 +23868,9 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     line-height: normal;
   }
   .tsb-inner > .display-options-toggle {
-    position: absolute;
-    left: 10px;
-    right: auto;
-    top: 50%;
-    transform: translateY(-50%);
+    position: static;
+    transform: none;
+    order: 20;
   }
   body.actuarial-mode #custom-range-entry:not([hidden]) {
     display: inline-flex !important;

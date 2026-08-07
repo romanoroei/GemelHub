@@ -87,6 +87,7 @@ const App = (() => {
   const categoryViewPromiseCache = new Map();
   const categoryPrefetchTargets = new Set();
   let categoryLoadSequence = 0;
+  let trailing7YTimer = null;
   let searchableWarmupPromise = null;
   let searchableRecordsFullyWarmed = false;
 
@@ -4051,6 +4052,8 @@ const App = (() => {
 
   function scheduleTrailing7YLoad(catId, requestId) {
     const run = () => {
+      trailing7YTimer = null;
+      if (state.activeCategoryId !== catId || state.trailing7Y.requestId !== requestId) return;
       APIModule.getTrailing7Yields(catId, state.targetPopulation)
         .then(map => {
           if (state.activeCategoryId !== catId || state.trailing7Y.requestId !== requestId) return;
@@ -4067,8 +4070,10 @@ const App = (() => {
           renderComparisonView();
         });
     };
-    if ('requestIdleCallback' in window) window.requestIdleCallback(run, { timeout: 1200 });
-    else setTimeout(run, 0);
+    clearTimeout(trailing7YTimer);
+    // Seven-year history is supplemental. Give navigation and the current table
+    // first priority so a quick category change never waits behind this request.
+    trailing7YTimer = setTimeout(run, 2200);
   }
 
   function getCategoryViewCacheKey(catId, targetPopulation = state.targetPopulation) {
@@ -4141,6 +4146,8 @@ const App = (() => {
   }
 
   async function loadCategory(catId) {
+    clearTimeout(trailing7YTimer);
+    trailing7YTimer = null;
     document.getElementById('sidebar-filters').style.display = '';
     const requestedCategoryId = catId;
     const requestedTargetPopulation = state.targetPopulation;
@@ -10778,7 +10785,9 @@ const App = (() => {
     let rows = '';
     records.forEach((r, idx) => {
       const baseName = getProviderDisplayName(r.CONTROLLING_CORPORATION, r.MANAGING_CORPORATION);
-      const _suffix = (_nameCount.get(baseName) > 1) ? extractFundSuffix(r.FUND_NAME || '') : null;
+      const _suffix = (_nameCount.get(baseName) > 1 && !baseName.startsWith('קרנות השתלמות למורים'))
+        ? extractFundSuffix(r.FUND_NAME || '')
+        : null;
       const name = _suffix ? baseName + ' — ' + _suffix : baseName;
       const color = providerColor(baseName);
       const fundId = r.FUND_ID || '';
