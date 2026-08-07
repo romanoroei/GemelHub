@@ -3001,7 +3001,7 @@ const App = (() => {
       return btn;
     };
 
-    ['gemel_tagmulim', 'gemel_hashkaa', 'hashtalamot', 'polisa_chisachon', 'pension_mekafit', 'pension_mashlima', 'hisachon_yeled'].forEach(id => {
+    ['gemel_tagmulim', 'gemel_hashkaa', 'hashtalamot', 'polisa_chisachon', 'pension_mekafit', 'pension_mashlima'].forEach(id => {
       const cat = byId.get(id);
       if (cat) primaryNav.appendChild(makeCategoryButton(cat));
     });
@@ -3088,6 +3088,8 @@ const App = (() => {
         'actuarial:pension_mashlima': 'איזון אקטוארי בקרנות פנסיה משלימות'
       }
     });
+    const childSavingsCategory = byId.get('hisachon_yeled');
+    if (childSavingsCategory) primaryNav.appendChild(makeCategoryButton(childSavingsCategory));
     const sandboxBtn = document.createElement('button');
     sandboxBtn.className = 'cat-tab sandbox-tab';
     sandboxBtn.dataset.cat = 'sandbox';
@@ -3866,37 +3868,37 @@ const App = (() => {
   function focusPendingSearchFund(explicitFundId = null) {
     const fundId = String(explicitFundId || state.pendingSearchFundId || '').trim();
     if (!fundId) return false;
-    const cell = document.querySelector(`#tracks-container .provider-cell[data-fundid="${CSS.escape(fundId)}"]`);
-    const row = cell?.closest('tr');
-    if (!row) return false;
-    const block = row.closest('.track-block');
-    if (block) scrollToTrackBlockTop(block, 'smooth');
-    else {
-      const y = row.getBoundingClientRect().top + window.scrollY - getTrackScrollOffset() - 12;
-      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-    }
-    // Let the smooth navigation finish before starting the highlight. Starting
-    // both together makes most of the animation run while the row is still
-    // outside the viewport.
-    row.classList.remove('search-fund-highlight');
+    let didScrollToResult = false;
     const applyHighlight = () => {
       const currentCell = document.querySelector(`#tracks-container .provider-cell[data-fundid="${CSS.escape(fundId)}"]`);
       const currentRow = currentCell?.closest('tr');
-      if (!currentRow) return;
+      if (!currentRow) return false;
+      if (!didScrollToResult) {
+        const block = currentRow.closest('.track-block');
+        if (block) scrollToTrackBlockTop(block, 'smooth');
+        else {
+          const y = currentRow.getBoundingClientRect().top + window.scrollY - getTrackScrollOffset() - 12;
+          window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+        }
+        didScrollToResult = true;
+      }
       document.querySelectorAll('#tracks-container tr.search-fund-highlight').forEach(item => {
         item.classList.remove('search-fund-highlight');
       });
       void currentRow.offsetWidth;
       currentRow.classList.add('search-fund-highlight');
-      setTimeout(() => currentRow.classList.remove('search-fund-highlight'), 2700);
+      setTimeout(() => currentRow.classList.remove('search-fund-highlight'), 4400);
+      return true;
     };
-    // Re-query the row after navigation because trailing-yield rendering may
-    // replace the table DOM while the smooth scroll is running.
-    setTimeout(applyHighlight, 560);
-    setTimeout(() => {
-      const currentCell = document.querySelector(`#tracks-container .provider-cell[data-fundid="${CSS.escape(fundId)}"]`);
-      if (currentCell && !currentCell.closest('tr')?.classList.contains('search-fund-highlight')) applyHighlight();
-    }, 1250);
+    // The target table can be rebuilt several times while deferred yields are
+    // arriving. Retry across that window so navigation and highlighting do not
+    // depend on the speed of the seven-year calculation.
+    [250, 700, 1400, 2400, 3800].forEach(delay => {
+      setTimeout(() => {
+        const currentCell = document.querySelector(`#tracks-container .provider-cell[data-fundid="${CSS.escape(fundId)}"]`);
+        if (currentCell && !currentCell.closest('tr')?.classList.contains('search-fund-highlight')) applyHighlight();
+      }, delay);
+    });
     state.pendingSearchFundId = null;
     state.pendingSearchPopulation = null;
     return true;
@@ -9436,6 +9438,7 @@ const App = (() => {
   let _sbComparePrintVisHandler = null;
   let _sbComparePrintCountdownInterval = null;
   const SB_COMPARE_PRINT_SAFETY_MS = 7000;
+  const H2H_PRINT_RETURN_MS = 3000;
 
   function _sbCleanupComparePrintState() {
     if (!_sbComparePrintInProgress && !_sbComparePrintOriginalNodes) return; // already cleaned up
@@ -11247,6 +11250,7 @@ const App = (() => {
               name,
               sub,
               cls,
+              fname,
               fundId: id,
               catId,
               targetPopulation: String(r.TARGET_POPULATION || ''),
@@ -11271,11 +11275,15 @@ const App = (() => {
 
       dropdown.innerHTML = results.map((res, i) => {
         const catLabel = CONFIG.PRODUCT_CATEGORIES.find(cat => cat.id === res.catId)?.label || '';
+        const isPolisaResult = res.catId === 'polisa_chisachon';
+        const detailsHtml = isPolisaResult
+          ? `<div class="sd-sub sd-fund-name">${highlight(res.fname || res.sub, q)}</div><div class="sd-result-id"><span class="sd-id">#${highlight(res.fundId, q)}</span></div>`
+          : `<div class="sd-sub">${highlight(res.sub, q)} · ${shortCls(res.cls)} · <span class="sd-id">#${highlight(res.fundId, q)}</span></div>`;
         return `
         <div class="sd-item" data-idx="${i}" data-catid="${res.catId || ''}" data-fundid="${res.fundId}" data-search-population="${ghEscapeAttr(res.targetPopulation)}">
-          <div class="sd-name">${highlight(res.name, q)}</div>
-          <div class="sd-sub">${highlight(res.sub, q)} · ${shortCls(res.cls)} · <span class="sd-id">#${highlight(res.fundId, q)}</span></div>
-          ${res.catId && res.catId !== state.activeCategoryId ? `<button type="button" class="sd-category-link" data-search-category="${res.catId}" data-search-population="${ghEscapeAttr(res.targetPopulation)}">מעבר לטבלת ${catLabel}</button>` : ''}
+          <div class="sd-result-fund-action"><span class="sd-name">${highlight(res.name, q)}</span><span class="sd-open-fund-cue"><i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i> פתיחת דף הקופה</span></div>
+          ${detailsHtml}
+          ${res.catId ? `<button type="button" class="sd-category-link" data-search-category="${res.catId}" data-search-population="${ghEscapeAttr(res.targetPopulation)}"><i class="fas fa-table" aria-hidden="true"></i> מעבר לטבלת המסלול · ${catLabel}</button>` : ''}
         </div>
       `;
       }).join('');
@@ -11286,16 +11294,9 @@ const App = (() => {
         item.addEventListener('click', async () => {
           const catId  = item.dataset.catid;
           const fundId = item.dataset.fundid;
-          const targetPopulation = item.dataset.searchPopulation || '';
-          const isSectorial = categoryUsesTargetPopulation(catId) && targetPopulation !== DEFAULT_TARGET_POPULATION;
           closeDropdown();
           input.value = '';
-          if (fundId && catId && isSectorial) {
-            state.pendingSearchFundId = fundId;
-            state.pendingSearchPopulation = targetPopulation;
-            await switchCategory(catId);
-            focusPendingSearchFund(fundId);
-          } else if (fundId && catId) {
+          if (fundId && catId) {
             window.location.href = `fund.html?id=${fundId}&cat=${catId}`;
           } else if (catId) {
             switchCategory(catId);
@@ -16708,10 +16709,10 @@ const App = (() => {
               if (!document.hidden) setTimeout(_sbCleanupComparePrintState, 700);
             };
             document.addEventListener('visibilitychange', _sbComparePrintVisHandler);
-            _sbComparePrintCleanupTimer = setTimeout(_sbCleanupComparePrintState, SB_COMPARE_PRINT_SAFETY_MS);
+            _sbComparePrintCleanupTimer = setTimeout(_sbCleanupComparePrintState, H2H_PRINT_RETURN_MS);
             const countdownEl = document.getElementById('sb-compare-print-return-timer');
             if (countdownEl) {
-              const deadline = Date.now() + SB_COMPARE_PRINT_SAFETY_MS;
+              const deadline = Date.now() + H2H_PRINT_RETURN_MS;
               const tick = () => {
                 const secsLeft = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
                 countdownEl.textContent = `חוזר אוטומטית בעוד ${secsLeft} שנ׳`;

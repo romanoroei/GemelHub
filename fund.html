@@ -45,7 +45,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=nonblocking-seven-year-20260808" />
+  <link rel="stylesheet" href="css/style.css?v=search-polisa-ui-20260808" />
   <link rel="stylesheet" href="css/fund.css?v=fund-destinations-20260806" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -340,9 +340,9 @@
   </div>
 </div>
 
-  <script src="js/config.js?v=minus-format-20260627"></script>
+  <script src="js/config.js?v=search-polisa-ui-20260808"></script>
   <script src="js/analytics.js?v=ga-20260704"></script>
-  <script src="js/api.js?v=nonblocking-seven-year-20260808"></script>
+  <script src="js/api.js?v=search-polisa-ui-20260808"></script>
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
 <script>
@@ -3000,11 +3000,15 @@ async function setupFundSearch() {
     if (!results.length) { dropdown.style.display = 'none'; dropdown.innerHTML = ''; return; }
     dropdown.innerHTML = results.map(res => {
       const catLabel = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === res.catId)?.label || '';
+      const isPolisaResult = res.catId === 'polisa_chisachon';
+      const detailsHtml = isPolisaResult
+        ? `<div class="sd-sub sd-fund-name">${escapeHtml(res.fname || res.sub)}</div><div class="sd-result-id"><span class="sd-id">#${escapeHtml(res.id)}</span></div>`
+        : `<div class="sd-sub">${escapeHtml(res.fname || res.sub)} · <span class="sd-id">#${escapeHtml(res.id)}</span></div>`;
       return `
       <div class="sd-item" data-fundid="${escapeHtml(res.id)}" data-catid="${escapeHtml(res.catId)}" data-search-population="${escapeHtml(res.targetPopulation)}">
-        <div class="sd-name">${escapeHtml(res.name)}</div>
-        <div class="sd-sub">${escapeHtml(res.fname || res.sub)} · <span class="sd-id">#${escapeHtml(res.id)}</span></div>
-        ${res.catId ? `<button type="button" class="sd-category-link" data-search-category="${escapeHtml(res.catId)}" data-search-population="${escapeHtml(res.targetPopulation)}">מעבר לטבלת ${escapeHtml(catLabel)}</button>` : ''}
+        <div class="sd-result-fund-action"><span class="sd-name">${escapeHtml(res.name)}</span><span class="sd-open-fund-cue"><i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i> פתיחת דף הקופה</span></div>
+        ${detailsHtml}
+        ${res.catId ? `<button type="button" class="sd-category-link" data-search-category="${escapeHtml(res.catId)}" data-search-population="${escapeHtml(res.targetPopulation)}"><i class="fas fa-table" aria-hidden="true"></i> מעבר לטבלת המסלול · ${escapeHtml(catLabel)}</button>` : ''}
       </div>`;
     }).join('');
     dropdown.style.display = 'block';
@@ -3012,11 +3016,7 @@ async function setupFundSearch() {
       item.addEventListener('click', () => {
         const fid = item.dataset.fundid;
         const cid = item.dataset.catid;
-        const population = item.dataset.searchPopulation || '';
-        const isSectorial = population && population !== 'כלל האוכלוסיה';
-        if (fid && cid && isSectorial) {
-          window.location.href = `index.html?cat=${encodeURIComponent(cid)}&fund=${encodeURIComponent(fid)}&population=${encodeURIComponent(population)}`;
-        } else if (fid) {
+        if (fid) {
           window.location.href = `fund.html?id=${fid}&cat=${cid || ''}`;
         }
       });

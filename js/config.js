@@ -200,6 +200,7 @@ const CONFIG = {
       icon: '📋',
       color: '#7c3aed',
       hiddenDefaultTracks: [],
+      excludedFundIds: ['14385', '14386', '15207', '14291'],
       topOrderTracks: [],
       polisaAPI: true,
       trackList: [
@@ -576,6 +577,7 @@ const CONFIG = {
 
     { id: 'polisa_ashrai_maniот',
       label: 'אשראי ואג"ח עם מניות (עד 25%)',
+      fundIds: ['90'],
       fundNameIncludes: ['אשראי ואג"ח עם מניות', 'אשראי אג"ח עם מניות'],
       fundNameExcludes: ['מדדים','עוקב','סחיר'] },
 
@@ -599,6 +601,7 @@ const CONFIG = {
 
     { id: 'polisa_okev_agach_maniот',
       label: 'עוקב מדדים — אג"ח עם מניות (עד 25%)',
+      fundIds: ['15275', '15316'],
       fundNameIncludes: ['מדדים אג"ח עם מניות', 'מדדים- אג"ח עם מניות'],
       fundNameExcludes: ['אשראי','סחיר'] },
 
@@ -612,11 +615,13 @@ const CONFIG = {
 
     { id: 'polisa_agach_sahar',
       label: 'אג"ח סחיר',
+      fundIds: ['180'],
       fundNameIncludes: ['אג"ח סחיר'],
       fundNameExcludes: ['ממשלתי'] },
 
     { id: 'polisa_agach_mimshalot',
       label: 'אג"ח ממשלות',
+      fundIdExcludes: ['180'],
       fundNameIncludes: ['ממשלות', 'ממשלתי'],
       fundNameExcludes: ['מקבלי', 'קצבה'] },
 
