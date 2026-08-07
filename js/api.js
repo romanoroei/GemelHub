@@ -1022,6 +1022,43 @@ const APIModule = (() => {
   const _cachedTrailing7YByCategory = new Map();
   const _trailing7YPromiseByCategory = new Map();
 
+  async function getTrailing7YSourceRecords(categoryId, targetPopulation) {
+    const cat = CONFIG.PRODUCT_CATEGORIES.find(item => item.id === categoryId);
+    if (!cat) return [];
+    const isPension = !!cat.pensionAPI;
+    const isPolisa = !!cat.polisaAPI;
+    const currentRecords = await getSourceRecordsByCategory(categoryId);
+    const historyResources = isPension
+      ? [CONFIG.API.PENSION_2023_RESOURCE_ID, CONFIG.API.PENSION_1999_2022_RESOURCE_ID]
+      : isPolisa
+        ? [CONFIG.API.POLISA_2023_RESOURCE_ID, CONFIG.API.POLISA_1999_2022_RESOURCE_ID]
+        : [CONFIG.API.GEMEL_2023_RESOURCE_ID, CONFIG.API.GEMEL_1999_2022_RESOURCE_ID];
+    const classifications = (cat.apiClassifications || []).map(value => String(value || '').trim()).filter(Boolean);
+    const historyParts = await Promise.all(historyResources.flatMap(resourceId =>
+      classifications.map(classification => safeFetchFilteredRecords(resourceId, {
+        FUND_CLASSIFICATION: classification
+      }))
+    ));
+    let historicalRecords = historyParts.flat();
+    if (isPolisa) {
+      historicalRecords = historicalRecords.map(record => {
+        const provider = _polisaProviderName(record.PARENT_COMPANY_NAME, record.FUND_NAME);
+        return { ...record, CONTROLLING_CORPORATION: provider, MANAGING_CORPORATION: provider };
+      });
+    }
+    let records = dedupeRecordsByFundAndPeriod([...currentRecords, ...historicalRecords]);
+    if (isPension || isPolisa || targetPopulation) records = filterByAllowedProviders(records);
+    records = records.filter(record => !(record.FUND_NAME || '').includes('בניהול אישי'));
+    if (isPolisa) records = records.filter(record => !_isPolisaExcluded(record.FUND_NAME));
+    if (!isPension && !isPolisa) records = filterByTargetPopulation(records, targetPopulation);
+    records = filterByCategory(records, cat);
+    if (cat.excludedFundIds?.length) {
+      const excluded = new Set(cat.excludedFundIds.map(String));
+      records = records.filter(record => !excluded.has(String(record.FUND_ID)));
+    }
+    return records;
+  }
+
   async function getTrailing7Yields(categoryId, targetPopulation = 'כלל האוכלוסיה') {
     const cacheKey = `gemelhub_trailing7y_v1_${categoryId || 'all'}_${targetPopulation || ''}`;
     if (_cachedTrailing7YByCategory.has(cacheKey)) return _cachedTrailing7YByCategory.get(cacheKey);
@@ -1036,38 +1073,53 @@ const APIModule = (() => {
     if (_trailing7YPromiseByCategory.has(cacheKey)) return _trailing7YPromiseByCategory.get(cacheKey);
 
     const promise = (async () => {
-      const records = await getRangeEligibleRecords(categoryId, targetPopulation);
-      const periods = records.map(record => Number(record.REPORT_PERIOD)).filter(Boolean);
-      const latestPeriod = periods.length ? Math.max(...periods) : 0;
+      // Load only the current category's history. The former full-archive load
+      // parsed tens of megabytes on the main thread and could temporarily block
+      // scrolling/taps, especially on mobile.
+      const records = await getTrailing7YSourceRecords(categoryId, targetPopulation);
+      await new Promise(resolve => setTimeout(resolve, 0));
+      const latestPeriod = records.reduce((latest, record) => {
+        const period = Number(record.REPORT_PERIOD) || 0;
+        return period > latest ? period : latest;
+      }, 0);
       const expectedPeriods = latestPeriod ? listPeriodsInRange(shiftPeriodByMonths(latestPeriod, -83), latestPeriod) : [];
       const expectedSet = new Set(expectedPeriods);
       const byFund = new Map();
 
-      records.forEach(record => {
+      for (let index = 0; index < records.length; index += 1) {
+        const record = records[index];
         const fundId = String(record.FUND_ID || '');
         const period = Number(record.REPORT_PERIOD);
-        if (!fundId || !expectedSet.has(period)) return;
-        if (!byFund.has(fundId)) byFund.set(fundId, new Map());
-        byFund.get(fundId).set(period, record);
-      });
+        if (fundId && expectedSet.has(period)) {
+          if (!byFund.has(fundId)) byFund.set(fundId, new Map());
+          byFund.get(fundId).set(period, record);
+        }
+        if (index > 0 && index % 1200 === 0) await new Promise(resolve => setTimeout(resolve, 0));
+      }
 
       const result = new Map();
-      byFund.forEach((periodMap, fundId) => {
+      let fundIndex = 0;
+      for (const [fundId, periodMap] of byFund.entries()) {
+        fundIndex += 1;
         if (periodMap.size !== expectedPeriods.length) {
           result.set(fundId, null);
-          return;
+          if (fundIndex % 40 === 0) await new Promise(resolve => setTimeout(resolve, 0));
+          continue;
         }
         const vals = [];
+        let invalid = false;
         for (const period of expectedPeriods) {
           const monthlyYield = parseFloat(periodMap.get(period)?.MONTHLY_YIELD);
           if (isNaN(monthlyYield)) {
             result.set(fundId, null);
-            return;
+            invalid = true;
+            break;
           }
           vals.push(monthlyYield);
         }
-        result.set(fundId, compoundMonthlyYields(vals));
-      });
+        if (!invalid) result.set(fundId, compoundMonthlyYields(vals));
+        if (fundIndex % 40 === 0) await new Promise(resolve => setTimeout(resolve, 0));
+      }
 
       _cachedTrailing7YByCategory.set(cacheKey, result);
       _lsSave(cacheKey, [...result.entries()]);

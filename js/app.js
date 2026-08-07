@@ -90,6 +90,7 @@ const App = (() => {
   const categoryViewPromiseCache = new Map();
   const categoryPrefetchTargets = new Set();
   let categoryLoadSequence = 0;
+  let comparisonAlignmentToken = 0;
   let trailing7YTimer = null;
   let searchableWarmupPromise = null;
   let searchableRecordsFullyWarmed = false;
@@ -3749,6 +3750,41 @@ const App = (() => {
     updateMobileStickyHeader();
   }
 
+  function scheduleNonBlockingComparisonAlignment(categoryId) {
+    const token = ++comparisonAlignmentToken;
+    const cancel = () => {
+      if (comparisonAlignmentToken === token) {
+        comparisonAlignmentToken += 1;
+        state.pendingTrackId = null;
+        state.pendingCompareTopScroll = false;
+        state.pendingTrackFocusOnly = false;
+      }
+      cleanup();
+    };
+    const options = { capture: true, passive: true };
+    const events = ['wheel', 'touchstart', 'pointerdown'];
+    const cleanup = () => {
+      events.forEach(eventName => window.removeEventListener(eventName, cancel, options));
+      window.removeEventListener('keydown', cancel, true);
+    };
+    events.forEach(eventName => window.addEventListener(eventName, cancel, options));
+    window.addEventListener('keydown', cancel, true);
+    const align = () => {
+      if (comparisonAlignmentToken !== token || state.activeCategoryId !== categoryId) return;
+      scrollToComparisonTableTop();
+    };
+    requestAnimationFrame(() => requestAnimationFrame(align));
+    setTimeout(align, 120);
+    setTimeout(() => {
+      if (comparisonAlignmentToken === token && state.activeCategoryId === categoryId) {
+        state.pendingTrackId = null;
+        state.pendingCompareTopScroll = false;
+        state.pendingTrackFocusOnly = false;
+      }
+      cleanup();
+    }, 220);
+  }
+
   function startMobileFirstTableScrollGuard() {
     const isMobile = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
     if (!isMobile) return;
@@ -4285,9 +4321,6 @@ const App = (() => {
       refreshCustomRangeAvailability()
         .then(() => {
           if (state.activeCategoryId === requestedCategoryId) renderComparisonView();
-          if (state.activeCategoryId === requestedCategoryId && state.pendingCompareTopScroll) {
-            setTimeout(scrollToComparisonTableTop, 0);
-          }
         })
         .catch(() => {});
 
@@ -4298,16 +4331,7 @@ const App = (() => {
       // pendingInitialTableTopScroll branch below) — that was a separate, confirmed-working fix
       // and is unrelated to this track-jump path.
       if (state.pendingCompareTopScroll) {
-        setTimeout(scrollToComparisonTableTop, 100);
-        setTimeout(scrollToComparisonTableTop, 500);
-        setTimeout(scrollToComparisonTableTop, 1200);
-        setTimeout(scrollToComparisonTableTop, 2200);
-        setTimeout(() => {
-          scrollToComparisonTableTop();
-          state.pendingTrackId = null;
-          state.pendingCompareTopScroll = false;
-          state.pendingTrackFocusOnly = false;
-        }, 2800);
+        scheduleNonBlockingComparisonAlignment(requestedCategoryId);
       } else if (state.pendingTrackId && getCurrentCompareMode() === 'tracks') {
         state.pendingTrackId = null;
         setTimeout(() => {
@@ -4666,12 +4690,9 @@ const App = (() => {
       }
     }
 
-    if (state.pendingCompareTopScroll) {
-      requestAnimationFrame(() => {
-        scrollToComparisonTableTop();
-        requestAnimationFrame(scrollToComparisonTableTop);
-      });
-    }
+    // Background renders (for example when seven-year returns arrive) must
+    // never move the viewport. Navigation alignment is scheduled once by
+    // loadCategory() and is cancelled immediately on user interaction.
     guardDisplayOptionsAfterRender();
     requestAnimationFrame(updateMobileStickyThead);
   }
