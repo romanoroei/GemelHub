@@ -411,6 +411,7 @@ const App = (() => {
     active: false,
     loading: false,
     availabilityLoading: false,
+    availabilityRequestId: 0,
     availablePeriods: [],
     availableYears: [],
     selectionMode: 'months',
@@ -2603,6 +2604,7 @@ const App = (() => {
     state.customRange.active = false;
     state.customRange.loading = false;
     state.customRange.availabilityLoading = false;
+    state.customRange.availabilityRequestId += 1;
     state.customRange.availablePeriods = [];
     state.customRange.availableYears = [];
     state.customRange.selectionMode = 'months';
@@ -2725,7 +2727,8 @@ const App = (() => {
     if (!entry || !toggle || !panel || !applyBtn || !clearBtn || !startSelect || !endSelect || !yearSelect) return;
 
     const enabled = isCustomRangeFeatureEnabled() && !state.isHomePage && !!state.activeCategoryId;
-    const isLoading = state.customRange.loading || state.customRange.availabilityLoading;
+    const hasPeriods = state.customRange.availablePeriods.length > 1;
+    const isLoading = state.customRange.loading || (state.customRange.availabilityLoading && !hasPeriods);
     entry.hidden = !enabled;
     panel.hidden = !enabled || !state.customRange.open;
     toggle.setAttribute('aria-expanded', enabled && state.customRange.open ? 'true' : 'false');
@@ -2742,7 +2745,6 @@ const App = (() => {
       ? 'טוען נתונים היסטוריים...'
       : formatCustomRangeToggleLabel();
 
-    const hasPeriods = state.customRange.availablePeriods.length > 1;
     const isYearMode = state.customRange.selectionMode === 'year';
     modeButtons.forEach(btn => btn.classList.toggle('is-active', btn.dataset.rangeMode === state.customRange.selectionMode));
     monthFields.forEach(field => {
@@ -2869,11 +2871,19 @@ const App = (() => {
       return;
     }
 
+    const requestId = ++state.customRange.availabilityRequestId;
+    const requestedCategoryId = state.activeCategoryId;
+    const requestedTargetPopulation = state.targetPopulation;
     state.customRange.availabilityLoading = true;
     syncCustomRangeControls();
 
     try {
-      const periods = await APIModule.getAvailableReportPeriods(state.activeCategoryId, state.targetPopulation);
+      const periods = await APIModule.getAvailableReportPeriods(requestedCategoryId, requestedTargetPopulation);
+      if (
+        requestId !== state.customRange.availabilityRequestId ||
+        state.activeCategoryId !== requestedCategoryId ||
+        state.targetPopulation !== requestedTargetPopulation
+      ) return;
       state.customRange.availablePeriods = periods;
       state.customRange.startPeriod = '';
       state.customRange.endPeriod = '';
@@ -2884,8 +2894,10 @@ const App = (() => {
       hydrateCustomRangePeriodOptions();
       setCustomRangeStatus('');
     } finally {
-      state.customRange.availabilityLoading = false;
-      syncCustomRangeControls();
+      if (requestId === state.customRange.availabilityRequestId) {
+        state.customRange.availabilityLoading = false;
+        syncCustomRangeControls();
+      }
     }
   }
 
