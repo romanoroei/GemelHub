@@ -765,7 +765,8 @@ body.sticky-gap-mask-active:not(.fund-page)::before {
   background: #fff; border-radius: 12px;
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--gray-200);
-  overflow: hidden; z-index: 2000;
+  overflow-x: hidden; overflow-y: auto; z-index: 2000;
+  max-height: min(70vh, 560px);
 }
 .sd-item {
   padding: 10px 16px; cursor: pointer;
@@ -5424,6 +5425,13 @@ table.track-table tr.average-row td.exp-col:nth-last-child(3) {
   cursor: pointer;
 }
 .sd-category-link:hover { background: #f4f1e4; }
+.sd-category-link[data-search-category="gemel_tagmulim"] { color:#0f2744; border-color:#94a3b8; background:#f1f5f9; }
+.sd-category-link[data-search-category="gemel_hashkaa"] { color:#047857; border-color:#6ee7b7; background:#ecfdf5; }
+.sd-category-link[data-search-category="hashtalamot"] { color:#7e22ce; border-color:#d8b4fe; background:#faf5ff; }
+.sd-category-link[data-search-category="hisachon_yeled"] { color:#92400e; border-color:#fcd34d; background:#fffbeb; }
+.sd-category-link[data-search-category="polisa_chisachon"] { color:#6d28d9; border-color:#c4b5fd; background:#f5f3ff; }
+.sd-category-link[data-search-category="pension_mekafit"] { color:#b91c1c; border-color:#fca5a5; background:#fef2f2; }
+.sd-category-link[data-search-category="pension_mashlima"] { color:#0e7490; border-color:#67e8f9; background:#ecfeff; }
 
 @keyframes gemelhubCtaAttention {
   0%, 100% {

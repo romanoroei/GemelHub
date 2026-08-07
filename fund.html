@@ -45,7 +45,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=search-restore-sticky-align-20260807" />
+  <link rel="stylesheet" href="css/style.css?v=search-ranking-sectorial-20260808-2" />
   <link rel="stylesheet" href="css/fund.css?v=fund-destinations-20260806" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -2964,27 +2964,46 @@ async function setupFundSearch() {
       const id    = String(r.FUND_ID || '');
       const fname = (r.FUND_NAME || '');
       const sub   = (r.SUB_SPECIALIZATION || '');
-      if (name.toLowerCase().includes(ql) || id.includes(ql) ||
-          fname.toLowerCase().includes(ql) || sub.toLowerCase().includes(ql)) {
-        if (!seen.has(id) && results.length < 12) {
+      const nameLower = name.toLowerCase();
+      const fundNameLower = fname.toLowerCase();
+      const subLower = sub.toLowerCase();
+      if (nameLower.includes(ql) || id.includes(ql) || fundNameLower.includes(ql) || subLower.includes(ql)) {
+        if (!seen.has(id)) {
           seen.add(id);
           const cls = r.FUND_CLASSIFICATION || '';
           const catObj = CONFIG.PRODUCT_CATEGORIES.find(c =>
             c.apiClassifications?.some(ac => cls === ac.trim()) ||
             (c.pensionAPI && cls.includes('פנסי'))
           );
-          results.push({ name, id, fname, sub, catId: catObj ? catObj.id : '', targetPopulation: String(r.TARGET_POPULATION || '') });
+          const catId = catObj ? catObj.id : '';
+          const score = id === ql ? 1200
+            : fundNameLower === ql ? 1100
+            : nameLower === ql ? 1000
+            : id.startsWith(ql) ? 900
+            : fundNameLower.startsWith(ql) ? 800
+            : nameLower.startsWith(ql) ? 700
+            : subLower.startsWith(ql) ? 600
+            : fundNameLower.includes(ql) ? 500
+            : nameLower.includes(ql) ? 400
+            : 300;
+          results.push({ name, id, fname, sub, catId, targetPopulation: String(r.TARGET_POPULATION || ''), score, currentCategory: catId === _fundCatId });
         }
       }
     });
+    results.sort((a, b) => Number(b.currentCategory) - Number(a.currentCategory) || b.score - a.score || a.name.localeCompare(b.name, 'he'));
+    const prioritizedResults = [
+      ...results.filter(result => result.currentCategory).slice(0, 8),
+      ...results.filter(result => !result.currentCategory).slice(0, 16)
+    ];
+    results.splice(0, results.length, ...prioritizedResults);
     if (!results.length) { dropdown.style.display = 'none'; dropdown.innerHTML = ''; return; }
     dropdown.innerHTML = results.map(res => {
       const catLabel = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === res.catId)?.label || '';
       return `
-      <div class="sd-item" data-fundid="${res.id}" data-catid="${res.catId}">
-        <div class="sd-name">${res.name}</div>
-        <div class="sd-sub">${res.fname || res.sub} · <span class="sd-id">#${res.id}</span></div>
-        ${res.catId ? `<button type="button" class="sd-category-link" data-search-category="${res.catId}" data-search-population="${res.targetPopulation}">מעבר לטבלת ${catLabel}</button>` : ''}
+      <div class="sd-item" data-fundid="${escapeHtml(res.id)}" data-catid="${escapeHtml(res.catId)}" data-search-population="${escapeHtml(res.targetPopulation)}">
+        <div class="sd-name">${escapeHtml(res.name)}</div>
+        <div class="sd-sub">${escapeHtml(res.fname || res.sub)} · <span class="sd-id">#${escapeHtml(res.id)}</span></div>
+        ${res.catId ? `<button type="button" class="sd-category-link" data-search-category="${escapeHtml(res.catId)}" data-search-population="${escapeHtml(res.targetPopulation)}">מעבר לטבלת ${escapeHtml(catLabel)}</button>` : ''}
       </div>`;
     }).join('');
     dropdown.style.display = 'block';
@@ -2992,7 +3011,13 @@ async function setupFundSearch() {
       item.addEventListener('click', () => {
         const fid = item.dataset.fundid;
         const cid = item.dataset.catid;
-        if (fid) window.location.href = `fund.html?id=${fid}&cat=${cid || ''}`;
+        const population = item.dataset.searchPopulation || '';
+        const isSectorial = population && population !== 'כלל האוכלוסיה';
+        if (fid && cid && isSectorial) {
+          window.location.href = `index.html?cat=${encodeURIComponent(cid)}&fund=${encodeURIComponent(fid)}&population=${encodeURIComponent(population)}`;
+        } else if (fid) {
+          window.location.href = `fund.html?id=${fid}&cat=${cid || ''}`;
+        }
       });
     });
     dropdown.querySelectorAll('[data-search-category]').forEach(button => {

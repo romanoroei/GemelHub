@@ -27,6 +27,7 @@ const App = (() => {
     pendingActuarialHighlightDone: false,
     pendingSearchFundId: null,
     pendingSearchPopulation: null,
+    searchForcedTrackId: null,
     compactTracksView: true,
     advancedOptionsOpen: false,
     displayOptionsOpen: false,
@@ -90,6 +91,7 @@ const App = (() => {
   const categoryPrefetchTargets = new Set();
   let categoryLoadSequence = 0;
   let trailing7YTimer = null;
+  let isInitialCategoryNavigation = true;
   let searchableWarmupPromise = null;
   let searchableRecordsFullyWarmed = false;
 
@@ -3147,10 +3149,16 @@ const App = (() => {
       state.selectedTracks.clear();
       state.selectedProviders.clear();
       state.excludedProviders.clear();
-      if (state.pendingSearchPopulation && categoryUsesTargetPopulation(catId)) {
-        state.targetPopulation = state.pendingSearchPopulation;
+      if (categoryUsesTargetPopulation(catId)) {
+        state.targetPopulation = state.pendingSearchPopulation && state.pendingSearchPopulation !== DEFAULT_TARGET_POPULATION
+          ? ''
+          : DEFAULT_TARGET_POPULATION;
       }
+    } else if (isInitialCategoryNavigation && categoryUsesTargetPopulation(catId)) {
+      state.targetPopulation = DEFAULT_TARGET_POPULATION;
     }
+    if (!state.pendingSearchFundId) state.searchForcedTrackId = null;
+    isInitialCategoryNavigation = false;
     resetCustomRangeState();
     resetAdvancedSearchState();
     syncCustomRangeControls();
@@ -3814,14 +3822,18 @@ const App = (() => {
     switchCategory(categoryId);
   }
 
-  function focusPendingSearchFund() {
-    const fundId = String(state.pendingSearchFundId || '').trim();
+  function focusPendingSearchFund(explicitFundId = null) {
+    const fundId = String(explicitFundId || state.pendingSearchFundId || '').trim();
     if (!fundId) return false;
     const cell = document.querySelector(`#tracks-container .provider-cell[data-fundid="${CSS.escape(fundId)}"]`);
     const row = cell?.closest('tr');
     if (!row) return false;
-    const y = row.getBoundingClientRect().top + window.scrollY - getTrackScrollOffset() - 12;
-    window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    const block = row.closest('.track-block');
+    if (block) scrollToTrackBlockTop(block, 'smooth');
+    else {
+      const y = row.getBoundingClientRect().top + window.scrollY - getTrackScrollOffset() - 12;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    }
     row.classList.remove('search-fund-highlight');
     void row.offsetWidth;
     row.classList.add('search-fund-highlight');
@@ -4215,6 +4227,17 @@ const App = (() => {
       state.yields12M        = yields12M;
       state.yields12MPension = yields12MPension;
       state.yields12MPolisa  = yields12MPolisa;
+      if (state.pendingSearchFundId) {
+        const searchedFundId = String(state.pendingSearchFundId);
+        const searchedTrack = organized.find(item =>
+          (item.records || []).some(record => String(record.FUND_ID || '') === searchedFundId));
+        if (searchedTrack?.track?.id) {
+          state.pendingTrackId = searchedTrack.track.id;
+          state.searchForcedTrackId = searchedTrack.track.id;
+          state.pendingCompareTopScroll = true;
+          state.pendingTrackFocusOnly = false;
+        }
+      }
       buildTrackFilters(organized, catId);
       buildProviderFilters(organized);
       setupPopulationRadio();
@@ -4579,7 +4602,7 @@ const App = (() => {
         // פילטר מסלולים: אם יש בחירה בסרגל → הצג רק אותם
         if (state.selectedTracks.size > 0 && !state.selectedTracks.has(track.id)) return;
         // מסלול מוסתר ברירת מחדל: הצג רק אם נבחר במפורש
-        if (isHiddenByDefault && !state.selectedTracks.has(track.id)) return;
+        if (isHiddenByDefault && !state.selectedTracks.has(track.id) && state.searchForcedTrackId !== track.id) return;
 
         // פילטר יצרנים + חיפוש
         let recs = applyFiltersToRecords(item.records);
@@ -11139,29 +11162,55 @@ const App = (() => {
         const cls   = (r.FUND_CLASSIFICATION || '');
         const fname = (r.FUND_NAME || '');
 
-        if (name.toLowerCase().includes(ql) || id.includes(ql) ||
-            sub.toLowerCase().includes(ql) || fname.toLowerCase().includes(ql)) {
-          const key = `${name}|${sub}`;
-          if (!seen.has(key) && results.length < 10) {
+        const nameLower = name.toLowerCase();
+        const subLower = sub.toLowerCase();
+        const fundNameLower = fname.toLowerCase();
+        if (nameLower.includes(ql) || id.includes(ql) || subLower.includes(ql) || fundNameLower.includes(ql)) {
+          const key = id || `${name}|${sub}|${cls}`;
+          if (!seen.has(key)) {
             seen.add(key);
+            const catId = getCatIdByClassification(cls);
+            const score = id === ql ? 1200
+              : fundNameLower === ql ? 1100
+              : nameLower === ql ? 1000
+              : id.startsWith(ql) ? 900
+              : fundNameLower.startsWith(ql) ? 800
+              : nameLower.startsWith(ql) ? 700
+              : subLower.startsWith(ql) ? 600
+              : fundNameLower.includes(ql) ? 500
+              : nameLower.includes(ql) ? 400
+              : subLower.includes(ql) ? 300
+              : 200;
             results.push({
               name,
               sub,
               cls,
               fundId: id,
-              catId: getCatIdByClassification(cls),
-              targetPopulation: String(r.TARGET_POPULATION || '')
+              catId,
+              targetPopulation: String(r.TARGET_POPULATION || ''),
+              score,
+              currentCategory: catId === state.activeCategoryId
             });
           }
         }
       });
+
+      results.sort((a, b) =>
+        Number(b.currentCategory) - Number(a.currentCategory) ||
+        b.score - a.score ||
+        a.name.localeCompare(b.name, 'he'));
+      const prioritizedResults = [
+        ...results.filter(result => result.currentCategory).slice(0, 8),
+        ...results.filter(result => !result.currentCategory).slice(0, 16)
+      ];
+      results.splice(0, results.length, ...prioritizedResults);
 
       if (results.length === 0) { closeDropdown(); return; }
 
       dropdown.innerHTML = results.map((res, i) => {
         const catLabel = CONFIG.PRODUCT_CATEGORIES.find(cat => cat.id === res.catId)?.label || '';
         return `
-        <div class="sd-item" data-idx="${i}" data-catid="${res.catId || ''}" data-fundid="${res.fundId}">
+        <div class="sd-item" data-idx="${i}" data-catid="${res.catId || ''}" data-fundid="${res.fundId}" data-search-population="${ghEscapeAttr(res.targetPopulation)}">
           <div class="sd-name">${highlight(res.name, q)}</div>
           <div class="sd-sub">${highlight(res.sub, q)} · ${shortCls(res.cls)} · <span class="sd-id">#${highlight(res.fundId, q)}</span></div>
           ${res.catId && res.catId !== state.activeCategoryId ? `<button type="button" class="sd-category-link" data-search-category="${res.catId}" data-search-population="${ghEscapeAttr(res.targetPopulation)}">מעבר לטבלת ${catLabel}</button>` : ''}
@@ -11172,12 +11221,19 @@ const App = (() => {
       dropdown.style.display = 'block';
 
       dropdown.querySelectorAll('.sd-item').forEach(item => {
-        item.addEventListener('click', () => {
+        item.addEventListener('click', async () => {
           const catId  = item.dataset.catid;
           const fundId = item.dataset.fundid;
+          const targetPopulation = item.dataset.searchPopulation || '';
+          const isSectorial = categoryUsesTargetPopulation(catId) && targetPopulation !== DEFAULT_TARGET_POPULATION;
           closeDropdown();
           input.value = '';
-          if (fundId && catId) {
+          if (fundId && catId && isSectorial) {
+            state.pendingSearchFundId = fundId;
+            state.pendingSearchPopulation = targetPopulation;
+            await switchCategory(catId);
+            focusPendingSearchFund(fundId);
+          } else if (fundId && catId) {
             window.location.href = `fund.html?id=${fundId}&cat=${catId}`;
           } else if (catId) {
             switchCategory(catId);
@@ -11185,15 +11241,18 @@ const App = (() => {
         });
       });
       dropdown.querySelectorAll('[data-search-category]').forEach(button => {
-        button.addEventListener('click', event => {
+        button.addEventListener('click', async event => {
           event.stopPropagation();
           const catId = button.dataset.searchCategory;
+          const fundId = button.closest('.sd-item')?.dataset.fundid || null;
+          const targetPopulation = button.dataset.searchPopulation || null;
           closeDropdown();
           input.value = '';
           if (catId) {
-            state.pendingSearchFundId = button.closest('.sd-item')?.dataset.fundid || null;
-            state.pendingSearchPopulation = button.dataset.searchPopulation || null;
-            switchCategory(catId);
+            state.pendingSearchFundId = fundId;
+            state.pendingSearchPopulation = targetPopulation;
+            await switchCategory(catId);
+            focusPendingSearchFund(fundId);
           }
         });
       });
