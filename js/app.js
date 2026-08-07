@@ -8116,7 +8116,7 @@ const App = (() => {
                 <th></th>
                 <th>${_sbSortHeaderHtml('מנהל', 'provider', catId)}</th>
                 <th>${_sbSortHeaderHtml('מסלול', 'track', catId)}</th>
-                <th class="sb-fee-head">${_sbSortHeaderHtml('<span>ד"נ</span><span>מצבירה %</span>', 'dnCumulative', catId, 'center')}</th>
+                <th class="sb-fee-head">${_sbSortHeaderHtml('<span>% ד"נ</span><span>מצבירה</span>', 'dnCumulative', catId, 'center')}</th>
                 ${isPension ? `<th class="sb-fee-head">${_sbSortHeaderHtml('<span>ד"נ</span><span>מהפקדה %</span>', 'dnDeposit', catId, 'center')}</th>` : ''}
                 <th class="sb-pct-head">${_sbSortHeaderHtml('<span>אחוז</span><span>השקעה</span>', 'pctOfTotal', catId, 'center')}</th>
                 <th class="sb-invest-head">${_sbSortHeaderHtml('<span>סכום</span><span>השקעה</span>', 'invest', catId, 'center')}</th>

@@ -16019,6 +16019,19 @@ tr.sb-row-hidden .sandbox-invest-input {
   display: none;
 }
 
+/* Percentage values are entered directly; native spinner arrows add noise on
+   narrow sandbox tables and can cause accidental changes while scrolling. */
+.sandbox-pct-input::-webkit-outer-spin-button,
+.sandbox-pct-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.sandbox-pct-input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
 @media (max-width: 1024px) {
   body {
     padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px));

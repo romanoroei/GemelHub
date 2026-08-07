@@ -1218,6 +1218,21 @@ body.fund-page #peers-table-wrap .track-table {
 }
 
 @media (max-width: 760px) {
+  body.fund-page .yield-scroll-wrap {
+    scrollbar-width: none !important;
+  }
+
+  body.fund-page .yield-scroll-wrap::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  body.fund-page .yield-chart-inner,
+  body.fund-page #history-chart {
+    height: 220px !important;
+  }
+
   /* Compact mobile sizing for comparison table */
   body.fund-page #peers-table-wrap .track-table th,
   body.fund-page #peers-table-wrap .track-table td {
@@ -3683,7 +3698,7 @@ body.fund-page #peers-table-wrap table.track-table tr.average-row .peer-yield-nu
   }
 
   body.fund-page .peer-return-toggle {
-    justify-self: end !important;
+    justify-self: start !important;
     width: min(100%, 236px) !important;
     min-height: 30px !important;
     border-radius: 7px !important;
@@ -3815,6 +3830,11 @@ body.fund-page #peers-table-wrap table.track-table tr.average-row .peer-yield-nu
   .gh-stamp-svg {
     width: 96px;
     height: 96px;
+  }
+
+  body.fund-page .fund-compare-title-main,
+  body.fund-page .fund-compare-title-main i {
+    color: #6f42b5 !important;
   }
 }
 

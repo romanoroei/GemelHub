@@ -1391,6 +1391,8 @@ function buildHistoryChart(history, field) {
 function renderYieldGroupedBars(labels, fundData, peerAvg) {
   if (historyChart) { historyChart.destroy(); historyChart = null; }
 
+  const isMobile = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+
   // רוחב דינמי: 36px לכל חודש (אם יש רק קופה) / 52px אם יש גם מתחרים
   const inner  = document.getElementById('yield-chart-inner');
   const wrap   = document.getElementById('yield-chart-scroll-wrap');
@@ -1401,7 +1403,9 @@ function renderYieldGroupedBars(labels, fundData, peerAvg) {
   const card  = wrap ? wrap.closest('.fund-card') : null;
   const avail = card ? card.clientWidth : (wrap ? wrap.clientWidth : 400);
   const chartW = Math.max(needW, avail - 36); // -36 לפצות על negative margins
-  const chartH = 280;
+  // Keep the canvas and its mobile wrapper at the same height.  A taller canvas
+  // was being clipped by the wrapper, taking the X-axis month labels with it.
+  const chartH = isMobile ? 220 : 280;
   if (inner)  inner.style.setProperty('min-width', chartW + 'px', 'important');
   if (canvas) {
     canvas.width = chartW;
@@ -3695,48 +3699,59 @@ document.addEventListener('DOMContentLoaded', () => {
       renderMobileRecentFunds();
     });
 
-    var startY = 0;
-    var dragDelta = 0;
-    var dragged = false;
-
-    function beginDrag(y) {
-      startY = y;
-      dragDelta = 0;
-      dragged = false;
+    var drag = null;
+    var suppressClick = false;
+    var closedOffset = function() { return Math.max(0, drawer.offsetHeight - handle.offsetHeight); };
+    function beginDrag(y, pointerId) {
+      drag = {
+        pointerId: pointerId,
+        startY: y,
+        lastY: y,
+        startedAt: performance.now(),
+        startOffset: drawer.classList.contains('is-open') ? 0 : closedOffset()
+      };
+      drawer.classList.add('is-dragging');
     }
-
     function moveDrag(y) {
-      if (!startY) return;
-      dragDelta = y - startY;
-      if (Math.abs(dragDelta) > 10) dragged = true;
+      if (!drag) return;
+      drag.lastY = y;
+      var offset = Math.max(0, Math.min(closedOffset(), drag.startOffset + y - drag.startY));
+      drawer.style.transform = 'translateY(' + offset + 'px)';
+      handle.setAttribute('aria-expanded', offset < closedOffset() / 2 ? 'true' : 'false');
+      if (Math.abs(y - drag.startY) > 5) suppressClick = true;
     }
-
     function endDrag() {
-      if (dragged) {
-        setOpen(dragDelta < 0);
-        setTimeout(function() { dragged = false; }, 0);
-      }
-      startY = 0;
-      dragDelta = 0;
+      if (!drag) return;
+      var delta = drag.lastY - drag.startY;
+      var elapsed = Math.max(1, performance.now() - drag.startedAt);
+      var velocity = delta / elapsed;
+      var matrix = new DOMMatrixReadOnly(getComputedStyle(drawer).transform);
+      var offset = matrix.m42;
+      var open = velocity < -0.25 || (velocity <= 0.25 && offset < closedOffset() / 2);
+      drag = null;
+      drawer.classList.remove('is-dragging');
+      drawer.style.removeProperty('transform');
+      setOpen(open);
+      setTimeout(function() { suppressClick = false; }, 80);
     }
 
     handle.addEventListener('pointerdown', function(event) {
-      beginDrag(event.clientY);
+      beginDrag(event.clientY, event.pointerId);
       if (handle.setPointerCapture) handle.setPointerCapture(event.pointerId);
     });
-    handle.addEventListener('pointermove', function(event) { moveDrag(event.clientY); });
+    handle.addEventListener('pointermove', function(event) {
+      if (drag && drag.pointerId === event.pointerId) {
+        event.preventDefault();
+        moveDrag(event.clientY);
+      }
+    });
     handle.addEventListener('pointerup', function(event) {
       if (handle.releasePointerCapture) handle.releasePointerCapture(event.pointerId);
       endDrag();
     });
-    handle.addEventListener('touchstart', function(event) { beginDrag((event.touches && event.touches[0] && event.touches[0].clientY) || 0); }, { passive: true });
-    handle.addEventListener('touchmove', function(event) { moveDrag((event.touches && event.touches[0] && event.touches[0].clientY) || 0); }, { passive: true });
-    handle.addEventListener('touchend', endDrag);
-    handle.addEventListener('mousedown', function(event) { beginDrag(event.clientY); });
-    document.addEventListener('mousemove', function(event) { moveDrag(event.clientY); });
-    document.addEventListener('mouseup', endDrag);
+    handle.addEventListener('pointercancel', endDrag);
     handle.addEventListener('click', function() {
-      if (dragged) return;
+      if (suppressClick) return;
       setOpen(!drawer.classList.contains('is-open'));
     });
     document.addEventListener('keydown', function(event) {
