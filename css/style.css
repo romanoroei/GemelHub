@@ -23913,6 +23913,8 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     margin-top: 18px;
   }
   .track-name-actions {
-    gap: 9px;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
   }
 }
