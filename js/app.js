@@ -25,6 +25,8 @@ const App = (() => {
     pendingActuarialFundId: null,
     pendingActuarialCompanyName: null,
     pendingActuarialHighlightDone: false,
+    pendingSearchFundId: null,
+    pendingSearchPopulation: null,
     compactTracksView: true,
     advancedOptionsOpen: false,
     displayOptionsOpen: false,
@@ -776,6 +778,7 @@ const App = (() => {
     const urlView = urlParams.get('view');
     const urlFund = urlParams.get('fund');
     const urlProvider = urlParams.get('provider');
+    const urlPopulation = urlParams.get('population');
     const isMobileViewport = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
     const shouldStartAtFirstTable = !!window.__GEMELHUB_FORCE_TABLE_TOP__ ||
       (isMobileViewport && !!window.__GEMELHUB_IS_RELOAD__ && !urlApp && !urlView && !urlParams.get('openAdvanced'));
@@ -784,6 +787,8 @@ const App = (() => {
     state.pendingActuarialFundId = urlView === 'actuarial' ? (urlFund || null) : null;
     state.pendingActuarialCompanyName = urlView === 'actuarial' ? (urlProvider || null) : null;
     state.pendingActuarialHighlightDone = false;
+    state.pendingSearchFundId = urlView === 'actuarial' ? null : (urlFund || null);
+    state.pendingSearchPopulation = urlView === 'actuarial' ? null : (urlPopulation || null);
     state.pendingInitialTableTopScroll = !!shouldStartAtFirstTable;
     if (handledSharedPortfolioUrl) {
       // Shared portfolio links handle their own navigation after loading.
@@ -3138,6 +3143,14 @@ const App = (() => {
       state.pendingActuarialHighlightDone = false;
     }
     loadSavedFilterState(catId);
+    if (state.pendingSearchFundId) {
+      state.selectedTracks.clear();
+      state.selectedProviders.clear();
+      state.excludedProviders.clear();
+      if (state.pendingSearchPopulation && categoryUsesTargetPopulation(catId)) {
+        state.targetPopulation = state.pendingSearchPopulation;
+      }
+    }
     resetCustomRangeState();
     resetAdvancedSearchState();
     syncCustomRangeControls();
@@ -3801,6 +3814,23 @@ const App = (() => {
     switchCategory(categoryId);
   }
 
+  function focusPendingSearchFund() {
+    const fundId = String(state.pendingSearchFundId || '').trim();
+    if (!fundId) return false;
+    const cell = document.querySelector(`#tracks-container .provider-cell[data-fundid="${CSS.escape(fundId)}"]`);
+    const row = cell?.closest('tr');
+    if (!row) return false;
+    const y = row.getBoundingClientRect().top + window.scrollY - getTrackScrollOffset() - 12;
+    window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    row.classList.remove('search-fund-highlight');
+    void row.offsetWidth;
+    row.classList.add('search-fund-highlight');
+    setTimeout(() => row.classList.remove('search-fund-highlight'), 1900);
+    state.pendingSearchFundId = null;
+    state.pendingSearchPopulation = null;
+    return true;
+  }
+
   async function buildHomeSupplementalInsights(candidates) {
     const insights = [];
     const fmt = (value) => Number.isFinite(value) ? formatPercent(value) : '-';
@@ -4198,6 +4228,10 @@ const App = (() => {
       }
       renderComparisonView();
       showLoading(false);
+      if (state.pendingSearchFundId) {
+        setTimeout(focusPendingSearchFund, 80);
+        setTimeout(focusPendingSearchFund, 420);
+      }
       scheduleTrailing7YLoad(requestedCategoryId, trailing7YRequestId);
       scheduleCategoryViewPrefetch(requestedCategoryId, requestedTargetPopulation);
 
@@ -7950,7 +7984,8 @@ const App = (() => {
     const _sbPageHeader = section.querySelector('.sandbox-page-header');
     const _sbValueBar = document.getElementById('sandbox-value-bar');
     if (_sbPageHeader && _sbValueBar) {
-      _sbPageHeader.appendChild(_sbValueBar);
+      if (window.matchMedia?.('(min-width: 1025px)').matches) _sbPageHeader.after(_sbValueBar);
+      else _sbPageHeader.appendChild(_sbValueBar);
     }
   }
 
@@ -10337,12 +10372,23 @@ const App = (() => {
       btn.addEventListener('click', () => {
         const item = _sbFindPortfolioItemFromElement(btn);
         if (!item) return;
+        const anchorTop = btn.getBoundingClientRect().top;
+        const itemKey = btn.dataset.sandboxKey || '';
         item.pctLocked = !item.pctLocked;
         _sbMarkPortfolioModified();
         saveSandboxPortfolio();
         const scrollMap = _sbCaptureTableScroll(section);
         renderSandboxPage();
         _sbRestoreTableScroll(section, scrollMap);
+        requestAnimationFrame(() => {
+          const freshButton = itemKey
+            ? section.querySelector(`.sandbox-pct-lock-btn[data-sandbox-key="${CSS.escape(itemKey)}"]`)
+            : null;
+          if (!freshButton) return;
+          const delta = freshButton.getBoundingClientRect().top - anchorTop;
+          if (Math.abs(delta) > 1) window.scrollBy({ top: delta, left: 0, behavior: 'auto' });
+          freshButton.focus({ preventScroll: true });
+        });
       });
     });
 
@@ -11096,7 +11142,14 @@ const App = (() => {
           const key = `${name}|${sub}`;
           if (!seen.has(key) && results.length < 10) {
             seen.add(key);
-            results.push({ name, sub, cls, fundId: id, catId: getCatIdByClassification(cls) });
+            results.push({
+              name,
+              sub,
+              cls,
+              fundId: id,
+              catId: getCatIdByClassification(cls),
+              targetPopulation: String(r.TARGET_POPULATION || '')
+            });
           }
         }
       });
@@ -11109,7 +11162,7 @@ const App = (() => {
         <div class="sd-item" data-idx="${i}" data-catid="${res.catId || ''}" data-fundid="${res.fundId}">
           <div class="sd-name">${highlight(res.name, q)}</div>
           <div class="sd-sub">${highlight(res.sub, q)} · ${shortCls(res.cls)} · <span class="sd-id">#${highlight(res.fundId, q)}</span></div>
-          ${res.catId && res.catId !== state.activeCategoryId ? `<button type="button" class="sd-category-link" data-search-category="${res.catId}">מעבר לטבלת ${catLabel}</button>` : ''}
+          ${res.catId && res.catId !== state.activeCategoryId ? `<button type="button" class="sd-category-link" data-search-category="${res.catId}" data-search-population="${escapeAttr(res.targetPopulation)}">מעבר לטבלת ${catLabel}</button>` : ''}
         </div>
       `;
       }).join('');
@@ -11135,7 +11188,11 @@ const App = (() => {
           const catId = button.dataset.searchCategory;
           closeDropdown();
           input.value = '';
-          if (catId) switchCategory(catId);
+          if (catId) {
+            state.pendingSearchFundId = button.closest('.sd-item')?.dataset.fundid || null;
+            state.pendingSearchPopulation = button.dataset.searchPopulation || null;
+            switchCategory(catId);
+          }
         });
       });
     }

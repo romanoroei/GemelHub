@@ -45,7 +45,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=search-actions-20260807" />
+  <link rel="stylesheet" href="css/style.css?v=search-focus-sandbox-sticky-20260807" />
   <link rel="stylesheet" href="css/fund.css?v=fund-destinations-20260806" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -2973,7 +2973,7 @@ async function setupFundSearch() {
             c.apiClassifications?.some(ac => cls === ac.trim()) ||
             (c.pensionAPI && cls.includes('פנסי'))
           );
-          results.push({ name, id, fname, sub, catId: catObj ? catObj.id : '' });
+          results.push({ name, id, fname, sub, catId: catObj ? catObj.id : '', targetPopulation: String(r.TARGET_POPULATION || '') });
         }
       }
     });
@@ -2984,7 +2984,7 @@ async function setupFundSearch() {
       <div class="sd-item" data-fundid="${res.id}" data-catid="${res.catId}">
         <div class="sd-name">${res.name}</div>
         <div class="sd-sub">${res.fname || res.sub} · <span class="sd-id">#${res.id}</span></div>
-        ${res.catId ? `<button type="button" class="sd-category-link" data-search-category="${res.catId}">מעבר לטבלת ${catLabel}</button>` : ''}
+        ${res.catId ? `<button type="button" class="sd-category-link" data-search-category="${res.catId}" data-search-population="${res.targetPopulation}">מעבר לטבלת ${catLabel}</button>` : ''}
       </div>`;
     }).join('');
     dropdown.style.display = 'block';
@@ -2998,7 +2998,8 @@ async function setupFundSearch() {
     dropdown.querySelectorAll('[data-search-category]').forEach(button => {
       button.addEventListener('click', event => {
         event.stopPropagation();
-        window.location.href = `index.html?cat=${encodeURIComponent(button.dataset.searchCategory)}`;
+        const fundId = button.closest('.sd-item')?.dataset.fundid || '';
+        window.location.href = `index.html?cat=${encodeURIComponent(button.dataset.searchCategory)}&fund=${encodeURIComponent(fundId)}&population=${encodeURIComponent(button.dataset.searchPopulation || '')}`;
       });
     });
   }
