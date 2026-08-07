@@ -91,7 +91,6 @@ const App = (() => {
   const categoryPrefetchTargets = new Set();
   let categoryLoadSequence = 0;
   let trailing7YTimer = null;
-  let isInitialCategoryNavigation = true;
   let searchableWarmupPromise = null;
   let searchableRecordsFullyWarmed = false;
 
@@ -3154,11 +3153,10 @@ const App = (() => {
           ? ''
           : DEFAULT_TARGET_POPULATION;
       }
-    } else if (isInitialCategoryNavigation && categoryUsesTargetPopulation(catId)) {
+    } else if (categoryUsesTargetPopulation(catId)) {
       state.targetPopulation = DEFAULT_TARGET_POPULATION;
     }
     if (!state.pendingSearchFundId) state.searchForcedTrackId = null;
-    isInitialCategoryNavigation = false;
     resetCustomRangeState();
     resetAdvancedSearchState();
     syncCustomRangeControls();
