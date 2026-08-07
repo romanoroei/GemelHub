@@ -2864,6 +2864,28 @@ const App = (() => {
     syncCustomRangeControls();
   }
 
+  function buildImmediateCustomRangePeriods(monthCount = 120) {
+    const latestPeriod = state.organizedData.reduce((latest, item) => {
+      return (item.records || []).reduce((recordLatest, record) => {
+        return Math.max(recordLatest, Number(record.REPORT_PERIOD) || 0);
+      }, latest);
+    }, 0);
+    if (!latestPeriod) return [];
+    let year = Math.floor(latestPeriod / 100);
+    let month = latestPeriod % 100;
+    if (month < 1 || month > 12) return [];
+    const periods = [];
+    for (let index = 0; index < monthCount; index += 1) {
+      periods.push((year * 100) + month);
+      month -= 1;
+      if (month < 1) {
+        month = 12;
+        year -= 1;
+      }
+    }
+    return periods;
+  }
+
   async function refreshCustomRangeAvailability() {
     if (!state.activeCategoryId || state.isHomePage || !isCustomRangeFeatureEnabled()) {
       resetCustomRangeState();
@@ -2874,6 +2896,13 @@ const App = (() => {
     const requestId = ++state.customRange.availabilityRequestId;
     const requestedCategoryId = state.activeCategoryId;
     const requestedTargetPopulation = state.targetPopulation;
+    if (!state.customRange.availablePeriods.length && getCurrentCompareMode() !== 'actuarial') {
+      const immediatePeriods = buildImmediateCustomRangePeriods();
+      if (immediatePeriods.length > 1) {
+        state.customRange.availablePeriods = immediatePeriods;
+        hydrateCustomRangePeriodOptions();
+      }
+    }
     state.customRange.availabilityLoading = true;
     syncCustomRangeControls();
 
@@ -2884,10 +2913,13 @@ const App = (() => {
         state.activeCategoryId !== requestedCategoryId ||
         state.targetPopulation !== requestedTargetPopulation
       ) return;
+      const priorStart = state.customRange.startPeriod;
+      const priorEnd = state.customRange.endPeriod;
+      const priorYear = state.customRange.selectedYear;
       state.customRange.availablePeriods = periods;
-      state.customRange.startPeriod = '';
-      state.customRange.endPeriod = '';
-      state.customRange.selectedYear = '';
+      state.customRange.startPeriod = periods.some(period => String(period) === String(priorStart)) ? priorStart : '';
+      state.customRange.endPeriod = periods.some(period => String(period) === String(priorEnd)) ? priorEnd : '';
+      state.customRange.selectedYear = periods.some(period => String(Math.floor(Number(period) / 100)) === String(priorYear)) ? priorYear : '';
       state.customRange.yieldMap = null;
       state.customRange.active = false;
       resetCustomRangeSorts();
