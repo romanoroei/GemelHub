@@ -45,7 +45,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=search-row-highlight-visible-20260808" />
+  <link rel="stylesheet" href="css/style.css?v=search-row-pension-sector-20260808" />
   <link rel="stylesheet" href="css/fund.css?v=fund-destinations-20260806" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -2963,14 +2963,15 @@ async function setupFundSearch() {
       const name  = getProviderDisplayName(r.CONTROLLING_CORPORATION, r.MANAGING_CORPORATION);
       const id    = String(r.FUND_ID || '');
       const fname = (r.FUND_NAME || '');
-      const sub   = (r.SUB_SPECIALIZATION || '');
+      const cls = r.FUND_CLASSIFICATION || '';
+      const isPensionRecord = /פנסי|קרנות\s+חדשות/i.test(`${cls} ${fname}`);
+      const sub   = (r.SUB_SPECIALIZATION || (isPensionRecord ? fname : ''));
       const nameLower = name.toLowerCase();
       const fundNameLower = fname.toLowerCase();
       const subLower = sub.toLowerCase();
       if (nameLower.includes(ql) || id.includes(ql) || fundNameLower.includes(ql) || subLower.includes(ql)) {
         if (!seen.has(id)) {
           seen.add(id);
-          const cls = r.FUND_CLASSIFICATION || '';
           const catObj = CONFIG.PRODUCT_CATEGORIES.find(c =>
             c.apiClassifications?.some(ac => cls === ac.trim()) ||
             (c.pensionAPI && cls.includes('פנסי'))

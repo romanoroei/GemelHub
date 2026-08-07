@@ -3124,6 +3124,13 @@ const App = (() => {
       showHomePage();
       return;
     }
+    const globalSearchInput = document.getElementById('global-search');
+    const globalSearchDropdown = document.getElementById('search-dropdown');
+    if (globalSearchInput) globalSearchInput.value = '';
+    if (globalSearchDropdown) {
+      globalSearchDropdown.style.display = 'none';
+      globalSearchDropdown.innerHTML = '';
+    }
     const animateMobileChange = window.matchMedia?.('(max-width: 1024px)').matches &&
       state.activeCategoryId && state.activeCategoryId !== catId;
     // Display modes belong to the current category. Carrying mobile exposure
@@ -3836,13 +3843,24 @@ const App = (() => {
     // both together makes most of the animation run while the row is still
     // outside the viewport.
     row.classList.remove('search-fund-highlight');
+    const applyHighlight = () => {
+      const currentCell = document.querySelector(`#tracks-container .provider-cell[data-fundid="${CSS.escape(fundId)}"]`);
+      const currentRow = currentCell?.closest('tr');
+      if (!currentRow) return;
+      document.querySelectorAll('#tracks-container tr.search-fund-highlight').forEach(item => {
+        item.classList.remove('search-fund-highlight');
+      });
+      void currentRow.offsetWidth;
+      currentRow.classList.add('search-fund-highlight');
+      setTimeout(() => currentRow.classList.remove('search-fund-highlight'), 2700);
+    };
+    // Re-query the row after navigation because trailing-yield rendering may
+    // replace the table DOM while the smooth scroll is running.
+    setTimeout(applyHighlight, 560);
     setTimeout(() => {
-      if (!row.isConnected) return;
-      row.classList.remove('search-fund-highlight');
-      void row.offsetWidth;
-      row.classList.add('search-fund-highlight');
-      setTimeout(() => row.classList.remove('search-fund-highlight'), 2600);
-    }, 520);
+      const currentCell = document.querySelector(`#tracks-container .provider-cell[data-fundid="${CSS.escape(fundId)}"]`);
+      if (currentCell && !currentCell.closest('tr')?.classList.contains('search-fund-highlight')) applyHighlight();
+    }, 1250);
     state.pendingSearchFundId = null;
     state.pendingSearchPopulation = null;
     return true;
@@ -10866,7 +10884,10 @@ const App = (() => {
       const armyAudience = baseName === 'הראל' && /צבא\s*הקבע|משרתי\s*הקבע/.test(fundName)
         ? 'צבא הקבע'
         : null;
-      const _suffix = armyAudience || ((_nameCount.get(baseName) > 1 && !isSectorNameWithoutSubManager)
+      const sectorAudience = String(r.TARGET_POPULATION || '') !== DEFAULT_TARGET_POPULATION && _nameCount.get(baseName) > 1
+        ? extractSectorAudience(fundName, baseName)
+        : null;
+      const _suffix = armyAudience || sectorAudience || ((_nameCount.get(baseName) > 1 && !isSectorNameWithoutSubManager)
         ? extractFundSuffix(fundName)
         : null);
       const name = _suffix ? baseName + ' — ' + _suffix : baseName;
@@ -11107,6 +11128,20 @@ const App = (() => {
     return null;
   }
 
+  function extractSectorAudience(fundName, providerName = '') {
+    let value = String(fundName || '').replace(/\s+/g, ' ').trim();
+    if (!value) return null;
+    const employeeAudience = value.match(/(לעובדי(?:ם)?\s+.+)$/);
+    if (employeeAudience) return employeeAudience[1].trim();
+    const escapedProvider = String(providerName || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    value = value
+      .replace(new RegExp(`^${escapedProvider}\s*[-–—:]?\s*`, 'i'), '')
+      .replace(/^.*?קרן\s+השתלמות\s*/i, '')
+      .replace(/^.*?קופת\s+גמל\s*/i, '')
+      .trim();
+    return value && value !== fundName ? value : null;
+  }
+
   function yieldClass(v) {
     const n = parseFloat(v);
     if (isNaN(n) || v === null || v === undefined) return '';
@@ -11163,9 +11198,10 @@ const App = (() => {
       state.searchableRecords.forEach(r => {
         const name  = getProviderDisplayName(r.CONTROLLING_CORPORATION, r.MANAGING_CORPORATION);
         const id    = String(r.FUND_ID || '');
-        const sub   = (r.SUB_SPECIALIZATION || '');
         const cls   = (r.FUND_CLASSIFICATION || '');
         const fname = (r.FUND_NAME || '');
+        const isPensionRecord = /פנסי|קרנות\s+חדשות/i.test(`${cls} ${fname}`);
+        const sub   = (r.SUB_SPECIALIZATION || (isPensionRecord ? fname : ''));
 
         const nameLower = name.toLowerCase();
         const subLower = sub.toLowerCase();
