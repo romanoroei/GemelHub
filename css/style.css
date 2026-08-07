@@ -11108,7 +11108,7 @@ body.h2h-active,
 @media (min-width: 1025px) {
   #sandbox-section .sandbox-value-bar {
     position: sticky !important;
-    top: calc(var(--sticky-total-h, 129px) + 4px) !important;
+    top: var(--sandbox-value-sticky-top, 77px) !important;
     bottom: auto !important;
     left: auto !important;
     transform: none !important;
@@ -23972,7 +23972,7 @@ body.actuarial-mode .custom-range-panel:not([hidden]) {
 @media (min-width: 1025px) {
   body.sandbox-active #sandbox-section .sandbox-value-bar {
     position: sticky !important;
-    top: calc(var(--sticky-total-h, 129px) + 4px) !important;
+    top: var(--sandbox-value-sticky-top, 77px) !important;
     z-index: 900 !important;
   }
 }

@@ -7986,6 +7986,8 @@ const App = (() => {
     if (_sbPageHeader && _sbValueBar) {
       if (window.matchMedia?.('(min-width: 1025px)').matches) _sbPageHeader.after(_sbValueBar);
       else _sbPageHeader.appendChild(_sbValueBar);
+      const categoryBarHeight = document.querySelector('.category-tabs-bar')?.getBoundingClientRect().height || 77;
+      _sbValueBar.style.setProperty('--sandbox-value-sticky-top', `${Math.ceil(categoryBarHeight)}px`);
     }
   }
 
@@ -11162,7 +11164,7 @@ const App = (() => {
         <div class="sd-item" data-idx="${i}" data-catid="${res.catId || ''}" data-fundid="${res.fundId}">
           <div class="sd-name">${highlight(res.name, q)}</div>
           <div class="sd-sub">${highlight(res.sub, q)} · ${shortCls(res.cls)} · <span class="sd-id">#${highlight(res.fundId, q)}</span></div>
-          ${res.catId && res.catId !== state.activeCategoryId ? `<button type="button" class="sd-category-link" data-search-category="${res.catId}" data-search-population="${escapeAttr(res.targetPopulation)}">מעבר לטבלת ${catLabel}</button>` : ''}
+          ${res.catId && res.catId !== state.activeCategoryId ? `<button type="button" class="sd-category-link" data-search-category="${res.catId}" data-search-population="${ghEscapeAttr(res.targetPopulation)}">מעבר לטבלת ${catLabel}</button>` : ''}
         </div>
       `;
       }).join('');
