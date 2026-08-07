@@ -26,6 +26,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { buildTrailing7YFile } from './build-trailing-7y.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.join(__dirname, '..');
@@ -219,6 +220,20 @@ async function main() {
   }
 
   // 3) Failure tracking — alert on the very first failed check, no waiting.
+  // Publish compact seven-year results whenever the underlying sources change.
+  // Visitors can then download a small map instead of parsing historical archives.
+  const trailing7YFile = path.join(DATA_DIR, 'trailing-7y.json');
+  if (anyChange || !(await fileExists(trailing7YFile))) {
+    try {
+      await buildTrailing7YFile();
+      anyChange = true;
+      console.log('trailing-7y: rebuilt compact precomputed results.');
+    } catch (err) {
+      console.error('trailing-7y: rebuild FAILED:', err.message);
+      checkFailed = true;
+    }
+  }
+
   const wasAboveThreshold = (state.consecutiveFailures || 0) >= FAILURE_ALERT_THRESHOLD;
   if (checkFailed) {
     state.consecutiveFailures = (state.consecutiveFailures || 0) + 1;

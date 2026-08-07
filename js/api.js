@@ -1021,6 +1021,66 @@ const APIModule = (() => {
 
   const _cachedTrailing7YByCategory = new Map();
   const _trailing7YPromiseByCategory = new Map();
+  const _precomputedTrailing7YByFamily = new Map();
+  let _precomputedTrailing7YPromise = null;
+
+  function trailing7YCacheKey(categoryId, targetPopulation = 'כלל האוכלוסיה') {
+    return `gemelhub_trailing7y_v1_${categoryId || 'all'}_${targetPopulation || ''}`;
+  }
+
+  function peekTrailing7Yields(categoryId, targetPopulation = 'כלל האוכלוסיה') {
+    const cacheKey = trailing7YCacheKey(categoryId, targetPopulation);
+    if (_cachedTrailing7YByCategory.has(cacheKey)) return _cachedTrailing7YByCategory.get(cacheKey);
+    const familyMap = _precomputedTrailing7YByFamily.get(getTrailing7YFamily(categoryId));
+    if (familyMap) {
+      _cachedTrailing7YByCategory.set(cacheKey, familyMap);
+      return familyMap;
+    }
+    const cachedArr = _lsLoad(cacheKey);
+    if (!cachedArr) return null;
+    const cachedMap = new Map(cachedArr.map(([fundId, value]) => [String(fundId), value === null ? null : Number(value)]));
+    _cachedTrailing7YByCategory.set(cacheKey, cachedMap);
+    return cachedMap;
+  }
+
+  function getTrailing7YFamily(categoryId) {
+    const cat = CONFIG.PRODUCT_CATEGORIES.find(item => item.id === categoryId);
+    if (cat?.pensionAPI) return 'pension';
+    if (cat?.polisaAPI) return 'polisa';
+    return cat ? 'gemel' : null;
+  }
+
+  async function loadPrecomputedTrailing7Yields(categoryId) {
+    const family = getTrailing7YFamily(categoryId);
+    if (!family) return null;
+    if (!_precomputedTrailing7YPromise) {
+      _precomputedTrailing7YPromise = fetch('data/ckan/trailing-7y.json', { cache: 'no-cache' })
+        .then(response => {
+          if (!response.ok) throw new Error(`precomputed seven-year HTTP ${response.status}`);
+          return response.json();
+        })
+        .then(payload => {
+          if (payload?.schemaVersion === 1) {
+            Object.entries(payload.families || {}).forEach(([familyName, familyData]) => {
+              const values = familyData?.values;
+              if (values && typeof values === 'object') {
+                _precomputedTrailing7YByFamily.set(familyName, new Map(
+                  Object.entries(values).map(([fundId, value]) => [String(fundId), Number(value)])
+                ));
+              }
+            });
+          }
+          return payload;
+        })
+        .catch(() => null);
+    }
+    await _precomputedTrailing7YPromise;
+    return _precomputedTrailing7YByFamily.get(family) || null;
+  }
+
+  function warmTrailing7Yields(categoryId = 'gemel_tagmulim') {
+    return loadPrecomputedTrailing7Yields(categoryId);
+  }
 
   async function getTrailing7YSourceRecords(categoryId, targetPopulation) {
     const cat = CONFIG.PRODUCT_CATEGORIES.find(item => item.id === categoryId);
@@ -1060,8 +1120,16 @@ const APIModule = (() => {
   }
 
   async function getTrailing7Yields(categoryId, targetPopulation = 'כלל האוכלוסיה') {
-    const cacheKey = `gemelhub_trailing7y_v1_${categoryId || 'all'}_${targetPopulation || ''}`;
-    if (_cachedTrailing7YByCategory.has(cacheKey)) return _cachedTrailing7YByCategory.get(cacheKey);
+    const cacheKey = trailing7YCacheKey(categoryId, targetPopulation);
+    const immediate = peekTrailing7Yields(categoryId, targetPopulation);
+    if (immediate) return immediate;
+
+    const precomputedMap = await loadPrecomputedTrailing7Yields(categoryId);
+    if (precomputedMap) {
+      _cachedTrailing7YByCategory.set(cacheKey, precomputedMap);
+      _lsSave(cacheKey, [...precomputedMap.entries()]);
+      return precomputedMap;
+    }
 
     const cachedArr = _lsLoad(cacheKey);
     if (cachedArr) {
@@ -2489,6 +2557,8 @@ const APIModule = (() => {
     fetchPolisaData,
     getAvailableReportPeriods,
     getCustomRangeYields,
+    peekTrailing7Yields,
+    warmTrailing7Yields,
     getTrailing7Yields,
     getAnnualYearlyYields,
     getYearlyYieldsForFunds,

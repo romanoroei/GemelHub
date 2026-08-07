@@ -683,6 +683,7 @@ const App = (() => {
   // ─── INIT ─────────────────────────────────────────────────────
   async function init() {
     APIModule.loadCachesFromLocalStorage();
+    APIModule.warmTrailing7Yields('gemel_tagmulim').catch(() => {});
     _sbRestoreMobileZoom();
     loadDisplayOptions();
     state.advancedOptionsOpen = false;
@@ -4174,9 +4175,9 @@ const App = (() => {
         });
     };
     clearTimeout(trailing7YTimer);
-    // Seven-year history is supplemental. Give navigation and the current table
-    // first priority so a quick category change never waits behind this request.
-    trailing7YTimer = setTimeout(run, 2200);
+    // Yield one task so navigation can paint first, then use the compact
+    // precomputed map. The historical fallback remains chunked/non-blocking.
+    trailing7YTimer = setTimeout(run, 0);
   }
 
   function getCategoryViewCacheKey(catId, targetPopulation = state.targetPopulation) {
@@ -4275,10 +4276,11 @@ const App = (() => {
     try {
       const bundle = cachedBundle || await getCategoryViewBundle(catId, requestedTargetPopulation);
       if (loadSequence !== categoryLoadSequence || state.activeCategoryId !== requestedCategoryId) return;
+      const cachedTrailing7Y = APIModule.peekTrailing7Yields(catId, requestedTargetPopulation);
       state.trailing7Y.categoryId = catId;
       state.trailing7Y.targetPopulation = requestedTargetPopulation;
-      state.trailing7Y.map = null;
-      state.trailing7Y.loading = true;
+      state.trailing7Y.map = cachedTrailing7Y;
+      state.trailing7Y.loading = !cachedTrailing7Y;
       state.trailing7Y.error = null;
       state.trailing7Y.requestId += 1;
       const trailing7YRequestId = state.trailing7Y.requestId;
@@ -4316,7 +4318,7 @@ const App = (() => {
         setTimeout(focusPendingSearchFund, 80);
         setTimeout(focusPendingSearchFund, 420);
       }
-      scheduleTrailing7YLoad(requestedCategoryId, trailing7YRequestId);
+      if (!cachedTrailing7Y) scheduleTrailing7YLoad(requestedCategoryId, trailing7YRequestId);
       scheduleCategoryViewPrefetch(requestedCategoryId, requestedTargetPopulation);
 
       // רקע: טווח מותאם — לא חוסם את הרינדור (נתוני חיפוש כבר הופעלו למעלה, מיד עם תחילת הטעינה)
