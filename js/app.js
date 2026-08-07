@@ -2045,8 +2045,6 @@ const App = (() => {
     const preferencesSlider = document.getElementById('mobile-preferences-scale-slider');
     const preferencesValue = document.getElementById('mobile-preferences-scale-value');
     const preferencesSummary = document.getElementById('mobile-preferences-scale-summary');
-    const preferencesPreview = document.getElementById('mobile-preferences-scale-preview');
-    const preferencesEffect = document.getElementById('mobile-preferences-scale-effect');
     if (preferencesToggle && preferencesPanel && preferencesSlider) {
       const syncPreferencesScale = value => {
         const pct = _sbApplyMobileZoom(parseInt(value, 10));
@@ -2057,10 +2055,6 @@ const App = (() => {
         const categoryValue = document.getElementById('mob-opts-zoom-value');
         if (categorySlider) categorySlider.value = String(pct);
         if (categoryValue) categoryValue.textContent = `${pct}%`;
-        if (preferencesPreview) preferencesPreview.style.setProperty('--scale-preview', String(pct / 100));
-        if (preferencesEffect) preferencesEffect.textContent = pct < 98
-          ? 'יותר נתונים נכנסים למסך'
-          : pct > 102 ? 'הטקסט והנתונים גדולים יותר' : 'תצוגה רגילה';
         return pct;
       };
       syncPreferencesScale(_sbGetMobileZoomPct());
@@ -3886,7 +3880,7 @@ const App = (() => {
     const logoHeight = document.querySelector('.mobile-table-logo-bar')?.getBoundingClientRect().height || 0;
     const categoryRail = document.getElementById('mobile-product-rail');
     const categoryRailHeight = categoryRail && !categoryRail.hidden ? categoryRail.getBoundingClientRect().height : 0;
-    const desiredTop = logoHeight + categoryRailHeight + trackHeader.getBoundingClientRect().height + thead.getBoundingClientRect().height + 2;
+    const desiredTop = logoHeight + categoryRailHeight + trackHeader.getBoundingClientRect().height + thead.getBoundingClientRect().height + 10;
     return {
       desiredTop,
       top: firstRow.getBoundingClientRect().top,
@@ -3929,7 +3923,10 @@ const App = (() => {
       if (!currentRow) return false;
       if (!didScrollToResult) {
         const block = currentRow.closest('.track-block');
-        if (block) scrollToTrackBlockTop(block, 'smooth');
+        if (block) {
+          block.style.scrollMarginTop = `${getTrackScrollOffset() + 10}px`;
+          block.scrollIntoView({ behavior: 'auto', block: 'start' });
+        }
         else {
           const y = currentRow.getBoundingClientRect().top + window.scrollY - getTrackScrollOffset() - 12;
           window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });

@@ -785,6 +785,115 @@ body.sticky-gap-mask-active:not(.fund-page)::before {
   justify-content: space-between;
   gap: 8px;
 }
+
+/* Mobile search and filter polish. */
+@media (max-width: 1024px) {
+  #mob-fund-search-backdrop {
+    background: rgba(15, 39, 68, .34) !important;
+    backdrop-filter: blur(2px);
+  }
+  #mob-fund-search-box {
+    width: calc(100% - 20px) !important;
+    max-height: min(78vh, 690px) !important;
+    margin: 8px auto 0 !important;
+    border: 1px solid rgba(201, 183, 114, .58) !important;
+    border-radius: 18px !important;
+    background: #f7f8fa !important;
+    box-shadow: 0 18px 45px rgba(15, 39, 68, .24) !important;
+  }
+  #mob-fund-search-row {
+    gap: 8px !important;
+    padding: 10px !important;
+    border-bottom: 1px solid #e8e3d5 !important;
+    background: #fff !important;
+  }
+  #mob-fund-search-input {
+    height: 40px !important;
+    padding: 8px 13px !important;
+    border: 1px solid #d8c78e !important;
+    background: #fff !important;
+    font-size: .9rem !important;
+  }
+  #mob-fund-search-close {
+    width: 30px !important;
+    height: 30px !important;
+    background: #f4f1e8 !important;
+    color: #526174 !important;
+  }
+  #mob-fund-search-results {
+    display: grid !important;
+    gap: 8px !important;
+    padding: 9px !important;
+    background: #f7f8fa !important;
+  }
+  #mob-fund-search-results .mob-search-item {
+    padding: 10px 11px !important;
+    border: 1px solid #e6e8ec !important;
+    border-radius: 12px !important;
+    background: #fff !important;
+    box-shadow: 0 2px 7px rgba(15, 39, 68, .055) !important;
+  }
+  #mob-fund-search-results .mob-search-fund-link {
+    min-height: 28px !important;
+    padding: 0 0 5px !important;
+    border-bottom: 1px solid #f0f1f3 !important;
+  }
+  #mob-fund-search-results .mob-search-item-name {
+    color: #10283d !important;
+    font-size: .88rem !important;
+    font-weight: 800 !important;
+    line-height: 1.25 !important;
+  }
+  #mob-fund-search-results .mob-search-open-cue {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 3px 7px !important;
+    border-radius: 999px !important;
+    background: #edf8f5 !important;
+    color: #167a68 !important;
+    font-size: .62rem !important;
+    font-weight: 750 !important;
+  }
+  #mob-fund-search-results .mob-search-item-sub {
+    margin-top: 7px !important;
+    color: #64748b !important;
+    font-size: .72rem !important;
+    line-height: 1.35 !important;
+  }
+  #mob-fund-search-results .search-sectorial-badge {
+    margin-top: 6px !important;
+    padding: 3px 7px !important;
+    font-size: .64rem !important;
+  }
+  #mob-fund-search-results .mob-search-table-link {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    min-height: 34px !important;
+    margin-top: 8px !important;
+    padding: 6px 9px !important;
+    border: 1px solid #cfb45e !important;
+    border-radius: 9px !important;
+    background: #fffaf0 !important;
+    color: #705313 !important;
+    font-size: .7rem !important;
+    font-weight: 800 !important;
+  }
+  #mob-fund-search-results .mob-search-table-link:active,
+  #mob-fund-search-results .mob-search-fund-link:active {
+    transform: scale(.985);
+  }
+  html body.mobile-filter-open #sidebar .provider-filter-name,
+  html body.mobile-filter-open #sidebar #filter-tracks .filter-checkbox {
+    font-size: .78rem !important;
+    line-height: 1.12 !important;
+  }
+  html body.mobile-filter-open #sidebar .filter-checkbox-sub {
+    font-size: .73rem !important;
+  }
+}
 .sd-fund-page-link {
   width: 100%;
   padding: 0;
@@ -24167,4 +24276,15 @@ body.actuarial-mode .custom-range-panel:not([hidden]) {
 html body .scroll-top-btn,
 html body #scroll-top-btn {
   z-index: 2147483000 !important;
+}
+
+@media (max-width: 1024px) {
+  html body.mobile-filter-open #sidebar .provider-filter-name,
+  html body.mobile-filter-open #sidebar #filter-tracks .filter-checkbox {
+    font-size: .78rem !important;
+    line-height: 1.12 !important;
+  }
+  html body.mobile-filter-open #sidebar .filter-checkbox-sub {
+    font-size: .73rem !important;
+  }
 }
