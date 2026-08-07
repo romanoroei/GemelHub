@@ -2040,6 +2040,33 @@ const App = (() => {
     const nav = document.querySelector('.mobile-app-nav');
     if (!nav) return;
     document.getElementById('mobile-user-account')?.addEventListener('click', switchToMobileMorePage);
+    const preferencesToggle = document.getElementById('mobile-preferences-toggle');
+    const preferencesPanel = document.getElementById('mobile-preferences-panel');
+    const preferencesSlider = document.getElementById('mobile-preferences-scale-slider');
+    const preferencesValue = document.getElementById('mobile-preferences-scale-value');
+    const preferencesSummary = document.getElementById('mobile-preferences-scale-summary');
+    if (preferencesToggle && preferencesPanel && preferencesSlider) {
+      const syncPreferencesScale = value => {
+        const pct = _sbApplyMobileZoom(parseInt(value, 10));
+        preferencesSlider.value = String(pct);
+        if (preferencesValue) preferencesValue.textContent = `${pct}%`;
+        if (preferencesSummary) preferencesSummary.textContent = `${pct}%`;
+        const categorySlider = document.getElementById('mob-opts-zoom-slider');
+        const categoryValue = document.getElementById('mob-opts-zoom-value');
+        if (categorySlider) categorySlider.value = String(pct);
+        if (categoryValue) categoryValue.textContent = `${pct}%`;
+        return pct;
+      };
+      syncPreferencesScale(_sbGetMobileZoomPct());
+      preferencesToggle.addEventListener('click', () => {
+        const open = preferencesPanel.hidden;
+        preferencesPanel.hidden = !open;
+        preferencesToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        preferencesToggle.querySelector('.fa-chevron-left')?.classList.toggle('fa-rotate-270', open);
+      });
+      preferencesSlider.addEventListener('input', () => syncPreferencesScale(preferencesSlider.value));
+      preferencesSlider.addEventListener('change', () => _sbSaveMobileZoomPct(syncPreferencesScale(preferencesSlider.value)));
+    }
     nav.addEventListener('click', event => {
       const item = event.target.closest('[data-mobile-app-action]');
       if (!item || !nav.contains(item)) return;

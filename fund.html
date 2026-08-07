@@ -45,7 +45,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=search-polisa-ui-20260808" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-preferences-20260809" />
   <link rel="stylesheet" href="css/fund.css?v=fund-destinations-20260806" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -286,9 +286,9 @@
 </div>
 
 <nav class="mobile-app-nav" aria-label="ניווט תחתון במובייל">
-  <button type="button" class="mobile-app-nav-item" data-fund-mobile-action="categories" aria-label="אפשרויות" data-mobile-app-target="categories">
-    <i class="fas fa-layer-group" aria-hidden="true"></i>
-    <span>אפשרויות</span>
+  <button type="button" class="mobile-app-nav-item" data-fund-mobile-action="funds" aria-label="קופות" data-mobile-app-target="funds">
+    <i class="fas fa-coins" aria-hidden="true"></i>
+    <span>קופות</span>
   </button>
   <button type="button" class="mobile-app-nav-item is-disabled" disabled aria-disabled="true" aria-label="סינון" data-mobile-app-target="sidebar-filter">
     <i class="fas fa-filter" aria-hidden="true"></i>
@@ -3758,8 +3758,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setupMobileRecentFundsDrawer();
     document.querySelectorAll('[data-fund-mobile-action]').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        if (btn.dataset.fundMobileAction === 'categories') {
-          openFundCategorySheet();
+        if (btn.dataset.fundMobileAction === 'funds') {
+          window.location.href = 'index.html?cat=' + encodeURIComponent(_fundCatId || 'gemel_tagmulim');
         }
         if (btn.dataset.fundMobileAction === 'search') {
           openFundSearchSheet();

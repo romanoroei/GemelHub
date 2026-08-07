@@ -58,7 +58,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=search-polisa-ui-20260808" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-preferences-20260809" />
   <style>
     @media (max-width: 760px) {
       .advanced-search-overlay { z-index: 9500 !important; }
@@ -737,7 +737,16 @@
     <div class="mobile-more-list">
       <button type="button" data-future-feature><i class="fas fa-bell"></i><span>התראות</span><em>בקרוב</em><i class="fas fa-chevron-left"></i></button>
       <button type="button" data-future-feature><i class="fas fa-bookmark"></i><span>פריטים שמורים</span><em>בקרוב</em><i class="fas fa-chevron-left"></i></button>
-      <button type="button" data-future-feature><i class="fas fa-sliders-h"></i><span>העדפות והגדרות</span><em>בקרוב</em><i class="fas fa-chevron-left"></i></button>
+      <button type="button" id="mobile-preferences-toggle" aria-expanded="false" aria-controls="mobile-preferences-panel"><i class="fas fa-sliders-h"></i><span>העדפות והגדרות</span><em id="mobile-preferences-scale-summary">100%</em><i class="fas fa-chevron-left"></i></button>
+      <div class="mobile-preferences-panel" id="mobile-preferences-panel" hidden>
+        <div class="mobile-preferences-scale-head">
+          <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+          <span>קנה מידה לתצוגה</span>
+          <strong id="mobile-preferences-scale-value">100%</strong>
+        </div>
+        <input type="range" id="mobile-preferences-scale-slider" min="85" max="110" step="1" value="100" aria-label="שינוי קנה המידה במובייל" />
+        <div class="mobile-preferences-scale-labels"><span>קטן</span><span>רגיל</span><span>גדול</span></div>
+      </div>
     </div>
   </div>
 </section>
@@ -822,6 +831,6 @@
 
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
-  <script src="js/app.js?v=instant-seven-year-20260808"></script>
+  <script src="js/app.js?v=mobile-preferences-20260809"></script>
 </body>
 </html>
