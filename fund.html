@@ -45,7 +45,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=mobile-preferences-20260809" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-search-swipe-20260809" />
   <link rel="stylesheet" href="css/fund.css?v=fund-destinations-20260806" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -110,6 +110,7 @@
             </div>
             <h1 class="fund-hero-name" id="fh-name"></h1>
             <div class="fund-hero-track" id="fh-track-large"></div>
+            <div class="fund-sectorial-note" id="fh-sectorial" hidden></div>
             <div class="fund-hero-meta">
               <span class="fh-meta-chip" id="fh-id"></span>
               <span class="fh-meta-chip fh-meta-period" id="fh-period"></span>
@@ -599,6 +600,13 @@ async function loadFundPage() {
     document.getElementById('fh-cat').textContent     = cat ? cat.label : (latest.FUND_CLASSIFICATION || '');
     document.getElementById('fh-name').textContent    = provName;
     setTrackLink(document.getElementById('fh-track-large'), trackDisplayLabel, trackCompareUrl);
+    const sectorialPopulation = String(latest.TARGET_POPULATION || '').trim();
+    const sectorialNote = document.getElementById('fh-sectorial');
+    if (sectorialNote) {
+      const isSectorial = !!sectorialPopulation && sectorialPopulation !== 'כלל האוכלוסיה' && sectorialPopulation !== 'כלל האוכלוסייה';
+      sectorialNote.hidden = !isSectorial;
+      sectorialNote.textContent = isSectorial ? `קופה סקטוריאלית · ${sectorialPopulation}` : '';
+    }
     document.getElementById('fh-id').textContent      = `קופה #${fundId}`;
     const stockExposureOutlier = calcStockExposureOutlier(latest, peers);
     const periodChip = document.getElementById('fh-period');
@@ -3000,20 +3008,24 @@ async function setupFundSearch() {
     if (!results.length) { dropdown.style.display = 'none'; dropdown.innerHTML = ''; return; }
     dropdown.innerHTML = results.map(res => {
       const catLabel = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === res.catId)?.label || '';
+      const population = String(res.targetPopulation || '').trim();
+      const isSectorial = population && population !== 'כלל האוכלוסיה' && population !== 'כלל האוכלוסייה';
       const isPolisaResult = res.catId === 'polisa_chisachon';
       const detailsHtml = isPolisaResult
         ? `<div class="sd-sub sd-fund-name">${escapeHtml(res.fname || res.sub)}</div><div class="sd-result-id"><span class="sd-id">#${escapeHtml(res.id)}</span></div>`
         : `<div class="sd-sub">${escapeHtml(res.fname || res.sub)} · <span class="sd-id">#${escapeHtml(res.id)}</span></div>`;
       return `
       <div class="sd-item" data-fundid="${escapeHtml(res.id)}" data-catid="${escapeHtml(res.catId)}" data-search-population="${escapeHtml(res.targetPopulation)}">
-        <div class="sd-result-fund-action"><span class="sd-name">${escapeHtml(res.name)}</span><span class="sd-open-fund-cue"><i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i> פתיחת דף הקופה</span></div>
+        <button type="button" class="sd-result-fund-action sd-fund-page-link" data-search-fund-link><span class="sd-name">${escapeHtml(res.name)}</span><span class="sd-open-fund-cue"><i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i> פתיחת דף הקופה</span></button>
         ${detailsHtml}
+        ${isSectorial ? `<div class="search-sectorial-badge"><i class="fas fa-users" aria-hidden="true"></i> קופה סקטוריאלית · ${escapeHtml(population)}</div>` : ''}
         ${res.catId ? `<button type="button" class="sd-category-link" data-search-category="${escapeHtml(res.catId)}" data-search-population="${escapeHtml(res.targetPopulation)}"><i class="fas fa-table" aria-hidden="true"></i> מעבר לטבלת המסלול · ${escapeHtml(catLabel)}</button>` : ''}
       </div>`;
     }).join('');
     dropdown.style.display = 'block';
-    dropdown.querySelectorAll('.sd-item').forEach(item => {
-      item.addEventListener('click', () => {
+    dropdown.querySelectorAll('[data-search-fund-link]').forEach(button => {
+      button.addEventListener('click', () => {
+        const item = button.closest('.sd-item');
         const fid = item.dataset.fundid;
         const cid = item.dataset.catid;
         if (fid) {
@@ -3023,7 +3035,6 @@ async function setupFundSearch() {
     });
     dropdown.querySelectorAll('[data-search-category]').forEach(button => {
       button.addEventListener('click', event => {
-        event.stopPropagation();
         const fundId = button.closest('.sd-item')?.dataset.fundid || '';
         window.location.href = `index.html?cat=${encodeURIComponent(button.dataset.searchCategory)}&fund=${encodeURIComponent(fundId)}&population=${encodeURIComponent(button.dataset.searchPopulation || '')}`;
       });
@@ -3399,18 +3410,24 @@ document.addEventListener('DOMContentLoaded', () => {
             return (c.apiClassifications && c.apiClassifications.some(function(ac){ return cls === ac.trim(); })) ||
                    (c.pensionAPI && cls.includes('פנסי'));
           });
-          hits.push({ name: name, id: id, fname: fname, sub: sub, catId: catObj ? catObj.id : '' });
+          hits.push({ name: name, id: id, fname: fname, sub: sub, catId: catObj ? catObj.id : '', targetPopulation: String(r.TARGET_POPULATION || '') });
         }
       });
       if (!hits.length) { results.innerHTML = '<div style="padding:16px;text-align:center;color:#94a3b8;font-size:.85rem;">לא נמצאו תוצאות</div>'; return; }
       results.innerHTML = hits.map(function(res) {
-        return '<div class="sd-item" data-fundid="' + res.id + '" data-catid="' + res.catId + '" style="padding:10px 12px;border-radius:8px;cursor:pointer;margin-bottom:4px;background:#f8fafc;">' +
-          '<div class="sd-name" style="font-size:.88rem;font-weight:700;color:#0f2744;">' + res.name + '</div>' +
+        var population = String(res.targetPopulation || '').trim();
+        var isSectorial = population && population !== 'כלל האוכלוסיה' && population !== 'כלל האוכלוסייה';
+        var cat = (CONFIG.PRODUCT_CATEGORIES || []).find(function(c) { return c.id === res.catId; });
+        return '<div class="sd-item mob-search-item" data-fundid="' + escapeHtml(res.id) + '" data-catid="' + escapeHtml(res.catId) + '" data-search-population="' + escapeHtml(population) + '">' +
+          '<button type="button" class="mob-search-fund-link" data-mobile-fund-link><span class="sd-name">' + escapeHtml(res.name) + '</span><span class="mob-search-open-cue"><i class="fas fa-arrow-up-right-from-square"></i> דף הקופה</span></button>' +
           '<div class="sd-sub" style="font-size:.75rem;color:#64748b;">' + (res.fname || res.sub) + ' · <span style="color:#94a3b8;">#' + res.id + '</span></div>' +
+          (isSectorial ? '<div class="search-sectorial-badge"><i class="fas fa-users"></i> קופה סקטוריאלית · ' + escapeHtml(population) + '</div>' : '') +
+          '<button type="button" class="mob-search-table-link" data-mobile-table-link><i class="fas fa-table"></i> מעבר לטבלת המסלול · ' + escapeHtml(cat ? cat.label : '') + '</button>' +
         '</div>';
       }).join('');
-      results.querySelectorAll('.sd-item').forEach(function(item) {
-        item.addEventListener('click', function() {
+      results.querySelectorAll('[data-mobile-fund-link]').forEach(function(button) {
+        button.addEventListener('click', function() {
+          var item = button.closest('.sd-item');
           var fid = item.dataset.fundid;
           var cid = item.dataset.catid;
           if (fid) {
@@ -3431,6 +3448,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             window.location.href = 'fund.html?id=' + fid + '&cat=' + (cid || '');
           }
+        });
+      });
+      results.querySelectorAll('[data-mobile-table-link]').forEach(function(button) {
+        button.addEventListener('click', function() {
+          var item = button.closest('.sd-item');
+          window.location.href = 'index.html?cat=' + encodeURIComponent(item.dataset.catid || '') + '&fund=' + encodeURIComponent(item.dataset.fundid || '') + '&population=' + encodeURIComponent(item.dataset.searchPopulation || '');
         });
       });
     }

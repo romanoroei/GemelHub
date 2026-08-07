@@ -58,7 +58,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=mobile-preferences-20260809" />
+  <link rel="stylesheet" href="css/style.css?v=mobile-search-swipe-20260809" />
   <style>
     @media (max-width: 760px) {
       .advanced-search-overlay { z-index: 9500 !important; }
@@ -746,6 +746,15 @@
         </div>
         <input type="range" id="mobile-preferences-scale-slider" min="85" max="110" step="1" value="100" aria-label="שינוי קנה המידה במובייל" />
         <div class="mobile-preferences-scale-labels"><span>קטן</span><span>רגיל</span><span>גדול</span></div>
+        <div class="mobile-scale-preview" aria-live="polite">
+          <div class="mobile-scale-preview-head"><span>תצוגה מקדימה של הטבלה</span><strong id="mobile-preferences-scale-effect">תצוגה רגילה</strong></div>
+          <div class="mobile-scale-preview-viewport">
+            <div class="mobile-scale-preview-table" id="mobile-preferences-scale-preview">
+              <span>מסלול</span><span>השנה</span><span>3 שנים</span><span>5 שנים</span>
+              <b>כללי</b><b>7.4%</b><b>32.1%</b><b>48.6%</b>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -831,6 +840,6 @@
 
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
-  <script src="js/app.js?v=mobile-preferences-20260809"></script>
+  <script src="js/app.js?v=mobile-search-swipe-20260809"></script>
 </body>
 </html>

@@ -2045,6 +2045,8 @@ const App = (() => {
     const preferencesSlider = document.getElementById('mobile-preferences-scale-slider');
     const preferencesValue = document.getElementById('mobile-preferences-scale-value');
     const preferencesSummary = document.getElementById('mobile-preferences-scale-summary');
+    const preferencesPreview = document.getElementById('mobile-preferences-scale-preview');
+    const preferencesEffect = document.getElementById('mobile-preferences-scale-effect');
     if (preferencesToggle && preferencesPanel && preferencesSlider) {
       const syncPreferencesScale = value => {
         const pct = _sbApplyMobileZoom(parseInt(value, 10));
@@ -2055,17 +2057,30 @@ const App = (() => {
         const categoryValue = document.getElementById('mob-opts-zoom-value');
         if (categorySlider) categorySlider.value = String(pct);
         if (categoryValue) categoryValue.textContent = `${pct}%`;
+        if (preferencesPreview) preferencesPreview.style.setProperty('--scale-preview', String(pct / 100));
+        if (preferencesEffect) preferencesEffect.textContent = pct < 98
+          ? 'יותר נתונים נכנסים למסך'
+          : pct > 102 ? 'הטקסט והנתונים גדולים יותר' : 'תצוגה רגילה';
         return pct;
       };
       syncPreferencesScale(_sbGetMobileZoomPct());
-      preferencesToggle.addEventListener('click', () => {
-        const open = preferencesPanel.hidden;
-        preferencesPanel.hidden = !open;
-        preferencesToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-        preferencesToggle.querySelector('.fa-chevron-left')?.classList.toggle('fa-rotate-270', open);
-      });
-      preferencesSlider.addEventListener('input', () => syncPreferencesScale(preferencesSlider.value));
-      preferencesSlider.addEventListener('change', () => _sbSaveMobileZoomPct(syncPreferencesScale(preferencesSlider.value)));
+      if (preferencesToggle.dataset.preferencesBound !== '1') {
+        preferencesToggle.dataset.preferencesBound = '1';
+        preferencesToggle.addEventListener('click', event => {
+          event.preventDefault();
+          event.stopPropagation();
+          const clickAt = performance.now();
+          const previousClickAt = Number(preferencesToggle.dataset.lastPreferencesClick || 0);
+          if (clickAt - previousClickAt < 180) return;
+          preferencesToggle.dataset.lastPreferencesClick = String(clickAt);
+          const open = preferencesPanel.hidden;
+          preferencesPanel.hidden = !open;
+          preferencesToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+          preferencesToggle.querySelector('.fa-chevron-left')?.classList.toggle('fa-rotate-270', open);
+        });
+        preferencesSlider.addEventListener('input', () => syncPreferencesScale(preferencesSlider.value));
+        preferencesSlider.addEventListener('change', () => _sbSaveMobileZoomPct(syncPreferencesScale(preferencesSlider.value)));
+      }
     }
     nav.addEventListener('click', event => {
       const item = event.target.closest('[data-mobile-app-action]');
@@ -2296,9 +2311,20 @@ const App = (() => {
       lastSwitchAt = Date.now();
       document.body.classList.toggle('mobile-category-slide-left', dx < 0);
       document.body.classList.toggle('mobile-category-slide-right', dx > 0);
+      const nextLabel = _sbGetCategoryLabel(nextItem) || '';
+      let cue = document.getElementById('mobile-category-swipe-cue');
+      if (!cue) {
+        cue = document.createElement('div');
+        cue.id = 'mobile-category-swipe-cue';
+        cue.setAttribute('aria-live', 'polite');
+        document.body.appendChild(cue);
+      }
+      cue.className = dx < 0 ? 'is-visible to-left' : 'is-visible to-right';
+      cue.innerHTML = `<i class="fas fa-chevron-${dx < 0 ? 'left' : 'right'}" aria-hidden="true"></i><span>עוברים אל</span><strong>${ghEscapeAttr(nextLabel)}</strong>`;
       Promise.resolve(openMobileNavigationItem(nextItem)).finally(() => {
-        switching = false;
+        setTimeout(() => { cue?.classList.remove('is-visible'); }, 260);
       });
+      setTimeout(() => { switching = false; }, 280);
       return true;
     };
     const begin = (x, y, pointerId, target) => {
@@ -11304,14 +11330,17 @@ const App = (() => {
 
       dropdown.innerHTML = results.map((res, i) => {
         const catLabel = CONFIG.PRODUCT_CATEGORIES.find(cat => cat.id === res.catId)?.label || '';
+        const population = String(res.targetPopulation || '').trim();
+        const isSectorial = population && population !== DEFAULT_TARGET_POPULATION && population !== 'כלל האוכלוסיה';
         const isPolisaResult = res.catId === 'polisa_chisachon';
         const detailsHtml = isPolisaResult
           ? `<div class="sd-sub sd-fund-name">${highlight(res.fname || res.sub, q)}</div><div class="sd-result-id"><span class="sd-id">#${highlight(res.fundId, q)}</span></div>`
           : `<div class="sd-sub">${highlight(res.sub, q)} · ${shortCls(res.cls)} · <span class="sd-id">#${highlight(res.fundId, q)}</span></div>`;
         return `
         <div class="sd-item" data-idx="${i}" data-catid="${res.catId || ''}" data-fundid="${res.fundId}" data-search-population="${ghEscapeAttr(res.targetPopulation)}">
-          <div class="sd-result-fund-action"><span class="sd-name">${highlight(res.name, q)}</span><span class="sd-open-fund-cue"><i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i> פתיחת דף הקופה</span></div>
+          <button type="button" class="sd-result-fund-action sd-fund-page-link" data-search-fund-link><span class="sd-name">${highlight(res.name, q)}</span><span class="sd-open-fund-cue"><i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i> פתיחת דף הקופה</span></button>
           ${detailsHtml}
+          ${isSectorial ? `<div class="search-sectorial-badge"><i class="fas fa-users" aria-hidden="true"></i> קופה סקטוריאלית · ${ghEscapeAttr(population)}</div>` : ''}
           ${res.catId ? `<button type="button" class="sd-category-link" data-search-category="${res.catId}" data-search-population="${ghEscapeAttr(res.targetPopulation)}"><i class="fas fa-table" aria-hidden="true"></i> מעבר לטבלת המסלול · ${catLabel}</button>` : ''}
         </div>
       `;
@@ -11319,8 +11348,9 @@ const App = (() => {
 
       dropdown.style.display = 'block';
 
-      dropdown.querySelectorAll('.sd-item').forEach(item => {
-        item.addEventListener('click', async () => {
+      dropdown.querySelectorAll('[data-search-fund-link]').forEach(button => {
+        button.addEventListener('click', async () => {
+          const item = button.closest('.sd-item');
           const catId  = item.dataset.catid;
           const fundId = item.dataset.fundid;
           closeDropdown();
@@ -11334,7 +11364,6 @@ const App = (() => {
       });
       dropdown.querySelectorAll('[data-search-category]').forEach(button => {
         button.addEventListener('click', async event => {
-          event.stopPropagation();
           const catId = button.dataset.searchCategory;
           const fundId = button.closest('.sd-item')?.dataset.fundid || null;
           const targetPopulation = button.dataset.searchPopulation || null;
@@ -11374,6 +11403,7 @@ const App = (() => {
   }
 
   function getCatIdByClassification(cls) {
+    if (/חסכון לילד|חיסכון לכל ילד|חיסכון לילד/.test(String(cls || ''))) return 'hisachon_yeled';
     const cat = CONFIG.PRODUCT_CATEGORIES.find(c =>
       c.apiClassifications.some(ac => cls.includes(ac))
     );
@@ -18887,39 +18917,66 @@ const App = (() => {
       recs.forEach(r => {
         const name  = getProviderDisplayName(r.CONTROLLING_CORPORATION, r.MANAGING_CORPORATION);
         const id    = String(r.FUND_ID || '');
-        const sub   = r.SUB_SPECIALIZATION || '';
-        const cls   = r.FUND_CLASSIFICATION || '';
         const fname = r.FUND_NAME || '';
+        const cls   = r.FUND_CLASSIFICATION || '';
+        const isPensionRecord = /פנסי|קרנות\s+חדשות/i.test(`${cls} ${fname}`);
+        const sub   = r.SUB_SPECIALIZATION || (isPensionRecord ? fname : '');
         if (name.toLowerCase().includes(ql) || id.includes(ql) ||
             sub.toLowerCase().includes(ql) || fname.toLowerCase().includes(ql)) {
           const key = `${id}`;
-          if (!seen.has(key) && hits.length < 15) {
+          if (!seen.has(key)) {
             seen.add(key);
             const catId = getCatIdByClassification(cls);
-            if (catId) hits.push({ name, sub, cls, fundId: id, catId });
+            const nameLower = name.toLowerCase();
+            const subLower = sub.toLowerCase();
+            const fnameLower = fname.toLowerCase();
+            const score = id === ql ? 1200 : fnameLower === ql ? 1100 : nameLower === ql ? 1000
+              : id.startsWith(ql) ? 900 : fnameLower.startsWith(ql) ? 800 : nameLower.startsWith(ql) ? 700
+              : subLower.startsWith(ql) ? 600 : fnameLower.includes(ql) ? 500 : nameLower.includes(ql) ? 400 : 300;
+            if (catId) hits.push({
+              name, sub, cls, fname, fundId: id, catId, score,
+              targetPopulation: String(r.TARGET_POPULATION || ''),
+              currentCategory: catId === state.activeCategoryId
+            });
           }
         }
       });
 
-      if (!hits.length) {
+      hits.sort((a, b) => Number(b.currentCategory) - Number(a.currentCategory) || b.score - a.score || a.name.localeCompare(b.name, 'he'));
+      const visibleHits = [
+        ...hits.filter(hit => hit.currentCategory).slice(0, 8),
+        ...hits.filter(hit => !hit.currentCategory).slice(0, 16)
+      ];
+
+      if (!visibleHits.length) {
         results.innerHTML = '<div class="mob-search-no-results">לא נמצאו תוצאות</div>';
         return;
       }
 
-      results.innerHTML = hits.map(h => `
-        <div class="mob-search-item" data-fundid="${h.fundId}" data-catid="${h.catId}">
-          <div class="mob-search-item-name">${highlight(h.name, q)}</div>
-          <div class="mob-search-item-sub">${highlight(h.sub || h.cls, q)} · <span class="mob-search-id">#${highlight(h.fundId, q)}</span></div>
+      results.innerHTML = visibleHits.map(h => {
+        const population = String(h.targetPopulation || '').trim();
+        const isSectorial = population && population !== DEFAULT_TARGET_POPULATION && population !== 'כלל האוכלוסיה';
+        const catLabel = CONFIG.PRODUCT_CATEGORIES.find(cat => cat.id === h.catId)?.label || '';
+        return `
+        <div class="mob-search-item" data-fundid="${ghEscapeAttr(h.fundId)}" data-catid="${ghEscapeAttr(h.catId)}" data-search-population="${ghEscapeAttr(population)}">
+          <button type="button" class="mob-search-fund-link" data-mobile-fund-link>
+            <span class="mob-search-item-name">${highlight(h.name, q)}</span>
+            <span class="mob-search-open-cue"><i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i> דף הקופה</span>
+          </button>
+          <div class="mob-search-item-sub">${highlight(h.fname || h.sub || h.cls, q)} · <span class="mob-search-id">#${highlight(h.fundId, q)}</span></div>
+          ${isSectorial ? `<div class="search-sectorial-badge"><i class="fas fa-users" aria-hidden="true"></i> קופה סקטוריאלית · ${ghEscapeAttr(population)}</div>` : ''}
+          <button type="button" class="mob-search-table-link" data-mobile-table-link><i class="fas fa-table" aria-hidden="true"></i> מעבר לטבלת המסלול · ${ghEscapeAttr(catLabel)}</button>
         </div>
-      `).join('');
+      `; }).join('');
 
-      results.querySelectorAll('.mob-search-item').forEach(item => {
-        item.addEventListener('click', () => {
+      results.querySelectorAll('[data-mobile-fund-link]').forEach(button => {
+        button.addEventListener('click', () => {
+          const item = button.closest('.mob-search-item');
           const fundId = item.dataset.fundid;
           const catId  = item.dataset.catid;
           closePanel();
           if (fundId && catId) {
-            const hit = hits.find(h => String(h.fundId) === String(fundId) && String(h.catId) === String(catId));
+            const hit = visibleHits.find(h => String(h.fundId) === String(fundId) && String(h.catId) === String(catId));
             if (hit) {
               addRecentViewedFund({
                 fundId,
@@ -18931,6 +18988,19 @@ const App = (() => {
             }
             window.location.href = `fund.html?id=${encodeURIComponent(fundId)}&cat=${encodeURIComponent(catId)}`;
           }
+        });
+      });
+      results.querySelectorAll('[data-mobile-table-link]').forEach(button => {
+        button.addEventListener('click', async () => {
+          const item = button.closest('.mob-search-item');
+          const fundId = item?.dataset.fundid;
+          const catId = item?.dataset.catid;
+          closePanel();
+          if (!fundId || !catId) return;
+          state.pendingSearchFundId = fundId;
+          state.pendingSearchPopulation = item.dataset.searchPopulation || null;
+          await switchCategory(catId);
+          focusPendingSearchFund(fundId);
         });
       });
     }
