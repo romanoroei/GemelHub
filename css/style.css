@@ -23707,6 +23707,7 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    color: #5f3b8f;
   }
   .h2h-brand-icon {
     display: inline-grid;
@@ -23714,9 +23715,9 @@ body.sb-compare-printing > #sb-compare-print-root * { visibility: visible !impor
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: linear-gradient(145deg, #f5c84b 0 48%, #183a66 50% 100%);
+    background: linear-gradient(145deg, #f5c84b 0 48%, #6f42b5 50% 100%);
     color: #fff;
-    box-shadow: 0 3px 9px rgba(15, 39, 68, .16);
+    box-shadow: 0 3px 9px rgba(95, 59, 143, .22);
     font-size: .9rem;
   }
   .h2h-mobile-brandbar img {

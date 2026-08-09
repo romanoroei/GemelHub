@@ -3832,10 +3832,6 @@ body.fund-page #peers-table-wrap table.track-table tr.average-row .peer-yield-nu
     height: 96px;
   }
 
-  body.fund-page .fund-compare-title-main,
-  body.fund-page .fund-compare-title-main i {
-    color: #6f42b5 !important;
-  }
 }
 
 /* Wide-mobile peer table correction: use the available viewport width on larger phones. */
