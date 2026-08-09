@@ -94,6 +94,8 @@ const App = (() => {
   let trailing7YTimer = null;
   let searchableWarmupPromise = null;
   let searchableRecordsFullyWarmed = false;
+  let categoryNavigationActive = false;
+  let deferredCategoryPrefetchTimer = null;
 
   const ghEscapeAttr = (value) => String(value ?? '')
     .replace(/&/g, '&amp;')
@@ -3228,6 +3230,13 @@ const App = (() => {
     }
     const animateMobileChange = window.matchMedia?.('(max-width: 1024px)').matches &&
       state.activeCategoryId && state.activeCategoryId !== catId;
+    if (animateMobileChange) {
+      categoryNavigationActive = true;
+      document.body.classList.add('mobile-category-changing');
+      // Let the browser paint the immediate transition feedback before the
+      // synchronous table construction starts on the main thread.
+      await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 32)));
+    }
     // Display modes belong to the current category. Carrying mobile exposure
     // mode into the next category leaves it looking like a squeezed partial
     // table, so every category transition starts in the normal returns view.
@@ -3293,12 +3302,17 @@ const App = (() => {
     window.scrollTo(0, 0);
     document.documentElement.style.scrollBehavior = '';
 
-    await loadCategory(catId);
-    if (animateMobileChange) {
-      document.body.classList.add('mobile-category-soft-enter');
-      setTimeout(() => {
-        document.body.classList.remove('mobile-category-soft-enter', 'mobile-category-slide-left', 'mobile-category-slide-right');
-      }, 170);
+    try {
+      await loadCategory(catId);
+    } finally {
+      categoryNavigationActive = false;
+      if (animateMobileChange) {
+        document.body.classList.remove('mobile-category-changing');
+        document.body.classList.add('mobile-category-soft-enter');
+        setTimeout(() => {
+          document.body.classList.remove('mobile-category-soft-enter', 'mobile-category-slide-left', 'mobile-category-slide-right');
+        }, 170);
+      }
     }
     startRotatingCtaPopup(10000);
   }
@@ -4258,20 +4272,42 @@ const App = (() => {
           state.trailing7Y.map = map;
           state.trailing7Y.loading = false;
           state.trailing7Y.error = null;
-          renderComparisonView();
+          refreshTrackBlocksAfterDeferredData(catId, requestId);
         })
         .catch(error => {
           console.warn('7 year trailing yield load failed', error);
           if (state.activeCategoryId !== catId || state.trailing7Y.requestId !== requestId) return;
           state.trailing7Y.loading = false;
           state.trailing7Y.error = 'failed';
-          renderComparisonView();
+          refreshTrackBlocksAfterDeferredData(catId, requestId);
         });
     };
     clearTimeout(trailing7YTimer);
     // Yield one task so navigation can paint first, then use the compact
     // precomputed map. The historical fallback remains chunked/non-blocking.
     trailing7YTimer = setTimeout(run, 0);
+  }
+
+  function refreshTrackBlocksAfterDeferredData(catId, requestId) {
+    if (state.activeCategoryId !== catId || state.trailing7Y.requestId !== requestId) return;
+    const isMobile = window.matchMedia?.('(max-width: 1024px)').matches;
+    if (!isMobile) {
+      renderComparisonView();
+      return;
+    }
+    const renderers = [...(state._blockRenderers || [])];
+    let index = 0;
+    const renderNext = () => {
+      if (state.activeCategoryId !== catId || state.trailing7Y.requestId !== requestId) return;
+      const render = renderers[index++];
+      if (!render) {
+        scheduleMobileStickyTheadUpdate();
+        return;
+      }
+      render();
+      requestAnimationFrame(renderNext);
+    };
+    requestAnimationFrame(renderNext);
   }
 
   function getCategoryViewCacheKey(catId, targetPopulation = state.targetPopulation) {
@@ -4322,6 +4358,14 @@ const App = (() => {
   }
 
   function scheduleCategoryViewPrefetch(activeCategoryId, targetPopulation = state.targetPopulation) {
+    if (categoryNavigationActive) {
+      clearTimeout(deferredCategoryPrefetchTimer);
+      deferredCategoryPrefetchTimer = setTimeout(
+        () => scheduleCategoryViewPrefetch(activeCategoryId, targetPopulation),
+        180
+      );
+      return;
+    }
     const targetKey = targetPopulation === ''
       ? '__all_populations__'
       : String(targetPopulation ?? DEFAULT_TARGET_POPULATION);
@@ -4417,9 +4461,9 @@ const App = (() => {
 
       // רקע: טווח מותאם — לא חוסם את הרינדור (נתוני חיפוש כבר הופעלו למעלה, מיד עם תחילת הטעינה)
       refreshCustomRangeAvailability()
-        .then(() => {
-          if (state.activeCategoryId === requestedCategoryId) renderComparisonView();
-        })
+        // Availability only changes the selector options. The comparison table
+        // has no custom-range column until the user explicitly applies one, so
+        // rebuilding every mobile table here is unnecessary.
         .catch(() => {});
 
       // Restored to the exact pre-session implementation (manual pixel math + repeated retries) —
