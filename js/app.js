@@ -96,6 +96,12 @@ const App = (() => {
   let searchableRecordsFullyWarmed = false;
   let categoryNavigationActive = false;
   let deferredCategoryPrefetchTimer = null;
+  // Rollback switch: setting this to false restores the previous eager mobile
+  // rendering path without removing the progressive-render implementation.
+  const MOBILE_PROGRESSIVE_TRACK_RENDER = true;
+  let mobileTrackRenderObserver = null;
+  let mobileTrackRenderGeneration = 0;
+  const mobileDeferredTrackBuilders = new Map();
 
   const ghEscapeAttr = (value) => String(value ?? '')
     .replace(/&/g, '&amp;')
@@ -4783,14 +4789,72 @@ const App = (() => {
     }
   }
 
+  function resetMobileProgressiveTrackRender() {
+    mobileTrackRenderGeneration += 1;
+    mobileTrackRenderObserver?.disconnect();
+    mobileTrackRenderObserver = null;
+    mobileDeferredTrackBuilders.clear();
+  }
+
+  function createDeferredMobileTrackBlock(item, records, generation) {
+    const placeholder = document.createElement('div');
+    placeholder.className = 'track-block mobile-deferred-track-block';
+    placeholder.dataset.trackId = item.track.id;
+    const estimatedHeight = Math.min(560, Math.max(190, 142 + records.length * 30));
+    placeholder.style.setProperty('--mobile-deferred-track-height', `${estimatedHeight}px`);
+    placeholder.innerHTML = `
+      <div class="mobile-deferred-track-head">
+        <strong>${getCategoryLabel()} מסלול ${item.track.label}</strong>
+        <span>הטבלה תוצג מיד בגלילה</span>
+      </div>
+      <div class="mobile-deferred-track-skeleton" aria-hidden="true"></div>`;
+
+    const materialize = () => {
+      if (generation !== mobileTrackRenderGeneration || !placeholder.isConnected) return;
+      mobileTrackRenderObserver?.unobserve(placeholder);
+      mobileDeferredTrackBuilders.delete(placeholder);
+      const block = buildTrackBlock(item, records);
+      placeholder.replaceWith(block);
+      applyMobileTheadSticky();
+      scheduleMobileStickyTheadUpdate();
+    };
+    mobileDeferredTrackBuilders.set(placeholder, materialize);
+    return placeholder;
+  }
+
+  function observeDeferredMobileTrackBlocks() {
+    if (!mobileDeferredTrackBuilders.size) return;
+    const generation = mobileTrackRenderGeneration;
+    mobileTrackRenderObserver = new IntersectionObserver(entries => {
+      const pendingTargets = entries
+        .filter(entry => entry.isIntersecting)
+        .map(entry => entry.target);
+      const buildNext = () => {
+        if (generation !== mobileTrackRenderGeneration) return;
+        const target = pendingTargets.shift();
+        if (!target) return;
+        mobileDeferredTrackBuilders.get(target)?.();
+        if (pendingTargets.length) requestAnimationFrame(buildNext);
+      };
+      if (pendingTargets.length) requestAnimationFrame(buildNext);
+    }, { root: null, rootMargin: '420px 0px', threshold: 0.01 });
+    mobileDeferredTrackBuilders.forEach((_, placeholder) => mobileTrackRenderObserver.observe(placeholder));
+  }
+
   function renderTracks() {
     if (state.isHomePage) return;
     if (getCurrentCompareMode() !== 'tracks') return;
 
     state._blockRenderers = [];  // reset on each full render
+    resetMobileProgressiveTrackRender();
 
     const container = document.getElementById('tracks-container');
     let totalShown = 0;
+    let immediateTrackCount = 0;
+    const progressiveMobile = MOBILE_PROGRESSIVE_TRACK_RENDER &&
+      window.matchMedia?.('(max-width: 1024px)').matches;
+    const priorityTrackId = state.pendingTrackId || state.searchForcedTrackId || '';
+    const progressiveGeneration = mobileTrackRenderGeneration;
 
     stabilizeTracksContainerDuringRender(container, () => {
       container.innerHTML = '';
@@ -4812,7 +4876,12 @@ const App = (() => {
         recs = sortBlockRecords(recs, item.sortField || '1yr', item.sortDir || 'desc', track.id);
 
         totalShown += recs.length;
-        const block = buildTrackBlock(item, recs);
+        const shouldRenderImmediately = !progressiveMobile || immediateTrackCount < 1 ||
+          item.track.id === priorityTrackId || state.selectedTracks.has(item.track.id);
+        const block = shouldRenderImmediately
+          ? buildTrackBlock(item, recs)
+          : createDeferredMobileTrackBlock(item, recs, progressiveGeneration);
+        if (shouldRenderImmediately) immediateTrackCount += 1;
         container.appendChild(block);
       });
 
@@ -4824,6 +4893,7 @@ const App = (() => {
           </div>`;
       }
       syncTracksDensityClasses();
+      if (progressiveMobile) observeDeferredMobileTrackBlocks();
     });
 
     applyMobileTheadSticky();
