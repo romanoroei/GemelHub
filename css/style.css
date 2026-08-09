@@ -39,62 +39,6 @@
 
 /* Mobile refinement pass: search, filters and H2H branding. */
 @media (max-width: 1024px) {
-  html body #tracks-container .mobile-deferred-track-block {
-    min-height: var(--mobile-deferred-track-height, 220px) !important;
-    overflow: hidden;
-    border: 1px solid rgba(201, 183, 114, .46) !important;
-    border-radius: 14px !important;
-    background: #fff !important;
-    contain: layout paint;
-  }
-
-  .mobile-deferred-track-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    min-height: 54px;
-    padding: 10px 12px;
-    border-bottom: 1px solid rgba(201, 183, 114, .35);
-    color: #10283d;
-  }
-
-  .mobile-deferred-track-head strong {
-    font-size: .82rem;
-    line-height: 1.25;
-  }
-
-  .mobile-deferred-track-head span {
-    color: #7b8794;
-    font-size: .62rem;
-    white-space: nowrap;
-  }
-
-  .mobile-deferred-track-skeleton {
-    height: calc(var(--mobile-deferred-track-height, 220px) - 54px);
-    background: repeating-linear-gradient(
-      to bottom,
-      #fbfcfd 0,
-      #fbfcfd 29px,
-      #edf1f4 30px,
-      #edf1f4 31px
-    );
-    position: relative;
-  }
-
-  .mobile-deferred-track-skeleton::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    transform: translateX(-100%);
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,.72), transparent);
-    animation: mobile-deferred-track-shimmer 1.2s ease-in-out infinite;
-  }
-
-  @keyframes mobile-deferred-track-shimmer {
-    to { transform: translateX(100%); }
-  }
-
   html body #tracks-container .track-advanced-filter-btn {
     width: 32px !important;
     height: 32px !important;
