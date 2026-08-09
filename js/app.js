@@ -3233,6 +3233,9 @@ const App = (() => {
     if (animateMobileChange) {
       categoryNavigationActive = true;
       document.body.classList.add('mobile-category-changing');
+      // Never keep the previous content dimmed while a slower category is
+      // being prepared. This cue is intentionally brief and self-releasing.
+      setTimeout(() => document.body.classList.remove('mobile-category-changing'), 90);
       // Let the browser paint the immediate transition feedback before the
       // synchronous table construction starts on the main thread.
       await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 32)));
@@ -3311,7 +3314,7 @@ const App = (() => {
         document.body.classList.add('mobile-category-soft-enter');
         setTimeout(() => {
           document.body.classList.remove('mobile-category-soft-enter', 'mobile-category-slide-left', 'mobile-category-slide-right');
-        }, 170);
+        }, 110);
       }
     }
     startRotatingCtaPopup(10000);
@@ -4464,6 +4467,14 @@ const App = (() => {
         // Availability only changes the selector options. The comparison table
         // has no custom-range column until the user explicitly applies one, so
         // rebuilding every mobile table here is unnecessary.
+        .then(() => {
+          // Actuarial comparison derives its initial reporting range from the
+          // available periods, so unlike regular track tables it must render
+          // once those periods arrive.
+          if (state.activeCategoryId === requestedCategoryId && getCurrentCompareMode() === 'actuarial') {
+            return renderComparisonView();
+          }
+        })
         .catch(() => {});
 
       // Restored to the exact pre-session implementation (manual pixel math + repeated retries) —
