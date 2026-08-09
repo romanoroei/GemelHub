@@ -5847,12 +5847,13 @@ const App = (() => {
       rail = document.createElement('div');
       rail.className = 'mobile-table-scrollbar';
       rail.setAttribute('aria-hidden', 'true');
-      rail.innerHTML = '<div class="mobile-table-scrollbar-track"><div class="mobile-table-scrollbar-thumb"></div></div>';
+      rail.innerHTML = '<span class="mobile-table-swipe-hint"><i class="fas fa-arrows-left-right" aria-hidden="true"></i> החליקו לצדדים</span><div class="mobile-table-scrollbar-track"><div class="mobile-table-scrollbar-thumb"></div></div>';
       wrapper.insertAdjacentElement('afterend', rail);
     }
 
     const track = rail.querySelector('.mobile-table-scrollbar-track');
     const thumb = rail.querySelector('.mobile-table-scrollbar-thumb');
+    const hint = rail.querySelector('.mobile-table-swipe-hint');
     if (!track || !thumb) return;
 
     const maxScroll = () => Math.max(0, wrapper.scrollWidth - wrapper.clientWidth);
@@ -5871,6 +5872,7 @@ const App = (() => {
       const max = maxScroll();
       rail.hidden = max <= 2;
       if (rail.hidden) return;
+      if (hint && Math.abs(wrapper.scrollLeft) > 8) hint.classList.add('is-dismissed');
       const trackWidth = track.clientWidth || rail.clientWidth;
       const thumbWidth = Math.max(36, Math.round((wrapper.clientWidth / wrapper.scrollWidth) * trackWidth));
       const travel = Math.max(0, trackWidth - thumbWidth);
