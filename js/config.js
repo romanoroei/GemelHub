@@ -208,7 +208,7 @@ const CONFIG = {
         'polisa_sp500','polisa_okev_maniот','polisa_okev_gmish',
         'polisa_okev_agach','polisa_okev_agach_maniот',
         'polisa_maniот_sahar','polisa_meshulab_sahar','polisa_agach_sahar',
-        'polisa_agach_mimshalot','polisa_ashrai_agach','polisa_halacha','polisa_ksafi'
+        'polisa_agach_mimshalot','polisa_ashrai_agach','polisa_kayamut','polisa_halacha','polisa_ksafi'
       ]
     },
     {
@@ -616,13 +616,11 @@ const CONFIG = {
 
     { id: 'polisa_agach_sahar',
       label: 'אג"ח סחיר',
-      fundIds: ['180'],
       fundNameIncludes: ['אג"ח סחיר'],
       fundNameExcludes: ['ממשלתי'] },
 
     { id: 'polisa_agach_mimshalot',
       label: 'אג"ח ממשלות',
-      fundIdExcludes: ['180'],
       fundNameIncludes: ['ממשלות', 'ממשלתי'],
       fundNameExcludes: ['מקבלי', 'קצבה'] },
 
@@ -630,6 +628,10 @@ const CONFIG = {
       label: 'אשראי ואג"ח',
       fundNameIncludes: ['אשראי ואג"ח'],
       fundNameExcludes: ['מניות'] },
+
+    { id: 'polisa_kayamut',
+      label: 'קיימות',
+      fundNameIncludes: ['קיימות'] },
 
     { id: 'polisa_halacha',
       label: 'הלכה',
