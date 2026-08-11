@@ -24372,3 +24372,200 @@ html body #scroll-top-btn {
     display: none !important;
   }
 }
+
+/* Mobile fund search: final layout layer. */
+@media (max-width: 1024px) {
+  html body.mobile-fund-search-open {
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+  }
+
+  html body #mob-fund-search-panel {
+    padding: max(8px, env(safe-area-inset-top, 0px)) 8px 8px !important;
+  }
+
+  html body #mob-fund-search-backdrop {
+    background: rgba(15, 39, 68, .5) !important;
+    backdrop-filter: blur(4px) !important;
+  }
+
+  html body #mob-fund-search-box {
+    width: min(100%, 520px) !important;
+    max-height: calc(100dvh - max(16px, env(safe-area-inset-top, 0px))) !important;
+    margin: 0 auto !important;
+    border: 1px solid rgba(201, 183, 114, .68) !important;
+    border-radius: 18px !important;
+    background: #f4f6f8 !important;
+    box-shadow: 0 24px 60px rgba(15, 39, 68, .32) !important;
+  }
+
+  html body #mob-fund-search-row {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 2 !important;
+    min-height: 64px !important;
+    gap: 9px !important;
+    padding: 10px 11px !important;
+    border-bottom: 1px solid #e6dfca !important;
+    background: #fff !important;
+  }
+
+  html body #mob-fund-search-row > i {
+    width: 20px !important;
+    color: #52657b !important;
+    font-size: .94rem !important;
+    text-align: center !important;
+  }
+
+  html body #mob-fund-search-input {
+    height: 44px !important;
+    padding: 9px 15px !important;
+    border: 1.5px solid #d9c98e !important;
+    border-radius: 14px !important;
+    background: #fff !important;
+    color: #0f2744 !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    box-shadow: inset 0 1px 2px rgba(15, 39, 68, .025) !important;
+  }
+
+  html body #mob-fund-search-input:focus {
+    border-color: #b8942d !important;
+    box-shadow: 0 0 0 3px rgba(201, 162, 39, .14) !important;
+  }
+
+  html body #mob-fund-search-close {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    border: 1px solid #e2e8f0 !important;
+    background: #f8fafc !important;
+    color: #526174 !important;
+    font-size: 1rem !important;
+  }
+
+  html body #mob-fund-search-results {
+    display: grid !important;
+    align-content: start !important;
+    gap: 10px !important;
+    padding: 10px !important;
+    background: #f4f6f8 !important;
+    overscroll-behavior: contain !important;
+    direction: ltr !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-item {
+    min-width: 0 !important;
+    padding: 13px !important;
+    border: 1px solid #e0e5ea !important;
+    border-radius: 14px !important;
+    background: #fff !important;
+    box-shadow: 0 3px 10px rgba(15, 39, 68, .055) !important;
+    direction: rtl !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-fund-link {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: start !important;
+    gap: 10px !important;
+    min-height: 32px !important;
+    padding: 0 0 9px !important;
+    border: 0 !important;
+    border-bottom: 1px solid #edf0f2 !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-item-name {
+    min-width: 0 !important;
+    color: #0f2744 !important;
+    font-size: 1rem !important;
+    font-weight: 900 !important;
+    line-height: 1.35 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-open-cue {
+    min-height: 28px !important;
+    padding: 5px 8px !important;
+    border: 1px solid #b8ddd4 !important;
+    border-radius: 8px !important;
+    background: #effaf7 !important;
+    color: #087565 !important;
+    font-size: .69rem !important;
+    font-weight: 850 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-item-sub {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    margin-top: 9px !important;
+    color: #5f6f82 !important;
+    font-size: .76rem !important;
+    line-height: 1.45 !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-track-name {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-id {
+    flex: 0 0 auto !important;
+    padding: 2px 7px !important;
+    border-radius: 999px !important;
+    background: #f6f1e3 !important;
+    color: #8a6b18 !important;
+    font-weight: 850 !important;
+    direction: ltr !important;
+    white-space: nowrap !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-highlight {
+    display: inline !important;
+    padding: 0 2px !important;
+    border-radius: 3px !important;
+    background: #fff0a8 !important;
+    color: inherit !important;
+    font: inherit !important;
+    box-decoration-break: clone !important;
+    -webkit-box-decoration-break: clone !important;
+  }
+
+  html body #mob-fund-search-results .search-sectorial-badge {
+    display: inline-flex !important;
+    width: fit-content !important;
+    max-width: 100% !important;
+    margin-top: 8px !important;
+    padding: 4px 8px !important;
+    font-size: .69rem !important;
+    line-height: 1.3 !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-table-link {
+    width: 100% !important;
+    min-height: 38px !important;
+    margin-top: 10px !important;
+    padding: 8px 10px !important;
+    border: 1px solid #d7bb63 !important;
+    border-radius: 10px !important;
+    background: #fffbf1 !important;
+    color: #6f5311 !important;
+    font-size: .76rem !important;
+    font-weight: 850 !important;
+    line-height: 1.25 !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-no-results {
+    padding: 36px 18px !important;
+    border: 1px dashed #d8dee6 !important;
+    border-radius: 14px !important;
+    background: #fff !important;
+    color: #718096 !important;
+  }
+}

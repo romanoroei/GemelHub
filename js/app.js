@@ -19150,7 +19150,7 @@ const App = (() => {
     function highlight(text, q) {
       if (!q || !text) return String(text || '');
       const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
-      return String(text).replace(re, '<mark style="background:#fef08a;border-radius:2px;">$1</mark>');
+      return String(text).replace(re, '<mark class="mob-search-highlight">$1</mark>');
     }
 
     function doMobileSearch(q) {
@@ -19210,7 +19210,10 @@ const App = (() => {
             <span class="mob-search-item-name">${highlight(h.name, q)}</span>
             <span class="mob-search-open-cue"><i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i> דף הקופה</span>
           </button>
-          <div class="mob-search-item-sub">${highlight(h.fname || h.sub || h.cls, q)} · <span class="mob-search-id">#${highlight(h.fundId, q)}</span></div>
+          <div class="mob-search-item-sub">
+            <span class="mob-search-track-name">${highlight(h.fname || h.sub || h.cls, q)}</span>
+            <span class="mob-search-id">#${highlight(h.fundId, q)}</span>
+          </div>
           ${isSectorial ? `<div class="search-sectorial-badge"><i class="fas fa-users" aria-hidden="true"></i> קופה סקטוריאלית · ${ghEscapeAttr(population)}</div>` : ''}
           <button type="button" class="mob-search-table-link" data-mobile-table-link><i class="fas fa-table" aria-hidden="true"></i> מעבר לטבלת המסלול · ${ghEscapeAttr(catLabel)}</button>
         </div>
@@ -19260,6 +19263,7 @@ const App = (() => {
 
     function closePanel() {
       panel.hidden = true;
+      document.body.classList.remove('mobile-fund-search-open');
       input.value = '';
       results.innerHTML = '';
     }
@@ -19270,6 +19274,7 @@ const App = (() => {
 
     window.openMobileFundSearch = function() {
       panel.hidden = false;
+      document.body.classList.add('mobile-fund-search-open');
       input.value = '';
       results.innerHTML = '';
       input.focus();
