@@ -413,6 +413,7 @@ const App = (() => {
     active: false,
     loading: false,
     availabilityLoading: false,
+    availabilityResolved: false,
     availabilityRequestId: 0,
     availablePeriods: [],
     availableYears: [],
@@ -1969,6 +1970,9 @@ const App = (() => {
     if (!state.activeCategoryId || state.isHomePage) return;
     state.advancedOptionsOpen = true;
     state.customRange.open = true;
+    if (!state.customRange.availabilityResolved && !state.customRange.availabilityLoading) {
+      refreshCustomRangeAvailability().catch(() => {});
+    }
     syncAdvancedOptionsUi();
     const panel = document.getElementById('custom-range-panel');
     if (!panel) return;
@@ -2606,6 +2610,7 @@ const App = (() => {
     state.customRange.active = false;
     state.customRange.loading = false;
     state.customRange.availabilityLoading = false;
+    state.customRange.availabilityResolved = false;
     state.customRange.availabilityRequestId += 1;
     state.customRange.availablePeriods = [];
     state.customRange.availableYears = [];
@@ -2919,6 +2924,7 @@ const App = (() => {
       const priorEnd = state.customRange.endPeriod;
       const priorYear = state.customRange.selectedYear;
       state.customRange.availablePeriods = periods;
+      state.customRange.availabilityResolved = true;
       state.customRange.startPeriod = periods.some(period => String(period) === String(priorStart)) ? priorStart : '';
       state.customRange.endPeriod = periods.some(period => String(period) === String(priorEnd)) ? priorEnd : '';
       state.customRange.selectedYear = periods.some(period => String(Math.floor(Number(period) / 100)) === String(priorYear)) ? priorYear : '';
@@ -3032,6 +3038,9 @@ const App = (() => {
       if (!isCustomRangeFeatureEnabled() || state.isHomePage || !state.activeCategoryId) return;
       state.advancedOptionsOpen = true;
       state.customRange.open = !state.customRange.open;
+      if (state.customRange.open && !state.customRange.availabilityResolved && !state.customRange.availabilityLoading) {
+        refreshCustomRangeAvailability().catch(() => {});
+      }
       if (state.customRange.open && state.customRange.availabilityLoading && !state.customRange.availablePeriods.length) {
         setCustomRangeStatus('טוען נתונים היסטוריים עבור טווח מותאם. האפשרות תיפתח בעוד כמה שניות...');
       }
@@ -4463,7 +4472,17 @@ const App = (() => {
       scheduleCategoryViewPrefetch(requestedCategoryId, requestedTargetPopulation);
 
       // רקע: טווח מותאם — לא חוסם את הרינדור (נתוני חיפוש כבר הופעלו למעלה, מיד עם תחילת הטעינה)
-      refreshCustomRangeAvailability()
+      const availabilityPromise = getCurrentCompareMode() === 'actuarial'
+        ? refreshCustomRangeAvailability()
+        : Promise.resolve();
+      if (getCurrentCompareMode() !== 'actuarial') {
+        const immediatePeriods = buildImmediateCustomRangePeriods();
+        if (immediatePeriods.length > 1) {
+          state.customRange.availablePeriods = immediatePeriods;
+          hydrateCustomRangePeriodOptions();
+        }
+      }
+      availabilityPromise
         // Availability only changes the selector options. The comparison table
         // has no custom-range column until the user explicitly applies one, so
         // rebuilding every mobile table here is unnecessary.
