@@ -567,6 +567,7 @@ const CONFIG = {
     // ── פוליסות חיסכון ──────────────────────────────────────────
     { id: 'polisa_kaklali',
       label: 'כללי',
+      fundIds: ['18013'],
       fundNameIncludes: ['כללי'],
       fundNameExcludes: ['פאסיבי',' 2','Apollo','שריעה','למקבלי','קצבה'] },
 
