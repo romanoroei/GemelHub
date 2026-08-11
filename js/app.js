@@ -56,6 +56,7 @@ const App = (() => {
   const DISPLAY_OPTIONS_STORAGE_KEY = 'gemelhubDisplayOptionsV3';
   const FILTER_STATE_STORAGE_KEY = 'gemelhub_filter_state_v1';
   const MOBILE_CATEGORY_ORDER_STORAGE_KEY = 'gemelhub_mobile_category_order_v1';
+  const TRACK_ORDER_STORAGE_KEY = 'gemelhub_track_order_v1';
   const DEFAULT_TARGET_POPULATION = 'כלל האוכלוסיה';
   const SANDBOX_STORAGE_KEY = 'gemelhub_sandbox_portfolio_v1';
   const SANDBOX_SELECTIONS_KEY = 'gemelhub_sandbox_selections_v1';
@@ -4533,6 +4534,124 @@ const App = (() => {
   }
 
   // ─── TRACK FILTERS (sidebar) ─────────────────────────────────
+  function readTrackOrder(catId, availableIds = []) {
+    try {
+      const stored = JSON.parse(localStorage.getItem(TRACK_ORDER_STORAGE_KEY) || '{}');
+      const available = new Set(availableIds.map(String));
+      return Array.isArray(stored?.[catId])
+        ? stored[catId].map(String).filter((id, index, ids) => available.has(id) && ids.indexOf(id) === index)
+        : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function saveTrackOrder(catId, orderedIds) {
+    try {
+      const stored = JSON.parse(localStorage.getItem(TRACK_ORDER_STORAGE_KEY) || '{}');
+      stored[catId] = orderedIds.map(String);
+      localStorage.setItem(TRACK_ORDER_STORAGE_KEY, JSON.stringify(stored));
+    } catch (error) {}
+  }
+
+  function applySavedTrackOrder(organized, catId) {
+    const availableIds = organized.map(item => String(item.track.id));
+    const savedOrder = readTrackOrder(catId, availableIds);
+    if (!savedOrder.length) return organized;
+    const rank = new Map(savedOrder.map((id, index) => [id, index]));
+    return organized
+      .map((item, index) => ({ item, index }))
+      .sort((a, b) => {
+        const aRank = rank.has(String(a.item.track.id)) ? rank.get(String(a.item.track.id)) : Number.MAX_SAFE_INTEGER;
+        const bRank = rank.has(String(b.item.track.id)) ? rank.get(String(b.item.track.id)) : Number.MAX_SAFE_INTEGER;
+        return aRank - bRank || a.index - b.index;
+      })
+      .map(entry => entry.item);
+  }
+
+  function commitTrackFilterOrder(container, catId) {
+    const orderedIds = [...container.querySelectorAll('.filter-track-row[data-track-id]')]
+      .map(row => row.dataset.trackId);
+    const byId = new Map(state.organizedData.map(item => [String(item.track.id), item]));
+    const reordered = orderedIds.map(id => byId.get(String(id))).filter(Boolean);
+    state.organizedData.forEach(item => {
+      if (!orderedIds.includes(String(item.track.id))) reordered.push(item);
+    });
+    state.organizedData = reordered;
+    saveTrackOrder(catId, reordered.map(item => item.track.id));
+    buildTrackFilters(state.organizedData, catId);
+    renderComparisonView();
+  }
+
+  function setupTrackFilterDrag(container, catId) {
+    container.querySelectorAll('.track-drag-handle').forEach(handle => {
+      handle.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+      handle.addEventListener('keydown', event => {
+        if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+        event.preventDefault();
+        event.stopPropagation();
+        const row = handle.closest('.filter-track-row');
+        const rows = [...container.querySelectorAll('.filter-track-row')];
+        const index = rows.indexOf(row);
+        const target = rows[index + (event.key === 'ArrowUp' ? -1 : 1)];
+        if (!target) return;
+        if (event.key === 'ArrowUp') container.insertBefore(row, target);
+        else container.insertBefore(row, target.nextElementSibling);
+        const trackId = row.dataset.trackId;
+        commitTrackFilterOrder(container, catId);
+        container.querySelector(`.filter-track-row[data-track-id="${CSS.escape(trackId)}"] .track-drag-handle`)?.focus();
+      });
+      handle.addEventListener('pointerdown', event => {
+        if (event.button !== undefined && event.button !== 0) return;
+        const row = handle.closest('.filter-track-row');
+        if (!row) return;
+        event.preventDefault();
+        event.stopPropagation();
+        handle.setPointerCapture?.(event.pointerId);
+        row.classList.add('is-dragging');
+        document.body.classList.add('track-filter-is-dragging');
+
+        const rect = row.getBoundingClientRect();
+        const ghost = row.cloneNode(true);
+        ghost.classList.add('track-filter-drag-ghost');
+        ghost.classList.remove('is-dragging');
+        Object.assign(ghost.style, {
+          width: `${rect.width}px`,
+          left: `${rect.left}px`,
+          top: `${event.clientY - rect.height / 2}px`
+        });
+        document.body.appendChild(ghost);
+
+        const onMove = moveEvent => {
+          if (moveEvent.pointerId !== event.pointerId) return;
+          moveEvent.preventDefault();
+          ghost.style.top = `${moveEvent.clientY - rect.height / 2}px`;
+          const target = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY)?.closest('.filter-track-row');
+          if (!target || target === row || !container.contains(target)) return;
+          const targetRect = target.getBoundingClientRect();
+          container.insertBefore(row, moveEvent.clientY < targetRect.top + targetRect.height / 2 ? target : target.nextElementSibling);
+        };
+        const finish = finishEvent => {
+          if (finishEvent.pointerId !== undefined && finishEvent.pointerId !== event.pointerId) return;
+          window.removeEventListener('pointermove', onMove);
+          window.removeEventListener('pointerup', finish);
+          window.removeEventListener('pointercancel', finish);
+          ghost.remove();
+          row.classList.remove('is-dragging');
+          document.body.classList.remove('track-filter-is-dragging');
+          handle.releasePointerCapture?.(event.pointerId);
+          commitTrackFilterOrder(container, catId);
+        };
+        window.addEventListener('pointermove', onMove, { passive: false });
+        window.addEventListener('pointerup', finish);
+        window.addEventListener('pointercancel', finish);
+      });
+    });
+  }
+
   function buildTrackFilters(organized, catId) {
     const cat  = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === catId);
     const hide = cat ? (cat.hiddenDefaultTracks || []) : [];
@@ -4543,7 +4662,7 @@ const App = (() => {
     container.innerHTML = '';
 
     // מיון: topOrder קודם, אחריהם גלויים, לבסוף מוסתרים
-    const sorted = [...organized].sort((a, b) => {
+    const defaultSorted = [...organized].sort((a, b) => {
       const aTop  = topOrder.indexOf(a.track.id);
       const bTop  = topOrder.indexOf(b.track.id);
       const aH = hide.includes(a.track.id) ? 2 : (aTop >= 0 ? -1 : 0);
@@ -4552,6 +4671,8 @@ const App = (() => {
       if (aTop >= 0 && bTop >= 0) return aTop - bTop;
       return 0;
     });
+    const sorted = applySavedTrackOrder(defaultSorted, catId);
+    organized.splice(0, organized.length, ...sorted);
     pruneSavedTrackFilters(sorted.map(item => item.track.id));
 
     let lastGroup = null;
@@ -4568,8 +4689,12 @@ const App = (() => {
       }
 
       const label = document.createElement('label');
-      label.className = 'filter-checkbox' + (track.group ? ' filter-checkbox-sub' : '');
+      label.className = 'filter-checkbox filter-track-row' + (track.group ? ' filter-checkbox-sub' : '');
+      label.dataset.trackId = track.id;
       label.innerHTML = `
+        <button type="button" class="track-drag-handle" aria-label="גרור לשינוי סדר המסלול ${track.label}" title="גרור לשינוי סדר">
+          <i class="fas fa-grip-vertical" aria-hidden="true"></i>
+        </button>
         <input type="checkbox" value="${track.id}" />
         <span>${track.label}</span>
         <span class="fc-count">${records.length}</span>
@@ -4586,6 +4711,7 @@ const App = (() => {
       });
       container.appendChild(label);
     });
+    setupTrackFilterDrag(container, catId);
   }
 
   // ─── PROVIDER FILTERS (sidebar) ──────────────────────────────

@@ -2938,6 +2938,21 @@ body:not(.advanced-options-open) .custom-range-panel {
 .filter-checkbox input { accent-color: var(--blue); width: 13px; height: 13px; }
 .filter-checkbox.checked { background: var(--blue-bg); color: var(--blue); font-weight: 600; }
 .filter-checkbox.excluded { background: #fff1f2; color: #b91c1c; text-decoration: line-through; }
+.filter-track-row { position: relative; user-select: none; }
+.track-drag-handle {
+  display: inline-grid; place-items: center; flex: 0 0 22px;
+  width: 22px; height: 22px; padding: 0; border: 0; border-radius: 5px;
+  background: transparent; color: var(--gray-400); cursor: grab; touch-action: none;
+}
+.track-drag-handle:hover, .track-drag-handle:focus-visible { background: var(--gray-200); color: var(--blue); outline: none; }
+.track-drag-handle:active { cursor: grabbing; }
+.filter-track-row.is-dragging { opacity: .28; outline: 2px dashed var(--blue); }
+.track-filter-drag-ghost {
+  position: fixed !important; z-index: 12000; pointer-events: none;
+  margin: 0 !important; background: #fff !important; opacity: .96;
+  box-shadow: 0 12px 28px rgba(15, 39, 68, .22); border: 1px solid var(--blue-light);
+}
+body.track-filter-is-dragging { user-select: none; cursor: grabbing; }
 .provider-filter-row { user-select: none; }
 .provider-filter-name { flex: 1; min-width: 0; }
 .provider-filter-name:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
