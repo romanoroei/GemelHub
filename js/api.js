@@ -335,6 +335,8 @@ const APIModule = (() => {
 
   let _cachedCurrentGemel = null;
   let _currentGemelPromise = null;
+  let _cachedDisplayGemel = null;
+  let _displayGemelPromise = null;
 
   function _saveToLocalStorage() {}
 
@@ -754,7 +756,7 @@ const APIModule = (() => {
     const isPolisa  = !!(cat && cat.polisaAPI);
     const allRaw  = isPension ? await fetchPensionData()
                   : isPolisa  ? await fetchPolisaData()
-                  : await fetchCurrentGemelData();
+                  : await fetchGemelDisplayData();
     // 1. קח רק את הרשומה העדכנית לכל קרן
     let records   = getLatestRecords(allRaw);
 
@@ -859,7 +861,7 @@ const APIModule = (() => {
 
   // ─── Top N מנהלים לפי תשואה 12 חודשים ───────────────────────
   async function getTop3(categoryId, trackId, n = 3) {
-    const allRaw  = await fetchCurrentGemelData();
+    const allRaw  = await fetchGemelDisplayData();
     let records   = getLatestRecords(allRaw);
     records = filterByAllowedProviders(records);
     records = records.filter(r => !(r.FUND_NAME || '').includes('בניהול אישי'));
@@ -892,7 +894,7 @@ const APIModule = (() => {
 
   // ─── קבל כל הרשומות (לחיפוש autocomplete) — רק תקופת דיווח אחרונה ──
   async function getAllSearchable() {
-    const allRaw = await fetchCurrentGemelData();
+    const allRaw = await fetchGemelDisplayData();
     let records  = getLatestRecords(allRaw);
     // Search spans the complete category, including sector funds whose
     // managing corporation is not part of the main provider-filter list.
@@ -1026,6 +1028,22 @@ const APIModule = (() => {
 
   function trailing7YCacheKey(categoryId, targetPopulation = 'כלל האוכלוסיה') {
     return `gemelhub_trailing7y_v1_${categoryId || 'all'}_${targetPopulation || ''}`;
+  }
+
+  // Compact payload used by ordinary category pages. It contains the latest
+  // 12 rows per fund (enough for the table and trailing-12-month return), so
+  // gemel/hashtalmut/child-savings navigation does not parse the 24MB history.
+  async function fetchGemelDisplayData() {
+    if (_cachedDisplayGemel) return _cachedDisplayGemel;
+    if (_displayGemelPromise) return _displayGemelPromise;
+    _displayGemelPromise = _loadStaticJson('data/ckan/gemel-display.json')
+      .then(data => {
+        _cachedDisplayGemel = Array.isArray(data?.records) ? data.records : [];
+        return _cachedDisplayGemel;
+      })
+      .catch(() => fetchCurrentGemelData())
+      .finally(() => { _displayGemelPromise = null; });
+    return _displayGemelPromise;
   }
 
   function peekTrailing7Yields(categoryId, targetPopulation = 'כלל האוכלוסיה') {
@@ -1539,7 +1557,7 @@ const APIModule = (() => {
   let _cached12M = null;
   async function get12MYields() {
     if (_cached12M) return _cached12M;
-    const allRaw = await fetchCurrentGemelData();
+    const allRaw = await fetchGemelDisplayData();
 
     // קבץ לפי FUND_ID, מיין לפי REPORT_PERIOD יורד
     const byFund = new Map();

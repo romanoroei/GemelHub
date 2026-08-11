@@ -102,6 +102,34 @@ async function writeJson(file, data) {
   await fs.writeFile(file, JSON.stringify(data));
 }
 
+async function writeDisplayCache(familyName, sourceData) {
+  const byFund = new Map();
+  for (const record of sourceData.records || []) {
+    const fundId = String(record.FUND_ID || '').trim();
+    if (!fundId) continue;
+    if (!byFund.has(fundId)) byFund.set(fundId, []);
+    byFund.get(fundId).push(record);
+  }
+  const records = [];
+  for (const fundRecords of byFund.values()) {
+    fundRecords.sort((a, b) => Number(b.REPORT_PERIOD) - Number(a.REPORT_PERIOD));
+    fundRecords.slice(0, 12).forEach((record, index) => {
+      records.push(index === 0 ? record : {
+        FUND_ID: record.FUND_ID,
+        REPORT_PERIOD: record.REPORT_PERIOD,
+        MONTHLY_YIELD: record.MONTHLY_YIELD
+      });
+    });
+  }
+  await writeJson(path.join(DATA_DIR, `${familyName}-display.json`), {
+    resource_id: sourceData.resource_id,
+    fetched_at: sourceData.fetched_at,
+    report_period: sourceData.report_period,
+    total: records.length,
+    records
+  });
+}
+
 async function fileExists(file) {
   try { await fs.access(file); return true; }
   catch { return false; }
@@ -208,10 +236,22 @@ async function main() {
           total,
           records
         });
+        if (familyName === 'gemel') {
+          await writeDisplayCache(familyName, {
+            resource_id: resourceId,
+            fetched_at: new Date().toISOString(),
+            report_period: latestPeriod,
+            records
+          });
+        }
         state[familyName] = { lastPeriod: latestPeriod };
         anyChange = true;
       } else {
         console.log(`${familyName}: no change (period ${latestPeriod}) — skipping refresh.`);
+        const displayFile = path.join(DATA_DIR, 'gemel-display.json');
+        if (familyName === 'gemel' && !(await fileExists(displayFile))) {
+          await writeDisplayCache(familyName, await readJson(file, { records: [] }));
+        }
       }
     } catch (err) {
       console.error(`${familyName}: check/refresh FAILED:`, err.message);
