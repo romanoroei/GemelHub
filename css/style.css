@@ -24340,3 +24340,35 @@ html body #scroll-top-btn {
     font-size: .73rem !important;
   }
 }
+
+/* Desktop: one global advanced-search action, directly after the search field. */
+@media (min-width: 1025px) {
+  html body #advanced-search-open-btn:not([hidden]) {
+    display: inline-flex !important;
+    order: 8;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    gap: 0;
+    border: 2px solid var(--gray-300);
+    border-radius: 50%;
+    background: #fff;
+    color: var(--blue);
+    box-shadow: none;
+    font-size: .9rem;
+  }
+
+  html body #advanced-search-open-btn:hover,
+  html body #advanced-search-open-btn:focus-visible {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(29, 78, 216, .1);
+  }
+
+  html body #tracks-container .track-advanced-filter-btn {
+    display: none !important;
+  }
+}

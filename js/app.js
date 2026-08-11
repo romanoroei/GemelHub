@@ -2567,8 +2567,12 @@ const App = (() => {
       }
     }
     if (customRangeEntry) customRangeEntry.hidden = true;
-    // Advanced search now lives in each table header beside the camera button.
-    if (advancedSearchBtn) advancedSearchBtn.hidden = true;
+    // On desktop advanced search is a single global action beside the search field.
+    // Mobile keeps the compact per-track entry point.
+    if (advancedSearchBtn) {
+      const isDesktop = !window.matchMedia || window.matchMedia('(min-width: 1025px)').matches;
+      advancedSearchBtn.hidden = !isDesktop || !isComparison || isSandbox;
+    }
     syncCompactViewToggle();
     updateFilterBadge();
     syncDisplayOptionsUi();
