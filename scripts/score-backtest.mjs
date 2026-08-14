@@ -54,7 +54,7 @@ function weighted(parts){ let s=0,w=0; for(const [v,wt] of parts){ if(Number.isF
 function spearman(xs,ys){ const n=xs.length;if(n<3)return null; const rank=a=>{const z=a.map((v,i)=>[v,i]).sort((x,y)=>x[0]-y[0]);const r=Array(n);z.forEach(([,i],k)=>r[i]=k+1);return r};const rx=rank(xs),ry=rank(ys),mu=(n+1)/2;let num=0,dx=0,dy=0;for(let i=0;i<n;i++){const a=rx[i]-mu,b=ry[i]-mu;num+=a*b;dx+=a*a;dy+=b*b;}return num/Math.sqrt(dx*dy); }
 
 function recencyYearWeights(total,shape){ const base=shape==='equal'?[1,1,1,1,1]:shape==='mild'?[1,1.3,1.6,1.9,2.2]:[1,1.5,2,2.5,3]; const sum=base.reduce((a,b)=>a+b,0); return base.map(x=>x/sum*total); }
-const MODELS={ baseline:{years:[.168,.168,.168,.168,.168],mom:[0,0,0],sharpe:.16} };
+export const MODELS={ baseline:{years:[.168,.168,.168,.168,.168],mom:[0,0,0],sharpe:.16} };
 for (const consistency of [.45,.50,.55,.60,.65,.70,.75,.80]) {
   for (const momentum of [.10,.15,.20,.25,.30,.35]) {
     for (const sharpe of [.10,.15,.20]) {
@@ -73,7 +73,7 @@ for (const consistency of [.45,.50,.55,.60,.65,.70,.75,.80]) {
   }
 }
 
-const obs=[];
+export const obs=[];
 for(const track of TRACKS){
   const funds=byTrackFund.get(track);
   const yearsAll=[...new Set([...funds.values()].flatMap(rec=>[...rec.keys()].map(p=>Math.floor(p/100))))].sort((a,b)=>a-b);
@@ -101,7 +101,7 @@ for(const track of TRACKS){
   }
 }
 
-function summarize(rows,model){
+export function summarize(rows,model){
   const xs=[],ys=[];let selected=0,hit=0,fall=0;const top3=[];const groups=new Map();for(const r of rows){const k=`${r.track}_${r.year}`;if(!groups.has(k))groups.set(k,[]);groups.get(k).push(r)}
   for(const g of groups.values()){g.sort((a,b)=>b.scores[model]-a.scores[model]);const cut=Math.ceil(g.length/3);g.forEach((r,i)=>{xs.push(r.scores[model]);ys.push(r.futurePct);if(i<cut){selected++;if(r.futurePct>=66.6667)hit++;if(r.futurePct<=33.3333)fall++;}if(i<3)top3.push(r.futurePct)})}
   return {n:rows.length,groups:groups.size,spearman:Number((spearman(xs,ys)??0).toFixed(3)),topThirdHitRate:selected?Number((hit/selected*100).toFixed(1)):null,topThirdFallToBottomRate:selected?Number((fall/selected*100).toFixed(1)):null,top3FuturePercentile:top3.length?Number((top3.reduce((a,b)=>a+b,0)/top3.length).toFixed(1)):null};

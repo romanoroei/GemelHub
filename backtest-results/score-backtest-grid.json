@@ -1,0 +1,443 @@
+{
+  "generatedAt": "2026-08-14T22:52:39.022Z",
+  "fundCounts": {
+    "כללי": 280,
+    "מניות": 62
+  },
+  "years": {
+    "כללי": [
+      2005,
+      2006,
+      2007,
+      2008,
+      2009,
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024
+    ],
+    "מניות": [
+      2005,
+      2006,
+      2007,
+      2008,
+      2009,
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024
+    ]
+  },
+  "tracks": {
+    "כללי": {
+      "baseline": {
+        "n": 860,
+        "groups": 20,
+        "spearman": 0.207,
+        "topThirdHitRate": 41.7,
+        "topThirdFallToBottomRate": 24.7,
+        "top3FuturePercentile": 58.8
+      }
+    },
+    "מניות": {
+      "baseline": {
+        "n": 230,
+        "groups": 20,
+        "spearman": 0.044,
+        "topThirdHitRate": 36.1,
+        "topThirdFallToBottomRate": 27.7,
+        "top3FuturePercentile": 52.5
+      }
+    }
+  },
+  "combinedTop20": [
+    {
+      "model": "c55_m35_s10_equal_short",
+      "n": 1090,
+      "groups": 40,
+      "spearman": 0.209,
+      "topThirdHitRate": 42.6,
+      "topThirdFallToBottomRate": 26.2,
+      "top3FuturePercentile": 59.6
+    },
+    {
+      "model": "c60_m30_s10_equal_short",
+      "n": 1090,
+      "groups": 40,
+      "spearman": 0.207,
+      "topThirdHitRate": 43.4,
+      "topThirdFallToBottomRate": 25.4,
+      "top3FuturePercentile": 59.7
+    },
+    {
+      "model": "c50_m35_s15_equal_short",
+      "n": 1090,
+      "groups": 40,
+      "spearman": 0.205,
+      "topThirdHitRate": 42.6,
+      "topThirdFallToBottomRate": 26.2,
+      "top3FuturePercentile": 59.9
+    },
+    {
+      "model": "c65_m25_s10_equal_short",
+      "n": 1090,
+      "groups": 40,
+      "spearman": 0.205,
+      "topThirdHitRate": 42.6,
+      "topThirdFallToBottomRate": 25.4,
+      "top3FuturePercentile": 58.9
+    },
+    {
+      "model": "c55_m35_s10_mild_short",
+      "n": 1090,
+      "groups": 40,
+      "spearman": 0.204,
+      "topThirdHitRate": 42.3,
+      "topThirdFallToBottomRate": 26.7,
+      "top3FuturePercentile": 59.8
+    },
+    {
+      "model": "c55_m30_s15_equal_short",
+      "n": 1090,
+      "groups": 40,
+      "spearman": 0.203,
+      "topThirdHitRate": 42.9,
+      "topThirdFallToBottomRate": 26.2,
+      "top3FuturePercentile": 59.6
+    },
+    {
+      "model": "c60_m30_s10_mild_short",
+      "n": 1090,
+      "groups": 40,
+      "spearman": 0.203,
+      "topThirdHitRate": 42.9,
+      "topThirdFallToBottomRate": 25.4,
+      "top3FuturePercentile": 59.6
+    },
+    {
+      "model": "c70_m20_s10_equal_short",
+      "n": 1090,
+      "groups": 40,
+      "spearman": 0.202,
+      "topThirdHitRate": 42.6,
+      "topThirdFallToBottomRate": 24.9,
+      "top3FuturePercentile": 57.4
+    },
+    {
+      "model": "c55_m35_s10_strong_short",
+      "n": 1090,
+      "groups": 40,
+      "spearman": 0.202,
+      "topThirdHitRate": 42.1,
+      "topThirdFallToBottomRate": 26.2,
+      "top3FuturePercentile": 60.1
+    },
+    {
+      "model": "c50_m35_s15_mild_short",
+      "n": 1090,
+      "groups": 40,
+      "spearman": 0.201,
+      "topThirdHitRate": 42.9,
+      "topThirdFallToBottomRate": 26.5,
+      "top3FuturePercentile": 60.4
+    },
+    {
+      "model": "c65_m25_s10_mild_short",
+      "n": 1090,
+      "groups": 40,
+      "spearman": 0.201,
+      "topThirdHitRate": 42.1,
+      "topThirdFallToBottomRate": 25.4,
+      "top3FuturePercentile": 59.7
+    },
+    {
+      "model": "c60_m25_s15_equal_short",
+      "n": 1090,
+      "groups": 40,
+      "spearman": 0.201,
+      "topThirdHitRate": 41.3,
+      "topThirdFallToBottomRate": 25.7,
+      "top3FuturePercentile": 57.5
+    },
+    {
+      "model": "c45_m35_s20_equal_short",
+      "n": 1090,
+      "groups": 40,
+      "spearman": 0.2,
+      "topThirdHitRate": 42.9,
+      "topThirdFallToBottomRate": 26.7,
+      "top3FuturePercentile": 60
+    },
+    {
+      "model": "c50_m35_s15_strong_short",
+      "n": 1090,
+      "groups": 40,
+      "spearman": 0.2,
+      "topThirdHitRate": 42.6,
+      "topThirdFallToBottomRate": 26.5,
+      "top3FuturePercentile": 60.4
+    },
+    {
+      "model": "c60_m30_s10_strong_short",
+      "n": 1090,
+      "groups": 40,
+      "spearman": 0.2,
+      "topThirdHitRate": 42.3,
+      "topThirdFallToBottomRate": 25.7,
+      "top3FuturePercentile": 59.5
+    },
+    {
+      "model": "c55_m30_s15_mild_short",
+      "n": 1090,
+      "groups": 40,
+      "spearman": 0.199,
+      "topThirdHitRate": 42.6,
+      "topThirdFallToBottomRate": 26.2,
+      "top3FuturePercentile": 60.2
+    },
+    {
+      "model": "c65_m25_s10_strong_short",
+      "n": 1090,
+      "groups": 40,
+      "spearman": 0.199,
+      "topThirdHitRate": 41.5,
+      "topThirdFallToBottomRate": 25.9,
+      "top3FuturePercentile": 59.7
+    },
+    {
+      "model": "c70_m20_s10_mild_short",
+      "n": 1090,
+      "groups": 40,
+      "spearman": 0.199,
+      "topThirdHitRate": 41.5,
+      "topThirdFallToBottomRate": 24.9,
+      "top3FuturePercentile": 59.5
+    },
+    {
+      "model": "c55_m30_s15_strong_short",
+      "n": 1090,
+      "groups": 40,
+      "spearman": 0.198,
+      "topThirdHitRate": 42.3,
+      "topThirdFallToBottomRate": 26.5,
+      "top3FuturePercentile": 60.5
+    },
+    {
+      "model": "c50_m30_s20_equal_short",
+      "n": 1090,
+      "groups": 40,
+      "spearman": 0.198,
+      "topThirdHitRate": 42.3,
+      "topThirdFallToBottomRate": 26.7,
+      "top3FuturePercentile": 59.2
+    }
+  ],
+  "bestByTrack": {
+    "כללי": [
+      {
+        "model": "c55_m35_s10_equal_short",
+        "n": 860,
+        "groups": 20,
+        "spearman": 0.24,
+        "topThirdHitRate": 43.4,
+        "topThirdFallToBottomRate": 25.1,
+        "top3FuturePercentile": 61.8
+      },
+      {
+        "model": "c60_m30_s10_equal_short",
+        "n": 860,
+        "groups": 20,
+        "spearman": 0.239,
+        "topThirdHitRate": 44.1,
+        "topThirdFallToBottomRate": 24.4,
+        "top3FuturePercentile": 60.8
+      },
+      {
+        "model": "c65_m25_s10_equal_short",
+        "n": 860,
+        "groups": 20,
+        "spearman": 0.238,
+        "topThirdHitRate": 43.7,
+        "topThirdFallToBottomRate": 24.4,
+        "top3FuturePercentile": 60.6
+      },
+      {
+        "model": "c60_m30_s10_mild_short",
+        "n": 860,
+        "groups": 20,
+        "spearman": 0.236,
+        "topThirdHitRate": 43.7,
+        "topThirdFallToBottomRate": 23.7,
+        "top3FuturePercentile": 61.9
+      },
+      {
+        "model": "c70_m20_s10_equal_short",
+        "n": 860,
+        "groups": 20,
+        "spearman": 0.236,
+        "topThirdHitRate": 43.7,
+        "topThirdFallToBottomRate": 23.7,
+        "top3FuturePercentile": 60
+      },
+      {
+        "model": "c50_m35_s15_equal_short",
+        "n": 860,
+        "groups": 20,
+        "spearman": 0.236,
+        "topThirdHitRate": 43.1,
+        "topThirdFallToBottomRate": 25.4,
+        "top3FuturePercentile": 62.4
+      },
+      {
+        "model": "c55_m35_s10_mild_short",
+        "n": 860,
+        "groups": 20,
+        "spearman": 0.236,
+        "topThirdHitRate": 43.1,
+        "topThirdFallToBottomRate": 25.4,
+        "top3FuturePercentile": 62.8
+      },
+      {
+        "model": "c55_m30_s15_equal_short",
+        "n": 860,
+        "groups": 20,
+        "spearman": 0.235,
+        "topThirdHitRate": 43.4,
+        "topThirdFallToBottomRate": 25.4,
+        "top3FuturePercentile": 61.9
+      },
+      {
+        "model": "c65_m25_s10_mild_short",
+        "n": 860,
+        "groups": 20,
+        "spearman": 0.235,
+        "topThirdHitRate": 43.1,
+        "topThirdFallToBottomRate": 24.4,
+        "top3FuturePercentile": 61.5
+      },
+      {
+        "model": "c55_m35_s10_strong_short",
+        "n": 860,
+        "groups": 20,
+        "spearman": 0.234,
+        "topThirdHitRate": 43.1,
+        "topThirdFallToBottomRate": 24.7,
+        "top3FuturePercentile": 63.4
+      }
+    ],
+    "מניות": [
+      {
+        "model": "c55_m35_s10_equal_short",
+        "n": 230,
+        "groups": 20,
+        "spearman": 0.09,
+        "topThirdHitRate": 39.8,
+        "topThirdFallToBottomRate": 30.1,
+        "top3FuturePercentile": 57.4
+      },
+      {
+        "model": "c60_m30_s10_equal_short",
+        "n": 230,
+        "groups": 20,
+        "spearman": 0.089,
+        "topThirdHitRate": 41,
+        "topThirdFallToBottomRate": 28.9,
+        "top3FuturePercentile": 58.5
+      },
+      {
+        "model": "c50_m35_s15_equal_short",
+        "n": 230,
+        "groups": 20,
+        "spearman": 0.088,
+        "topThirdHitRate": 41,
+        "topThirdFallToBottomRate": 28.9,
+        "top3FuturePercentile": 57.5
+      },
+      {
+        "model": "c55_m30_s15_equal_short",
+        "n": 230,
+        "groups": 20,
+        "spearman": 0.087,
+        "topThirdHitRate": 41,
+        "topThirdFallToBottomRate": 28.9,
+        "top3FuturePercentile": 57.2
+      },
+      {
+        "model": "c55_m35_s10_mild_short",
+        "n": 230,
+        "groups": 20,
+        "spearman": 0.085,
+        "topThirdHitRate": 39.8,
+        "topThirdFallToBottomRate": 31.3,
+        "top3FuturePercentile": 56.9
+      },
+      {
+        "model": "c65_m25_s10_equal_short",
+        "n": 230,
+        "groups": 20,
+        "spearman": 0.085,
+        "topThirdHitRate": 38.6,
+        "topThirdFallToBottomRate": 28.9,
+        "top3FuturePercentile": 57.2
+      },
+      {
+        "model": "c55_m35_s10_strong_short",
+        "n": 230,
+        "groups": 20,
+        "spearman": 0.083,
+        "topThirdHitRate": 38.6,
+        "topThirdFallToBottomRate": 31.3,
+        "top3FuturePercentile": 56.9
+      },
+      {
+        "model": "c45_m35_s20_equal_short",
+        "n": 230,
+        "groups": 20,
+        "spearman": 0.082,
+        "topThirdHitRate": 41,
+        "topThirdFallToBottomRate": 28.9,
+        "top3FuturePercentile": 57.2
+      },
+      {
+        "model": "c50_m35_s15_mild_short",
+        "n": 230,
+        "groups": 20,
+        "spearman": 0.082,
+        "topThirdHitRate": 38.6,
+        "topThirdFallToBottomRate": 31.3,
+        "top3FuturePercentile": 56.9
+      },
+      {
+        "model": "c50_m35_s15_strong_short",
+        "n": 230,
+        "groups": 20,
+        "spearman": 0.081,
+        "topThirdHitRate": 39.8,
+        "topThirdFallToBottomRate": 31.3,
+        "top3FuturePercentile": 56.9
+      }
+    ]
+  }
+}
