@@ -1,0 +1,33 @@
+name: GemelHub Score Backtest Temporary
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/score-backtest-main.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: analysis/gemelhub-score-backtest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run score backtest
+        run: node scripts/score-backtest.mjs
+
+      - name: Upload backtest results
+        uses: actions/upload-artifact@v4
+        with:
+          name: gemelhub-score-backtest-results
+          path: backtest-results/score-backtest.json
