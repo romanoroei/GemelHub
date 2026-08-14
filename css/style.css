@@ -24569,3 +24569,156 @@ html body #scroll-top-btn {
     color: #718096 !important;
   }
 }
+
+/* Mobile search brand refresh: GemelHub navy, gold and warm ivory. */
+@media (max-width: 1024px) {
+  html body #mob-fund-search-backdrop {
+    background: rgba(12, 33, 52, .58) !important;
+    backdrop-filter: blur(5px) saturate(.9) !important;
+  }
+
+  html body #mob-fund-search-box {
+    border: 1px solid rgba(201, 162, 39, .72) !important;
+    background: #f8f4e9 !important;
+    box-shadow: 0 24px 64px rgba(12, 33, 52, .38), 0 0 0 1px rgba(255, 255, 255, .55) inset !important;
+  }
+
+  html body #mob-fund-search-row {
+    min-height: 68px !important;
+    padding: 10px 12px 12px !important;
+    border-bottom: 3px solid #c9a227 !important;
+    background: linear-gradient(180deg, #ffffff 0%, #fffdf7 100%) !important;
+  }
+
+  html body #mob-fund-search-row > i {
+    color: #0f2744 !important;
+  }
+
+  html body #mob-fund-search-input {
+    border: 1.5px solid #c9a227 !important;
+    border-radius: 999px !important;
+    background: #fff !important;
+    color: #0c2134 !important;
+    box-shadow: 0 2px 8px rgba(12, 33, 52, .06) !important;
+  }
+
+  html body #mob-fund-search-input:focus {
+    border-color: #9f7910 !important;
+    box-shadow: 0 0 0 3px rgba(201, 162, 39, .16), 0 3px 10px rgba(12, 33, 52, .07) !important;
+  }
+
+  html body #mob-fund-search-close {
+    border: 1px solid #e5dcc3 !important;
+    background: #f8f4e9 !important;
+    color: #0f2744 !important;
+  }
+
+  html body #mob-fund-search-results {
+    gap: 11px !important;
+    padding: 11px !important;
+    background:
+      radial-gradient(circle at 100% 0, rgba(201, 162, 39, .09), transparent 36%),
+      #f8f4e9 !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-item {
+    position: relative !important;
+    display: block !important;
+    overflow: visible !important;
+    padding: 14px !important;
+    border: 1px solid #e3d7b6 !important;
+    border-radius: 16px !important;
+    background: linear-gradient(145deg, #ffffff 0%, #fffdf8 100%) !important;
+    box-shadow: 0 5px 16px rgba(12, 33, 52, .07) !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-item::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 10px auto 10px !important;
+    height: 3px !important;
+    border-radius: 0 0 4px 4px !important;
+    background: linear-gradient(90deg, #0f2744 0 72%, #c9a227 72% 100%) !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-fund-link {
+    width: 100% !important;
+    min-height: 36px !important;
+    padding: 1px 0 10px !important;
+    border-bottom: 1px solid #eee6d1 !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-item-name {
+    color: #0c2134 !important;
+    font-size: 1.02rem !important;
+    letter-spacing: -.01em !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-open-cue {
+    min-height: 30px !important;
+    padding: 6px 9px !important;
+    border: 1px solid #c9a227 !important;
+    border-radius: 999px !important;
+    background: #fffaf0 !important;
+    color: #0f2744 !important;
+    box-shadow: 0 2px 6px rgba(12, 33, 52, .045) !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-open-cue i {
+    color: #a47d12 !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-item-sub {
+    color: #526174 !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-id {
+    border: 1px solid #eadba9 !important;
+    background: #f8f1dc !important;
+    color: #7a5b08 !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-highlight {
+    padding: 0 1px !important;
+    border-radius: 0 !important;
+    background: linear-gradient(transparent 58%, rgba(228, 189, 75, .45) 58%) !important;
+    color: #0c2134 !important;
+    font-weight: 900 !important;
+  }
+
+  html body #mob-fund-search-results .search-sectorial-badge {
+    border: 1px solid #d6c99f !important;
+    border-radius: 999px !important;
+    background: #f4f1e8 !important;
+    color: #334b63 !important;
+    font-weight: 800 !important;
+  }
+
+  html body #mob-fund-search-results .search-sectorial-badge i {
+    color: #a47d12 !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-table-link {
+    min-height: 42px !important;
+    border: 1px solid #0f2744 !important;
+    border-radius: 12px !important;
+    background: linear-gradient(135deg, #0c2134 0%, #183b5c 100%) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 10px rgba(12, 33, 52, .15) !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-table-link i {
+    color: #e4bd4b !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-table-link:active,
+  html body #mob-fund-search-results .mob-search-fund-link:active {
+    transform: translateY(1px) scale(.99) !important;
+  }
+
+  html body #mob-fund-search-results .mob-search-no-results {
+    border-color: #d9c792 !important;
+    background: #fffdf8 !important;
+    color: #526174 !important;
+  }
+}
