@@ -21,11 +21,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Diagnose classifications
-        run: node scripts/score-backtest-diagnose.mjs
-      - name: Run score backtest
+      - name: Run corrected grid backtest
         run: node scripts/score-backtest.mjs
       - uses: actions/upload-artifact@v4
         with:
-          name: gemelhub-score-backtest-results
+          name: gemelhub-score-grid-results
           path: backtest-results/
