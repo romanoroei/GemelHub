@@ -1,1 +1,1 @@
-{"gemel":{"lastPeriod":202606},"pension":{"lastPeriod":202606},"polisa":{"lastPeriod":202606},"consecutiveFailures":0,"alertIssueOpen":false,"lastFailureAt":null,"lastSuccessAt":"2026-08-17T03:41:54.154Z"}
+{"gemel":{"lastPeriod":202606},"pension":{"lastPeriod":202606},"polisa":{"lastPeriod":202606},"consecutiveFailures":1,"alertIssueOpen":true,"lastFailureAt":"2026-08-17T11:20:16.876Z","lastSuccessAt":"2026-08-17T03:41:54.154Z"}
