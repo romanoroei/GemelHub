@@ -2311,7 +2311,7 @@ const APIModule = (() => {
   async function computeGemelHubScores(fundId, catId) {
     const cacheKey = `${catId}_${fundId}`;
     if (_cachedGHScores.has(cacheKey)) return _cachedGHScores.get(cacheKey);
-    const lsKey = `gemelhub_ghscore_v14_${cacheKey}`;
+    const lsKey = `gemelhub_ghscore_v15_${cacheKey}`;
     const lsCached = _lsLoad(lsKey);
     if (lsCached) { _cachedGHScores.set(cacheKey, lsCached); return lsCached; }
 
@@ -2586,6 +2586,10 @@ const APIModule = (() => {
       const horizonValues = [1, 3, 6, 12]
         .map(months => shortHorizonPercentiles.get(months)?.get(s.fundId))
         .filter(Number.isFinite);
+      const horizonScores = Object.fromEntries([1, 3, 6, 12].map(months => [
+        months,
+        shortHorizonPercentiles.get(months)?.get(s.fundId) ?? null
+      ]));
       const shortTermSupport = horizonValues.length
         ? horizonValues.reduce((sum, value) => sum + value, 0) / horizonValues.length
         : null;
@@ -2605,9 +2609,38 @@ const APIModule = (() => {
       ));
       const highRisk = reversalRisk >= 55 || (qualityPercentile >= 85 && qualityShortTermGap >= 80);
       const mixedSignals = !highRisk && (reversalRisk >= 35 || (qualityPercentile >= 80 && qualityShortTermGap >= 50));
-      const dataConsistency = horizonAgreement !== null && horizonValues.length === 4
-        ? (horizonAgreement >= 70 ? 'high' : horizonAgreement >= 45 ? 'medium' : 'low')
+      const p1 = horizonScores[1];
+      const p3 = horizonScores[3];
+      const p6 = horizonScores[6];
+      const p12 = horizonScores[12];
+      const recoveryPossible = [p1, p3, p6, p12].every(Number.isFinite)
+        && p12 <= 40 && p3 >= 60 && p1 >= 55 && p3 >= p6 + 12;
+      const strengtheningMomentum = !recoveryPossible
+        && [p1, p3, p6, p12].every(Number.isFinite)
+        && p1 >= 55 && p3 >= 55 && ((p1 + p3) / 2) >= ((p6 + p12) / 2) + 12;
+      const positiveStable = shortTermSupport !== null && shortTermSupport >= 65 && horizonAgreement >= 65;
+      const shortTermWeakness = shortTermSupport !== null && shortTermSupport < 35;
+      const yearlyPercentiles = s.components.years.map(year => year.percentile).filter(Number.isFinite);
+      const yearlyAverage = yearlyPercentiles.reduce((sum, value) => sum + value, 0) / yearlyPercentiles.length;
+      const yearlyStdDev = yearlyPercentiles.length > 1
+        ? Math.sqrt(yearlyPercentiles.reduce((sum, value) => sum + (value - yearlyAverage) ** 2, 0) / yearlyPercentiles.length)
+        : null;
+      const dataConsistency = yearlyStdDev !== null
+        ? (yearlyStdDev <= 18 ? 'high' : yearlyStdDev <= 30 ? 'medium' : 'low')
         : 'low';
+
+      let timingLabel = 'unclear_trend';
+      if (highRisk) timingLabel = 'high_reversal_risk';
+      else if (recoveryPossible) timingLabel = 'possible_recovery';
+      else if (strengtheningMomentum) timingLabel = 'strengthening_momentum';
+      else if (mixedSignals) timingLabel = 'mixed_signals';
+      else if (positiveStable) timingLabel = 'positive_stable';
+      else if (shortTermWeakness) timingLabel = 'short_term_weakness';
+      else if (shortTermSupport !== null && shortTermSupport >= 55) timingLabel = 'positive_recent';
+
+      const trendTags = [timingLabel];
+      if (recoveryPossible && !trendTags.includes('possible_recovery')) trendTags.push('possible_recovery');
+      if (strengtheningMomentum && !trendTags.includes('strengthening_momentum')) trendTags.push('strengthening_momentum');
 
       s.userProtection = {
         displayScoreCapped: true,
@@ -2615,7 +2648,15 @@ const APIModule = (() => {
         horizonAgreement: horizonAgreement !== null ? parseFloat(horizonAgreement.toFixed(1)) : null,
         qualityShortTermGap: parseFloat(qualityShortTermGap.toFixed(1)),
         reversalRisk: parseFloat(reversalRisk.toFixed(1)),
-        timingLabel: highRisk ? 'high_reversal_risk' : mixedSignals ? 'mixed_signals' : 'normal',
+        horizonScores: Object.fromEntries(Object.entries(horizonScores).map(([months, value]) => [
+          months,
+          Number.isFinite(value) ? parseFloat(value.toFixed(1)) : null
+        ])),
+        timingLabel,
+        trendTags,
+        recoveryPossible,
+        strengtheningMomentum,
+        yearlyRankStdDev: yearlyStdDev !== null ? parseFloat(yearlyStdDev.toFixed(1)) : null,
         dataConsistency
       };
     });
