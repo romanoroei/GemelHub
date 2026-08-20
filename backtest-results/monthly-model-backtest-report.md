@@ -60,3 +60,16 @@ For fund 119, `מנורה מבטחים יותר מסלול ד'`, the genuinely o
 | 2024-12 | 52.6 | 50.0 | 52.1 |
 
 This example also demonstrates why the score is probabilistic rather than a promise: the 2020 signal was optimistic and did not materialize, while the 2018, 2022, and 2024 estimates were directionally closer to the realized relative outcome. Reliability is established across thousands of cohort-month decisions, not from any single fund observation.
+
+### Additional example: fund 1093
+
+For fund 1093, `אלטשולר שחם השתלמות כללי`, the genuinely out-of-sample December observations were:
+
+| Decision date | Predicted multi-horizon score | Baseline score | Realized future multi-horizon percentile |
+|---|---:|---:|---:|
+| 2018-12 | 62.6 | 81.3 | 97.2 |
+| 2020-12 | 100.0 | 84.1 | 29.9 |
+| 2022-12 | 69.5 | 49.6 | 36.6 |
+| 2024-12 | 45.1 | 37.0 | 23.0 |
+
+The 2018 signal correctly identified a very strong subsequent relative result. The 2020 and 2022 signals were too optimistic and constitute clear misses. In 2024 the model correctly pointed below the middle of the peer group, although the realized weakness was greater than forecast. A score of 100 is a clipped expected relative percentile, not a guarantee of future performance.

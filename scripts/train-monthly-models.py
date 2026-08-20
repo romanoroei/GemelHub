@@ -170,15 +170,25 @@ composite_result = {
     'baseline': metrics(composite, composite.baseline.to_numpy()),
     'rows': len(composite),
 }
-sample_fund_id = '119'
-sample = composite[(composite.fundId == sample_fund_id) & (composite.period % 100 == 12)].copy()
-sample_history = [{
-    'fundId': sample_fund_id,
-    'period': int(row.period),
-    'predictedScore': round(float(row.prediction), 1),
-    'baselineScore': round(float(row.baseline), 1),
-    'realizedMultiHorizonPercentile': round(float(row.truth), 1),
-} for row in sample.itertuples()]
+sample_funds = {
+    '119': ("מנורה מבטחים יותר מסלול ד'", 'gemel_regular__general'),
+    '1093': ('אלטשולר שחם השתלמות כללי', 'training_fund__general'),
+}
+sample_histories = []
+for sample_fund_id, (sample_name, sample_cohort) in sample_funds.items():
+    sample = composite[(composite.fundId == sample_fund_id) & (composite.period % 100 == 12)].copy()
+    sample_histories.append({
+        'fundId': sample_fund_id,
+        'fundName': sample_name,
+        'cohort': sample_cohort,
+        'points': [{
+            'fundId': sample_fund_id,
+            'period': int(row.period),
+            'predictedScore': round(float(row.prediction), 1),
+            'baselineScore': round(float(row.baseline), 1),
+            'realizedMultiHorizonPercentile': round(float(row.truth), 1),
+        } for row in sample.itertuples()],
+    })
 
 result = {
     'generatedAt': pd.Timestamp.now('UTC').isoformat(),
@@ -192,12 +202,7 @@ result = {
     'foldComparisonsToBaseline': fold_comparisons,
     'cohorts': cohort_results,
     'compositeScore': composite_result,
-    'sampleHistory': {
-        'fundId': sample_fund_id,
-        'fundName': "מנורה מבטחים יותר מסלול ד'",
-        'cohort': 'gemel_regular__general',
-        'points': sample_history,
-    },
+    'sampleHistories': sample_histories,
     'folds': folds,
 }
 out = ROOT / 'backtest-results' / 'monthly-model-backtest.json'

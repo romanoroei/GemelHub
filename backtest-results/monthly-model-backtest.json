@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-20T20:34:55.426965+00:00",
+  "generatedAt": "2026-08-20T20:42:48.308802+00:00",
   "design": {
     "testYears": [
       2018,
@@ -5526,41 +5526,78 @@
     },
     "rows": 19426
   },
-  "sampleHistory": {
-    "fundId": "119",
-    "fundName": "מנורה מבטחים יותר מסלול ד'",
-    "cohort": "gemel_regular__general",
-    "points": [
-      {
-        "fundId": "119",
-        "period": 201812,
-        "predictedScore": 47.4,
-        "baselineScore": 73.6,
-        "realizedMultiHorizonPercentile": 45.4
-      },
-      {
-        "fundId": "119",
-        "period": 202012,
-        "predictedScore": 62.2,
-        "baselineScore": 54.5,
-        "realizedMultiHorizonPercentile": 43.8
-      },
-      {
-        "fundId": "119",
-        "period": 202212,
-        "predictedScore": 51.3,
-        "baselineScore": 52.6,
-        "realizedMultiHorizonPercentile": 55.9
-      },
-      {
-        "fundId": "119",
-        "period": 202412,
-        "predictedScore": 52.6,
-        "baselineScore": 50.0,
-        "realizedMultiHorizonPercentile": 52.1
-      }
-    ]
-  },
+  "sampleHistories": [
+    {
+      "fundId": "119",
+      "fundName": "מנורה מבטחים יותר מסלול ד'",
+      "cohort": "gemel_regular__general",
+      "points": [
+        {
+          "fundId": "119",
+          "period": 201812,
+          "predictedScore": 47.4,
+          "baselineScore": 73.6,
+          "realizedMultiHorizonPercentile": 45.4
+        },
+        {
+          "fundId": "119",
+          "period": 202012,
+          "predictedScore": 62.2,
+          "baselineScore": 54.5,
+          "realizedMultiHorizonPercentile": 43.8
+        },
+        {
+          "fundId": "119",
+          "period": 202212,
+          "predictedScore": 51.3,
+          "baselineScore": 52.6,
+          "realizedMultiHorizonPercentile": 55.9
+        },
+        {
+          "fundId": "119",
+          "period": 202412,
+          "predictedScore": 52.6,
+          "baselineScore": 50.0,
+          "realizedMultiHorizonPercentile": 52.1
+        }
+      ]
+    },
+    {
+      "fundId": "1093",
+      "fundName": "אלטשולר שחם השתלמות כללי",
+      "cohort": "training_fund__general",
+      "points": [
+        {
+          "fundId": "1093",
+          "period": 201812,
+          "predictedScore": 62.6,
+          "baselineScore": 81.3,
+          "realizedMultiHorizonPercentile": 97.2
+        },
+        {
+          "fundId": "1093",
+          "period": 202012,
+          "predictedScore": 100.0,
+          "baselineScore": 84.1,
+          "realizedMultiHorizonPercentile": 29.9
+        },
+        {
+          "fundId": "1093",
+          "period": 202212,
+          "predictedScore": 69.5,
+          "baselineScore": 49.6,
+          "realizedMultiHorizonPercentile": 36.6
+        },
+        {
+          "fundId": "1093",
+          "period": 202412,
+          "predictedScore": 45.1,
+          "baselineScore": 37.0,
+          "realizedMultiHorizonPercentile": 23.0
+        }
+      ]
+    }
+  ],
   "folds": [
     {
       "horizonMonths": 3,
