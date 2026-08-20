@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-20T21:09:22.774298+00:00",
+  "generatedAt": "2026-08-20T21:44:08.608859+00:00",
   "design": {
     "testYears": [
       2018,
@@ -8383,6 +8383,73 @@
       }
     ]
   },
+  "userProtectionExperiment": {
+    "displayScoreRange": [
+      5,
+      95
+    ],
+    "reversalRiskWeights": {
+      "overheat": 0.3,
+      "recentWeakening": 0.25,
+      "horizonDisagreement": 0.15,
+      "qualityShortTermGap": 0.3
+    },
+    "guardrailCandidates": [
+      {
+        "strength": 0.1,
+        "formula": "capped broad score minus strength * reversal risk above 35",
+        "groups": 2276,
+        "meanMonthlySpearman": 0.215,
+        "topThirdHitRate": 39.8,
+        "topThirdFallRate": 18.1,
+        "top3FuturePercentile": 56.8,
+        "rows": 34038
+      },
+      {
+        "strength": 0.25,
+        "formula": "capped broad score minus strength * reversal risk above 35",
+        "groups": 2276,
+        "meanMonthlySpearman": 0.215,
+        "topThirdHitRate": 39.7,
+        "topThirdFallRate": 18.1,
+        "top3FuturePercentile": 56.8,
+        "rows": 34038
+      },
+      {
+        "strength": 0.5,
+        "formula": "capped broad score minus strength * reversal risk above 35",
+        "groups": 2276,
+        "meanMonthlySpearman": 0.213,
+        "topThirdHitRate": 39.7,
+        "topThirdFallRate": 18.1,
+        "top3FuturePercentile": 56.8,
+        "rows": 34038
+      }
+    ],
+    "timingLabelResults": [
+      {
+        "label": "caution",
+        "rows": 1228,
+        "meanFuturePercentile": 54.4,
+        "futureBottomThirdRate": 27.6,
+        "futureTopThirdRate": 39.7
+      },
+      {
+        "label": "high reversal risk",
+        "rows": 115,
+        "meanFuturePercentile": 40.1,
+        "futureBottomThirdRate": 48.7,
+        "futureTopThirdRate": 21.7
+      },
+      {
+        "label": "normal",
+        "rows": 32695,
+        "meanFuturePercentile": 49.7,
+        "futureBottomThirdRate": 29.3,
+        "futureTopThirdRate": 28.8
+      }
+    ]
+  },
   "sampleHistories": [
     {
       "fundId": "119",
@@ -8399,7 +8466,16 @@
           "scoreDelta6m": null,
           "scoreDelta12m": null,
           "scoreTrend": null,
-          "trendAdjustedScore": null
+          "trendAdjustedScore": null,
+          "displayScore": 54.8,
+          "guardedScore": 54.8,
+          "horizonAgreement": 85.1,
+          "shortTermLevel": 56.2,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 4.0,
+          "timingLabel": "normal",
+          "confidence": "low",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8411,7 +8487,16 @@
           "scoreDelta6m": null,
           "scoreDelta12m": null,
           "scoreTrend": null,
-          "trendAdjustedScore": null
+          "trendAdjustedScore": null,
+          "displayScore": 53.8,
+          "guardedScore": 53.8,
+          "horizonAgreement": 94.9,
+          "shortTermLevel": 65.6,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 1.2,
+          "timingLabel": "normal",
+          "confidence": "low",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8423,7 +8508,16 @@
           "scoreDelta6m": null,
           "scoreDelta12m": null,
           "scoreTrend": null,
-          "trendAdjustedScore": null
+          "trendAdjustedScore": null,
+          "displayScore": 53.1,
+          "guardedScore": 53.1,
+          "horizonAgreement": 77.5,
+          "shortTermLevel": 85.4,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 22.5,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8435,7 +8529,16 @@
           "scoreDelta6m": null,
           "scoreDelta12m": null,
           "scoreTrend": -1.4,
-          "trendAdjustedScore": 53.0
+          "trendAdjustedScore": 53.0,
+          "displayScore": 53.4,
+          "guardedScore": 53.4,
+          "horizonAgreement": 68.1,
+          "shortTermLevel": 76.0,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 15.7,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8447,7 +8550,16 @@
           "scoreDelta6m": null,
           "scoreDelta12m": null,
           "scoreTrend": -1.8,
-          "trendAdjustedScore": 51.5
+          "trendAdjustedScore": 51.5,
+          "displayScore": 52.0,
+          "guardedScore": 52.0,
+          "horizonAgreement": 40.4,
+          "shortTermLevel": 62.5,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 18.0,
+          "timingLabel": "normal",
+          "confidence": "low",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8459,7 +8571,16 @@
           "scoreDelta6m": null,
           "scoreDelta12m": null,
           "scoreTrend": -1.7,
-          "trendAdjustedScore": 50.9
+          "trendAdjustedScore": 50.9,
+          "displayScore": 51.4,
+          "guardedScore": 51.4,
+          "horizonAgreement": 61.6,
+          "shortTermLevel": 56.2,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 10.6,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8471,7 +8592,16 @@
           "scoreDelta6m": -2.9,
           "scoreDelta12m": null,
           "scoreTrend": -2.0,
-          "trendAdjustedScore": 51.5
+          "trendAdjustedScore": 51.5,
+          "displayScore": 52.0,
+          "guardedScore": 52.0,
+          "horizonAgreement": 81.3,
+          "shortTermLevel": 50.0,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 5.0,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8483,7 +8613,16 @@
           "scoreDelta6m": -2.3,
           "scoreDelta12m": null,
           "scoreTrend": -1.2,
-          "trendAdjustedScore": 51.2
+          "trendAdjustedScore": 51.2,
+          "displayScore": 51.5,
+          "guardedScore": 51.5,
+          "horizonAgreement": 88.6,
+          "shortTermLevel": 45.8,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 2.8,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8495,7 +8634,16 @@
           "scoreDelta6m": -2.4,
           "scoreDelta12m": null,
           "scoreTrend": -1.3,
-          "trendAdjustedScore": 50.4
+          "trendAdjustedScore": 50.4,
+          "displayScore": 50.7,
+          "guardedScore": 50.7,
+          "horizonAgreement": 71.8,
+          "shortTermLevel": 44.8,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 4.2,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8507,7 +8655,16 @@
           "scoreDelta6m": -3.9,
           "scoreDelta12m": null,
           "scoreTrend": -3.1,
-          "trendAdjustedScore": 48.7
+          "trendAdjustedScore": 48.7,
+          "displayScore": 49.5,
+          "guardedScore": 49.5,
+          "horizonAgreement": 85.2,
+          "shortTermLevel": 49.0,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 2.2,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8519,7 +8676,16 @@
           "scoreDelta6m": -2.3,
           "scoreDelta12m": null,
           "scoreTrend": -2.0,
-          "trendAdjustedScore": 49.2
+          "trendAdjustedScore": 49.2,
+          "displayScore": 49.7,
+          "guardedScore": 49.7,
+          "horizonAgreement": 86.5,
+          "shortTermLevel": 55.2,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 4.4,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8531,7 +8697,16 @@
           "scoreDelta6m": -3.9,
           "scoreDelta12m": null,
           "scoreTrend": -3.5,
-          "trendAdjustedScore": 46.5
+          "trendAdjustedScore": 46.5,
+          "displayScore": 47.4,
+          "guardedScore": 47.4,
+          "horizonAgreement": 96.4,
+          "shortTermLevel": 58.3,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 0.9,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8543,7 +8718,16 @@
           "scoreDelta6m": -2.6,
           "scoreDelta12m": -5.5,
           "scoreTrend": -1.9,
-          "trendAdjustedScore": 48.9
+          "trendAdjustedScore": 48.9,
+          "displayScore": 49.3,
+          "guardedScore": 49.3,
+          "horizonAgreement": 75.4,
+          "shortTermLevel": 66.7,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 7.7,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8555,7 +8739,16 @@
           "scoreDelta6m": -0.9,
           "scoreDelta12m": -3.2,
           "scoreTrend": -0.4,
-          "trendAdjustedScore": 50.5
+          "trendAdjustedScore": 50.5,
+          "displayScore": 50.6,
+          "guardedScore": 50.6,
+          "horizonAgreement": 62.2,
+          "shortTermLevel": 75.9,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 17.2,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8567,7 +8760,16 @@
           "scoreDelta6m": 0.9,
           "scoreDelta12m": -1.5,
           "scoreTrend": 2.0,
-          "trendAdjustedScore": 52.1
+          "trendAdjustedScore": 52.1,
+          "displayScore": 51.6,
+          "guardedScore": 51.6,
+          "horizonAgreement": 63.5,
+          "shortTermLevel": 60.9,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 9.6,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8579,7 +8781,16 @@
           "scoreDelta6m": 2.9,
           "scoreDelta12m": -1.1,
           "scoreTrend": 2.1,
-          "trendAdjustedScore": 52.9
+          "trendAdjustedScore": 52.9,
+          "displayScore": 52.3,
+          "guardedScore": 52.3,
+          "horizonAgreement": 82.1,
+          "shortTermLevel": 52.4,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 4.5,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8591,7 +8802,16 @@
           "scoreDelta6m": 2.3,
           "scoreDelta12m": -0.0,
           "scoreTrend": 1.3,
-          "trendAdjustedScore": 52.3
+          "trendAdjustedScore": 52.3,
+          "displayScore": 52.0,
+          "guardedScore": 52.0,
+          "horizonAgreement": 76.4,
+          "shortTermLevel": 77.4,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 14.7,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8603,7 +8823,16 @@
           "scoreDelta6m": 6.7,
           "scoreDelta12m": 2.8,
           "scoreTrend": 3.8,
-          "trendAdjustedScore": 55.1
+          "trendAdjustedScore": 55.1,
+          "displayScore": 54.1,
+          "guardedScore": 54.1,
+          "horizonAgreement": 71.7,
+          "shortTermLevel": 64.3,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 7.7,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8615,7 +8844,16 @@
           "scoreDelta6m": 4.3,
           "scoreDelta12m": 1.7,
           "scoreTrend": 2.3,
-          "trendAdjustedScore": 54.3
+          "trendAdjustedScore": 54.3,
+          "displayScore": 53.7,
+          "guardedScore": 53.7,
+          "horizonAgreement": 94.6,
+          "shortTermLevel": 70.2,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 1.8,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8627,7 +8865,16 @@
           "scoreDelta6m": 2.4,
           "scoreDelta12m": 1.5,
           "scoreTrend": 1.5,
-          "trendAdjustedScore": 53.4
+          "trendAdjustedScore": 53.4,
+          "displayScore": 53.0,
+          "guardedScore": 53.0,
+          "horizonAgreement": 56.7,
+          "shortTermLevel": 60.7,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 9.5,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8639,7 +8886,16 @@
           "scoreDelta6m": 1.9,
           "scoreDelta12m": 2.7,
           "scoreTrend": 0.8,
-          "trendAdjustedScore": 53.7
+          "trendAdjustedScore": 53.7,
+          "displayScore": 53.5,
+          "guardedScore": 53.5,
+          "horizonAgreement": 60.4,
+          "shortTermLevel": 59.5,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 7.4,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8651,7 +8907,16 @@
           "scoreDelta6m": 2.3,
           "scoreDelta12m": 5.2,
           "scoreTrend": 2.2,
-          "trendAdjustedScore": 55.2
+          "trendAdjustedScore": 55.2,
+          "displayScore": 54.6,
+          "guardedScore": 54.6,
+          "horizonAgreement": 86.5,
+          "shortTermLevel": 52.4,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 2.6,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8663,7 +8928,16 @@
           "scoreDelta6m": 2.8,
           "scoreDelta12m": 5.0,
           "scoreTrend": 2.7,
-          "trendAdjustedScore": 55.4
+          "trendAdjustedScore": 55.4,
+          "displayScore": 54.7,
+          "guardedScore": 54.7,
+          "horizonAgreement": 87.8,
+          "shortTermLevel": 48.8,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 1.8,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8675,7 +8949,16 @@
           "scoreDelta6m": 1.3,
           "scoreDelta12m": 8.0,
           "scoreTrend": 2.9,
-          "trendAdjustedScore": 56.1
+          "trendAdjustedScore": 56.1,
+          "displayScore": 55.4,
+          "guardedScore": 55.4,
+          "horizonAgreement": 91.8,
+          "shortTermLevel": 48.8,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 1.2,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8687,7 +8970,16 @@
           "scoreDelta6m": 1.5,
           "scoreDelta12m": 5.9,
           "scoreTrend": 1.9,
-          "trendAdjustedScore": 55.7
+          "trendAdjustedScore": 55.7,
+          "displayScore": 55.2,
+          "guardedScore": 55.2,
+          "horizonAgreement": 82.7,
+          "shortTermLevel": 51.2,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 2.6,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8699,7 +8991,16 @@
           "scoreDelta6m": 1.9,
           "scoreDelta12m": 4.3,
           "scoreTrend": 1.5,
-          "trendAdjustedScore": 55.3
+          "trendAdjustedScore": 55.3,
+          "displayScore": 54.9,
+          "guardedScore": 54.9,
+          "horizonAgreement": 87.8,
+          "shortTermLevel": 61.9,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 2.6,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8711,7 +9012,16 @@
           "scoreDelta6m": 3.4,
           "scoreDelta12m": 5.3,
           "scoreTrend": 2.8,
-          "trendAdjustedScore": 57.6
+          "trendAdjustedScore": 57.6,
+          "displayScore": 56.9,
+          "guardedScore": 56.9,
+          "horizonAgreement": 93.2,
+          "shortTermLevel": 40.5,
+          "qualityShortTermGap": 15.9,
+          "reversalRisk": 6.3,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8723,7 +9033,16 @@
           "scoreDelta6m": 6.5,
           "scoreDelta12m": 8.8,
           "scoreTrend": 6.6,
-          "trendAdjustedScore": 62.8
+          "trendAdjustedScore": 62.8,
+          "displayScore": 61.1,
+          "guardedScore": 61.1,
+          "horizonAgreement": 87.0,
+          "shortTermLevel": 33.3,
+          "qualityShortTermGap": 44.4,
+          "reversalRisk": 15.3,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8735,7 +9054,16 @@
           "scoreDelta6m": 7.6,
           "scoreDelta12m": 10.3,
           "scoreTrend": 8.0,
-          "trendAdjustedScore": 64.3
+          "trendAdjustedScore": 64.3,
+          "displayScore": 62.3,
+          "guardedScore": 62.3,
+          "horizonAgreement": 60.5,
+          "shortTermLevel": 28.6,
+          "qualityShortTermGap": 59.3,
+          "reversalRisk": 25.9,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8747,7 +9075,16 @@
           "scoreDelta6m": 4.3,
           "scoreDelta12m": 5.5,
           "scoreTrend": 3.8,
-          "trendAdjustedScore": 60.6
+          "trendAdjustedScore": 60.6,
+          "displayScore": 59.7,
+          "guardedScore": 59.7,
+          "horizonAgreement": 82.4,
+          "shortTermLevel": 35.7,
+          "qualityShortTermGap": 34.9,
+          "reversalRisk": 14.4,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8759,7 +9096,16 @@
           "scoreDelta6m": 5.5,
           "scoreDelta12m": 7.0,
           "scoreTrend": 2.8,
-          "trendAdjustedScore": 61.4
+          "trendAdjustedScore": 61.4,
+          "displayScore": 60.7,
+          "guardedScore": 60.7,
+          "horizonAgreement": 71.2,
+          "shortTermLevel": 34.5,
+          "qualityShortTermGap": 40.4,
+          "reversalRisk": 18.0,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8771,7 +9117,16 @@
           "scoreDelta6m": 7.2,
           "scoreDelta12m": 9.1,
           "scoreTrend": 3.9,
-          "trendAdjustedScore": 63.1
+          "trendAdjustedScore": 63.1,
+          "displayScore": 62.1,
+          "guardedScore": 62.1,
+          "horizonAgreement": 69.8,
+          "shortTermLevel": 35.8,
+          "qualityShortTermGap": 40.8,
+          "reversalRisk": 17.9,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8783,7 +9138,16 @@
           "scoreDelta6m": 3.0,
           "scoreDelta12m": 6.4,
           "scoreTrend": 2.3,
-          "trendAdjustedScore": 60.4
+          "trendAdjustedScore": 60.4,
+          "displayScore": 59.8,
+          "guardedScore": 59.8,
+          "horizonAgreement": 85.2,
+          "shortTermLevel": 35.8,
+          "qualityShortTermGap": 35.1,
+          "reversalRisk": 12.7,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8795,7 +9159,16 @@
           "scoreDelta6m": -0.3,
           "scoreDelta12m": 6.2,
           "scoreTrend": 1.2,
-          "trendAdjustedScore": 61.1
+          "trendAdjustedScore": 61.1,
+          "displayScore": 60.8,
+          "guardedScore": 60.8,
+          "horizonAgreement": 56.6,
+          "shortTermLevel": 42.0,
+          "qualityShortTermGap": 22.0,
+          "reversalRisk": 14.2,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8807,7 +9180,16 @@
           "scoreDelta6m": 0.4,
           "scoreDelta12m": 8.0,
           "scoreTrend": 2.0,
-          "trendAdjustedScore": 63.3
+          "trendAdjustedScore": 63.3,
+          "displayScore": 62.7,
+          "guardedScore": 62.7,
+          "horizonAgreement": 93.7,
+          "shortTermLevel": 47.4,
+          "qualityShortTermGap": 13.3,
+          "reversalRisk": 6.1,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8819,7 +9201,16 @@
           "scoreDelta6m": 2.5,
           "scoreDelta12m": 6.8,
           "scoreTrend": 3.3,
-          "trendAdjustedScore": 63.0
+          "trendAdjustedScore": 63.0,
+          "displayScore": 62.2,
+          "guardedScore": 62.2,
+          "horizonAgreement": 92.6,
+          "shortTermLevel": 42.3,
+          "qualityShortTermGap": 24.6,
+          "reversalRisk": 8.9,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8831,7 +9222,16 @@
           "scoreDelta6m": 0.5,
           "scoreDelta12m": 6.0,
           "scoreTrend": 1.5,
-          "trendAdjustedScore": 61.6
+          "trendAdjustedScore": 61.6,
+          "displayScore": 61.2,
+          "guardedScore": 61.2,
+          "horizonAgreement": 89.1,
+          "shortTermLevel": 43.6,
+          "qualityShortTermGap": 18.9,
+          "reversalRisk": 7.7,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8843,7 +9243,16 @@
           "scoreDelta6m": 0.4,
           "scoreDelta12m": 7.6,
           "scoreTrend": 1.5,
-          "trendAdjustedScore": 62.9
+          "trendAdjustedScore": 62.9,
+          "displayScore": 62.5,
+          "guardedScore": 62.5,
+          "horizonAgreement": 95.6,
+          "shortTermLevel": 44.9,
+          "qualityShortTermGap": 19.1,
+          "reversalRisk": 7.0,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8855,7 +9264,16 @@
           "scoreDelta6m": -1.6,
           "scoreDelta12m": 1.3,
           "scoreTrend": -2.2,
-          "trendAdjustedScore": 57.6
+          "trendAdjustedScore": 57.6,
+          "displayScore": 58.2,
+          "guardedScore": 58.2,
+          "horizonAgreement": 92.6,
+          "shortTermLevel": 42.3,
+          "qualityShortTermGap": 14.7,
+          "reversalRisk": 5.9,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8867,7 +9285,16 @@
           "scoreDelta6m": -3.5,
           "scoreDelta12m": -3.9,
           "scoreTrend": -3.8,
-          "trendAdjustedScore": 56.3
+          "trendAdjustedScore": 56.3,
+          "displayScore": 57.2,
+          "guardedScore": 57.2,
+          "horizonAgreement": 96.2,
+          "shortTermLevel": 43.6,
+          "qualityShortTermGap": 9.1,
+          "reversalRisk": 3.3,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8879,7 +9306,16 @@
           "scoreDelta6m": -5.9,
           "scoreDelta12m": -5.5,
           "scoreTrend": -5.7,
-          "trendAdjustedScore": 55.4
+          "trendAdjustedScore": 55.4,
+          "displayScore": 56.8,
+          "guardedScore": 56.8,
+          "horizonAgreement": 85.3,
+          "shortTermLevel": 41.0,
+          "qualityShortTermGap": 14.5,
+          "reversalRisk": 6.6,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8891,7 +9327,16 @@
           "scoreDelta6m": -4.5,
           "scoreDelta12m": -2.0,
           "scoreTrend": -2.0,
-          "trendAdjustedScore": 57.1
+          "trendAdjustedScore": 57.1,
+          "displayScore": 57.6,
+          "guardedScore": 57.6,
+          "horizonAgreement": 94.2,
+          "shortTermLevel": 43.6,
+          "qualityShortTermGap": 10.1,
+          "reversalRisk": 3.9,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8903,7 +9348,16 @@
           "scoreDelta6m": -3.5,
           "scoreDelta12m": -3.0,
           "scoreTrend": -1.4,
-          "trendAdjustedScore": 57.4
+          "trendAdjustedScore": 57.4,
+          "displayScore": 57.7,
+          "guardedScore": 57.7,
+          "horizonAgreement": 56.0,
+          "shortTermLevel": 47.4,
+          "qualityShortTermGap": 0.7,
+          "reversalRisk": 6.8,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8915,7 +9369,16 @@
           "scoreDelta6m": -5.2,
           "scoreDelta12m": -4.8,
           "scoreTrend": -2.2,
-          "trendAdjustedScore": 56.8
+          "trendAdjustedScore": 56.8,
+          "displayScore": 57.4,
+          "guardedScore": 57.4,
+          "horizonAgreement": 84.2,
+          "shortTermLevel": 52.8,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 4.9,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8927,7 +9390,16 @@
           "scoreDelta6m": -1.7,
           "scoreDelta12m": -3.4,
           "scoreTrend": -1.8,
-          "trendAdjustedScore": 56.0
+          "trendAdjustedScore": 56.0,
+          "displayScore": 56.5,
+          "guardedScore": 56.5,
+          "horizonAgreement": 85.6,
+          "shortTermLevel": 52.8,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 4.0,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8939,7 +9411,16 @@
           "scoreDelta6m": -1.1,
           "scoreDelta12m": -4.6,
           "scoreTrend": -2.0,
-          "trendAdjustedScore": 55.7
+          "trendAdjustedScore": 55.7,
+          "displayScore": 56.2,
+          "guardedScore": 56.2,
+          "horizonAgreement": 100.0,
+          "shortTermLevel": 45.8,
+          "qualityShortTermGap": 0.9,
+          "reversalRisk": 0.3,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8951,7 +9432,16 @@
           "scoreDelta6m": -2.4,
           "scoreDelta12m": -8.3,
           "scoreTrend": -3.8,
-          "trendAdjustedScore": 53.5
+          "trendAdjustedScore": 53.5,
+          "displayScore": 54.5,
+          "guardedScore": 54.5,
+          "horizonAgreement": 71.9,
+          "shortTermLevel": 47.2,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 4.6,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8963,7 +9453,16 @@
           "scoreDelta6m": -3.9,
           "scoreDelta12m": -8.4,
           "scoreTrend": -4.2,
-          "trendAdjustedScore": 52.7
+          "trendAdjustedScore": 52.7,
+          "displayScore": 53.7,
+          "guardedScore": 53.7,
+          "horizonAgreement": 92.0,
+          "shortTermLevel": 48.6,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 2.0,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8975,7 +9474,16 @@
           "scoreDelta6m": -3.9,
           "scoreDelta12m": -7.4,
           "scoreTrend": -3.9,
-          "trendAdjustedScore": 52.8
+          "trendAdjustedScore": 52.8,
+          "displayScore": 53.8,
+          "guardedScore": 53.8,
+          "horizonAgreement": 76.1,
+          "shortTermLevel": 58.0,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 4.9,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8987,7 +9495,16 @@
           "scoreDelta6m": -4.1,
           "scoreDelta12m": -9.3,
           "scoreTrend": -3.7,
-          "trendAdjustedScore": 52.3
+          "trendAdjustedScore": 52.3,
+          "displayScore": 53.2,
+          "guardedScore": 53.2,
+          "horizonAgreement": 70.4,
+          "shortTermLevel": 49.3,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 9.0,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -8999,7 +9516,16 @@
           "scoreDelta6m": -3.4,
           "scoreDelta12m": -5.1,
           "scoreTrend": -2.4,
-          "trendAdjustedScore": 52.5
+          "trendAdjustedScore": 52.5,
+          "displayScore": 53.1,
+          "guardedScore": 53.1,
+          "horizonAgreement": 84.4,
+          "shortTermLevel": 49.3,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 4.1,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9011,7 +9537,16 @@
           "scoreDelta6m": -3.9,
           "scoreDelta12m": -4.9,
           "scoreTrend": -2.9,
-          "trendAdjustedScore": 51.6
+          "trendAdjustedScore": 51.6,
+          "displayScore": 52.3,
+          "guardedScore": 52.3,
+          "horizonAgreement": 88.3,
+          "shortTermLevel": 40.9,
+          "qualityShortTermGap": 3.5,
+          "reversalRisk": 3.3,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9023,7 +9558,16 @@
           "scoreDelta6m": -2.2,
           "scoreDelta12m": -4.6,
           "scoreTrend": -2.1,
-          "trendAdjustedScore": 51.7
+          "trendAdjustedScore": 51.7,
+          "displayScore": 52.2,
+          "guardedScore": 52.2,
+          "horizonAgreement": 75.0,
+          "shortTermLevel": 45.5,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 4.1,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9035,7 +9579,16 @@
           "scoreDelta6m": -2.6,
           "scoreDelta12m": -6.5,
           "scoreTrend": -3.0,
-          "trendAdjustedScore": 50.4
+          "trendAdjustedScore": 50.4,
+          "displayScore": 51.1,
+          "guardedScore": 51.1,
+          "horizonAgreement": 92.2,
+          "shortTermLevel": 54.5,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 1.5,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9047,7 +9600,16 @@
           "scoreDelta6m": -1.8,
           "scoreDelta12m": -5.7,
           "scoreTrend": -1.8,
-          "trendAdjustedScore": 51.6
+          "trendAdjustedScore": 51.6,
+          "displayScore": 52.0,
+          "guardedScore": 52.0,
+          "horizonAgreement": 84.5,
+          "shortTermLevel": 47.0,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 3.7,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9059,7 +9621,16 @@
           "scoreDelta6m": -2.7,
           "scoreDelta12m": -6.8,
           "scoreTrend": -3.0,
-          "trendAdjustedScore": 49.8
+          "trendAdjustedScore": 49.8,
+          "displayScore": 50.5,
+          "guardedScore": 50.5,
+          "horizonAgreement": 80.4,
+          "shortTermLevel": 39.4,
+          "qualityShortTermGap": 2.9,
+          "reversalRisk": 6.3,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9071,7 +9642,16 @@
           "scoreDelta6m": -1.6,
           "scoreDelta12m": -5.0,
           "scoreTrend": -1.3,
-          "trendAdjustedScore": 51.1
+          "trendAdjustedScore": 51.1,
+          "displayScore": 51.4,
+          "guardedScore": 51.4,
+          "horizonAgreement": 71.7,
+          "shortTermLevel": 43.9,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 7.0,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9083,7 +9663,16 @@
           "scoreDelta6m": -0.4,
           "scoreDelta12m": -4.3,
           "scoreTrend": -1.0,
-          "trendAdjustedScore": 51.7
+          "trendAdjustedScore": 51.7,
+          "displayScore": 51.9,
+          "guardedScore": 51.9,
+          "horizonAgreement": 92.6,
+          "shortTermLevel": 51.5,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 2.2,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9095,7 +9684,16 @@
           "scoreDelta6m": 0.3,
           "scoreDelta12m": -2.0,
           "scoreTrend": 0.7,
-          "trendAdjustedScore": 52.7
+          "trendAdjustedScore": 52.7,
+          "displayScore": 52.5,
+          "guardedScore": 52.5,
+          "horizonAgreement": 82.1,
+          "shortTermLevel": 53.0,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 2.7,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9107,7 +9705,16 @@
           "scoreDelta6m": 0.1,
           "scoreDelta12m": -2.5,
           "scoreTrend": -0.6,
-          "trendAdjustedScore": 51.1
+          "trendAdjustedScore": 51.1,
+          "displayScore": 51.2,
+          "guardedScore": 51.2,
+          "horizonAgreement": 66.0,
+          "shortTermLevel": 63.6,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 8.5,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9119,7 +9726,16 @@
           "scoreDelta6m": 0.3,
           "scoreDelta12m": -1.5,
           "scoreTrend": -0.0,
-          "trendAdjustedScore": 52.3
+          "trendAdjustedScore": 52.3,
+          "displayScore": 52.3,
+          "guardedScore": 52.3,
+          "horizonAgreement": 63.6,
+          "shortTermLevel": 66.7,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 10.9,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9131,7 +9747,16 @@
           "scoreDelta6m": 2.2,
           "scoreDelta12m": -0.5,
           "scoreTrend": 0.7,
-          "trendAdjustedScore": 52.9
+          "trendAdjustedScore": 52.9,
+          "displayScore": 52.7,
+          "guardedScore": 52.7,
+          "horizonAgreement": 94.8,
+          "shortTermLevel": 57.6,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 1.5,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9143,7 +9768,16 @@
           "scoreDelta6m": -1.9,
           "scoreDelta12m": -3.5,
           "scoreTrend": -2.1,
-          "trendAdjustedScore": 49.0
+          "trendAdjustedScore": 49.0,
+          "displayScore": 49.5,
+          "guardedScore": 49.5,
+          "horizonAgreement": 78.5,
+          "shortTermLevel": 65.2,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 5.9,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9155,7 +9789,16 @@
           "scoreDelta6m": -1.5,
           "scoreDelta12m": -1.9,
           "scoreTrend": -1.7,
-          "trendAdjustedScore": 50.0
+          "trendAdjustedScore": 50.0,
+          "displayScore": 50.4,
+          "guardedScore": 50.4,
+          "horizonAgreement": 63.3,
+          "shortTermLevel": 75.8,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 16.0,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9167,7 +9810,16 @@
           "scoreDelta6m": -0.9,
           "scoreDelta12m": -0.6,
           "scoreTrend": -0.9,
-          "trendAdjustedScore": 51.4
+          "trendAdjustedScore": 51.4,
+          "displayScore": 51.6,
+          "guardedScore": 51.6,
+          "horizonAgreement": 69.4,
+          "shortTermLevel": 78.8,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 16.6,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9179,7 +9831,16 @@
           "scoreDelta6m": 1.8,
           "scoreDelta12m": 1.9,
           "scoreTrend": 2.7,
-          "trendAdjustedScore": 53.7
+          "trendAdjustedScore": 53.7,
+          "displayScore": 53.0,
+          "guardedScore": 53.0,
+          "horizonAgreement": 91.3,
+          "shortTermLevel": 62.1,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 2.7,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9191,7 +9852,16 @@
           "scoreDelta6m": 0.6,
           "scoreDelta12m": 0.9,
           "scoreTrend": 1.6,
-          "trendAdjustedScore": 53.3
+          "trendAdjustedScore": 53.3,
+          "displayScore": 52.9,
+          "guardedScore": 52.9,
+          "horizonAgreement": 73.2,
+          "shortTermLevel": 63.6,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 5.8,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9203,7 +9873,16 @@
           "scoreDelta6m": 1.1,
           "scoreDelta12m": 3.3,
           "scoreTrend": 2.1,
-          "trendAdjustedScore": 54.4
+          "trendAdjustedScore": 54.4,
+          "displayScore": 53.8,
+          "guardedScore": 53.8,
+          "horizonAgreement": 55.9,
+          "shortTermLevel": 62.1,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 8.9,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9215,7 +9894,16 @@
           "scoreDelta6m": 3.5,
           "scoreDelta12m": 1.6,
           "scoreTrend": 1.3,
-          "trendAdjustedScore": 53.3
+          "trendAdjustedScore": 53.3,
+          "displayScore": 53.0,
+          "guardedScore": 53.0,
+          "horizonAgreement": 78.9,
+          "shortTermLevel": 68.3,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 6.7,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9227,7 +9915,16 @@
           "scoreDelta6m": 2.3,
           "scoreDelta12m": 0.8,
           "scoreTrend": 0.7,
-          "trendAdjustedScore": 52.9
+          "trendAdjustedScore": 52.9,
+          "displayScore": 52.7,
+          "guardedScore": 52.7,
+          "horizonAgreement": 64.9,
+          "shortTermLevel": 83.3,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 22.4,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9239,7 +9936,16 @@
           "scoreDelta6m": 0.3,
           "scoreDelta12m": -0.6,
           "scoreTrend": -1.0,
-          "trendAdjustedScore": 51.7
+          "trendAdjustedScore": 51.7,
+          "displayScore": 51.9,
+          "guardedScore": 51.9,
+          "horizonAgreement": 67.0,
+          "shortTermLevel": 55.0,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 7.5,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9251,7 +9957,16 @@
           "scoreDelta6m": -0.7,
           "scoreDelta12m": 1.1,
           "scoreTrend": -0.3,
-          "trendAdjustedScore": 52.3
+          "trendAdjustedScore": 52.3,
+          "displayScore": 52.4,
+          "guardedScore": 52.4,
+          "horizonAgreement": 81.1,
+          "shortTermLevel": 48.3,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 3.3,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9263,7 +9978,16 @@
           "scoreDelta6m": -0.8,
           "scoreDelta12m": -0.1,
           "scoreTrend": -0.5,
-          "trendAdjustedScore": 52.0
+          "trendAdjustedScore": 52.0,
+          "displayScore": 52.2,
+          "guardedScore": 52.2,
+          "horizonAgreement": 82.7,
+          "shortTermLevel": 51.7,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 4.1,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9275,7 +9999,16 @@
           "scoreDelta6m": -0.7,
           "scoreDelta12m": 0.4,
           "scoreTrend": 0.5,
-          "trendAdjustedScore": 53.3
+          "trendAdjustedScore": 53.3,
+          "displayScore": 53.2,
+          "guardedScore": 53.2,
+          "horizonAgreement": 95.0,
+          "shortTermLevel": 41.7,
+          "qualityShortTermGap": 3.7,
+          "reversalRisk": 1.9,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9287,7 +10020,16 @@
           "scoreDelta6m": 0.6,
           "scoreDelta12m": 4.1,
           "scoreTrend": 1.7,
-          "trendAdjustedScore": 54.1
+          "trendAdjustedScore": 54.1,
+          "displayScore": 53.6,
+          "guardedScore": 53.6,
+          "horizonAgreement": 95.0,
+          "shortTermLevel": 43.3,
+          "qualityShortTermGap": 0.8,
+          "reversalRisk": 1.5,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9299,7 +10041,16 @@
           "scoreDelta6m": -0.1,
           "scoreDelta12m": 2.2,
           "scoreTrend": 0.6,
-          "trendAdjustedScore": 52.8
+          "trendAdjustedScore": 52.8,
+          "displayScore": 52.6,
+          "guardedScore": 52.6,
+          "horizonAgreement": 82.0,
+          "shortTermLevel": 50.9,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 2.7,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9311,7 +10062,16 @@
           "scoreDelta6m": 0.2,
           "scoreDelta12m": 0.5,
           "scoreTrend": -0.4,
-          "trendAdjustedScore": 52.0
+          "trendAdjustedScore": 52.0,
+          "displayScore": 52.1,
+          "guardedScore": 52.1,
+          "horizonAgreement": 85.1,
+          "shortTermLevel": 49.1,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 4.6,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9323,7 +10083,16 @@
           "scoreDelta6m": 0.2,
           "scoreDelta12m": -0.5,
           "scoreTrend": -0.6,
-          "trendAdjustedScore": 52.4
+          "trendAdjustedScore": 52.4,
+          "displayScore": 52.5,
+          "guardedScore": 52.5,
+          "horizonAgreement": 91.4,
+          "shortTermLevel": 47.4,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 2.1,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9335,7 +10104,16 @@
           "scoreDelta6m": -0.0,
           "scoreDelta12m": -0.8,
           "scoreTrend": -0.4,
-          "trendAdjustedScore": 52.0
+          "trendAdjustedScore": 52.0,
+          "displayScore": 52.1,
+          "guardedScore": 52.1,
+          "horizonAgreement": 92.1,
+          "shortTermLevel": 43.9,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 1.2,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9347,7 +10125,16 @@
           "scoreDelta6m": -1.1,
           "scoreDelta12m": -1.8,
           "scoreTrend": -0.7,
-          "trendAdjustedScore": 51.8
+          "trendAdjustedScore": 51.8,
+          "displayScore": 52.0,
+          "guardedScore": 52.0,
+          "horizonAgreement": 93.9,
+          "shortTermLevel": 49.1,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 0.9,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9359,7 +10146,16 @@
           "scoreDelta6m": -1.0,
           "scoreDelta12m": -0.4,
           "scoreTrend": -0.3,
-          "trendAdjustedScore": 52.6
+          "trendAdjustedScore": 52.6,
+          "displayScore": 52.6,
+          "guardedScore": 52.6,
+          "horizonAgreement": 100.0,
+          "shortTermLevel": 47.4,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 0.0,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9371,7 +10167,16 @@
           "scoreDelta6m": 0.5,
           "scoreDelta12m": 0.4,
           "scoreTrend": 0.7,
-          "trendAdjustedScore": 53.3
+          "trendAdjustedScore": 53.3,
+          "displayScore": 53.1,
+          "guardedScore": 53.1,
+          "horizonAgreement": 86.9,
+          "shortTermLevel": 51.9,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 2.0,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9383,7 +10188,16 @@
           "scoreDelta6m": 0.7,
           "scoreDelta12m": 0.9,
           "scoreTrend": 0.8,
-          "trendAdjustedScore": 53.0
+          "trendAdjustedScore": 53.0,
+          "displayScore": 52.8,
+          "guardedScore": 52.8,
+          "horizonAgreement": 94.4,
+          "shortTermLevel": 46.3,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 1.4,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "119",
@@ -9395,7 +10209,16 @@
           "scoreDelta6m": 0.1,
           "scoreDelta12m": 0.3,
           "scoreTrend": 0.1,
-          "trendAdjustedScore": 52.7
+          "trendAdjustedScore": 52.7,
+          "displayScore": 52.7,
+          "guardedScore": 52.7,
+          "horizonAgreement": 76.9,
+          "shortTermLevel": 53.7,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 3.5,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         }
       ]
     },
@@ -9414,7 +10237,16 @@
           "scoreDelta6m": null,
           "scoreDelta12m": null,
           "scoreTrend": null,
-          "trendAdjustedScore": null
+          "trendAdjustedScore": null,
+          "displayScore": 60.5,
+          "guardedScore": 59.0,
+          "horizonAgreement": 45.7,
+          "shortTermLevel": 94.9,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 41.0,
+          "timingLabel": "caution",
+          "confidence": "low",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9426,7 +10258,16 @@
           "scoreDelta6m": null,
           "scoreDelta12m": null,
           "scoreTrend": null,
-          "trendAdjustedScore": null
+          "trendAdjustedScore": null,
+          "displayScore": 59.2,
+          "guardedScore": 59.2,
+          "horizonAgreement": 82.4,
+          "shortTermLevel": 96.2,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 31.3,
+          "timingLabel": "normal",
+          "confidence": "low",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9438,7 +10279,16 @@
           "scoreDelta6m": null,
           "scoreDelta12m": null,
           "scoreTrend": null,
-          "trendAdjustedScore": null
+          "trendAdjustedScore": null,
+          "displayScore": 59.7,
+          "guardedScore": 59.7,
+          "horizonAgreement": 64.3,
+          "shortTermLevel": 87.2,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 25.8,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9450,7 +10300,16 @@
           "scoreDelta6m": null,
           "scoreDelta12m": null,
           "scoreTrend": 2.0,
-          "trendAdjustedScore": 63.0
+          "trendAdjustedScore": 63.0,
+          "displayScore": 62.5,
+          "guardedScore": 62.5,
+          "horizonAgreement": 44.3,
+          "shortTermLevel": 87.2,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 32.8,
+          "timingLabel": "normal",
+          "confidence": "low",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9462,7 +10321,16 @@
           "scoreDelta6m": null,
           "scoreDelta12m": null,
           "scoreTrend": 3.3,
-          "trendAdjustedScore": 63.2
+          "trendAdjustedScore": 63.2,
+          "displayScore": 62.4,
+          "guardedScore": 62.4,
+          "horizonAgreement": 96.4,
+          "shortTermLevel": 97.5,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 28.6,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9474,7 +10342,16 @@
           "scoreDelta6m": null,
           "scoreDelta12m": null,
           "scoreTrend": 1.0,
-          "trendAdjustedScore": 61.0
+          "trendAdjustedScore": 61.0,
+          "displayScore": 60.7,
+          "guardedScore": 60.7,
+          "horizonAgreement": 17.2,
+          "shortTermLevel": 81.8,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 35.1,
+          "timingLabel": "caution",
+          "confidence": "low",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9486,7 +10363,16 @@
           "scoreDelta6m": 2.4,
           "scoreDelta12m": null,
           "scoreTrend": 1.1,
-          "trendAdjustedScore": 63.1
+          "trendAdjustedScore": 63.1,
+          "displayScore": 62.8,
+          "guardedScore": 62.8,
+          "horizonAgreement": 41.8,
+          "shortTermLevel": 88.1,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 34.7,
+          "timingLabel": "normal",
+          "confidence": "low",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9498,7 +10384,16 @@
           "scoreDelta6m": 5.3,
           "scoreDelta12m": null,
           "scoreTrend": 3.3,
-          "trendAdjustedScore": 65.3
+          "trendAdjustedScore": 65.3,
+          "displayScore": 64.5,
+          "guardedScore": 64.5,
+          "horizonAgreement": 40.4,
+          "shortTermLevel": 64.8,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 14.0,
+          "timingLabel": "normal",
+          "confidence": "low",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9510,7 +10405,16 @@
           "scoreDelta6m": 3.0,
           "scoreDelta12m": null,
           "scoreTrend": 2.3,
-          "trendAdjustedScore": 63.3
+          "trendAdjustedScore": 63.3,
+          "displayScore": 62.7,
+          "guardedScore": 62.7,
+          "horizonAgreement": 36.1,
+          "shortTermLevel": 65.4,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 14.4,
+          "timingLabel": "normal",
+          "confidence": "low",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9522,7 +10426,16 @@
           "scoreDelta6m": -2.9,
           "scoreDelta12m": null,
           "scoreTrend": -3.2,
-          "trendAdjustedScore": 58.8
+          "trendAdjustedScore": 58.8,
+          "displayScore": 59.5,
+          "guardedScore": 59.5,
+          "horizonAgreement": 30.2,
+          "shortTermLevel": 43.6,
+          "qualityShortTermGap": 14.9,
+          "reversalRisk": 17.5,
+          "timingLabel": "normal",
+          "confidence": "low",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9534,7 +10447,16 @@
           "scoreDelta6m": -2.7,
           "scoreDelta12m": null,
           "scoreTrend": -4.0,
-          "trendAdjustedScore": 58.7
+          "trendAdjustedScore": 58.7,
+          "displayScore": 59.7,
+          "guardedScore": 59.7,
+          "horizonAgreement": 50.6,
+          "shortTermLevel": 22.4,
+          "qualityShortTermGap": 68.1,
+          "reversalRisk": 27.8,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9546,7 +10468,16 @@
           "scoreDelta6m": 1.9,
           "scoreDelta12m": null,
           "scoreTrend": 0.7,
-          "trendAdjustedScore": 62.8
+          "trendAdjustedScore": 62.8,
+          "displayScore": 62.6,
+          "guardedScore": 62.6,
+          "horizonAgreement": 44.9,
+          "shortTermLevel": 27.6,
+          "qualityShortTermGap": 62.7,
+          "reversalRisk": 27.1,
+          "timingLabel": "normal",
+          "confidence": "low",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9558,7 +10489,16 @@
           "scoreDelta6m": -3.6,
           "scoreDelta12m": -1.3,
           "scoreTrend": -1.5,
-          "trendAdjustedScore": 58.8
+          "trendAdjustedScore": 58.8,
+          "displayScore": 59.2,
+          "guardedScore": 59.2,
+          "horizonAgreement": 95.0,
+          "shortTermLevel": 94.9,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 25.9,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9570,7 +10510,16 @@
           "scoreDelta6m": -2.7,
           "scoreDelta12m": 2.6,
           "scoreTrend": 0.8,
-          "trendAdjustedScore": 62.0
+          "trendAdjustedScore": 62.0,
+          "displayScore": 61.8,
+          "guardedScore": 61.8,
+          "horizonAgreement": 91.5,
+          "shortTermLevel": 96.1,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 28.8,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9582,7 +10531,16 @@
           "scoreDelta6m": 4.0,
           "scoreDelta12m": 7.0,
           "scoreTrend": 4.6,
-          "trendAdjustedScore": 67.8
+          "trendAdjustedScore": 67.8,
+          "displayScore": 66.7,
+          "guardedScore": 66.7,
+          "horizonAgreement": 96.2,
+          "shortTermLevel": 97.4,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 28.5,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9594,7 +10552,16 @@
           "scoreDelta6m": 7.1,
           "scoreDelta12m": 4.1,
           "scoreTrend": 6.7,
-          "trendAdjustedScore": 68.3
+          "trendAdjustedScore": 68.3,
+          "displayScore": 66.6,
+          "guardedScore": 66.6,
+          "horizonAgreement": 98.0,
+          "shortTermLevel": 98.0,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 28.6,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9606,7 +10573,16 @@
           "scoreDelta6m": 4.1,
           "scoreDelta12m": 1.4,
           "scoreTrend": 2.5,
-          "trendAdjustedScore": 64.4
+          "trendAdjustedScore": 64.4,
+          "displayScore": 63.8,
+          "guardedScore": 60.1,
+          "horizonAgreement": 16.8,
+          "shortTermLevel": 94.8,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 50.0,
+          "timingLabel": "caution",
+          "confidence": "low",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9618,7 +10594,16 @@
           "scoreDelta6m": 11.8,
           "scoreDelta12m": 13.7,
           "scoreTrend": 10.1,
-          "trendAdjustedScore": 76.9
+          "trendAdjustedScore": 76.9,
+          "displayScore": 74.4,
+          "guardedScore": 74.4,
+          "horizonAgreement": 89.0,
+          "shortTermLevel": 95.4,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 28.3,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9630,7 +10615,16 @@
           "scoreDelta6m": 16.8,
           "scoreDelta12m": 13.1,
           "scoreTrend": 12.3,
-          "trendAdjustedScore": 79.1
+          "trendAdjustedScore": 79.1,
+          "displayScore": 76.0,
+          "guardedScore": 76.0,
+          "horizonAgreement": 98.0,
+          "shortTermLevel": 97.4,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 27.9,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9642,7 +10636,16 @@
           "scoreDelta6m": 12.8,
           "scoreDelta12m": 10.1,
           "scoreTrend": 11.3,
-          "trendAdjustedScore": 77.4
+          "trendAdjustedScore": 77.4,
+          "displayScore": 74.6,
+          "guardedScore": 74.6,
+          "horizonAgreement": 83.6,
+          "shortTermLevel": 98.7,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 33.8,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9654,7 +10657,16 @@
           "scoreDelta6m": 13.7,
           "scoreDelta12m": 17.7,
           "scoreTrend": 10.7,
-          "trendAdjustedScore": 83.1
+          "trendAdjustedScore": 83.1,
+          "displayScore": 80.4,
+          "guardedScore": 80.4,
+          "horizonAgreement": 88.7,
+          "shortTermLevel": 99.3,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 32.8,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -9666,7 +10678,16 @@
           "scoreDelta6m": 12.6,
           "scoreDelta12m": 19.7,
           "scoreTrend": 9.3,
-          "trendAdjustedScore": 81.5
+          "trendAdjustedScore": 81.5,
+          "displayScore": 79.2,
+          "guardedScore": 77.7,
+          "horizonAgreement": 43.0,
+          "shortTermLevel": 94.1,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 41.0,
+          "timingLabel": "caution",
+          "confidence": "low",
+          "highScorePersistenceMonths": 1
         },
         {
           "fundId": "1093",
@@ -9678,7 +10699,16 @@
           "scoreDelta6m": 16.5,
           "scoreDelta12m": 20.7,
           "scoreTrend": 12.0,
-          "trendAdjustedScore": 83.3
+          "trendAdjustedScore": 83.3,
+          "displayScore": 80.3,
+          "guardedScore": 80.3,
+          "horizonAgreement": 85.3,
+          "shortTermLevel": 91.0,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 24.8,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 1
         },
         {
           "fundId": "1093",
@@ -9690,7 +10720,16 @@
           "scoreDelta6m": 7.8,
           "scoreDelta12m": 19.6,
           "scoreTrend": 7.2,
-          "trendAdjustedScore": 84.0
+          "trendAdjustedScore": 84.0,
+          "displayScore": 82.2,
+          "guardedScore": 82.2,
+          "horizonAgreement": 61.1,
+          "shortTermLevel": 90.8,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 32.1,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 2
         },
         {
           "fundId": "1093",
@@ -9702,7 +10741,16 @@
           "scoreDelta6m": 3.2,
           "scoreDelta12m": 19.9,
           "scoreTrend": 4.9,
-          "trendAdjustedScore": 80.4
+          "trendAdjustedScore": 80.4,
+          "displayScore": 79.1,
+          "guardedScore": 79.1,
+          "horizonAgreement": 92.6,
+          "shortTermLevel": 91.5,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 22.8,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 2
         },
         {
           "fundId": "1093",
@@ -9714,7 +10762,16 @@
           "scoreDelta6m": 5.1,
           "scoreDelta12m": 17.9,
           "scoreTrend": 4.8,
-          "trendAdjustedScore": 80.9
+          "trendAdjustedScore": 80.9,
+          "displayScore": 79.7,
+          "guardedScore": 79.7,
+          "horizonAgreement": 73.9,
+          "shortTermLevel": 90.2,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 27.1,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 2
         },
         {
           "fundId": "1093",
@@ -9726,7 +10783,16 @@
           "scoreDelta6m": 4.7,
           "scoreDelta12m": 18.5,
           "scoreTrend": 6.6,
-          "trendAdjustedScore": 86.8
+          "trendAdjustedScore": 86.8,
+          "displayScore": 85.2,
+          "guardedScore": 85.2,
+          "horizonAgreement": 79.0,
+          "shortTermLevel": 76.5,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 12.1,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 1
         },
         {
           "fundId": "1093",
@@ -9738,7 +10804,16 @@
           "scoreDelta6m": 7.9,
           "scoreDelta12m": 20.4,
           "scoreTrend": 10.4,
-          "trendAdjustedScore": 89.7
+          "trendAdjustedScore": 89.7,
+          "displayScore": 87.1,
+          "guardedScore": 87.1,
+          "horizonAgreement": 63.6,
+          "shortTermLevel": 75.2,
+          "qualityShortTermGap": 4.8,
+          "reversalRisk": 14.8,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 1
         },
         {
           "fundId": "1093",
@@ -9750,7 +10825,16 @@
           "scoreDelta6m": 7.4,
           "scoreDelta12m": 23.9,
           "scoreTrend": 11.0,
-          "trendAdjustedScore": 90.4
+          "trendAdjustedScore": 90.4,
+          "displayScore": 87.7,
+          "guardedScore": 87.7,
+          "horizonAgreement": 78.9,
+          "shortTermLevel": 79.7,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 13.3,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 2
         },
         {
           "fundId": "1093",
@@ -9762,7 +10846,16 @@
           "scoreDelta6m": 6.8,
           "scoreDelta12m": 14.7,
           "scoreTrend": 6.9,
-          "trendAdjustedScore": 90.8
+          "trendAdjustedScore": 90.8,
+          "displayScore": 89.1,
+          "guardedScore": 89.1,
+          "horizonAgreement": 82.9,
+          "shortTermLevel": 87.6,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 20.1,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -9774,7 +10867,16 @@
           "scoreDelta6m": 12.6,
           "scoreDelta12m": 15.7,
           "scoreTrend": 9.2,
-          "trendAdjustedScore": 94.0
+          "trendAdjustedScore": 94.0,
+          "displayScore": 91.7,
+          "guardedScore": 91.7,
+          "horizonAgreement": 85.0,
+          "shortTermLevel": 88.9,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 22.3,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -9786,7 +10888,16 @@
           "scoreDelta6m": 16.4,
           "scoreDelta12m": 21.4,
           "scoreTrend": 13.4,
-          "trendAdjustedScore": 99.4
+          "trendAdjustedScore": 99.4,
+          "displayScore": 95.0,
+          "guardedScore": 95.0,
+          "horizonAgreement": 45.2,
+          "shortTermLevel": 86.3,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 32.3,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -9798,7 +10909,16 @@
           "scoreDelta6m": 9.8,
           "scoreDelta12m": 14.5,
           "scoreTrend": 8.7,
-          "trendAdjustedScore": 97.1
+          "trendAdjustedScore": 97.1,
+          "displayScore": 94.9,
+          "guardedScore": 94.9,
+          "horizonAgreement": 66.8,
+          "shortTermLevel": 77.8,
+          "qualityShortTermGap": 17.8,
+          "reversalRisk": 21.4,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -9810,7 +10930,16 @@
           "scoreDelta6m": 7.3,
           "scoreDelta12m": 15.1,
           "scoreTrend": 6.5,
-          "trendAdjustedScore": 96.0
+          "trendAdjustedScore": 96.0,
+          "displayScore": 94.4,
+          "guardedScore": 94.4,
+          "horizonAgreement": 18.5,
+          "shortTermLevel": 68.0,
+          "qualityShortTermGap": 41.0,
+          "reversalRisk": 31.9,
+          "timingLabel": "normal",
+          "confidence": "low",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -9822,7 +10951,16 @@
           "scoreDelta6m": 6.3,
           "scoreDelta12m": 13.7,
           "scoreTrend": 3.6,
-          "trendAdjustedScore": 94.9
+          "trendAdjustedScore": 94.9,
+          "displayScore": 94.0,
+          "guardedScore": 93.9,
+          "horizonAgreement": 45.6,
+          "shortTermLevel": 52.3,
+          "qualityShortTermGap": 79.3,
+          "reversalRisk": 35.3,
+          "timingLabel": "caution",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -9834,7 +10972,16 @@
           "scoreDelta6m": 10.9,
           "scoreDelta12m": 17.8,
           "scoreTrend": 9.4,
-          "trendAdjustedScore": 100.0
+          "trendAdjustedScore": 100.0,
+          "displayScore": 95.0,
+          "guardedScore": 94.1,
+          "horizonAgreement": 47.9,
+          "shortTermLevel": 42.5,
+          "qualityShortTermGap": 100.0,
+          "reversalRisk": 38.4,
+          "timingLabel": "high reversal risk",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -9846,7 +10993,16 @@
           "scoreDelta6m": -0.9,
           "scoreDelta12m": 11.7,
           "scoreTrend": 0.3,
-          "trendAdjustedScore": 90.9
+          "trendAdjustedScore": 90.9,
+          "displayScore": 90.8,
+          "guardedScore": 90.3,
+          "horizonAgreement": 52.6,
+          "shortTermLevel": 39.9,
+          "qualityShortTermGap": 100.0,
+          "reversalRisk": 37.1,
+          "timingLabel": "high reversal risk",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -9858,7 +11014,16 @@
           "scoreDelta6m": -7.5,
           "scoreDelta12m": 8.8,
           "scoreTrend": -3.3,
-          "trendAdjustedScore": 87.7
+          "trendAdjustedScore": 87.7,
+          "displayScore": 88.5,
+          "guardedScore": 88.5,
+          "horizonAgreement": 76.9,
+          "shortTermLevel": 42.5,
+          "qualityShortTermGap": 90.0,
+          "reversalRisk": 31.1,
+          "timingLabel": "high reversal risk",
+          "confidence": "high",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -9870,7 +11035,16 @@
           "scoreDelta6m": -11.4,
           "scoreDelta12m": -1.6,
           "scoreTrend": -11.9,
-          "trendAdjustedScore": 80.6
+          "trendAdjustedScore": 80.6,
+          "displayScore": 83.6,
+          "guardedScore": 83.6,
+          "horizonAgreement": 75.2,
+          "shortTermLevel": 39.2,
+          "qualityShortTermGap": 85.8,
+          "reversalRisk": 29.5,
+          "timingLabel": "caution",
+          "confidence": "high",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -9882,7 +11056,16 @@
           "scoreDelta6m": -4.8,
           "scoreDelta12m": 2.4,
           "scoreTrend": -1.6,
-          "trendAdjustedScore": 89.1
+          "trendAdjustedScore": 89.1,
+          "displayScore": 89.5,
+          "guardedScore": 89.5,
+          "horizonAgreement": 59.5,
+          "shortTermLevel": 52.6,
+          "qualityShortTermGap": 67.4,
+          "reversalRisk": 26.3,
+          "timingLabel": "caution",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -9894,7 +11077,16 @@
           "scoreDelta6m": -1.3,
           "scoreDelta12m": 5.0,
           "scoreTrend": 2.7,
-          "trendAdjustedScore": 93.4
+          "trendAdjustedScore": 93.4,
+          "displayScore": 92.7,
+          "guardedScore": 92.7,
+          "horizonAgreement": 82.1,
+          "shortTermLevel": 51.9,
+          "qualityShortTermGap": 77.0,
+          "reversalRisk": 28.4,
+          "timingLabel": "caution",
+          "confidence": "high",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -9906,7 +11098,16 @@
           "scoreDelta6m": -3.8,
           "scoreDelta12m": 7.1,
           "scoreTrend": 6.6,
-          "trendAdjustedScore": 97.8
+          "trendAdjustedScore": 97.8,
+          "displayScore": 95.0,
+          "guardedScore": 95.0,
+          "horizonAgreement": 84.5,
+          "shortTermLevel": 39.1,
+          "qualityShortTermGap": 100.0,
+          "reversalRisk": 34.6,
+          "timingLabel": "high reversal risk",
+          "confidence": "high",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -9918,7 +11119,16 @@
           "scoreDelta6m": 3.6,
           "scoreDelta12m": 2.6,
           "scoreTrend": 4.0,
-          "trendAdjustedScore": 95.4
+          "trendAdjustedScore": 95.4,
+          "displayScore": 94.4,
+          "guardedScore": 94.4,
+          "horizonAgreement": 87.3,
+          "shortTermLevel": 34.0,
+          "qualityShortTermGap": 100.0,
+          "reversalRisk": 32.9,
+          "timingLabel": "high reversal risk",
+          "confidence": "high",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -9930,7 +11140,16 @@
           "scoreDelta6m": 9.6,
           "scoreDelta12m": 2.1,
           "scoreTrend": 6.0,
-          "trendAdjustedScore": 99.6
+          "trendAdjustedScore": 99.6,
+          "displayScore": 95.0,
+          "guardedScore": 95.0,
+          "horizonAgreement": 84.2,
+          "shortTermLevel": 29.9,
+          "qualityShortTermGap": 100.0,
+          "reversalRisk": 34.0,
+          "timingLabel": "high reversal risk",
+          "confidence": "high",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -9942,7 +11161,16 @@
           "scoreDelta6m": 16.4,
           "scoreDelta12m": 5.1,
           "scoreTrend": 7.9,
-          "trendAdjustedScore": 100.0
+          "trendAdjustedScore": 100.0,
+          "displayScore": 95.0,
+          "guardedScore": 95.0,
+          "horizonAgreement": 83.3,
+          "shortTermLevel": 17.0,
+          "qualityShortTermGap": 100.0,
+          "reversalRisk": 34.2,
+          "timingLabel": "high reversal risk",
+          "confidence": "high",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -9954,7 +11182,16 @@
           "scoreDelta6m": 10.5,
           "scoreDelta12m": 5.6,
           "scoreTrend": 7.1,
-          "trendAdjustedScore": 100.0
+          "trendAdjustedScore": 100.0,
+          "displayScore": 95.0,
+          "guardedScore": 94.1,
+          "horizonAgreement": 44.2,
+          "shortTermLevel": 23.8,
+          "qualityShortTermGap": 100.0,
+          "reversalRisk": 38.6,
+          "timingLabel": "high reversal risk",
+          "confidence": "low",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -9966,7 +11203,16 @@
           "scoreDelta6m": 7.3,
           "scoreDelta12m": 6.0,
           "scoreTrend": 4.3,
-          "trendAdjustedScore": 100.0
+          "trendAdjustedScore": 100.0,
+          "displayScore": 95.0,
+          "guardedScore": 95.0,
+          "horizonAgreement": 84.9,
+          "shortTermLevel": 23.1,
+          "qualityShortTermGap": 100.0,
+          "reversalRisk": 32.3,
+          "timingLabel": "high reversal risk",
+          "confidence": "high",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -9978,7 +11224,16 @@
           "scoreDelta6m": 3.8,
           "scoreDelta12m": 0.0,
           "scoreTrend": 1.1,
-          "trendAdjustedScore": 100.0
+          "trendAdjustedScore": 100.0,
+          "displayScore": 95.0,
+          "guardedScore": 95.0,
+          "horizonAgreement": 68.6,
+          "shortTermLevel": 37.4,
+          "qualityShortTermGap": 100.0,
+          "reversalRisk": 34.7,
+          "timingLabel": "high reversal risk",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -9990,7 +11245,16 @@
           "scoreDelta6m": 5.6,
           "scoreDelta12m": 9.2,
           "scoreTrend": 3.5,
-          "trendAdjustedScore": 100.0
+          "trendAdjustedScore": 100.0,
+          "displayScore": 95.0,
+          "guardedScore": 95.0,
+          "horizonAgreement": 94.7,
+          "shortTermLevel": 26.5,
+          "qualityShortTermGap": 100.0,
+          "reversalRisk": 31.3,
+          "timingLabel": "high reversal risk",
+          "confidence": "high",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -10002,7 +11266,16 @@
           "scoreDelta6m": -2.6,
           "scoreDelta12m": 7.0,
           "scoreTrend": -1.6,
-          "trendAdjustedScore": 95.1
+          "trendAdjustedScore": 95.1,
+          "displayScore": 95.0,
+          "guardedScore": 95.0,
+          "horizonAgreement": 83.0,
+          "shortTermLevel": 19.0,
+          "qualityShortTermGap": 100.0,
+          "reversalRisk": 33.6,
+          "timingLabel": "high reversal risk",
+          "confidence": "high",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -10014,7 +11287,16 @@
           "scoreDelta6m": -14.2,
           "scoreDelta12m": 2.2,
           "scoreTrend": -10.9,
-          "trendAdjustedScore": 83.1
+          "trendAdjustedScore": 83.1,
+          "displayScore": 85.8,
+          "guardedScore": 84.0,
+          "horizonAgreement": 36.4,
+          "shortTermLevel": 26.5,
+          "qualityShortTermGap": 100.0,
+          "reversalRisk": 42.4,
+          "timingLabel": "high reversal risk",
+          "confidence": "low",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -10026,7 +11308,16 @@
           "scoreDelta6m": -9.8,
           "scoreDelta12m": 0.7,
           "scoreTrend": -7.7,
-          "trendAdjustedScore": 88.3
+          "trendAdjustedScore": 88.3,
+          "displayScore": 90.2,
+          "guardedScore": 90.2,
+          "horizonAgreement": 87.4,
+          "shortTermLevel": 11.6,
+          "qualityShortTermGap": 100.0,
+          "reversalRisk": 33.4,
+          "timingLabel": "high reversal risk",
+          "confidence": "high",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -10038,7 +11329,16 @@
           "scoreDelta6m": -8.9,
           "scoreDelta12m": -1.6,
           "scoreTrend": -5.2,
-          "trendAdjustedScore": 89.8
+          "trendAdjustedScore": 89.8,
+          "displayScore": 91.1,
+          "guardedScore": 91.0,
+          "horizonAgreement": 64.2,
+          "shortTermLevel": 12.2,
+          "qualityShortTermGap": 100.0,
+          "reversalRisk": 35.4,
+          "timingLabel": "high reversal risk",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -10050,7 +11350,16 @@
           "scoreDelta6m": -9.4,
           "scoreDelta12m": -5.6,
           "scoreTrend": -1.5,
-          "trendAdjustedScore": 90.2
+          "trendAdjustedScore": 90.2,
+          "displayScore": 90.6,
+          "guardedScore": 90.6,
+          "horizonAgreement": 100.0,
+          "shortTermLevel": 6.1,
+          "qualityShortTermGap": 100.0,
+          "reversalRisk": 30.0,
+          "timingLabel": "high reversal risk",
+          "confidence": "high",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -10062,7 +11371,16 @@
           "scoreDelta6m": -9.8,
           "scoreDelta12m": -4.2,
           "scoreTrend": -3.8,
-          "trendAdjustedScore": 89.2
+          "trendAdjustedScore": 89.2,
+          "displayScore": 90.2,
+          "guardedScore": 88.1,
+          "horizonAgreement": 10.2,
+          "shortTermLevel": 6.1,
+          "qualityShortTermGap": 100.0,
+          "reversalRisk": 43.5,
+          "timingLabel": "high reversal risk",
+          "confidence": "low",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -10074,7 +11392,16 @@
           "scoreDelta6m": -5.8,
           "scoreDelta12m": -8.4,
           "scoreTrend": -4.1,
-          "trendAdjustedScore": 88.7
+          "trendAdjustedScore": 88.7,
+          "displayScore": 89.7,
+          "guardedScore": 89.7,
+          "horizonAgreement": 98.0,
+          "shortTermLevel": 6.1,
+          "qualityShortTermGap": 100.0,
+          "reversalRisk": 30.3,
+          "timingLabel": "high reversal risk",
+          "confidence": "high",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -10086,7 +11413,16 @@
           "scoreDelta6m": -0.5,
           "scoreDelta12m": -14.7,
           "scoreTrend": -5.7,
-          "trendAdjustedScore": 83.9
+          "trendAdjustedScore": 83.9,
+          "displayScore": 85.3,
+          "guardedScore": 83.6,
+          "horizonAgreement": 55.6,
+          "shortTermLevel": 21.8,
+          "qualityShortTermGap": 100.0,
+          "reversalRisk": 41.9,
+          "timingLabel": "high reversal risk",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -10098,7 +11434,16 @@
           "scoreDelta6m": -5.1,
           "scoreDelta12m": -15.0,
           "scoreTrend": -7.1,
-          "trendAdjustedScore": 83.3
+          "trendAdjustedScore": 83.3,
+          "displayScore": 85.0,
+          "guardedScore": 84.0,
+          "horizonAgreement": 39.9,
+          "shortTermLevel": 7.5,
+          "qualityShortTermGap": 100.0,
+          "reversalRisk": 39.0,
+          "timingLabel": "high reversal risk",
+          "confidence": "low",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -10110,7 +11455,16 @@
           "scoreDelta6m": -15.5,
           "scoreDelta12m": -24.4,
           "scoreTrend": -16.6,
-          "trendAdjustedScore": 71.5
+          "trendAdjustedScore": 71.5,
+          "displayScore": 75.6,
+          "guardedScore": 73.9,
+          "horizonAgreement": 18.0,
+          "shortTermLevel": 26.4,
+          "qualityShortTermGap": 98.1,
+          "reversalRisk": 41.7,
+          "timingLabel": "caution",
+          "confidence": "low",
+          "highScorePersistenceMonths": 3
         },
         {
           "fundId": "1093",
@@ -10122,7 +11476,16 @@
           "scoreDelta6m": -21.2,
           "scoreDelta12m": -30.6,
           "scoreTrend": -20.4,
-          "trendAdjustedScore": 64.4
+          "trendAdjustedScore": 64.4,
+          "displayScore": 69.4,
+          "guardedScore": 69.4,
+          "horizonAgreement": 27.3,
+          "shortTermLevel": 54.2,
+          "qualityShortTermGap": 13.1,
+          "reversalRisk": 23.7,
+          "timingLabel": "normal",
+          "confidence": "low",
+          "highScorePersistenceMonths": 2
         },
         {
           "fundId": "1093",
@@ -10134,7 +11497,16 @@
           "scoreDelta6m": -30.8,
           "scoreDelta12m": -40.6,
           "scoreTrend": -30.2,
-          "trendAdjustedScore": 54.4
+          "trendAdjustedScore": 54.4,
+          "displayScore": 59.4,
+          "guardedScore": 59.4,
+          "horizonAgreement": 49.3,
+          "shortTermLevel": 30.6,
+          "qualityShortTermGap": 47.0,
+          "reversalRisk": 22.6,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 1
         },
         {
           "fundId": "1093",
@@ -10146,7 +11518,16 @@
           "scoreDelta6m": -34.5,
           "scoreDelta12m": -40.3,
           "scoreTrend": -28.6,
-          "trendAdjustedScore": 50.2
+          "trendAdjustedScore": 50.2,
+          "displayScore": 55.2,
+          "guardedScore": 55.2,
+          "horizonAgreement": 55.0,
+          "shortTermLevel": 31.2,
+          "qualityShortTermGap": 35.0,
+          "reversalRisk": 18.7,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10158,7 +11539,16 @@
           "scoreDelta6m": -33.1,
           "scoreDelta12m": -33.6,
           "scoreTrend": -25.3,
-          "trendAdjustedScore": 47.2
+          "trendAdjustedScore": 47.2,
+          "displayScore": 52.2,
+          "guardedScore": 52.2,
+          "horizonAgreement": 53.1,
+          "shortTermLevel": 41.7,
+          "qualityShortTermGap": 1.3,
+          "reversalRisk": 11.7,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10170,7 +11560,16 @@
           "scoreDelta6m": -30.4,
           "scoreDelta12m": -35.6,
           "scoreTrend": -18.6,
-          "trendAdjustedScore": 50.0
+          "trendAdjustedScore": 50.0,
+          "displayScore": 54.6,
+          "guardedScore": 54.6,
+          "horizonAgreement": 48.5,
+          "shortTermLevel": 45.8,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 8.8,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10182,7 +11581,16 @@
           "scoreDelta6m": -25.8,
           "scoreDelta12m": -41.3,
           "scoreTrend": -18.7,
-          "trendAdjustedScore": 45.2
+          "trendAdjustedScore": 45.2,
+          "displayScore": 49.8,
+          "guardedScore": 49.8,
+          "horizonAgreement": 81.2,
+          "shortTermLevel": 19.4,
+          "qualityShortTermGap": 51.0,
+          "reversalRisk": 19.4,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10194,7 +11602,16 @@
           "scoreDelta6m": -21.3,
           "scoreDelta12m": -42.4,
           "scoreTrend": -16.9,
-          "trendAdjustedScore": 43.9
+          "trendAdjustedScore": 43.9,
+          "displayScore": 48.1,
+          "guardedScore": 48.1,
+          "horizonAgreement": 67.4,
+          "shortTermLevel": 36.8,
+          "qualityShortTermGap": 3.4,
+          "reversalRisk": 7.2,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10206,7 +11623,16 @@
           "scoreDelta6m": -12.7,
           "scoreDelta12m": -43.5,
           "scoreTrend": -16.5,
-          "trendAdjustedScore": 42.6
+          "trendAdjustedScore": 42.6,
+          "displayScore": 46.7,
+          "guardedScore": 46.7,
+          "horizonAgreement": 83.6,
+          "shortTermLevel": 28.5,
+          "qualityShortTermGap": 20.6,
+          "reversalRisk": 9.7,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10218,7 +11644,16 @@
           "scoreDelta6m": -10.7,
           "scoreDelta12m": -45.2,
           "scoreTrend": -14.9,
-          "trendAdjustedScore": 40.8
+          "trendAdjustedScore": 40.8,
+          "displayScore": 44.5,
+          "guardedScore": 44.5,
+          "horizonAgreement": 83.7,
+          "shortTermLevel": 29.2,
+          "qualityShortTermGap": 13.4,
+          "reversalRisk": 9.4,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10230,7 +11665,16 @@
           "scoreDelta6m": -9.3,
           "scoreDelta12m": -42.5,
           "scoreTrend": -13.9,
-          "trendAdjustedScore": 39.4
+          "trendAdjustedScore": 39.4,
+          "displayScore": 42.9,
+          "guardedScore": 42.9,
+          "horizonAgreement": 88.7,
+          "shortTermLevel": 26.2,
+          "qualityShortTermGap": 16.5,
+          "reversalRisk": 6.6,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10242,7 +11686,16 @@
           "scoreDelta6m": -13.9,
           "scoreDelta12m": -44.3,
           "scoreTrend": -16.0,
-          "trendAdjustedScore": 36.7
+          "trendAdjustedScore": 36.7,
+          "displayScore": 40.7,
+          "guardedScore": 40.7,
+          "horizonAgreement": 69.4,
+          "shortTermLevel": 39.9,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 4.6,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10254,7 +11707,16 @@
           "scoreDelta6m": -3.2,
           "scoreDelta12m": -29.0,
           "scoreTrend": -5.7,
-          "trendAdjustedScore": 45.2
+          "trendAdjustedScore": 45.2,
+          "displayScore": 46.7,
+          "guardedScore": 46.7,
+          "horizonAgreement": 80.1,
+          "shortTermLevel": 39.1,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 4.9,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10266,7 +11728,16 @@
           "scoreDelta6m": 1.1,
           "scoreDelta12m": -20.2,
           "scoreTrend": -0.5,
-          "trendAdjustedScore": 49.1
+          "trendAdjustedScore": 49.1,
+          "displayScore": 49.2,
+          "guardedScore": 49.2,
+          "horizonAgreement": 88.4,
+          "shortTermLevel": 39.9,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 3.2,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10278,7 +11749,16 @@
           "scoreDelta6m": -10.1,
           "scoreDelta12m": -22.8,
           "scoreTrend": -9.7,
-          "trendAdjustedScore": 34.1
+          "trendAdjustedScore": 34.1,
+          "displayScore": 36.6,
+          "guardedScore": 36.6,
+          "horizonAgreement": 74.2,
+          "shortTermLevel": 38.4,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 3.9,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10290,7 +11770,16 @@
           "scoreDelta6m": -3.7,
           "scoreDelta12m": -14.4,
           "scoreTrend": -6.9,
-          "trendAdjustedScore": 39.1
+          "trendAdjustedScore": 39.1,
+          "displayScore": 40.8,
+          "guardedScore": 40.8,
+          "horizonAgreement": 95.8,
+          "shortTermLevel": 29.7,
+          "qualityShortTermGap": 2.7,
+          "reversalRisk": 2.1,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10302,7 +11791,16 @@
           "scoreDelta6m": 13.8,
           "scoreDelta12m": 4.5,
           "scoreTrend": 8.7,
-          "trendAdjustedScore": 58.8
+          "trendAdjustedScore": 58.8,
+          "displayScore": 56.6,
+          "guardedScore": 56.6,
+          "horizonAgreement": 51.7,
+          "shortTermLevel": 50.0,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 7.2,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10314,7 +11812,16 @@
           "scoreDelta6m": 13.5,
           "scoreDelta12m": -0.4,
           "scoreTrend": 12.8,
-          "trendAdjustedScore": 57.4
+          "trendAdjustedScore": 57.4,
+          "displayScore": 54.2,
+          "guardedScore": 54.2,
+          "horizonAgreement": 57.9,
+          "shortTermLevel": 50.4,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 6.3,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10326,7 +11833,16 @@
           "scoreDelta6m": 3.3,
           "scoreDelta12m": 0.1,
           "scoreTrend": 5.5,
-          "trendAdjustedScore": 51.3
+          "trendAdjustedScore": 51.3,
+          "displayScore": 49.9,
+          "guardedScore": 49.9,
+          "horizonAgreement": 76.9,
+          "shortTermLevel": 86.7,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 20.1,
+          "timingLabel": "normal",
+          "confidence": "high",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10338,7 +11854,16 @@
           "scoreDelta6m": 0.4,
           "scoreDelta12m": 1.5,
           "scoreTrend": -3.0,
-          "trendAdjustedScore": 48.9
+          "trendAdjustedScore": 48.9,
+          "displayScore": 49.7,
+          "guardedScore": 49.7,
+          "horizonAgreement": 63.5,
+          "shortTermLevel": 85.2,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 26.7,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10350,7 +11875,16 @@
           "scoreDelta6m": 21.2,
           "scoreDelta12m": 11.1,
           "scoreTrend": 10.4,
-          "trendAdjustedScore": 60.4
+          "trendAdjustedScore": 60.4,
+          "displayScore": 57.8,
+          "guardedScore": 57.8,
+          "horizonAgreement": 50.3,
+          "shortTermLevel": 85.2,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 30.5,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10362,7 +11896,16 @@
           "scoreDelta6m": 11.5,
           "scoreDelta12m": 7.8,
           "scoreTrend": 6.3,
-          "trendAdjustedScore": 53.9
+          "trendAdjustedScore": 53.9,
+          "displayScore": 52.4,
+          "guardedScore": 52.4,
+          "horizonAgreement": 62.9,
+          "shortTermLevel": 79.3,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 19.0,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10374,7 +11917,16 @@
           "scoreDelta6m": -2.6,
           "scoreDelta12m": 11.2,
           "scoreTrend": 3.6,
-          "trendAdjustedScore": 54.9
+          "trendAdjustedScore": 54.9,
+          "displayScore": 54.0,
+          "guardedScore": 54.0,
+          "horizonAgreement": 64.7,
+          "shortTermLevel": 81.5,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 20.8,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10386,7 +11938,16 @@
           "scoreDelta6m": -1.0,
           "scoreDelta12m": 12.5,
           "scoreTrend": -0.1,
-          "trendAdjustedScore": 53.2
+          "trendAdjustedScore": 53.2,
+          "displayScore": 53.2,
+          "guardedScore": 53.2,
+          "horizonAgreement": 50.1,
+          "shortTermLevel": 80.0,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 25.1,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10398,7 +11959,16 @@
           "scoreDelta6m": -2.9,
           "scoreDelta12m": 0.3,
           "scoreTrend": -3.5,
-          "trendAdjustedScore": 46.1
+          "trendAdjustedScore": 46.1,
+          "displayScore": 47.0,
+          "guardedScore": 47.0,
+          "horizonAgreement": 55.4,
+          "shortTermLevel": 45.9,
+          "qualityShortTermGap": 0.0,
+          "reversalRisk": 8.4,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         },
         {
           "fundId": "1093",
@@ -10410,7 +11980,16 @@
           "scoreDelta6m": -4.5,
           "scoreDelta12m": -4.1,
           "scoreTrend": -6.6,
-          "trendAdjustedScore": 43.5
+          "trendAdjustedScore": 43.5,
+          "displayScore": 45.1,
+          "guardedScore": 45.1,
+          "horizonAgreement": 58.6,
+          "shortTermLevel": 31.8,
+          "qualityShortTermGap": 8.3,
+          "reversalRisk": 11.7,
+          "timingLabel": "normal",
+          "confidence": "medium",
+          "highScorePersistenceMonths": 0
         }
       ]
     }

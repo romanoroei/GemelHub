@@ -61,6 +61,16 @@ For fund 1093 the trend signal did not anticipate the 2020 reversal: the broad s
 
 The practical conclusion is to display score direction as context, but not treat it as a sufficient crash-warning mechanism. Fund 1093 shows that a trend derived from the model can inherit the model's blind spot.
 
+## User-protection and reversal-warning layer
+
+The research output now separates quality from timing. The displayed quality score is capped at 95 to avoid communicating certainty. Separate point-in-time fields report 1/3/6/12-month agreement, three-month high-score persistence, confidence, and reversal risk. Reversal risk combines unusually strong recent performance, recent weakening, disagreement across short horizons, and—critically—the gap between a high broad-model score and weak short-horizon evidence.
+
+Across 34,038 out-of-sample monthly observations, the strict `high reversal risk` rule fired only 115 times. Those observations had a mean future percentile of 40.1; 48.7% subsequently landed in the bottom third and only 21.7% reached the top third. Normal observations had a 29.3% bottom-third rate. The strict warning therefore identifies a small, materially higher-risk subset.
+
+Directly subtracting reversal risk from the quality score did not improve aggregate ranking metrics: Spearman remained approximately 0.215 and the selected-fund bottom-third rate remained 18.1%. The warning should consequently remain a separate timing label rather than silently altering the quality score.
+
+For fund 1093, December 2020 would have displayed quality 95 (capped from 100), short-horizon support of only 42.5, medium confidence, and `high reversal risk`; its realized future percentile was 29.9. The strict warning remained active through 2021, when realized future percentiles became especially weak. This addresses the communication failure exposed by fund 1093 without claiming certainty that a peak has occurred.
+
 ## Interpretation and limitations
 
 The result supports the predictive value of the broader monthly history: returns at several horizons, consistency, downside behavior, size, fees, flows, exposures, Alpha, and Sharpe contain more useful information together than the current fixed formula.

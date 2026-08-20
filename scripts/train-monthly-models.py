@@ -204,6 +204,83 @@ trend_weights = {3: .5, 6: .3, 12: .2}
 trend_numerator = sum(composite[f'scoreDelta{months}m'].fillna(0) * weight for months, weight in trend_weights.items())
 trend_denominator = sum(composite[f'scoreDelta{months}m'].notna() * weight for months, weight in trend_weights.items())
 composite['scoreTrend'] = trend_numerator / trend_denominator.replace(0, np.nan)
+
+# User-facing protection layer: separate long-run quality from entry timing.
+# All inputs are point-in-time and ranked only against the same cohort/month.
+feature_lookup = df.set_index(['cohort','product','track','fundId','period'])
+for months in [1, 3, 6, 12]:
+    col = f'return_{months}m'
+    composite[col] = [feature_lookup[col].get((r.cohort,r.product,r.track,r.fundId,r.period), np.nan) for r in composite.itertuples()]
+    composite[f'{col}_percentile'] = composite.groupby(['cohort','period'])[col].rank(pct=True) * 100
+
+rank_cols = [f'return_{months}m_percentile' for months in [1, 3, 6, 12]]
+composite['horizonAgreement'] = (100 - composite[rank_cols].std(axis=1, skipna=True) * 2).clip(0, 100)
+composite['shortTermLevel'] = composite[[f'return_{m}m_percentile' for m in [3, 6, 12]]].mean(axis=1)
+composite['recentWeakening'] = (
+    .6 * (composite['return_3m_percentile'] - composite['return_1m_percentile']).clip(lower=0)
+    + .4 * (composite['return_6m_percentile'] - composite['return_3m_percentile']).clip(lower=0)
+).clip(0, 100)
+composite['overheatLevel'] = ((composite['shortTermLevel'] - 70).clip(lower=0) / 30 * 100).clip(0, 100)
+composite['disagreementRisk'] = (100 - composite.horizonAgreement).clip(0, 100)
+composite['qualityShortTermGap'] = (
+    (composite.prediction - composite.shortTermLevel - 10).clip(lower=0) / 40 * 100
+).clip(0, 100)
+composite['reversalRisk'] = (
+    .30 * composite.overheatLevel
+    + .25 * composite.recentWeakening
+    + .15 * composite.disagreementRisk
+    + .30 * composite.qualityShortTermGap
+).clip(0, 100)
+
+for offset in [1, 2, 3]:
+    composite[f'priorScore{offset}m'] = [score_lookup.get((r.cohort, r.fundId, serial(r.period) - offset), np.nan) for r in composite.itertuples()]
+prior_cols = [f'priorScore{offset}m' for offset in [1, 2, 3]]
+composite['highScorePersistenceMonths'] = composite[prior_cols].ge(80).sum(axis=1)
+composite['displayScore'] = composite.prediction.clip(5, 95)
+composite['confidence'] = np.select(
+    [
+        (composite.horizonAgreement >= 70) & (composite[prior_cols].notna().sum(axis=1) == 3),
+        (composite.horizonAgreement >= 45) & (composite[prior_cols].notna().sum(axis=1) >= 2),
+    ],
+    ['high', 'medium'],
+    default='low',
+)
+high_reversal_warning = (
+    (composite.reversalRisk >= 55)
+    | ((composite.prediction >= 85) & (composite.qualityShortTermGap >= 80))
+)
+caution_warning = (
+    (composite.reversalRisk >= 35)
+    | ((composite.prediction >= 80) & (composite.qualityShortTermGap >= 50))
+)
+composite['timingLabel'] = np.select(
+    [high_reversal_warning, caution_warning],
+    ['high reversal risk', 'caution'],
+    default='normal',
+)
+
+timing_label_results = []
+for label, group in composite.groupby('timingLabel'):
+    timing_label_results.append({
+        'label': label,
+        'rows': len(group),
+        'meanFuturePercentile': round(float(group.truth.mean()), 1),
+        'futureBottomThirdRate': round(float((group.truth <= 33.3333).mean() * 100), 1),
+        'futureTopThirdRate': round(float((group.truth >= 66.6667).mean() * 100), 1),
+    })
+
+guardrail_results = []
+for strength in [.10, .25, .50]:
+    penalty = strength * (composite.reversalRisk - 35).clip(lower=0)
+    guarded = (composite.displayScore - penalty).clip(5, 95)
+    valid = guarded.notna()
+    guardrail_results.append({
+        'strength': strength,
+        'formula': 'capped broad score minus strength * reversal risk above 35',
+        **metrics(composite[valid], guarded[valid].to_numpy()),
+        'rows': int(valid.sum()),
+    })
+composite['guardedScore'] = (composite.displayScore - .25 * (composite.reversalRisk - 35).clip(lower=0)).clip(5, 95)
 trend_results = []
 for strength in [.10, .25, .50]:
     adjusted = (composite.prediction + strength * composite.scoreTrend.clip(-20, 20)).clip(0, 100)
@@ -264,6 +341,15 @@ for sample_fund_id, (sample_name, sample_cohort) in sample_funds.items():
             'scoreDelta12m': round(float(row.scoreDelta12m), 1) if np.isfinite(row.scoreDelta12m) else None,
             'scoreTrend': round(float(row.scoreTrend), 1) if np.isfinite(row.scoreTrend) else None,
             'trendAdjustedScore': round(float(np.clip(row.prediction + .25 * np.clip(row.scoreTrend, -20, 20), 0, 100)), 1) if np.isfinite(row.scoreTrend) else None,
+            'displayScore': round(float(row.displayScore), 1),
+            'guardedScore': round(float(row.guardedScore), 1) if np.isfinite(row.guardedScore) else None,
+            'horizonAgreement': round(float(row.horizonAgreement), 1) if np.isfinite(row.horizonAgreement) else None,
+            'shortTermLevel': round(float(row.shortTermLevel), 1) if np.isfinite(row.shortTermLevel) else None,
+            'qualityShortTermGap': round(float(row.qualityShortTermGap), 1) if np.isfinite(row.qualityShortTermGap) else None,
+            'reversalRisk': round(float(row.reversalRisk), 1) if np.isfinite(row.reversalRisk) else None,
+            'timingLabel': row.timingLabel,
+            'confidence': row.confidence,
+            'highScorePersistenceMonths': int(row.highScorePersistenceMonths),
         } for row in sample.itertuples()],
     })
 
@@ -284,6 +370,12 @@ result = {
     'shortFlowCompositeScore': short_flow_composite_result,
     'shortReturnCompositeScore': short_return_composite_result,
     'scoreTrendExperiment': {'weights': {str(k): v for k, v in trend_weights.items()}, 'candidates': trend_results},
+    'userProtectionExperiment': {
+        'displayScoreRange': [5, 95],
+        'reversalRiskWeights': {'overheat': .30, 'recentWeakening': .25, 'horizonDisagreement': .15, 'qualityShortTermGap': .30},
+        'guardrailCandidates': guardrail_results,
+        'timingLabelResults': timing_label_results,
+    },
     'sampleHistories': sample_histories,
     'folds': folds,
 }
