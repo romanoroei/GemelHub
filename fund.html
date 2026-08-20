@@ -3223,6 +3223,8 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
   const infoStylesHtml = `<style>
     #gh-score-modal .gh-info-tip-btn{display:inline-flex;vertical-align:middle;border:0;background:transparent;color:#2563eb;padding:0;margin-inline-start:3px;cursor:pointer;font-size:.72rem;line-height:1;}
     #gh-score-modal .gh-info-floating-bubble{position:fixed;z-index:10020;padding:10px 12px;border:1px solid #dbe3ee;border-radius:11px;background:#fff;color:#334155;box-shadow:0 10px 30px rgba(15,39,68,.24);font-size:.74rem;font-weight:500;line-height:1.6;text-align:right;}
+    #gh-score-modal .gh-period-detail summary::-webkit-details-marker{display:none;}
+    #gh-score-modal .gh-period-detail[open] .gh-period-chevron{transform:rotate(180deg);}
   </style>`;
   const scoreHeaderHtml = thisFund ? (() => {
     const grade = ghGrade(thisFund.score);
@@ -3230,20 +3232,21 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
     const rank  = allScores.findIndex(s => s.fundId === String(currentFundId)) + 1;
     const total = allScores.length;
     return `
-    <div style="padding:14px 16px;background:linear-gradient(135deg,#0f2744 0%,#1d3a68 100%);position:sticky;top:0;z-index:20;box-shadow:0 5px 16px rgba(15,39,68,.22);">
-      <div style="display:flex;align-items:stretch;gap:12px;">
-        <div style="text-align:center;min-width:128px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:9px 12px;">
-          <div style="font-size:.66rem;color:#cbd5e1;font-weight:800;margin-bottom:3px;">ציון גמל האב</div>
-          <div style="font-size:2.45rem;font-weight:900;color:#d6ad22;line-height:1;">${thisFund.score.toFixed(2)}</div>
+    <div style="padding:15px 18px 13px;background:#172f55;position:sticky;top:0;z-index:20;box-shadow:0 4px 12px rgba(15,39,68,.2);">
+      <div style="display:flex;align-items:center;gap:18px;">
+        <div style="text-align:center;min-width:112px;padding-left:18px;border-left:1px solid rgba(255,255,255,.22);">
+          <div style="font-size:.64rem;color:#b9c7da;font-weight:700;margin-bottom:4px;">ציון גמל האב</div>
+          <div style="font-size:2.5rem;font-weight:900;color:#d6ad22;line-height:1;letter-spacing:-1px;">${thisFund.score.toFixed(2)}</div>
         </div>
-        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:5px 8px;">
-          <div style="font-size:.66rem;color:#93a9c7;font-weight:800;margin-bottom:4px;">מגמה עדכנית</div>
-          <div style="font-size:1.12rem;font-weight:900;color:${trendPanelColor};line-height:1.35;">${trend.icon ? trend.icon + ' ' : ''}${trend.text}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:.64rem;color:#93a9c7;font-weight:700;margin-bottom:5px;">מגמה עדכנית</div>
+          <div style="font-size:1.08rem;font-weight:800;color:${trendPanelColor};line-height:1.35;">${trend.icon ? trend.icon + ' ' : ''}${trend.text}</div>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
-        <div style="background:rgba(255,255,255,.07);border-radius:9px;padding:7px 10px;font-size:.86rem;color:${color};font-weight:900;text-align:center;">דירוג: ${grade}</div>
-        <div style="background:rgba(255,255,255,.07);border-radius:9px;padding:7px 10px;font-size:.76rem;color:#dbe7f6;text-align:center;">מקום <strong style="color:#fff;">${rank}</strong> מתוך <strong style="color:#fff;">${total}</strong> מנהלים</div>
+      <div style="display:flex;align-items:center;gap:10px;border-top:1px solid rgba(255,255,255,.14);margin-top:12px;padding-top:9px;font-size:.78rem;">
+        <div style="color:${color};font-weight:900;">דירוג: ${grade}</div>
+        <span style="color:#6f86a6;">|</span>
+        <div style="color:#cbd5e1;">מקום <strong style="color:#fff;">${rank}</strong> מתוך <strong style="color:#fff;">${total}</strong> מנהלים</div>
       </div>
     </div>`;
   })() : '';
@@ -3255,20 +3258,39 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
     : support >= 70 ? 'חזקים ביחס למתחרים'
       : support >= 55 ? 'חיוביים ביחס למתחרים'
         : support >= 40 ? 'באמצע המסלול' : 'חלשים ביחס למתחרים';
+  const yearBreakdown = (thisFund?.components?.years || []).map(year => `
+    <div style="display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid #edf1f5;">
+      <span>${year.year}</span><strong style="color:#172f55;">אחוזון ${year.percentile.toFixed(0)}</strong>
+    </div>`).join('');
+  const horizonNames = { 1: 'חודש', 3: '3 חודשים', 6: '6 חודשים', 12: '12 חודשים' };
+  const horizonBreakdown = Object.entries(protection.horizonScores || {}).map(([months, value]) => `
+    <div style="display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid #edf1f5;">
+      <span>${horizonNames[months]}</span><strong style="color:#172f55;">${Number.isFinite(value) ? `אחוזון ${value.toFixed(0)}` : 'אין נתון'}</strong>
+    </div>`).join('');
   const protectionHtml = thisFund ? `
-    <div style="padding:14px 16px 16px;background:#fff;border-bottom:1px solid #e8eef5;">
-      <div style="display:flex;align-items:center;margin-bottom:11px;font-size:.8rem;font-weight:900;color:#0f2744;">ביצועים לאורך זמן ${ghInfoBubble('הציון משלב שני מבטים: יציבות הדירוג בחמש השנים האחרונות, וביצועים עדכניים בחודש, 3, 6 ו־12 חודשים מול המתחרים. תווית המגמה בפאנל הכחול מסכמת את השינוי העדכני.', 'הסבר על ביצועים לאורך זמן')}</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;">
-        <div style="background:linear-gradient(180deg,#f8fbff 0%,#f4f7fb 100%);border:1px solid #e5edf6;border-top:3px solid #3b82f6;border-radius:12px;padding:11px 10px;text-align:center;box-shadow:0 3px 10px rgba(15,39,68,.04);">
-          <div style="font-size:.62rem;color:#8291a6;font-weight:700;">מבט ארוך טווח</div>
-          <div style="font-size:.71rem;color:#475569;font-weight:800;margin-top:2px;">יציבות ב־5 שנים</div>
-          <div style="font-size:1.03rem;font-weight:900;color:#0f2744;margin-top:5px;">${consistencyLabel}</div>
-        </div>
-        <div style="background:linear-gradient(180deg,#f8fbff 0%,#f4f7fb 100%);border:1px solid #e5edf6;border-top:3px solid #14b8a6;border-radius:12px;padding:11px 10px;text-align:center;box-shadow:0 3px 10px rgba(15,39,68,.04);">
-          <div style="font-size:.62rem;color:#8291a6;font-weight:700;">מבט עדכני</div>
-          <div style="font-size:.71rem;color:#475569;font-weight:800;margin-top:2px;">ביצועים עד שנה</div>
-          <div style="font-size:.94rem;font-weight:900;color:#0f2744;margin-top:5px;">${supportLabel}</div>
-        </div>
+    <div style="padding:15px 18px 17px;background:#fff;border-bottom:1px solid #e8eef5;">
+      <div style="margin-bottom:10px;font-size:.8rem;font-weight:900;color:#172f55;">ביצועים לאורך זמן</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));border:1px solid #dfe6ee;border-radius:8px;overflow:hidden;background:#fff;">
+        <details class="gh-period-detail" style="border-left:1px solid #dfe6ee;">
+          <summary style="list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+            <div><div style="font-size:.72rem;color:#52637a;font-weight:700;">יציבות ב־5 שנים</div><div style="font-size:1rem;color:#172f55;font-weight:900;margin-top:3px;">${consistencyLabel}</div></div>
+            <i class="fas fa-chevron-down gh-period-chevron" style="font-size:.65rem;color:#8493a7;transition:transform .2s;"></i>
+          </summary>
+          <div style="padding:0 14px 12px;color:#52637a;font-size:.7rem;line-height:1.55;">
+            <div style="padding:8px 0;color:#64748b;">מידת היציבות של מיקום הקופה מול מתחרים בכל אחת מחמש השנים.</div>
+            ${yearBreakdown}
+          </div>
+        </details>
+        <details class="gh-period-detail">
+          <summary style="list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+            <div><div style="font-size:.72rem;color:#52637a;font-weight:700;">ביצועים עד שנה</div><div style="font-size:.92rem;color:#172f55;font-weight:900;margin-top:3px;">${supportLabel}</div></div>
+            <i class="fas fa-chevron-down gh-period-chevron" style="font-size:.65rem;color:#8493a7;transition:transform .2s;"></i>
+          </summary>
+          <div style="padding:0 14px 12px;color:#52637a;font-size:.7rem;line-height:1.55;">
+            <div style="padding:8px 0;color:#64748b;">מיקום הקופה מול מתחרים בכל טווח. אחוזון גבוה יותר מצביע על ביצועים טובים יותר.</div>
+            ${horizonBreakdown}
+          </div>
+        </details>
       </div>
     </div>` : '';
 
