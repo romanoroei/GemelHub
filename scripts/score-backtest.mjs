@@ -3,7 +3,7 @@ import path from 'node:path';
 
 const ROOT = process.cwd();
 const CLS = 'תגמולים ואישית לפיצויים';
-const TRACKS = ['כללי','מניות'];
+export const TRACKS = ['כללי','מניות'];
 const readJson = p => JSON.parse(fs.readFileSync(path.join(ROOT,p),'utf8'));
 const unwrap = x => Array.isArray(x) ? x : (x.records || x.result?.records || []);
 
@@ -33,7 +33,7 @@ const dedup = new Map();
 for (const r of rows) dedup.set(`${r.FUND_ID}_${r.REPORT_PERIOD}`, r);
 rows = [...dedup.values()];
 
-const byTrackFund = new Map(TRACKS.map(t => [t,new Map()]));
+export const byTrackFund = new Map(TRACKS.map(t => [t,new Map()]));
 for (const r of rows) {
   const fid = String(r.FUND_ID || '');
   const track = trackByFund.get(fid);
@@ -45,12 +45,12 @@ for (const r of rows) {
   fm.get(fid).set(period,r);
 }
 
-function periodsForYear(y){ return Array.from({length:12},(_,i)=>y*100+i+1); }
-function compound(records,periods){ let x=1; for(const p of periods){ const v=Number(records.get(p)?.MONTHLY_YIELD); if(!Number.isFinite(v)) return null; x*=1+v/100; } return (x-1)*100; }
-function trailing(records,endYear,months){ const ps=[]; let y=endYear,m=12; for(let i=0;i<months;i++){ ps.push(y*100+m); if(--m===0){m=12;y--;} } return compound(records,ps.reverse()); }
-function latestSharpe(records,endYear){ for(let m=12;m>=1;m--){ const v=Number(records.get(endYear*100+m)?.SHARPE_RATIO); if(Number.isFinite(v)) return v; } return null; }
-function ranks(values,higher=true){ const v=[...values.entries()].filter(([,x])=>Number.isFinite(x)).sort((a,b)=>higher?b[1]-a[1]:a[1]-b[1]); const out=new Map(); const n=v.length; v.forEach(([id],i)=>out.set(id,n>1?((n-i-1)/(n-1))*100:50)); return out; }
-function weighted(parts){ let s=0,w=0; for(const [v,wt] of parts){ if(Number.isFinite(v)&&wt>0){s+=v*wt;w+=wt;} } return w?s/w:null; }
+export function periodsForYear(y){ return Array.from({length:12},(_,i)=>y*100+i+1); }
+export function compound(records,periods){ let x=1; for(const p of periods){ const v=Number(records.get(p)?.MONTHLY_YIELD); if(!Number.isFinite(v)) return null; x*=1+v/100; } return (x-1)*100; }
+export function trailing(records,endYear,months){ const ps=[]; let y=endYear,m=12; for(let i=0;i<months;i++){ ps.push(y*100+m); if(--m===0){m=12;y--;} } return compound(records,ps.reverse()); }
+export function latestSharpe(records,endYear){ for(let m=12;m>=1;m--){ const v=Number(records.get(endYear*100+m)?.SHARPE_RATIO); if(Number.isFinite(v)) return v; } return null; }
+export function ranks(values,higher=true){ const v=[...values.entries()].filter(([,x])=>Number.isFinite(x)).sort((a,b)=>higher?b[1]-a[1]:a[1]-b[1]); const out=new Map(); const n=v.length; v.forEach(([id],i)=>out.set(id,n>1?((n-i-1)/(n-1))*100:50)); return out; }
+export function weighted(parts){ let s=0,w=0; for(const [v,wt] of parts){ if(Number.isFinite(v)&&wt>0){s+=v*wt;w+=wt;} } return w?s/w:null; }
 function spearman(xs,ys){ const n=xs.length;if(n<3)return null; const rank=a=>{const z=a.map((v,i)=>[v,i]).sort((x,y)=>x[0]-y[0]);const r=Array(n);z.forEach(([,i],k)=>r[i]=k+1);return r};const rx=rank(xs),ry=rank(ys),mu=(n+1)/2;let num=0,dx=0,dy=0;for(let i=0;i<n;i++){const a=rx[i]-mu,b=ry[i]-mu;num+=a*b;dx+=a*a;dy+=b*b;}return num/Math.sqrt(dx*dy); }
 
 function recencyYearWeights(total,shape){ const base=shape==='equal'?[1,1,1,1,1]:shape==='mild'?[1,1.3,1.6,1.9,2.2]:[1,1.5,2,2.5,3]; const sum=base.reduce((a,b)=>a+b,0); return base.map(x=>x/sum*total); }

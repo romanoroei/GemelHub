@@ -1,0 +1,940 @@
+{
+  "generatedAt": "2026-08-20T19:54:55.875Z",
+  "design": {
+    "testYears": [
+      2011,
+      2024
+    ],
+    "featureWindowMonths": 36,
+    "features": [
+      "positive-month ratio",
+      "downside deviation",
+      "maximum drawdown",
+      "five-year rank stability"
+    ],
+    "candidateCount": 1458,
+    "protocol": "Track-specific expanding walk-forward; feature and model selection use prior data only"
+  },
+  "summary": {
+    "combined": {
+      "observations": 578,
+      "folds": 28,
+      "defensive": {
+        "n": 578,
+        "groups": 28,
+        "spearman": 0.222,
+        "topThirdHitRate": 38.6,
+        "topThirdFallToBottomRate": 21.8,
+        "top3FuturePercentile": 60.3
+      },
+      "baseline": {
+        "n": 578,
+        "groups": 28,
+        "spearman": 0.217,
+        "topThirdHitRate": 39.6,
+        "topThirdFallToBottomRate": 21.3,
+        "top3FuturePercentile": 59.2
+      },
+      "annualWinCounts": {
+        "spearman": 15,
+        "topThirdHitRate": 5,
+        "topThirdFallToBottomRate": 5,
+        "top3FuturePercentile": 8
+      }
+    },
+    "כללי": {
+      "observations": 391,
+      "folds": 14,
+      "defensive": {
+        "n": 391,
+        "groups": 14,
+        "spearman": 0.29,
+        "topThirdHitRate": 40,
+        "topThirdFallToBottomRate": 18.5,
+        "top3FuturePercentile": 66.6
+      },
+      "baseline": {
+        "n": 391,
+        "groups": 14,
+        "spearman": 0.293,
+        "topThirdHitRate": 41.5,
+        "topThirdFallToBottomRate": 19.3,
+        "top3FuturePercentile": 64.8
+      },
+      "annualWinCounts": {
+        "spearman": 8,
+        "topThirdHitRate": 3,
+        "topThirdFallToBottomRate": 3,
+        "top3FuturePercentile": 4
+      }
+    },
+    "מניות": {
+      "observations": 187,
+      "folds": 14,
+      "defensive": {
+        "n": 187,
+        "groups": 14,
+        "spearman": 0.077,
+        "topThirdHitRate": 35.8,
+        "topThirdFallToBottomRate": 28.4,
+        "top3FuturePercentile": 54.1
+      },
+      "baseline": {
+        "n": 187,
+        "groups": 14,
+        "spearman": 0.064,
+        "topThirdHitRate": 35.8,
+        "topThirdFallToBottomRate": 25.4,
+        "top3FuturePercentile": 53.6
+      },
+      "annualWinCounts": {
+        "spearman": 7,
+        "topThirdHitRate": 2,
+        "topThirdFallToBottomRate": 2,
+        "top3FuturePercentile": 4
+      }
+    }
+  },
+  "folds": [
+    {
+      "track": "כללי",
+      "testYear": 2011,
+      "selectedModel": "c55_m35_s10_mild_short_d20_stability",
+      "trainingStabilityScore": -8.496,
+      "test": {
+        "defensive": {
+          "n": 47,
+          "groups": 1,
+          "spearman": -0.156,
+          "topThirdHitRate": 18.8,
+          "topThirdFallToBottomRate": 37.5,
+          "top3FuturePercentile": 60.1
+        },
+        "baseline": {
+          "n": 47,
+          "groups": 1,
+          "spearman": -0.039,
+          "topThirdHitRate": 31.3,
+          "topThirdFallToBottomRate": 43.8,
+          "top3FuturePercentile": 55.1
+        }
+      },
+      "wins": {
+        "spearman": false,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": true,
+        "top3FuturePercentile": true
+      }
+    },
+    {
+      "track": "מניות",
+      "testYear": 2011,
+      "selectedModel": "c55_m35_s10_equal_short_d30_stability",
+      "trainingStabilityScore": 23.479,
+      "test": {
+        "defensive": {
+          "n": 8,
+          "groups": 1,
+          "spearman": 0.214,
+          "topThirdHitRate": 66.7,
+          "topThirdFallToBottomRate": 33.3,
+          "top3FuturePercentile": 61.9
+        },
+        "baseline": {
+          "n": 8,
+          "groups": 1,
+          "spearman": -0.19,
+          "topThirdHitRate": 33.3,
+          "topThirdFallToBottomRate": 66.7,
+          "top3FuturePercentile": 38.1
+        }
+      },
+      "wins": {
+        "spearman": true,
+        "topThirdHitRate": true,
+        "topThirdFallToBottomRate": true,
+        "top3FuturePercentile": true
+      }
+    },
+    {
+      "track": "כללי",
+      "testYear": 2012,
+      "selectedModel": "c75_m15_s10_mild_short_d10_stability",
+      "trainingStabilityScore": -9.848,
+      "test": {
+        "defensive": {
+          "n": 47,
+          "groups": 1,
+          "spearman": 0.271,
+          "topThirdHitRate": 43.8,
+          "topThirdFallToBottomRate": 18.8,
+          "top3FuturePercentile": 68.1
+        },
+        "baseline": {
+          "n": 47,
+          "groups": 1,
+          "spearman": 0.206,
+          "topThirdHitRate": 37.5,
+          "topThirdFallToBottomRate": 25,
+          "top3FuturePercentile": 68.1
+        }
+      },
+      "wins": {
+        "spearman": true,
+        "topThirdHitRate": true,
+        "topThirdFallToBottomRate": true,
+        "top3FuturePercentile": false
+      }
+    },
+    {
+      "track": "מניות",
+      "testYear": 2012,
+      "selectedModel": "c55_m35_s10_equal_short_d30_stability",
+      "trainingStabilityScore": 22.266,
+      "test": {
+        "defensive": {
+          "n": 8,
+          "groups": 1,
+          "spearman": -0.095,
+          "topThirdHitRate": 0,
+          "topThirdFallToBottomRate": 33.3,
+          "top3FuturePercentile": 38.1
+        },
+        "baseline": {
+          "n": 8,
+          "groups": 1,
+          "spearman": -0.071,
+          "topThirdHitRate": 0,
+          "topThirdFallToBottomRate": 33.3,
+          "top3FuturePercentile": 38.1
+        }
+      },
+      "wins": {
+        "spearman": false,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": false
+      }
+    },
+    {
+      "track": "כללי",
+      "testYear": 2013,
+      "selectedModel": "c75_m15_s10_mild_short_d10_stability",
+      "trainingStabilityScore": -7.559,
+      "test": {
+        "defensive": {
+          "n": 39,
+          "groups": 1,
+          "spearman": 0.139,
+          "topThirdHitRate": 30.8,
+          "topThirdFallToBottomRate": 30.8,
+          "top3FuturePercentile": 63.2
+        },
+        "baseline": {
+          "n": 39,
+          "groups": 1,
+          "spearman": 0.095,
+          "topThirdHitRate": 30.8,
+          "topThirdFallToBottomRate": 30.8,
+          "top3FuturePercentile": 63.2
+        }
+      },
+      "wins": {
+        "spearman": true,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": false
+      }
+    },
+    {
+      "track": "מניות",
+      "testYear": 2013,
+      "selectedModel": "c55_m35_s10_equal_short_d30_stability",
+      "trainingStabilityScore": 9.205,
+      "test": {
+        "defensive": {
+          "n": 8,
+          "groups": 1,
+          "spearman": -0.571,
+          "topThirdHitRate": 33.3,
+          "topThirdFallToBottomRate": 66.7,
+          "top3FuturePercentile": 38.1
+        },
+        "baseline": {
+          "n": 8,
+          "groups": 1,
+          "spearman": -0.595,
+          "topThirdHitRate": 0,
+          "topThirdFallToBottomRate": 66.7,
+          "top3FuturePercentile": 33.3
+        }
+      },
+      "wins": {
+        "spearman": true,
+        "topThirdHitRate": true,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": true
+      }
+    },
+    {
+      "track": "כללי",
+      "testYear": 2014,
+      "selectedModel": "c75_m15_s10_mild_short_d10_stability",
+      "trainingStabilityScore": -7.972,
+      "test": {
+        "defensive": {
+          "n": 44,
+          "groups": 1,
+          "spearman": 0.543,
+          "topThirdHitRate": 66.7,
+          "topThirdFallToBottomRate": 13.3,
+          "top3FuturePercentile": 77.5
+        },
+        "baseline": {
+          "n": 44,
+          "groups": 1,
+          "spearman": 0.691,
+          "topThirdHitRate": 73.3,
+          "topThirdFallToBottomRate": 0,
+          "top3FuturePercentile": 87.6
+        }
+      },
+      "wins": {
+        "spearman": false,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": false
+      }
+    },
+    {
+      "track": "מניות",
+      "testYear": 2014,
+      "selectedModel": "c55_m35_s10_equal_short_d30_stability",
+      "trainingStabilityScore": -5.112,
+      "test": {
+        "defensive": {
+          "n": 10,
+          "groups": 1,
+          "spearman": 0.079,
+          "topThirdHitRate": 25,
+          "topThirdFallToBottomRate": 25,
+          "top3FuturePercentile": 66.7
+        },
+        "baseline": {
+          "n": 10,
+          "groups": 1,
+          "spearman": 0.442,
+          "topThirdHitRate": 25,
+          "topThirdFallToBottomRate": 0,
+          "top3FuturePercentile": 66.7
+        }
+      },
+      "wins": {
+        "spearman": false,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": false
+      }
+    },
+    {
+      "track": "כללי",
+      "testYear": 2015,
+      "selectedModel": "c75_m15_s10_mild_short_d10_stability",
+      "trainingStabilityScore": -4.272,
+      "test": {
+        "defensive": {
+          "n": 17,
+          "groups": 1,
+          "spearman": 0.164,
+          "topThirdHitRate": 33.3,
+          "topThirdFallToBottomRate": 33.3,
+          "top3FuturePercentile": 58.3
+        },
+        "baseline": {
+          "n": 17,
+          "groups": 1,
+          "spearman": 0.039,
+          "topThirdHitRate": 16.7,
+          "topThirdFallToBottomRate": 33.3,
+          "top3FuturePercentile": 58.3
+        }
+      },
+      "wins": {
+        "spearman": true,
+        "topThirdHitRate": true,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": false
+      }
+    },
+    {
+      "track": "מניות",
+      "testYear": 2015,
+      "selectedModel": "c50_m35_s15_mild_short_d20_stability",
+      "trainingStabilityScore": -6.973,
+      "test": {
+        "defensive": {
+          "n": 12,
+          "groups": 1,
+          "spearman": 0.154,
+          "topThirdHitRate": 50,
+          "topThirdFallToBottomRate": 50,
+          "top3FuturePercentile": 63.6
+        },
+        "baseline": {
+          "n": 12,
+          "groups": 1,
+          "spearman": 0.217,
+          "topThirdHitRate": 50,
+          "topThirdFallToBottomRate": 25,
+          "top3FuturePercentile": 72.7
+        }
+      },
+      "wins": {
+        "spearman": false,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": false
+      }
+    },
+    {
+      "track": "כללי",
+      "testYear": 2016,
+      "selectedModel": "c75_m15_s10_mild_short_d10_stability",
+      "trainingStabilityScore": -4.18,
+      "test": {
+        "defensive": {
+          "n": 20,
+          "groups": 1,
+          "spearman": 0.731,
+          "topThirdHitRate": 57.1,
+          "topThirdFallToBottomRate": 14.3,
+          "top3FuturePercentile": 77.2
+        },
+        "baseline": {
+          "n": 20,
+          "groups": 1,
+          "spearman": 0.707,
+          "topThirdHitRate": 57.1,
+          "topThirdFallToBottomRate": 14.3,
+          "top3FuturePercentile": 77.2
+        }
+      },
+      "wins": {
+        "spearman": true,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": false
+      }
+    },
+    {
+      "track": "מניות",
+      "testYear": 2016,
+      "selectedModel": "c60_m30_s10_mild_balanced_d20_balanced",
+      "trainingStabilityScore": -1.956,
+      "test": {
+        "defensive": {
+          "n": 14,
+          "groups": 1,
+          "spearman": 0.349,
+          "topThirdHitRate": 60,
+          "topThirdFallToBottomRate": 20,
+          "top3FuturePercentile": 74.4
+        },
+        "baseline": {
+          "n": 14,
+          "groups": 1,
+          "spearman": 0.495,
+          "topThirdHitRate": 60,
+          "topThirdFallToBottomRate": 20,
+          "top3FuturePercentile": 74.4
+        }
+      },
+      "wins": {
+        "spearman": false,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": false
+      }
+    },
+    {
+      "track": "כללי",
+      "testYear": 2017,
+      "selectedModel": "c75_m15_s10_mild_short_d10_stability",
+      "trainingStabilityScore": -2.694,
+      "test": {
+        "defensive": {
+          "n": 24,
+          "groups": 1,
+          "spearman": -0.192,
+          "topThirdHitRate": 12.5,
+          "topThirdFallToBottomRate": 25,
+          "top3FuturePercentile": 55.1
+        },
+        "baseline": {
+          "n": 24,
+          "groups": 1,
+          "spearman": -0.153,
+          "topThirdHitRate": 25,
+          "topThirdFallToBottomRate": 25,
+          "top3FuturePercentile": 55.1
+        }
+      },
+      "wins": {
+        "spearman": false,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": false
+      }
+    },
+    {
+      "track": "מניות",
+      "testYear": 2017,
+      "selectedModel": "c55_m35_s10_equal_balanced_d10_downside",
+      "trainingStabilityScore": 1.914,
+      "test": {
+        "defensive": {
+          "n": 16,
+          "groups": 1,
+          "spearman": 0.094,
+          "topThirdHitRate": 33.3,
+          "topThirdFallToBottomRate": 16.7,
+          "top3FuturePercentile": 51.1
+        },
+        "baseline": {
+          "n": 16,
+          "groups": 1,
+          "spearman": 0.197,
+          "topThirdHitRate": 33.3,
+          "topThirdFallToBottomRate": 16.7,
+          "top3FuturePercentile": 64.4
+        }
+      },
+      "wins": {
+        "spearman": false,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": false
+      }
+    },
+    {
+      "track": "כללי",
+      "testYear": 2018,
+      "selectedModel": "c75_m15_s10_mild_short_d10_stability",
+      "trainingStabilityScore": -3.631,
+      "test": {
+        "defensive": {
+          "n": 25,
+          "groups": 1,
+          "spearman": 0.544,
+          "topThirdHitRate": 44.4,
+          "topThirdFallToBottomRate": 0,
+          "top3FuturePercentile": 72.2
+        },
+        "baseline": {
+          "n": 25,
+          "groups": 1,
+          "spearman": 0.669,
+          "topThirdHitRate": 55.6,
+          "topThirdFallToBottomRate": 0,
+          "top3FuturePercentile": 72.2
+        }
+      },
+      "wins": {
+        "spearman": false,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": false
+      }
+    },
+    {
+      "track": "מניות",
+      "testYear": 2018,
+      "selectedModel": "c55_m35_s10_equal_balanced_d10_downside",
+      "trainingStabilityScore": 1.872,
+      "test": {
+        "defensive": {
+          "n": 15,
+          "groups": 1,
+          "spearman": -0.139,
+          "topThirdHitRate": 20,
+          "topThirdFallToBottomRate": 60,
+          "top3FuturePercentile": 52.4
+        },
+        "baseline": {
+          "n": 15,
+          "groups": 1,
+          "spearman": 0.061,
+          "topThirdHitRate": 40,
+          "topThirdFallToBottomRate": 20,
+          "top3FuturePercentile": 52.4
+        }
+      },
+      "wins": {
+        "spearman": false,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": false
+      }
+    },
+    {
+      "track": "כללי",
+      "testYear": 2019,
+      "selectedModel": "c75_m15_s10_mild_short_d10_stability",
+      "trainingStabilityScore": -1.946,
+      "test": {
+        "defensive": {
+          "n": 25,
+          "groups": 1,
+          "spearman": 0.481,
+          "topThirdHitRate": 44.4,
+          "topThirdFallToBottomRate": 0,
+          "top3FuturePercentile": 69.4
+        },
+        "baseline": {
+          "n": 25,
+          "groups": 1,
+          "spearman": 0.399,
+          "topThirdHitRate": 33.3,
+          "topThirdFallToBottomRate": 11.1,
+          "top3FuturePercentile": 56.9
+        }
+      },
+      "wins": {
+        "spearman": true,
+        "topThirdHitRate": true,
+        "topThirdFallToBottomRate": true,
+        "top3FuturePercentile": true
+      }
+    },
+    {
+      "track": "מניות",
+      "testYear": 2019,
+      "selectedModel": "c75_m10_s15_equal_short_d20_stability",
+      "trainingStabilityScore": -3.069,
+      "test": {
+        "defensive": {
+          "n": 16,
+          "groups": 1,
+          "spearman": 0.156,
+          "topThirdHitRate": 33.3,
+          "topThirdFallToBottomRate": 16.7,
+          "top3FuturePercentile": 55.6
+        },
+        "baseline": {
+          "n": 16,
+          "groups": 1,
+          "spearman": 0.053,
+          "topThirdHitRate": 33.3,
+          "topThirdFallToBottomRate": 16.7,
+          "top3FuturePercentile": 55.6
+        }
+      },
+      "wins": {
+        "spearman": true,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": false
+      }
+    },
+    {
+      "track": "כללי",
+      "testYear": 2020,
+      "selectedModel": "c75_m15_s10_mild_short_d10_stability",
+      "trainingStabilityScore": -0.187,
+      "test": {
+        "defensive": {
+          "n": 24,
+          "groups": 1,
+          "spearman": 0.716,
+          "topThirdHitRate": 62.5,
+          "topThirdFallToBottomRate": 0,
+          "top3FuturePercentile": 82.6
+        },
+        "baseline": {
+          "n": 24,
+          "groups": 1,
+          "spearman": 0.654,
+          "topThirdHitRate": 62.5,
+          "topThirdFallToBottomRate": 0,
+          "top3FuturePercentile": 82.6
+        }
+      },
+      "wins": {
+        "spearman": true,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": false
+      }
+    },
+    {
+      "track": "מניות",
+      "testYear": 2020,
+      "selectedModel": "c75_m10_s15_equal_short_d20_stability",
+      "trainingStabilityScore": -2.178,
+      "test": {
+        "defensive": {
+          "n": 15,
+          "groups": 1,
+          "spearman": 0.089,
+          "topThirdHitRate": 60,
+          "topThirdFallToBottomRate": 20,
+          "top3FuturePercentile": 42.9
+        },
+        "baseline": {
+          "n": 15,
+          "groups": 1,
+          "spearman": 0.136,
+          "topThirdHitRate": 60,
+          "topThirdFallToBottomRate": 20,
+          "top3FuturePercentile": 64.3
+        }
+      },
+      "wins": {
+        "spearman": false,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": false
+      }
+    },
+    {
+      "track": "כללי",
+      "testYear": 2021,
+      "selectedModel": "c75_m15_s10_mild_short_d10_stability",
+      "trainingStabilityScore": 1.683,
+      "test": {
+        "defensive": {
+          "n": 22,
+          "groups": 1,
+          "spearman": -0.531,
+          "topThirdHitRate": 0,
+          "topThirdFallToBottomRate": 50,
+          "top3FuturePercentile": 39.7
+        },
+        "baseline": {
+          "n": 22,
+          "groups": 1,
+          "spearman": -0.512,
+          "topThirdHitRate": 0,
+          "topThirdFallToBottomRate": 50,
+          "top3FuturePercentile": 54
+        }
+      },
+      "wins": {
+        "spearman": false,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": false
+      }
+    },
+    {
+      "track": "מניות",
+      "testYear": 2021,
+      "selectedModel": "c75_m10_s15_equal_short_d20_stability",
+      "trainingStabilityScore": -0.055,
+      "test": {
+        "defensive": {
+          "n": 15,
+          "groups": 1,
+          "spearman": -0.032,
+          "topThirdHitRate": 40,
+          "topThirdFallToBottomRate": 20,
+          "top3FuturePercentile": 59.5
+        },
+        "baseline": {
+          "n": 15,
+          "groups": 1,
+          "spearman": -0.082,
+          "topThirdHitRate": 40,
+          "topThirdFallToBottomRate": 20,
+          "top3FuturePercentile": 52.4
+        }
+      },
+      "wins": {
+        "spearman": true,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": true
+      }
+    },
+    {
+      "track": "כללי",
+      "testYear": 2022,
+      "selectedModel": "c75_m15_s10_mild_short_d10_stability",
+      "trainingStabilityScore": -2.544,
+      "test": {
+        "defensive": {
+          "n": 21,
+          "groups": 1,
+          "spearman": 0.317,
+          "topThirdHitRate": 42.9,
+          "topThirdFallToBottomRate": 14.3,
+          "top3FuturePercentile": 55
+        },
+        "baseline": {
+          "n": 21,
+          "groups": 1,
+          "spearman": 0.392,
+          "topThirdHitRate": 42.9,
+          "topThirdFallToBottomRate": 14.3,
+          "top3FuturePercentile": 55
+        }
+      },
+      "wins": {
+        "spearman": false,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": false
+      }
+    },
+    {
+      "track": "מניות",
+      "testYear": 2022,
+      "selectedModel": "c75_m10_s15_equal_short_d20_stability",
+      "trainingStabilityScore": -0.082,
+      "test": {
+        "defensive": {
+          "n": 17,
+          "groups": 1,
+          "spearman": 0.549,
+          "topThirdHitRate": 50,
+          "topThirdFallToBottomRate": 16.7,
+          "top3FuturePercentile": 79.2
+        },
+        "baseline": {
+          "n": 17,
+          "groups": 1,
+          "spearman": 0.446,
+          "topThirdHitRate": 50,
+          "topThirdFallToBottomRate": 16.7,
+          "top3FuturePercentile": 64.6
+        }
+      },
+      "wins": {
+        "spearman": true,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": true
+      }
+    },
+    {
+      "track": "כללי",
+      "testYear": 2023,
+      "selectedModel": "c75_m15_s10_mild_short_d10_stability",
+      "trainingStabilityScore": -1.723,
+      "test": {
+        "defensive": {
+          "n": 19,
+          "groups": 1,
+          "spearman": 0.761,
+          "topThirdHitRate": 57.1,
+          "topThirdFallToBottomRate": 0,
+          "top3FuturePercentile": 87
+        },
+        "baseline": {
+          "n": 19,
+          "groups": 1,
+          "spearman": 0.633,
+          "topThirdHitRate": 57.1,
+          "topThirdFallToBottomRate": 0,
+          "top3FuturePercentile": 57.4
+        }
+      },
+      "wins": {
+        "spearman": true,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": true
+      }
+    },
+    {
+      "track": "מניות",
+      "testYear": 2023,
+      "selectedModel": "c75_m10_s15_equal_short_d20_stability",
+      "trainingStabilityScore": 2.448,
+      "test": {
+        "defensive": {
+          "n": 17,
+          "groups": 1,
+          "spearman": 0.257,
+          "topThirdHitRate": 33.3,
+          "topThirdFallToBottomRate": 16.7,
+          "top3FuturePercentile": 56.3
+        },
+        "baseline": {
+          "n": 17,
+          "groups": 1,
+          "spearman": 0.179,
+          "topThirdHitRate": 50,
+          "topThirdFallToBottomRate": 16.7,
+          "top3FuturePercentile": 56.3
+        }
+      },
+      "wins": {
+        "spearman": true,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": false
+      }
+    },
+    {
+      "track": "כללי",
+      "testYear": 2024,
+      "selectedModel": "c75_m15_s10_mild_short_d10_stability",
+      "trainingStabilityScore": -0.125,
+      "test": {
+        "defensive": {
+          "n": 17,
+          "groups": 1,
+          "spearman": 0.787,
+          "topThirdHitRate": 50,
+          "topThirdFallToBottomRate": 0,
+          "top3FuturePercentile": 66.7
+        },
+        "baseline": {
+          "n": 17,
+          "groups": 1,
+          "spearman": 0.735,
+          "topThirdHitRate": 50,
+          "topThirdFallToBottomRate": 0,
+          "top3FuturePercentile": 64.6
+        }
+      },
+      "wins": {
+        "spearman": true,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": false,
+        "top3FuturePercentile": true
+      }
+    },
+    {
+      "track": "מניות",
+      "testYear": 2024,
+      "selectedModel": "c75_m10_s15_equal_short_d20_stability",
+      "trainingStabilityScore": 2.724,
+      "test": {
+        "defensive": {
+          "n": 16,
+          "groups": 1,
+          "spearman": -0.194,
+          "topThirdHitRate": 0,
+          "topThirdFallToBottomRate": 33.3,
+          "top3FuturePercentile": 17.8
+        },
+        "baseline": {
+          "n": 16,
+          "groups": 1,
+          "spearman": -0.268,
+          "topThirdHitRate": 0,
+          "topThirdFallToBottomRate": 50,
+          "top3FuturePercentile": 17.8
+        }
+      },
+      "wins": {
+        "spearman": true,
+        "topThirdHitRate": false,
+        "topThirdFallToBottomRate": true,
+        "top3FuturePercentile": false
+      }
+    }
+  ]
+}
