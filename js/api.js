@@ -2311,7 +2311,7 @@ const APIModule = (() => {
   async function computeGemelHubScores(fundId, catId) {
     const cacheKey = `${catId}_${fundId}`;
     if (_cachedGHScores.has(cacheKey)) return _cachedGHScores.get(cacheKey);
-    const lsKey = `gemelhub_ghscore_v15_${cacheKey}`;
+    const lsKey = `gemelhub_ghscore_v16_${cacheKey}`;
     const lsCached = _lsLoad(lsKey);
     if (lsCached) { _cachedGHScores.set(cacheKey, lsCached); return lsCached; }
 
@@ -2517,11 +2517,21 @@ const APIModule = (() => {
       sorted.forEach(([id], index) => result.set(id, sorted.length > 1 ? index / (sorted.length - 1) * 100 : 50));
       return result;
     }
+    function positionMap(values) {
+      const sorted = Array.from(values.entries())
+        .filter(([, value]) => Number.isFinite(value))
+        .sort((a, b) => b[1] - a[1]);
+      const result = new Map();
+      sorted.forEach(([id], index) => result.set(id, { rank: index + 1, total: sorted.length }));
+      return result;
+    }
     const shortHorizonPercentiles = new Map();
+    const shortHorizonPositions = new Map();
     for (const months of [1, 3, 6, 12]) {
       const returns = new Map();
       byFund.forEach(({ recs }, id) => returns.set(id, trailingReturn(recs, months)));
       shortHorizonPercentiles.set(months, percentileMap(returns));
+      shortHorizonPositions.set(months, positionMap(returns));
     }
 
     // חשב ציון לכל קרן שיש לה נתונים מלאים ל-5 שנים
@@ -2651,6 +2661,10 @@ const APIModule = (() => {
         horizonScores: Object.fromEntries(Object.entries(horizonScores).map(([months, value]) => [
           months,
           Number.isFinite(value) ? parseFloat(value.toFixed(1)) : null
+        ])),
+        horizonPositions: Object.fromEntries([1, 3, 6, 12].map(months => [
+          months,
+          shortHorizonPositions.get(months)?.get(s.fundId) || null
         ])),
         timingLabel,
         trendTags,

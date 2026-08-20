@@ -343,7 +343,7 @@
 
   <script src="js/config.js?v=polisa-manora-funds-20260812"></script>
   <script src="js/analytics.js?v=ga-20260704"></script>
-  <script src="js/api.js?v=instant-seven-year-20260808"></script>
+  <script src="js/api.js?v=score-positions-20260821"></script>
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
 <script>
@@ -3258,17 +3258,33 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
     : support >= 70 ? 'חזקים ביחס למתחרים'
       : support >= 55 ? 'חיוביים ביחס למתחרים'
         : support >= 40 ? 'באמצע המסלול' : 'חלשים ביחס למתחרים';
-  const yearBreakdown = (thisFund?.components?.years || []).map(year => `
-    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:7px 6px;text-align:center;min-width:58px;flex:1;">
-      <div style="font-size:.64rem;color:#64748b;font-weight:700;">${year.year}</div>
-      <div style="font-size:.78rem;font-weight:900;color:${year.percentile >= 75 ? '#15803d' : year.percentile >= 50 ? '#1d4ed8' : year.percentile >= 25 ? '#92400e' : '#dc2626'};margin-top:2px;">${year.percentile.toFixed(0)}%</div>
-    </div>`).join('');
+  const positionTone = (rank, total) => {
+    const strength = total > 1 ? 1 - ((rank - 1) / (total - 1)) : .5;
+    if (strength >= .75) return { color: '#087f5b', bg: '#ecfdf5', line: '#10b981' };
+    if (strength >= .5) return { color: '#1d4ed8', bg: '#eff6ff', line: '#3b82f6' };
+    if (strength >= .25) return { color: '#a16207', bg: '#fffbeb', line: '#eab308' };
+    return { color: '#b42318', bg: '#fff1f2', line: '#f43f5e' };
+  };
+  const yearBreakdown = (thisFund?.components?.years || []).map(year => {
+    const tone = positionTone(year.rank, year.total);
+    return `
+    <div style="position:relative;background:${tone.bg};border:1px solid #dfe6ee;border-radius:9px;padding:9px 7px 8px;text-align:center;min-width:68px;flex:1;overflow:hidden;box-shadow:0 2px 5px rgba(15,39,68,.05);">
+      <div style="position:absolute;inset:0 0 auto;height:3px;background:${tone.line};"></div>
+      <div style="font-size:.64rem;color:#64748b;font-weight:800;">${year.year}</div>
+      <div style="font-size:.68rem;color:#52637a;margin-top:5px;">מקום <strong style="font-size:1.05rem;color:${tone.color};">${year.rank}</strong></div>
+      <div style="font-size:.6rem;color:#8493a7;margin-top:1px;">מתוך ${year.total}</div>
+    </div>`;
+  }).join('');
   const horizonNames = { 1: 'חודש', 3: '3 חודשים', 6: '6 חודשים', 12: '12 חודשים' };
-  const horizonBreakdown = Object.entries(protection.horizonScores || {}).map(([months, value]) => `
-    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:7px 6px;text-align:center;min-width:58px;flex:1;">
-      <div style="font-size:.64rem;color:#64748b;font-weight:700;">${horizonNames[months]}</div>
-      <div style="font-size:.78rem;font-weight:900;color:${Number.isFinite(value) ? (value >= 75 ? '#15803d' : value >= 50 ? '#1d4ed8' : value >= 25 ? '#92400e' : '#dc2626') : '#64748b'};margin-top:2px;">${Number.isFinite(value) ? `${value.toFixed(0)}%` : '—'}</div>
-    </div>`).join('');
+  const horizonBreakdown = Object.entries(protection.horizonPositions || {}).map(([months, position]) => {
+    const tone = position ? positionTone(position.rank, position.total) : { color: '#64748b', bg: '#f8fafc', line: '#94a3b8' };
+    return `
+    <div style="position:relative;background:${tone.bg};border:1px solid #dfe6ee;border-radius:9px;padding:9px 7px 8px;text-align:center;min-width:68px;flex:1;overflow:hidden;box-shadow:0 2px 5px rgba(15,39,68,.05);">
+      <div style="position:absolute;inset:0 0 auto;height:3px;background:${tone.line};"></div>
+      <div style="font-size:.64rem;color:#64748b;font-weight:800;">${horizonNames[months]}</div>
+      ${position ? `<div style="font-size:.68rem;color:#52637a;margin-top:5px;">מקום <strong style="font-size:1.05rem;color:${tone.color};">${position.rank}</strong></div><div style="font-size:.6rem;color:#8493a7;margin-top:1px;">מתוך ${position.total}</div>` : '<div style="font-size:.72rem;color:#64748b;margin-top:8px;">אין נתון</div>'}
+    </div>`;
+  }).join('');
   const protectionHtml = thisFund ? `
     <div style="padding:15px 18px 17px;background:#fff;border-bottom:1px solid #e8eef5;">
       <div style="margin-bottom:10px;font-size:.8rem;font-weight:900;color:#172f55;">ביצועים לאורך זמן</div>
@@ -3289,7 +3305,7 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
             <i class="fas fa-chevron-down gh-period-chevron" style="font-size:.65rem;color:#8493a7;transition:transform .2s;"></i>
           </summary>
           <div style="padding:0 14px 12px;color:#52637a;font-size:.7rem;line-height:1.55;">
-            <div style="padding:8px 0;color:#64748b;">מיקום הקופה מול מתחרים בכל טווח. אחוזון גבוה יותר מצביע על ביצועים טובים יותר.</div>
+            <div style="padding:8px 0;color:#64748b;">מיקום הקופה מול המתחרים בכל אחד מטווחי הזמן.</div>
             <div style="display:flex;gap:5px;flex-wrap:wrap;">${horizonBreakdown}</div>
           </div>
         </details>
