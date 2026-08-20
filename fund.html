@@ -3259,13 +3259,15 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
       : support >= 55 ? 'חיוביים ביחס למתחרים'
         : support >= 40 ? 'באמצע המסלול' : 'חלשים ביחס למתחרים';
   const yearBreakdown = (thisFund?.components?.years || []).map(year => `
-    <div style="display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid #edf1f5;">
-      <span>${year.year}</span><strong style="color:#172f55;">אחוזון ${year.percentile.toFixed(0)}</strong>
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:7px 6px;text-align:center;min-width:58px;flex:1;">
+      <div style="font-size:.64rem;color:#64748b;font-weight:700;">${year.year}</div>
+      <div style="font-size:.78rem;font-weight:900;color:${year.percentile >= 75 ? '#15803d' : year.percentile >= 50 ? '#1d4ed8' : year.percentile >= 25 ? '#92400e' : '#dc2626'};margin-top:2px;">${year.percentile.toFixed(0)}%</div>
     </div>`).join('');
   const horizonNames = { 1: 'חודש', 3: '3 חודשים', 6: '6 חודשים', 12: '12 חודשים' };
   const horizonBreakdown = Object.entries(protection.horizonScores || {}).map(([months, value]) => `
-    <div style="display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid #edf1f5;">
-      <span>${horizonNames[months]}</span><strong style="color:#172f55;">${Number.isFinite(value) ? `אחוזון ${value.toFixed(0)}` : 'אין נתון'}</strong>
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:7px 6px;text-align:center;min-width:58px;flex:1;">
+      <div style="font-size:.64rem;color:#64748b;font-weight:700;">${horizonNames[months]}</div>
+      <div style="font-size:.78rem;font-weight:900;color:${Number.isFinite(value) ? (value >= 75 ? '#15803d' : value >= 50 ? '#1d4ed8' : value >= 25 ? '#92400e' : '#dc2626') : '#64748b'};margin-top:2px;">${Number.isFinite(value) ? `${value.toFixed(0)}%` : '—'}</div>
     </div>`).join('');
   const protectionHtml = thisFund ? `
     <div style="padding:15px 18px 17px;background:#fff;border-bottom:1px solid #e8eef5;">
@@ -3278,7 +3280,7 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
           </summary>
           <div style="padding:0 14px 12px;color:#52637a;font-size:.7rem;line-height:1.55;">
             <div style="padding:8px 0;color:#64748b;">מידת היציבות של מיקום הקופה מול מתחרים בכל אחת מחמש השנים.</div>
-            ${yearBreakdown}
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">${yearBreakdown}</div>
           </div>
         </details>
         <details class="gh-period-detail">
@@ -3288,7 +3290,7 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
           </summary>
           <div style="padding:0 14px 12px;color:#52637a;font-size:.7rem;line-height:1.55;">
             <div style="padding:8px 0;color:#64748b;">מיקום הקופה מול מתחרים בכל טווח. אחוזון גבוה יותר מצביע על ביצועים טובים יותר.</div>
-            ${horizonBreakdown}
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">${horizonBreakdown}</div>
           </div>
         </details>
       </div>
@@ -3296,7 +3298,7 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
 
   let compHtml = '';
   if (thisFund) {
-    const { consistencyScore, sharpeScore, currentYearScore, currentYearMonths, currentYearWeightPct, years } = thisFund.components;
+    const { consistencyScore, sharpeScore, currentYearScore, currentYearMonths, currentYearWeightPct } = thisFund.components;
     compHtml = `
       <details style="padding:13px 16px;border-bottom:1px solid #eef2f7;">
         <summary style="cursor:pointer;list-style:none;font-size:.76rem;font-weight:900;color:#0f2744;">פירוט רכיבי הציון <i class="fas fa-chevron-down" style="color:#64748b;margin-right:5px;font-size:.65rem;"></i></summary>
@@ -3315,15 +3317,6 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
             <div style="font-size:.69rem;color:#f59e0b;font-weight:700;margin-bottom:3px;">שנה נוכחית (${currentYearWeightPct}%)</div>
             <div style="font-size:1.25rem;font-weight:900;color:#92400e;">${currentYearScore !== null ? currentYearScore.toFixed(1) : '—'}<span style="font-size:.65rem;color:#fcd34d;">/100</span></div>
           </div>` : ''}
-        </div>
-        <div style="font-size:.72rem;color:#64748b;font-weight:700;margin-bottom:6px;">עקביות לפי שנה — מיקום בתוך הקטגוריה:</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          ${years.map(y => `
-            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:7px 10px;text-align:center;min-width:58px;">
-              <div style="font-size:.65rem;color:#64748b;font-weight:700;">${y.year}</div>
-              <div style="font-size:.85rem;font-weight:800;color:#0f2744;">${y.rank}<span style="font-size:.65rem;color:#94a3b8;">/${y.total}</span></div>
-              <div style="font-size:.68rem;font-weight:700;color:${y.percentile >= 75 ? '#15803d' : y.percentile >= 50 ? '#1d4ed8' : y.percentile >= 25 ? '#92400e' : '#dc2626'};">${y.percentile.toFixed(0)}%</div>
-            </div>`).join('')}
         </div>
         </div>
       </details>`;
