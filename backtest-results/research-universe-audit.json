@@ -1,0 +1,334 @@
+{
+  "generatedAt": "2026-08-20T20:11:07.758Z",
+  "scope": {
+    "products": [
+      "gemel_regular",
+      "gemel_investment",
+      "training_fund",
+      "savings_policy",
+      "comprehensive_pension",
+      "supplementary_pension"
+    ],
+    "tracks": [
+      "general",
+      "equities",
+      "credit_bonds",
+      "age_upto_50",
+      "age_50_60",
+      "age_60_plus",
+      "credit_bonds_upto_25_equities"
+    ],
+    "exclusions": [
+      "child_savings",
+      "central_severance",
+      "index_tracking",
+      "tradable_only",
+      "cash",
+      "halacha",
+      "pension_recipients"
+    ]
+  },
+  "totalEligibleRows": 97903,
+  "cohorts": [
+    {
+      "product": "comprehensive_pension",
+      "track": "age_50_60",
+      "fundCount": 12,
+      "monthlyRows": 1134,
+      "distinctMonths": 172,
+      "firstPeriod": 201203,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    },
+    {
+      "product": "comprehensive_pension",
+      "track": "age_60_plus",
+      "fundCount": 12,
+      "monthlyRows": 1089,
+      "distinctMonths": 134,
+      "firstPeriod": 201505,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    },
+    {
+      "product": "comprehensive_pension",
+      "track": "age_upto_50",
+      "fundCount": 11,
+      "monthlyRows": 1162,
+      "distinctMonths": 172,
+      "firstPeriod": 201203,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    },
+    {
+      "product": "comprehensive_pension",
+      "track": "credit_bonds",
+      "fundCount": 7,
+      "monthlyRows": 899,
+      "distinctMonths": 166,
+      "firstPeriod": 201209,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": false
+    },
+    {
+      "product": "comprehensive_pension",
+      "track": "equities",
+      "fundCount": 19,
+      "monthlyRows": 1776,
+      "distinctMonths": 172,
+      "firstPeriod": 201203,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    },
+    {
+      "product": "comprehensive_pension",
+      "track": "general",
+      "fundCount": 10,
+      "monthlyRows": 1004,
+      "distinctMonths": 177,
+      "firstPeriod": 201110,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    },
+    {
+      "product": "gemel_investment",
+      "track": "credit_bonds",
+      "fundCount": 12,
+      "monthlyRows": 326,
+      "distinctMonths": 30,
+      "firstPeriod": 202401,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": false
+    },
+    {
+      "product": "gemel_investment",
+      "track": "credit_bonds_upto_25_equities",
+      "fundCount": 12,
+      "monthlyRows": 360,
+      "distinctMonths": 30,
+      "firstPeriod": 202401,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": false
+    },
+    {
+      "product": "gemel_investment",
+      "track": "equities",
+      "fundCount": 22,
+      "monthlyRows": 774,
+      "distinctMonths": 116,
+      "firstPeriod": 201611,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    },
+    {
+      "product": "gemel_investment",
+      "track": "general",
+      "fundCount": 21,
+      "monthlyRows": 1784,
+      "distinctMonths": 116,
+      "firstPeriod": 201611,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    },
+    {
+      "product": "gemel_regular",
+      "track": "age_50_60",
+      "fundCount": 47,
+      "monthlyRows": 4883,
+      "distinctMonths": 257,
+      "firstPeriod": 199901,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    },
+    {
+      "product": "gemel_regular",
+      "track": "age_60_plus",
+      "fundCount": 49,
+      "monthlyRows": 5033,
+      "distinctMonths": 304,
+      "firstPeriod": 199901,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    },
+    {
+      "product": "gemel_regular",
+      "track": "age_upto_50",
+      "fundCount": 48,
+      "monthlyRows": 4727,
+      "distinctMonths": 138,
+      "firstPeriod": 201501,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    },
+    {
+      "product": "gemel_regular",
+      "track": "credit_bonds",
+      "fundCount": 16,
+      "monthlyRows": 452,
+      "distinctMonths": 30,
+      "firstPeriod": 202401,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": false
+    },
+    {
+      "product": "gemel_regular",
+      "track": "equities",
+      "fundCount": 62,
+      "monthlyRows": 4115,
+      "distinctMonths": 330,
+      "firstPeriod": 199901,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    },
+    {
+      "product": "gemel_regular",
+      "track": "general",
+      "fundCount": 280,
+      "monthlyRows": 28488,
+      "distinctMonths": 330,
+      "firstPeriod": 199901,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    },
+    {
+      "product": "savings_policy",
+      "track": "credit_bonds",
+      "fundCount": 12,
+      "monthlyRows": 323,
+      "distinctMonths": 30,
+      "firstPeriod": 202401,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": false
+    },
+    {
+      "product": "savings_policy",
+      "track": "credit_bonds_upto_25_equities",
+      "fundCount": 8,
+      "monthlyRows": 234,
+      "distinctMonths": 30,
+      "firstPeriod": 202401,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": false
+    },
+    {
+      "product": "savings_policy",
+      "track": "equities",
+      "fundCount": 49,
+      "monthlyRows": 5106,
+      "distinctMonths": 322,
+      "firstPeriod": 199909,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    },
+    {
+      "product": "savings_policy",
+      "track": "general",
+      "fundCount": 37,
+      "monthlyRows": 4423,
+      "distinctMonths": 322,
+      "firstPeriod": 199909,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    },
+    {
+      "product": "supplementary_pension",
+      "track": "age_50_60",
+      "fundCount": 11,
+      "monthlyRows": 1040,
+      "distinctMonths": 172,
+      "firstPeriod": 201203,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    },
+    {
+      "product": "supplementary_pension",
+      "track": "age_60_plus",
+      "fundCount": 10,
+      "monthlyRows": 1031,
+      "distinctMonths": 172,
+      "firstPeriod": 201203,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    },
+    {
+      "product": "supplementary_pension",
+      "track": "age_upto_50",
+      "fundCount": 10,
+      "monthlyRows": 1078,
+      "distinctMonths": 172,
+      "firstPeriod": 201203,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    },
+    {
+      "product": "supplementary_pension",
+      "track": "credit_bonds",
+      "fundCount": 6,
+      "monthlyRows": 604,
+      "distinctMonths": 166,
+      "firstPeriod": 201209,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": false
+    },
+    {
+      "product": "supplementary_pension",
+      "track": "equities",
+      "fundCount": 12,
+      "monthlyRows": 897,
+      "distinctMonths": 172,
+      "firstPeriod": 201203,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    },
+    {
+      "product": "supplementary_pension",
+      "track": "general",
+      "fundCount": 14,
+      "monthlyRows": 899,
+      "distinctMonths": 166,
+      "firstPeriod": 201209,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    },
+    {
+      "product": "training_fund",
+      "track": "credit_bonds",
+      "fundCount": 28,
+      "monthlyRows": 795,
+      "distinctMonths": 30,
+      "firstPeriod": 202401,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": false
+    },
+    {
+      "product": "training_fund",
+      "track": "credit_bonds_upto_25_equities",
+      "fundCount": 16,
+      "monthlyRows": 447,
+      "distinctMonths": 30,
+      "firstPeriod": 202401,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": false
+    },
+    {
+      "product": "training_fund",
+      "track": "equities",
+      "fundCount": 57,
+      "monthlyRows": 3894,
+      "distinctMonths": 330,
+      "firstPeriod": 199901,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    },
+    {
+      "product": "training_fund",
+      "track": "general",
+      "fundCount": 162,
+      "monthlyRows": 19126,
+      "distinctMonths": 330,
+      "firstPeriod": 199901,
+      "lastPeriod": 202606,
+      "eligibleForStandaloneModel": true
+    }
+  ]
+}
