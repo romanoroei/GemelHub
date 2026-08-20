@@ -40,6 +40,8 @@ The four Ridge forecasts were combined using 20% for 3 months, 25% for 6 months,
 
 This is the first model in the research series to improve all four aggregate metrics simultaneously in a purged monthly walk-forward test.
 
+After restoring older general/equity rows whose historical specialization field was blank but whose stable fund identity/name was unambiguous, the continuous 2018–2024 test contains 38,594 predictions across 2,366 cohort-month groups. The broad Ridge records Spearman 0.218, a 39.0% top-third hit rate, a 17.8% bottom-third fall rate, and a 56.7 Top-3 future percentile; the reconstructed baseline records 0.214, 38.3%, 19.5%, and 56.5 respectively.
+
 ## Short-horizon and investor-flow experiment
 
 A separate Ridge candidate used only relative returns over 1, 3, 6, and 12 months. A second candidate added fund size, raw asset changes over 1/3/6/12 months, and reported net-flow ratios over 1/3/6/12 months. Both were trained and tested with the same purged walk-forward folds as the broad model.
@@ -76,6 +78,22 @@ The user-facing field formerly called confidence is now named `data consistency`
 A 2,000-replication cluster bootstrap over 2,276 cohort-month decision groups estimated that high-risk observations had a bottom-third rate 19.4 percentage points above normal observations. The 95% interval was +10.4 to +28.9 points. The aggregate warning signal is therefore statistically meaningful in this research sample.
 
 The effect is not yet universal. It was particularly strong in `training_fund__general` (23 warnings, 73.9% bottom-third outcomes) and several provident-fund cohorts, but weak in `comprehensive_pension__general` (41 warnings, 22.0% bottom-third outcomes). Annual warning counts were also small and outcomes varied materially. Production use should therefore require cohort-specific calibration and minimum-sample rules; the current universal threshold remains experimental.
+
+### Additional example: fund 8522
+
+Fund 8522, `הראל גמל להשקעה מניות`, was initially represented by only 16 recent rows because older records lacked `SUB_SPECIALIZATION`. Conservative name/fund continuity restored 102 eligible months in `gemel_investment__equities`, enabling 84 out-of-sample monthly observations in 2018–2024.
+
+| Decision date | Display score | Short-horizon support | Timing label | Data consistency | Realized future percentile |
+|---|---:|---:|---|---|---:|
+| 2018-12 | 48.4 | 10.4 | Normal | High | 58.9 |
+| 2019-12 | 59.6 | 54.2 | Normal | High | 35.6 |
+| 2020-12 | 81.1 | 77.1 | Normal | Medium | 71.4 |
+| 2021-12 | 63.5 | 81.0 | Normal | High | 40.8 |
+| 2022-12 | 62.4 | 20.0 | Normal | High | 71.7 |
+| 2023-12 | 60.4 | 58.8 | Normal | Medium | 86.6 |
+| 2024-12 | 56.7 | 100.0 | Normal | High | 98.2 |
+
+The model correctly identified the strong 2020 setup, but materially underestimated the fund before its strong 2023–2024 outcomes and was too optimistic in 2019. No strict high-reversal warning was issued at these December observations. Two weaker `caution` labels in April–May 2020 were followed by above-average outcomes, reinforcing that the non-strict caution label is contextual rather than a validated sell/avoid signal.
 
 ## Interpretation and limitations
 

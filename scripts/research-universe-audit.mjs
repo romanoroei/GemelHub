@@ -29,6 +29,10 @@ function classifyGemel(row) {
   else if (sub === 'אשראי ואג"ח' || sub === 'אשראי ואגח') {
     track = has(name, ['מניות', '25%']) ? 'credit_bonds_upto_25_equities' : 'credit_bonds';
   }
+  // Older GemelNet rows often omit SUB_SPECIALIZATION even when the stable
+  // fund name clearly identifies a requested general/equity track.
+  else if (has(name, ['מניות']) && !has(name, ['25%', 'אג"ח', 'אגח', 'עוקב', 'סחיר', 's&p', 'sp500', 'sp 500'])) track = 'equities';
+  else if (has(name, ['כללי']) && !has(name, ['מניות', 'אג"ח', 'אגח', 'הלכה', 'כספי', 'עוקב', 'סחיר'])) track = 'general';
   return track ? { product, track } : null;
 }
 
@@ -93,7 +97,7 @@ for (const [source, rows, classify] of sources) {
   const continuityCohort = new Map();
   for (const [fundId, row] of latestByFund) {
     const cohort = classify(row);
-    if (cohort && ['credit_bonds', 'credit_bonds_upto_25_equities'].includes(cohort.track)) continuityCohort.set(fundId, cohort);
+    if (cohort && ['general', 'equities', 'credit_bonds', 'credit_bonds_upto_25_equities'].includes(cohort.track)) continuityCohort.set(fundId, cohort);
   }
   for (const row of rows) {
     const fundId = String(row.FUND_ID || '').trim(), period = Number(row.REPORT_PERIOD);

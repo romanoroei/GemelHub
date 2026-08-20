@@ -367,6 +367,7 @@ short_return_composite_result = {
 sample_funds = {
     '119': ("מנורה מבטחים יותר מסלול ד'", 'gemel_regular__general'),
     '1093': ('אלטשולר שחם השתלמות כללי', 'training_fund__general'),
+    '8522': ('הראל גמל להשקעה מניות', 'gemel_investment__equities'),
 }
 sample_histories = []
 for sample_fund_id, (sample_name, sample_cohort) in sample_funds.items():

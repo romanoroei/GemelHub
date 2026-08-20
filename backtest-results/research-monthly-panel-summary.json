@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-20T20:51:17.306Z",
-  "rowCount": 90950,
+  "generatedAt": "2026-08-20T22:16:57.689Z",
+  "rowCount": 99455,
   "featureCount": 36,
   "features": [
     "return_1m",
@@ -136,25 +136,25 @@
       }
     },
     "gemel_investment__equities": {
-      "rows": 243,
-      "funds": 16,
-      "months": 16,
+      "rows": 1587,
+      "funds": 23,
+      "months": 102,
       "targetRows": {
-        "3": 243,
-        "6": 195,
-        "12": 105,
-        "24": 0
+        "3": 1587,
+        "6": 1518,
+        "12": 1386,
+        "24": 1133
       }
     },
     "gemel_investment__general": {
-      "rows": 1473,
-      "funds": 21,
+      "rows": 1587,
+      "funds": 24,
       "months": 102,
       "targetRows": {
-        "3": 1473,
-        "6": 1410,
-        "12": 1285,
-        "24": 1052
+        "3": 1587,
+        "6": 1515,
+        "12": 1372,
+        "24": 1110
       }
     },
     "gemel_regular__age_50_60": {
@@ -202,25 +202,25 @@
       }
     },
     "gemel_regular__equities": {
-      "rows": 3072,
-      "funds": 58,
-      "months": 285,
+      "rows": 6434,
+      "funds": 73,
+      "months": 316,
       "targetRows": {
-        "3": 3072,
-        "6": 2884,
-        "12": 2513,
-        "24": 1911
+        "3": 6434,
+        "6": 6207,
+        "12": 5758,
+        "24": 4932
       }
     },
     "gemel_regular__general": {
-      "rows": 24197,
-      "funds": 263,
+      "rows": 24298,
+      "funds": 265,
       "months": 316,
       "targetRows": {
-        "3": 24197,
-        "6": 23371,
-        "12": 21765,
-        "24": 18815
+        "3": 24298,
+        "6": 23466,
+        "12": 21848,
+        "24": 18877
       }
     },
     "savings_policy__credit_bonds": {
@@ -334,14 +334,14 @@
       }
     },
     "training_fund__credit_bonds": {
-      "rows": 4426,
+      "rows": 4269,
       "funds": 27,
       "months": 203,
       "targetRows": {
-        "3": 4426,
-        "6": 4342,
-        "12": 4174,
-        "24": 3834
+        "3": 4269,
+        "6": 4185,
+        "12": 4017,
+        "24": 3677
       }
     },
     "training_fund__credit_bonds_upto_25_equities": {
@@ -356,25 +356,25 @@
       }
     },
     "training_fund__equities": {
-      "rows": 2996,
-      "funds": 53,
+      "rows": 6407,
+      "funds": 65,
       "months": 292,
       "targetRows": {
-        "3": 2996,
-        "6": 2829,
-        "12": 2512,
-        "24": 1990
+        "3": 6407,
+        "6": 6204,
+        "12": 5815,
+        "24": 5096
       }
     },
     "training_fund__general": {
-      "rows": 16606,
-      "funds": 156,
+      "rows": 16936,
+      "funds": 161,
       "months": 316,
       "targetRows": {
-        "3": 16606,
-        "6": 16108,
-        "12": 15157,
-        "24": 13359
+        "3": 16936,
+        "6": 16420,
+        "12": 15433,
+        "24": 13575
       }
     }
   }

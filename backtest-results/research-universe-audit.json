@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-20T20:51:16.231Z",
+  "generatedAt": "2026-08-20T22:16:56.346Z",
   "scope": {
     "products": [
       "gemel_regular",
@@ -28,17 +28,17 @@
       "pension_recipients"
     ]
   },
-  "totalEligibleRows": 110411,
+  "totalEligibleRows": 119235,
   "continuity": {
-    "inferredRows": 12508,
-    "inferredFunds": 93,
+    "inferredRows": 12340,
+    "inferredFunds": 92,
     "inferredRowsByCohort": {
       "gemel_investment__credit_bonds": 582,
       "gemel_investment__credit_bonds_upto_25_equities": 922,
       "gemel_regular__credit_bonds": 2542,
       "savings_policy__credit_bonds": 1533,
       "savings_policy__credit_bonds_upto_25_equities": 965,
-      "training_fund__credit_bonds": 4282,
+      "training_fund__credit_bonds": 4114,
       "training_fund__credit_bonds_upto_25_equities": 1682
     }
   },
@@ -126,8 +126,8 @@
     {
       "product": "gemel_investment",
       "track": "equities",
-      "fundCount": 22,
-      "monthlyRows": 774,
+      "fundCount": 25,
+      "monthlyRows": 1929,
       "distinctMonths": 116,
       "firstPeriod": 201611,
       "lastPeriod": 202606,
@@ -136,8 +136,8 @@
     {
       "product": "gemel_investment",
       "track": "general",
-      "fundCount": 21,
-      "monthlyRows": 1784,
+      "fundCount": 24,
+      "monthlyRows": 1949,
       "distinctMonths": 116,
       "firstPeriod": 201611,
       "lastPeriod": 202606,
@@ -186,8 +186,8 @@
     {
       "product": "gemel_regular",
       "track": "equities",
-      "fundCount": 62,
-      "monthlyRows": 4115,
+      "fundCount": 78,
+      "monthlyRows": 7599,
       "distinctMonths": 330,
       "firstPeriod": 199901,
       "lastPeriod": 202606,
@@ -196,8 +196,8 @@
     {
       "product": "gemel_regular",
       "track": "general",
-      "fundCount": 280,
-      "monthlyRows": 28488,
+      "fundCount": 282,
+      "monthlyRows": 28620,
       "distinctMonths": 330,
       "firstPeriod": 199901,
       "lastPeriod": 202606,
@@ -307,7 +307,7 @@
       "product": "training_fund",
       "track": "credit_bonds",
       "fundCount": 28,
-      "monthlyRows": 5077,
+      "monthlyRows": 4909,
       "distinctMonths": 330,
       "firstPeriod": 199901,
       "lastPeriod": 202606,
@@ -326,8 +326,8 @@
     {
       "product": "training_fund",
       "track": "equities",
-      "fundCount": 57,
-      "monthlyRows": 3894,
+      "fundCount": 70,
+      "monthlyRows": 7505,
       "distinctMonths": 330,
       "firstPeriod": 199901,
       "lastPeriod": 202606,
@@ -336,8 +336,8 @@
     {
       "product": "training_fund",
       "track": "general",
-      "fundCount": 162,
-      "monthlyRows": 19126,
+      "fundCount": 169,
+      "monthlyRows": 19571,
       "distinctMonths": 330,
       "firstPeriod": 199901,
       "lastPeriod": 202606,
