@@ -161,7 +161,7 @@ composite_prediction = pred_wide.mul(weights).sum(axis=1, skipna=True) / pred_wi
 composite_truth = truth_wide.mul(weights).sum(axis=1, skipna=True) / truth_wide.notna().mul(weights).sum(axis=1)
 composite = pred_wide.reset_index()[key_cols]
 composite['truth'] = composite_truth.to_numpy()
-composite['prediction'] = composite_prediction.to_numpy()
+composite['prediction'] = composite_prediction.clip(0, 100).to_numpy()
 baseline_lookup = df.set_index(['cohort','product','track','fundId','period'])['baseline']
 composite['baseline'] = [baseline_lookup.get((r.cohort,r.product,r.track,r.fundId,r.period), np.nan) for r in composite.itertuples()]
 composite_result = {
@@ -170,6 +170,15 @@ composite_result = {
     'baseline': metrics(composite, composite.baseline.to_numpy()),
     'rows': len(composite),
 }
+sample_fund_id = '119'
+sample = composite[(composite.fundId == sample_fund_id) & (composite.period % 100 == 12)].copy()
+sample_history = [{
+    'fundId': sample_fund_id,
+    'period': int(row.period),
+    'predictedScore': round(float(row.prediction), 1),
+    'baselineScore': round(float(row.baseline), 1),
+    'realizedMultiHorizonPercentile': round(float(row.truth), 1),
+} for row in sample.itertuples()]
 
 result = {
     'generatedAt': pd.Timestamp.now('UTC').isoformat(),
@@ -183,6 +192,12 @@ result = {
     'foldComparisonsToBaseline': fold_comparisons,
     'cohorts': cohort_results,
     'compositeScore': composite_result,
+    'sampleHistory': {
+        'fundId': sample_fund_id,
+        'fundName': "מנורה מבטחים יותר מסלול ד'",
+        'cohort': 'gemel_regular__general',
+        'points': sample_history,
+    },
     'folds': folds,
 }
 out = ROOT / 'backtest-results' / 'monthly-model-backtest.json'

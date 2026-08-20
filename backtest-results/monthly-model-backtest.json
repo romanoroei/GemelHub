@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-20T20:27:34.494019+00:00",
+  "generatedAt": "2026-08-20T20:34:55.426965+00:00",
   "design": {
     "testYears": [
       2018,
@@ -5514,7 +5514,7 @@
       "groups": 1302,
       "meanMonthlySpearman": 0.214,
       "topThirdHitRate": 41.1,
-      "topThirdFallRate": 17.5,
+      "topThirdFallRate": 17.4,
       "top3FuturePercentile": 57.3
     },
     "baseline": {
@@ -5525,6 +5525,41 @@
       "top3FuturePercentile": 55.7
     },
     "rows": 19426
+  },
+  "sampleHistory": {
+    "fundId": "119",
+    "fundName": "מנורה מבטחים יותר מסלול ד'",
+    "cohort": "gemel_regular__general",
+    "points": [
+      {
+        "fundId": "119",
+        "period": 201812,
+        "predictedScore": 47.4,
+        "baselineScore": 73.6,
+        "realizedMultiHorizonPercentile": 45.4
+      },
+      {
+        "fundId": "119",
+        "period": 202012,
+        "predictedScore": 62.2,
+        "baselineScore": 54.5,
+        "realizedMultiHorizonPercentile": 43.8
+      },
+      {
+        "fundId": "119",
+        "period": 202212,
+        "predictedScore": 51.3,
+        "baselineScore": 52.6,
+        "realizedMultiHorizonPercentile": 55.9
+      },
+      {
+        "fundId": "119",
+        "period": 202412,
+        "predictedScore": 52.6,
+        "baselineScore": 50.0,
+        "realizedMultiHorizonPercentile": 52.1
+      }
+    ]
   },
   "folds": [
     {

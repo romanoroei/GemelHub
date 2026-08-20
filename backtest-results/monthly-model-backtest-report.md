@@ -47,3 +47,16 @@ The result supports the predictive value of the broader monthly history: returns
 This is not yet authorization to change the production score. The baseline is a faithful monthly reconstruction rather than a byte-for-byte execution of the live website code. Several small cohorts remain individually unstable, so production eligibility should require cohort-level confidence. A final validation should add block-bootstrap confidence intervals, freeze the model specification, and run one untouched final holdout period before deployment.
 
 Machine-readable aggregate, fold, and cohort results are stored in `monthly-model-backtest.json`.
+
+## Historical example
+
+For fund 119, `מנורה מבטחים יותר מסלול ד'`, the genuinely out-of-sample December observations were:
+
+| Decision date | Predicted multi-horizon score | Baseline score | Realized future multi-horizon percentile |
+|---|---:|---:|---:|
+| 2018-12 | 47.4 | 73.6 | 45.4 |
+| 2020-12 | 62.2 | 54.5 | 43.8 |
+| 2022-12 | 51.3 | 52.6 | 55.9 |
+| 2024-12 | 52.6 | 50.0 | 52.1 |
+
+This example also demonstrates why the score is probabilistic rather than a promise: the 2020 signal was optimistic and did not materialize, while the 2018, 2022, and 2024 estimates were directionally closer to the realized relative outcome. Reliability is established across thousands of cohort-month decisions, not from any single fund observation.
