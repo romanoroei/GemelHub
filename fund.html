@@ -3093,7 +3093,7 @@ function renderGemelHubScoreBadge(container, data, fundId, catId) {
     return;
   }
 
-  const { score } = data.thisFund;
+  const { score, userProtection = {} } = data.thisFund;
   const rank  = data.allScores.findIndex(s => s.fundId === String(fundId)) + 1;
   const total = data.allScores.length;
   const yearLabel = new Date().getFullYear();
@@ -3158,6 +3158,11 @@ function renderGemelHubScoreBadge(container, data, fundId, catId) {
       </svg>
       <!-- אינדיקטור לחיצה מתחת לחותמת -->
       <div class="gh-stamp-tap-hint">לחץ לפרטים מלאים ▼</div>
+      ${userProtection.timingLabel === 'high_reversal_risk'
+        ? '<div style="margin-top:7px;padding:5px 9px;border-radius:999px;background:#fee2e2;color:#b91c1c;font-size:.72rem;font-weight:900;">⚠ סיכון גבוה להיפוך</div>'
+        : userProtection.timingLabel === 'mixed_signals'
+          ? '<div style="margin-top:7px;padding:5px 9px;border-radius:999px;background:#fef3c7;color:#92400e;font-size:.72rem;font-weight:900;">נתונים קצרים מעורבים</div>'
+          : ''}
     </button>`;
 
   document.getElementById('gh-score-badge-btn')
@@ -3230,6 +3235,30 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
         })()}
       </div>
     </div>`;
+
+  const protection = thisFund?.userProtection || {};
+  const consistencyLabel = protection.dataConsistency === 'high' ? 'גבוהה'
+    : protection.dataConsistency === 'medium' ? 'בינונית' : 'נמוכה';
+  const timingTitle = protection.timingLabel === 'high_reversal_risk' ? 'סיכון גבוה להיפוך'
+    : protection.timingLabel === 'mixed_signals' ? 'נתונים קצרים מעורבים' : 'ללא אזהרת עיתוי חריגה';
+  const timingColor = protection.timingLabel === 'high_reversal_risk' ? '#b91c1c'
+    : protection.timingLabel === 'mixed_signals' ? '#92400e' : '#15803d';
+  const protectionHtml = thisFund ? `
+    <div style="padding:13px 16px;background:#fff;border-bottom:1px solid #eef2f7;">
+      <div style="font-size:.76rem;font-weight:900;color:#0f2744;margin-bottom:9px;">הקשר לציון — איכות אינה עיתוי כניסה</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;">
+        <div style="background:#f8fafc;border-radius:10px;padding:9px;text-align:center;">
+          <div style="font-size:.68rem;color:#64748b;font-weight:700;">עקביות הנתונים</div>
+          <div style="font-size:1rem;font-weight:900;color:#0f2744;margin-top:3px;">${consistencyLabel}</div>
+        </div>
+        <div style="background:#f8fafc;border-radius:10px;padding:9px;text-align:center;">
+          <div style="font-size:.68rem;color:#64748b;font-weight:700;">תמיכת 1–12 חודשים</div>
+          <div style="font-size:1rem;font-weight:900;color:#0f2744;margin-top:3px;">${Number.isFinite(protection.shortTermSupport) ? protection.shortTermSupport.toFixed(1) : '—'}<span style="font-size:.65rem;color:#94a3b8;">/100</span></div>
+        </div>
+      </div>
+      <div style="margin-top:9px;border-radius:10px;padding:9px 11px;background:${protection.timingLabel === 'high_reversal_risk' ? '#fef2f2' : protection.timingLabel === 'mixed_signals' ? '#fffbeb' : '#f0fdf4'};color:${timingColor};font-size:.78rem;font-weight:900;">${timingTitle}</div>
+      <div style="font-size:.72rem;color:#64748b;line-height:1.55;margin-top:7px;">המדד משווה בין ציון האיכות לבין ביצועי החודש, 3, 6 ו־12 חודשים. הוא נועד להוסיף הקשר ואינו תחזית ודאית לעלייה או לירידה.</div>
+    </div>` : '';
 
   let compHtml = '';
   if (thisFund) {
@@ -3310,7 +3339,7 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
       </p>
     </div>`;
 
-  showStatModal('gh-score-modal', titleHtml, scoreHeaderHtml + explanationHtml + tableHtml + compHtml + disclaimerHtml, 'max-width:640px;');
+  showStatModal('gh-score-modal', titleHtml, scoreHeaderHtml + explanationHtml + protectionHtml + tableHtml + compHtml + disclaimerHtml, 'max-width:640px;');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
