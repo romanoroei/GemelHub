@@ -26,3 +26,6 @@ share-sample-*.png
 # Local Claude settings
 .claude/
 backtest-results/*.ndjson.gz
+.python-packages/
+.pip-temp/
+__pycache__/

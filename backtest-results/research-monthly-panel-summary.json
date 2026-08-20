@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-08-20T20:16:42.243Z",
+  "generatedAt": "2026-08-20T20:20:45.455Z",
   "rowCount": 90950,
-  "featureCount": 24,
+  "featureCount": 29,
   "features": [
     "return_1m",
     "return_3m",
@@ -10,6 +10,11 @@
     "return_24m",
     "return_36m",
     "return_60m",
+    "return_year_1",
+    "return_year_2",
+    "return_year_3",
+    "return_year_4",
+    "return_year_5",
     "positive_month_ratio_12m",
     "volatility_12m",
     "downside_deviation_12m",
