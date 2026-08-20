@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-20T22:16:57.689Z",
-  "rowCount": 99455,
+  "generatedAt": "2026-08-20T22:34:29.440Z",
+  "rowCount": 73783,
   "featureCount": 36,
   "features": [
     "return_1m",
@@ -102,17 +102,6 @@
         "24": 1159
       }
     },
-    "comprehensive_pension__general": {
-      "rows": 830,
-      "funds": 9,
-      "months": 150,
-      "targetRows": {
-        "3": 830,
-        "6": 791,
-        "12": 713,
-        "24": 557
-      }
-    },
     "gemel_investment__credit_bonds": {
       "rows": 752,
       "funds": 11,
@@ -212,17 +201,6 @@
         "24": 4932
       }
     },
-    "gemel_regular__general": {
-      "rows": 24298,
-      "funds": 265,
-      "months": 316,
-      "targetRows": {
-        "3": 24298,
-        "6": 23466,
-        "12": 21848,
-        "24": 18877
-      }
-    },
     "savings_policy__credit_bonds": {
       "rows": 1583,
       "funds": 12,
@@ -320,17 +298,6 @@
         "6": 347,
         "12": 299,
         "24": 203
-      }
-    },
-    "supplementary_pension__general": {
-      "rows": 544,
-      "funds": 10,
-      "months": 91,
-      "targetRows": {
-        "3": 544,
-        "6": 490,
-        "12": 382,
-        "24": 176
       }
     },
     "training_fund__credit_bonds": {

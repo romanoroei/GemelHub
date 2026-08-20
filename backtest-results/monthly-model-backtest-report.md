@@ -40,7 +40,7 @@ The four Ridge forecasts were combined using 20% for 3 months, 25% for 6 months,
 
 This is the first model in the research series to improve all four aggregate metrics simultaneously in a purged monthly walk-forward test.
 
-After restoring older general/equity rows whose historical specialization field was blank but whose stable fund identity/name was unambiguous, the continuous 2018–2024 test contains 38,594 predictions across 2,366 cohort-month groups. The broad Ridge records Spearman 0.218, a 39.0% top-third hit rate, a 17.8% bottom-third fall rate, and a 56.7 Top-3 future percentile; the reconstructed baseline records 0.214, 38.3%, 19.5%, and 56.5 respectively.
+After restoring older general/equity rows whose historical specialization field was blank but whose stable fund identity/name was unambiguous, the research universe was narrowed per product policy: the `general` track is included only for investment provident funds, savings policies, and training funds. General tracks in regular provident and pension products are excluded. The continuous 2018–2024 test now contains 35,846 predictions across 2,158 cohort-month groups. The broad Ridge records Spearman 0.215, a 38.6% top-third hit rate, an 18.3% bottom-third fall rate, and a 56.6 Top-3 future percentile; the reconstructed baseline records 0.216, 38.0%, 20.0%, and 56.5 respectively.
 
 ## Short-horizon and investor-flow experiment
 
@@ -67,7 +67,7 @@ The practical conclusion is to display score direction as context, but not treat
 
 The research output now separates quality from timing. The displayed quality score is capped at 95 to avoid communicating certainty. Separate point-in-time fields report 1/3/6/12-month agreement, three-month high-score persistence, confidence, and reversal risk. Reversal risk combines unusually strong recent performance, recent weakening, disagreement across short horizons, and—critically—the gap between a high broad-model score and weak short-horizon evidence.
 
-Across 34,038 out-of-sample monthly observations, the strict `high reversal risk` rule fired only 115 times. Those observations had a mean future percentile of 40.1; 48.7% subsequently landed in the bottom third and only 21.7% reached the top third. Normal observations had a 29.3% bottom-third rate. The strict warning therefore identifies a small, materially higher-risk subset.
+Across 35,846 out-of-sample monthly observations in the narrowed universe, the strict `high reversal risk` rule fired only 113 times. Those observations had a mean future percentile of 38.3; 49.6% subsequently landed in the bottom third and only 15.0% reached the top third. Normal observations had a 28.9% bottom-third rate. The strict warning therefore identifies a small, materially higher-risk subset.
 
 Directly subtracting reversal risk from the quality score did not improve aggregate ranking metrics: Spearman remained approximately 0.215 and the selected-fund bottom-third rate remained 18.1%. The warning should consequently remain a separate timing label rather than silently altering the quality score.
 
@@ -75,7 +75,7 @@ For fund 1093, December 2020 would have displayed quality 95 (capped from 100), 
 
 The user-facing field formerly called confidence is now named `data consistency`, because it measures agreement and history coverage rather than a probability of success.
 
-A 2,000-replication cluster bootstrap over 2,276 cohort-month decision groups estimated that high-risk observations had a bottom-third rate 19.4 percentage points above normal observations. The 95% interval was +10.4 to +28.9 points. The aggregate warning signal is therefore statistically meaningful in this research sample.
+A 2,000-replication cluster bootstrap over 2,158 cohort-month decision groups estimated that high-risk observations had a bottom-third rate 20.7 percentage points above normal observations. The 95% interval was +11.0 to +30.7 points. The aggregate warning signal is therefore statistically meaningful in this research sample.
 
 The effect is not yet universal. It was particularly strong in `training_fund__general` (23 warnings, 73.9% bottom-third outcomes) and several provident-fund cohorts, but weak in `comprehensive_pension__general` (41 warnings, 22.0% bottom-third outcomes). Annual warning counts were also small and outcomes varied materially. Production use should therefore require cohort-specific calibration and minimum-sample rules; the current universal threshold remains experimental.
 
@@ -103,20 +103,7 @@ This is not yet authorization to change the production score. The baseline is a 
 
 Machine-readable aggregate, fold, and cohort results are stored in `monthly-model-backtest.json`.
 
-## Historical example
-
-For fund 119, `מנורה מבטחים יותר מסלול ד'`, the genuinely out-of-sample December observations were:
-
-| Decision date | Predicted multi-horizon score | Baseline score | Realized future multi-horizon percentile |
-|---|---:|---:|---:|
-| 2018-12 | 47.4 | 73.6 | 45.4 |
-| 2020-12 | 62.2 | 54.5 | 43.8 |
-| 2022-12 | 51.3 | 52.6 | 55.9 |
-| 2024-12 | 52.6 | 50.0 | 52.1 |
-
-This example also demonstrates why the score is probabilistic rather than a promise: the 2020 signal was optimistic and did not materialize, while the 2018, 2022, and 2024 estimates were directionally closer to the realized relative outcome. Reliability is established across thousands of cohort-month decisions, not from any single fund observation.
-
-### Additional example: fund 1093
+## Historical example: fund 1093
 
 For fund 1093, `אלטשולר שחם השתלמות כללי`, the genuinely out-of-sample December observations were:
 

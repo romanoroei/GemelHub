@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-20T22:16:56.346Z",
+  "generatedAt": "2026-08-20T22:34:28.559Z",
   "scope": {
     "products": [
       "gemel_regular",
@@ -18,6 +18,11 @@
       "age_60_plus",
       "credit_bonds_upto_25_equities"
     ],
+    "generalTrackProducts": [
+      "gemel_investment",
+      "training_fund",
+      "savings_policy"
+    ],
     "exclusions": [
       "child_savings",
       "central_severance",
@@ -28,7 +33,7 @@
       "pension_recipients"
     ]
   },
-  "totalEligibleRows": 119235,
+  "totalEligibleRows": 88712,
   "continuity": {
     "inferredRows": 12340,
     "inferredFunds": 92,
@@ -90,16 +95,6 @@
       "monthlyRows": 1776,
       "distinctMonths": 172,
       "firstPeriod": 201203,
-      "lastPeriod": 202606,
-      "eligibleForStandaloneModel": true
-    },
-    {
-      "product": "comprehensive_pension",
-      "track": "general",
-      "fundCount": 10,
-      "monthlyRows": 1004,
-      "distinctMonths": 177,
-      "firstPeriod": 201110,
       "lastPeriod": 202606,
       "eligibleForStandaloneModel": true
     },
@@ -194,16 +189,6 @@
       "eligibleForStandaloneModel": true
     },
     {
-      "product": "gemel_regular",
-      "track": "general",
-      "fundCount": 282,
-      "monthlyRows": 28620,
-      "distinctMonths": 330,
-      "firstPeriod": 199901,
-      "lastPeriod": 202606,
-      "eligibleForStandaloneModel": true
-    },
-    {
       "product": "savings_policy",
       "track": "credit_bonds",
       "fundCount": 12,
@@ -290,16 +275,6 @@
       "monthlyRows": 897,
       "distinctMonths": 172,
       "firstPeriod": 201203,
-      "lastPeriod": 202606,
-      "eligibleForStandaloneModel": true
-    },
-    {
-      "product": "supplementary_pension",
-      "track": "general",
-      "fundCount": 14,
-      "monthlyRows": 899,
-      "distinctMonths": 166,
-      "firstPeriod": 201209,
       "lastPeriod": 202606,
       "eligibleForStandaloneModel": true
     },

@@ -86,6 +86,7 @@ const sources = [
 ];
 const dedup = new Map();
 const continuity = { inferredRows: 0, inferredFunds: new Set(), byCohort: new Map() };
+const generalTrackProducts = new Set(['gemel_investment', 'training_fund', 'savings_policy']);
 for (const [source, rows, classify] of sources) {
   const latestByFund = new Map();
   for (const row of rows) {
@@ -105,6 +106,7 @@ for (const [source, rows, classify] of sources) {
     const inferred = !direct ? continuityCohort.get(fundId) : null;
     const cohort = direct || inferred;
     if (!cohort || !fundId || !period || !Number.isFinite(Number(row.MONTHLY_YIELD))) continue;
+    if (cohort.track === 'general' && !generalTrackProducts.has(cohort.product)) continue;
     if (inferred) {
       continuity.inferredRows++;
       continuity.inferredFunds.add(`${source}_${fundId}`);
@@ -138,6 +140,7 @@ const result = {
   scope: {
     products: ['gemel_regular', 'gemel_investment', 'training_fund', 'savings_policy', 'comprehensive_pension', 'supplementary_pension'],
     tracks: ['general', 'equities', 'credit_bonds', 'age_upto_50', 'age_50_60', 'age_60_plus', 'credit_bonds_upto_25_equities'],
+    generalTrackProducts: [...generalTrackProducts],
     exclusions: ['child_savings', 'central_severance', 'index_tracking', 'tradable_only', 'cash', 'halacha', 'pension_recipients'],
   },
   totalEligibleRows: dedup.size,
