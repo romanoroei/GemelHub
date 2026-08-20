@@ -35,6 +35,13 @@ feature_cols = [c for c in feature_cols if not c.startswith('return_') or c in {
     'return_1m','return_3m','return_6m','return_12m','return_24m','return_36m','return_60m',
     'return_year_1','return_year_2','return_year_3','return_year_4','return_year_5'
 }]
+short_flow_features = [
+    'return_1m', 'return_3m', 'return_6m', 'return_12m',
+    'total_assets_log', 'asset_change_1m', 'asset_change_3m',
+    'asset_change_6m', 'asset_change_12m', 'net_flow_to_assets',
+    'net_flow_to_assets_3m', 'net_flow_to_assets_6m', 'net_flow_to_assets_12m',
+]
+short_return_features = ['return_1m', 'return_3m', 'return_6m', 'return_12m']
 
 def add_baseline(frame):
     annual = ['return_year_1','return_year_2','return_year_3','return_year_4','return_year_5']
@@ -99,6 +106,26 @@ for horizon in HORIZONS:
         ridge.fit(train[numeric + ['cohort']], train['truth'])
         ridge_pred = ridge.predict(test[numeric + ['cohort']])
 
+        short_flow_ridge = Pipeline([
+            ('prep', ColumnTransformer([
+                ('num', Pipeline([('impute', SimpleImputer(strategy='median')), ('scale', StandardScaler())]), short_flow_features),
+                ('cat', OneHotEncoder(handle_unknown='ignore'), ['cohort']),
+            ])),
+            ('model', Ridge(alpha=50.0)),
+        ])
+        short_flow_ridge.fit(train[short_flow_features + ['cohort']], train['truth'])
+        short_flow_pred = short_flow_ridge.predict(test[short_flow_features + ['cohort']])
+
+        short_return_ridge = Pipeline([
+            ('prep', ColumnTransformer([
+                ('num', Pipeline([('impute', SimpleImputer(strategy='median')), ('scale', StandardScaler())]), short_return_features),
+                ('cat', OneHotEncoder(handle_unknown='ignore'), ['cohort']),
+            ])),
+            ('model', Ridge(alpha=50.0)),
+        ])
+        short_return_ridge.fit(train[short_return_features + ['cohort']], train['truth'])
+        short_return_pred = short_return_ridge.predict(test[short_return_features + ['cohort']])
+
         imputer = SimpleImputer(strategy='median')
         x_train = imputer.fit_transform(train[numeric])
         x_test = imputer.transform(test[numeric])
@@ -107,7 +134,7 @@ for horizon in HORIZONS:
         boost_pred = boost.predict(x_test)
         ensemble_pred = .4 * ridge_pred + .6 * boost_pred
 
-        for model, pred in [('baseline', test['baseline'].to_numpy()), ('ridge', ridge_pred), ('gradientBoosting', boost_pred), ('ensemble', ensemble_pred)]:
+        for model, pred in [('baseline', test['baseline'].to_numpy()), ('ridge', ridge_pred), ('shortReturnRidge', short_return_pred), ('shortFlowRidge', short_flow_pred), ('gradientBoosting', boost_pred), ('ensemble', ensemble_pred)]:
             fold_metrics = metrics(test, pred)
             folds.append({'horizonMonths': horizon, 'testYear': test_year, 'model': model, 'trainRows': len(train), 'testRows': len(test), **fold_metrics})
             pf = test[['cohort','product','track','fundId','period','truth']].copy()
@@ -136,7 +163,7 @@ for (horizon, model, cohort), g in all_predictions.groupby(['horizonMonths','mod
 fold_comparisons = []
 for horizon in HORIZONS:
     base = fold_df[(fold_df.horizonMonths == horizon) & (fold_df.model == 'baseline')].set_index('testYear')
-    for model in ['ridge','gradientBoosting','ensemble']:
+    for model in ['ridge','shortReturnRidge','shortFlowRidge','gradientBoosting','ensemble']:
         challenger = fold_df[(fold_df.horizonMonths == horizon) & (fold_df.model == model)].set_index('testYear')
         common = base.index.intersection(challenger.index)
         fold_comparisons.append({
@@ -170,6 +197,28 @@ composite_result = {
     'baseline': metrics(composite, composite.baseline.to_numpy()),
     'rows': len(composite),
 }
+short_flow_predictions = all_predictions[all_predictions.model == 'shortFlowRidge']
+short_pred_wide = short_flow_predictions.pivot_table(index=key_cols, columns='horizonMonths', values='prediction').reindex(common_index)
+short_composite_prediction = short_pred_wide.mul(weights).sum(axis=1, skipna=True) / short_pred_wide.notna().mul(weights).sum(axis=1)
+short_composite = composite.copy()
+short_composite['prediction'] = short_composite_prediction.clip(0, 100).to_numpy()
+short_flow_composite_result = {
+    'weights': {str(k): v for k, v in score_weights.items()},
+    'shortFlowRidge': metrics(short_composite, short_composite.prediction.to_numpy()),
+    'baseline': metrics(short_composite, short_composite.baseline.to_numpy()),
+    'rows': len(short_composite),
+}
+short_return_predictions = all_predictions[all_predictions.model == 'shortReturnRidge']
+short_return_wide = short_return_predictions.pivot_table(index=key_cols, columns='horizonMonths', values='prediction').reindex(common_index)
+short_return_composite_prediction = short_return_wide.mul(weights).sum(axis=1, skipna=True) / short_return_wide.notna().mul(weights).sum(axis=1)
+short_return_composite = composite.copy()
+short_return_composite['prediction'] = short_return_composite_prediction.clip(0, 100).to_numpy()
+short_return_composite_result = {
+    'weights': {str(k): v for k, v in score_weights.items()},
+    'shortReturnRidge': metrics(short_return_composite, short_return_composite.prediction.to_numpy()),
+    'baseline': metrics(short_return_composite, short_return_composite.baseline.to_numpy()),
+    'rows': len(short_return_composite),
+}
 sample_funds = {
     '119': ("מנורה מבטחים יותר מסלול ד'", 'gemel_regular__general'),
     '1093': ('אלטשולר שחם השתלמות כללי', 'training_fund__general'),
@@ -195,13 +244,17 @@ result = {
     'design': {
         'testYears': TEST_YEARS, 'horizonsMonths': HORIZONS,
         'purgeRule': 'Training target must end before January of the test year',
-        'models': ['current-score approximation', 'regularized ridge', 'histogram gradient boosting', '40/60 ridge/boost ensemble'],
+        'models': ['current-score approximation', 'regularized ridge', 'short-horizon plus asset/flow ridge', 'histogram gradient boosting', '40/60 ridge/boost ensemble'],
         'featureCount': len(feature_cols), 'features': feature_cols,
+        'shortFlowFeatures': short_flow_features,
+        'shortReturnFeatures': short_return_features,
     },
     'aggregate': aggregate,
     'foldComparisonsToBaseline': fold_comparisons,
     'cohorts': cohort_results,
     'compositeScore': composite_result,
+    'shortFlowCompositeScore': short_flow_composite_result,
+    'shortReturnCompositeScore': short_return_composite_result,
     'sampleHistories': sample_histories,
     'folds': folds,
 }

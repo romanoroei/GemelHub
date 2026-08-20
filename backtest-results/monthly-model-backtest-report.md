@@ -40,6 +40,19 @@ The four Ridge forecasts were combined using 20% for 3 months, 25% for 6 months,
 
 This is the first model in the research series to improve all four aggregate metrics simultaneously in a purged monthly walk-forward test.
 
+## Short-horizon and investor-flow experiment
+
+A separate Ridge candidate used only relative returns over 1, 3, 6, and 12 months. A second candidate added fund size, raw asset changes over 1/3/6/12 months, and reported net-flow ratios over 1/3/6/12 months. Both were trained and tested with the same purged walk-forward folds as the broad model.
+
+| Composite score | Monthly Spearman | Top-third hit | Fall to bottom third | Top-3 future percentile |
+|---|---:|---:|---:|---:|
+| Short returns only | 0.087 | 33.3% | 26.4% | 52.2 |
+| Short returns + assets/flows | 0.139 | 36.4% | 20.9% | 54.4 |
+| Baseline | 0.198 | 39.1% | 19.8% | 55.7 |
+| Broad Ridge including assets/flows | **0.215** | **41.2%** | **17.4%** | **57.3** |
+
+Assets and flows add substantial information compared with short-term returns alone, but the focused model does not beat the baseline or the broad Ridge. The evidence therefore supports retaining asset/flow trends as inputs inside the broad model, not replacing the broad model with a short-horizon-only formula. Raw asset growth and reported net flows are kept as separate inputs because asset growth also contains the mechanical effect of investment returns.
+
 ## Interpretation and limitations
 
 The result supports the predictive value of the broader monthly history: returns at several horizons, consistency, downside behavior, size, fees, flows, exposures, Alpha, and Sharpe contain more useful information together than the current fixed formula.

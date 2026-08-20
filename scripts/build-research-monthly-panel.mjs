@@ -33,6 +33,22 @@ function returnSeries(records, endPeriod, months) {
   }
   return values;
 }
+function assetChange(records, endPeriod, months) {
+  const current = num(records.get(endPeriod)?.raw.TOTAL_ASSETS);
+  const previous = num(records.get(addMonths(endPeriod, -months))?.raw.TOTAL_ASSETS);
+  return current > 0 && previous > 0 ? (current / previous - 1) * 100 : null;
+}
+function rollingNetFlowRatio(records, endPeriod, months) {
+  const startingAssets = num(records.get(addMonths(endPeriod, -months))?.raw.TOTAL_ASSETS);
+  if (!(startingAssets > 0)) return null;
+  let flow = 0;
+  for (let i = 0; i < months; i++) {
+    const value = num(records.get(addMonths(endPeriod, i - months + 1))?.raw.NET_MONTHLY_DEPOSITS);
+    if (value === null) return null;
+    flow += value;
+  }
+  return flow / startingAssets;
+}
 const mean = values => values.reduce((a, b) => a + b, 0) / values.length;
 function standardDeviation(values) {
   const average = mean(values);
@@ -93,9 +109,16 @@ for (const row of researchRows) {
     alpha: num(raw.ALPHA),
     reported_standard_deviation: num(raw.STANDARD_DEVIATION),
     total_assets_log: num(raw.TOTAL_ASSETS) > 0 ? Math.log1p(num(raw.TOTAL_ASSETS)) : null,
+    asset_change_1m: assetChange(records, row.period, 1),
+    asset_change_3m: assetChange(records, row.period, 3),
+    asset_change_6m: assetChange(records, row.period, 6),
+    asset_change_12m: assetChange(records, row.period, 12),
     management_fee: num(raw.AVG_ANNUAL_MANAGEMENT_FEE),
     deposit_fee: num(raw.AVG_DEPOSIT_FEE),
     net_flow_to_assets: num(raw.NET_MONTHLY_DEPOSITS) !== null && num(raw.TOTAL_ASSETS) > 0 ? num(raw.NET_MONTHLY_DEPOSITS) / num(raw.TOTAL_ASSETS) : null,
+    net_flow_to_assets_3m: rollingNetFlowRatio(records, row.period, 3),
+    net_flow_to_assets_6m: rollingNetFlowRatio(records, row.period, 6),
+    net_flow_to_assets_12m: rollingNetFlowRatio(records, row.period, 12),
     stock_exposure: num(raw.STOCK_MARKET_EXPOSURE),
     foreign_exposure: num(raw.FOREIGN_EXPOSURE),
     fx_exposure: num(raw.FOREIGN_CURRENCY_EXPOSURE),
