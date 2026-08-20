@@ -25,3 +25,4 @@ share-sample-*.png
 
 # Local Claude settings
 .claude/
+backtest-results/*.ndjson.gz

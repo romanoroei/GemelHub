@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-20T20:11:07.758Z",
+  "generatedAt": "2026-08-20T20:16:41.360Z",
   "scope": {
     "products": [
       "gemel_regular",
@@ -28,7 +28,20 @@
       "pension_recipients"
     ]
   },
-  "totalEligibleRows": 97903,
+  "totalEligibleRows": 110411,
+  "continuity": {
+    "inferredRows": 12508,
+    "inferredFunds": 93,
+    "inferredRowsByCohort": {
+      "gemel_investment__credit_bonds": 582,
+      "gemel_investment__credit_bonds_upto_25_equities": 922,
+      "gemel_regular__credit_bonds": 2542,
+      "savings_policy__credit_bonds": 1533,
+      "savings_policy__credit_bonds_upto_25_equities": 965,
+      "training_fund__credit_bonds": 4282,
+      "training_fund__credit_bonds_upto_25_equities": 1682
+    }
+  },
   "cohorts": [
     {
       "product": "comprehensive_pension",
@@ -94,21 +107,21 @@
       "product": "gemel_investment",
       "track": "credit_bonds",
       "fundCount": 12,
-      "monthlyRows": 326,
-      "distinctMonths": 30,
-      "firstPeriod": 202401,
+      "monthlyRows": 908,
+      "distinctMonths": 116,
+      "firstPeriod": 201611,
       "lastPeriod": 202606,
-      "eligibleForStandaloneModel": false
+      "eligibleForStandaloneModel": true
     },
     {
       "product": "gemel_investment",
       "track": "credit_bonds_upto_25_equities",
       "fundCount": 12,
-      "monthlyRows": 360,
-      "distinctMonths": 30,
-      "firstPeriod": 202401,
+      "monthlyRows": 1282,
+      "distinctMonths": 116,
+      "firstPeriod": 201611,
       "lastPeriod": 202606,
-      "eligibleForStandaloneModel": false
+      "eligibleForStandaloneModel": true
     },
     {
       "product": "gemel_investment",
@@ -164,11 +177,11 @@
       "product": "gemel_regular",
       "track": "credit_bonds",
       "fundCount": 16,
-      "monthlyRows": 452,
-      "distinctMonths": 30,
-      "firstPeriod": 202401,
+      "monthlyRows": 2994,
+      "distinctMonths": 330,
+      "firstPeriod": 199901,
       "lastPeriod": 202606,
-      "eligibleForStandaloneModel": false
+      "eligibleForStandaloneModel": true
     },
     {
       "product": "gemel_regular",
@@ -194,21 +207,21 @@
       "product": "savings_policy",
       "track": "credit_bonds",
       "fundCount": 12,
-      "monthlyRows": 323,
-      "distinctMonths": 30,
-      "firstPeriod": 202401,
+      "monthlyRows": 1856,
+      "distinctMonths": 322,
+      "firstPeriod": 199909,
       "lastPeriod": 202606,
-      "eligibleForStandaloneModel": false
+      "eligibleForStandaloneModel": true
     },
     {
       "product": "savings_policy",
       "track": "credit_bonds_upto_25_equities",
       "fundCount": 8,
-      "monthlyRows": 234,
-      "distinctMonths": 30,
-      "firstPeriod": 202401,
+      "monthlyRows": 1199,
+      "distinctMonths": 322,
+      "firstPeriod": 199909,
       "lastPeriod": 202606,
-      "eligibleForStandaloneModel": false
+      "eligibleForStandaloneModel": true
     },
     {
       "product": "savings_policy",
@@ -294,21 +307,21 @@
       "product": "training_fund",
       "track": "credit_bonds",
       "fundCount": 28,
-      "monthlyRows": 795,
-      "distinctMonths": 30,
-      "firstPeriod": 202401,
+      "monthlyRows": 5077,
+      "distinctMonths": 330,
+      "firstPeriod": 199901,
       "lastPeriod": 202606,
-      "eligibleForStandaloneModel": false
+      "eligibleForStandaloneModel": true
     },
     {
       "product": "training_fund",
       "track": "credit_bonds_upto_25_equities",
       "fundCount": 16,
-      "monthlyRows": 447,
-      "distinctMonths": 30,
-      "firstPeriod": 202401,
+      "monthlyRows": 2129,
+      "distinctMonths": 327,
+      "firstPeriod": 199901,
       "lastPeriod": 202606,
-      "eligibleForStandaloneModel": false
+      "eligibleForStandaloneModel": true
     },
     {
       "product": "training_fund",

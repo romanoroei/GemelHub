@@ -81,11 +81,34 @@ const sources = [
   ['polisa', loadFamily('polisa'), classifyPolisa],
 ];
 const dedup = new Map();
-for (const [source, rows, classify] of sources) for (const row of rows) {
-  const cohort = classify(row);
-  const fundId = String(row.FUND_ID || '').trim(), period = Number(row.REPORT_PERIOD);
-  if (!cohort || !fundId || !period || !Number.isFinite(Number(row.MONTHLY_YIELD))) continue;
-  dedup.set(`${source}_${fundId}_${period}`, { source, fundId, period, fundName: String(row.FUND_NAME || ''), ...cohort });
+const continuity = { inferredRows: 0, inferredFunds: new Set(), byCohort: new Map() };
+for (const [source, rows, classify] of sources) {
+  const latestByFund = new Map();
+  for (const row of rows) {
+    const fundId = String(row.FUND_ID || '').trim(), period = Number(row.REPORT_PERIOD);
+    if (!fundId || !period) continue;
+    const previous = latestByFund.get(fundId);
+    if (!previous || Number(previous.REPORT_PERIOD) < period) latestByFund.set(fundId, row);
+  }
+  const continuityCohort = new Map();
+  for (const [fundId, row] of latestByFund) {
+    const cohort = classify(row);
+    if (cohort && ['credit_bonds', 'credit_bonds_upto_25_equities'].includes(cohort.track)) continuityCohort.set(fundId, cohort);
+  }
+  for (const row of rows) {
+    const fundId = String(row.FUND_ID || '').trim(), period = Number(row.REPORT_PERIOD);
+    const direct = classify(row);
+    const inferred = !direct ? continuityCohort.get(fundId) : null;
+    const cohort = direct || inferred;
+    if (!cohort || !fundId || !period || !Number.isFinite(Number(row.MONTHLY_YIELD))) continue;
+    if (inferred) {
+      continuity.inferredRows++;
+      continuity.inferredFunds.add(`${source}_${fundId}`);
+      const key = `${cohort.product}__${cohort.track}`;
+      continuity.byCohort.set(key, (continuity.byCohort.get(key) || 0) + 1);
+    }
+    dedup.set(`${source}_${fundId}_${period}`, { source, fundId, period, fundName: String(row.FUND_NAME || ''), classificationMethod: inferred ? 'fund_id_continuity' : 'direct', raw: row, ...cohort });
+  }
 }
 
 const cohorts = new Map();
@@ -114,8 +137,14 @@ const result = {
     exclusions: ['child_savings', 'central_severance', 'index_tracking', 'tradable_only', 'cash', 'halacha', 'pension_recipients'],
   },
   totalEligibleRows: dedup.size,
+  continuity: {
+    inferredRows: continuity.inferredRows,
+    inferredFunds: continuity.inferredFunds.size,
+    inferredRowsByCohort: Object.fromEntries([...continuity.byCohort].sort()),
+  },
   cohorts: summary,
 };
+export const researchRows = [...dedup.values()];
 fs.mkdirSync(path.join(ROOT, 'backtest-results'), { recursive: true });
 fs.writeFileSync(path.join(ROOT, 'backtest-results', 'research-universe-audit.json'), JSON.stringify(result, null, 2));
 console.log(JSON.stringify(result, null, 2));

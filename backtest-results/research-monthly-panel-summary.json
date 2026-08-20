@@ -1,0 +1,369 @@
+{
+  "generatedAt": "2026-08-20T20:16:42.243Z",
+  "rowCount": 90950,
+  "featureCount": 24,
+  "features": [
+    "return_1m",
+    "return_3m",
+    "return_6m",
+    "return_12m",
+    "return_24m",
+    "return_36m",
+    "return_60m",
+    "positive_month_ratio_12m",
+    "volatility_12m",
+    "downside_deviation_12m",
+    "positive_month_ratio_36m",
+    "volatility_36m",
+    "max_drawdown_36m",
+    "sharpe",
+    "alpha",
+    "reported_standard_deviation",
+    "total_assets_log",
+    "management_fee",
+    "deposit_fee",
+    "net_flow_to_assets",
+    "stock_exposure",
+    "foreign_exposure",
+    "fx_exposure",
+    "liquid_assets"
+  ],
+  "horizons": [
+    3,
+    6,
+    12,
+    24
+  ],
+  "cohorts": {
+    "comprehensive_pension__age_50_60": {
+      "rows": 914,
+      "funds": 11,
+      "months": 112,
+      "targetRows": {
+        "3": 914,
+        "6": 881,
+        "12": 815,
+        "24": 683
+      }
+    },
+    "comprehensive_pension__age_60_plus": {
+      "rows": 914,
+      "funds": 11,
+      "months": 112,
+      "targetRows": {
+        "3": 914,
+        "6": 881,
+        "12": 815,
+        "24": 683
+      }
+    },
+    "comprehensive_pension__age_upto_50": {
+      "rows": 916,
+      "funds": 11,
+      "months": 112,
+      "targetRows": {
+        "3": 916,
+        "6": 883,
+        "12": 817,
+        "24": 685
+      }
+    },
+    "comprehensive_pension__credit_bonds": {
+      "rows": 647,
+      "funds": 7,
+      "months": 112,
+      "targetRows": {
+        "3": 647,
+        "6": 626,
+        "12": 584,
+        "24": 500
+      }
+    },
+    "comprehensive_pension__equities": {
+      "rows": 1490,
+      "funds": 18,
+      "months": 152,
+      "targetRows": {
+        "3": 1490,
+        "6": 1438,
+        "12": 1336,
+        "24": 1159
+      }
+    },
+    "comprehensive_pension__general": {
+      "rows": 830,
+      "funds": 9,
+      "months": 150,
+      "targetRows": {
+        "3": 830,
+        "6": 791,
+        "12": 713,
+        "24": 557
+      }
+    },
+    "gemel_investment__credit_bonds": {
+      "rows": 752,
+      "funds": 11,
+      "months": 102,
+      "targetRows": {
+        "3": 752,
+        "6": 719,
+        "12": 653,
+        "24": 536
+      }
+    },
+    "gemel_investment__credit_bonds_upto_25_equities": {
+      "rows": 1114,
+      "funds": 12,
+      "months": 102,
+      "targetRows": {
+        "3": 1114,
+        "6": 1078,
+        "12": 1006,
+        "24": 862
+      }
+    },
+    "gemel_investment__equities": {
+      "rows": 243,
+      "funds": 16,
+      "months": 16,
+      "targetRows": {
+        "3": 243,
+        "6": 195,
+        "12": 105,
+        "24": 0
+      }
+    },
+    "gemel_investment__general": {
+      "rows": 1473,
+      "funds": 21,
+      "months": 102,
+      "targetRows": {
+        "3": 1473,
+        "6": 1410,
+        "12": 1285,
+        "24": 1052
+      }
+    },
+    "gemel_regular__age_50_60": {
+      "rows": 4119,
+      "funds": 44,
+      "months": 114,
+      "targetRows": {
+        "3": 4119,
+        "6": 3989,
+        "12": 3731,
+        "24": 3215
+      }
+    },
+    "gemel_regular__age_60_plus": {
+      "rows": 4105,
+      "funds": 46,
+      "months": 115,
+      "targetRows": {
+        "3": 4105,
+        "6": 3969,
+        "12": 3699,
+        "24": 3178
+      }
+    },
+    "gemel_regular__age_upto_50": {
+      "rows": 4078,
+      "funds": 45,
+      "months": 114,
+      "targetRows": {
+        "3": 4078,
+        "6": 3945,
+        "12": 3681,
+        "24": 3163
+      }
+    },
+    "gemel_regular__credit_bonds": {
+      "rows": 2382,
+      "funds": 15,
+      "months": 196,
+      "targetRows": {
+        "3": 2382,
+        "6": 2337,
+        "12": 2247,
+        "24": 2067
+      }
+    },
+    "gemel_regular__equities": {
+      "rows": 3072,
+      "funds": 58,
+      "months": 285,
+      "targetRows": {
+        "3": 3072,
+        "6": 2884,
+        "12": 2513,
+        "24": 1911
+      }
+    },
+    "gemel_regular__general": {
+      "rows": 24197,
+      "funds": 263,
+      "months": 316,
+      "targetRows": {
+        "3": 24197,
+        "6": 23371,
+        "12": 21765,
+        "24": 18815
+      }
+    },
+    "savings_policy__credit_bonds": {
+      "rows": 1583,
+      "funds": 12,
+      "months": 238,
+      "targetRows": {
+        "3": 1583,
+        "6": 1547,
+        "12": 1483,
+        "24": 1375
+      }
+    },
+    "savings_policy__credit_bonds_upto_25_equities": {
+      "rows": 639,
+      "funds": 8,
+      "months": 111,
+      "targetRows": {
+        "3": 639,
+        "6": 615,
+        "12": 567,
+        "24": 487
+      }
+    },
+    "savings_policy__equities": {
+      "rows": 4389,
+      "funds": 45,
+      "months": 281,
+      "targetRows": {
+        "3": 4389,
+        "6": 4257,
+        "12": 4002,
+        "24": 3551
+      }
+    },
+    "savings_policy__general": {
+      "rows": 3865,
+      "funds": 35,
+      "months": 256,
+      "targetRows": {
+        "3": 3865,
+        "6": 3762,
+        "12": 3567,
+        "24": 3223
+      }
+    },
+    "supplementary_pension__age_50_60": {
+      "rows": 847,
+      "funds": 10,
+      "months": 112,
+      "targetRows": {
+        "3": 847,
+        "6": 817,
+        "12": 757,
+        "24": 637
+      }
+    },
+    "supplementary_pension__age_60_plus": {
+      "rows": 845,
+      "funds": 10,
+      "months": 112,
+      "targetRows": {
+        "3": 845,
+        "6": 815,
+        "12": 755,
+        "24": 635
+      }
+    },
+    "supplementary_pension__age_upto_50": {
+      "rows": 847,
+      "funds": 10,
+      "months": 112,
+      "targetRows": {
+        "3": 847,
+        "6": 817,
+        "12": 757,
+        "24": 637
+      }
+    },
+    "supplementary_pension__credit_bonds": {
+      "rows": 175,
+      "funds": 6,
+      "months": 33,
+      "targetRows": {
+        "3": 175,
+        "6": 157,
+        "12": 121,
+        "24": 60
+      }
+    },
+    "supplementary_pension__equities": {
+      "rows": 373,
+      "funds": 9,
+      "months": 55,
+      "targetRows": {
+        "3": 373,
+        "6": 347,
+        "12": 299,
+        "24": 203
+      }
+    },
+    "supplementary_pension__general": {
+      "rows": 544,
+      "funds": 10,
+      "months": 91,
+      "targetRows": {
+        "3": 544,
+        "6": 490,
+        "12": 382,
+        "24": 176
+      }
+    },
+    "training_fund__credit_bonds": {
+      "rows": 4426,
+      "funds": 27,
+      "months": 203,
+      "targetRows": {
+        "3": 4426,
+        "6": 4342,
+        "12": 4174,
+        "24": 3834
+      }
+    },
+    "training_fund__credit_bonds_upto_25_equities": {
+      "rows": 1569,
+      "funds": 15,
+      "months": 125,
+      "targetRows": {
+        "3": 1569,
+        "6": 1524,
+        "12": 1434,
+        "24": 1264
+      }
+    },
+    "training_fund__equities": {
+      "rows": 2996,
+      "funds": 53,
+      "months": 292,
+      "targetRows": {
+        "3": 2996,
+        "6": 2829,
+        "12": 2512,
+        "24": 1990
+      }
+    },
+    "training_fund__general": {
+      "rows": 16606,
+      "funds": 156,
+      "months": 316,
+      "targetRows": {
+        "3": 16606,
+        "6": 16108,
+        "12": 15157,
+        "24": 13359
+      }
+    }
+  }
+}
