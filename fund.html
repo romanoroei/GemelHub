@@ -3230,18 +3230,20 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
     const rank  = allScores.findIndex(s => s.fundId === String(currentFundId)) + 1;
     const total = allScores.length;
     return `
-    <div style="padding:13px 16px;background:linear-gradient(135deg,#0f2744 0%,#1a3560 100%);position:sticky;top:0;z-index:20;box-shadow:0 4px 12px rgba(15,39,68,.18);">
-      <div style="display:flex;align-items:center;gap:16px;">
-        <div style="text-align:center;min-width:130px;">
-          <div style="font-size:2.6rem;font-weight:900;color:#c9a227;line-height:1;">${thisFund.score.toFixed(2)}</div>
+    <div style="padding:14px 16px;background:linear-gradient(135deg,#0f2744 0%,#1d3a68 100%);position:sticky;top:0;z-index:20;box-shadow:0 5px 16px rgba(15,39,68,.22);">
+      <div style="display:flex;align-items:stretch;gap:12px;">
+        <div style="text-align:center;min-width:128px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:9px 12px;">
+          <div style="font-size:.66rem;color:#cbd5e1;font-weight:800;margin-bottom:3px;">ציון גמל האב</div>
+          <div style="font-size:2.45rem;font-weight:900;color:#d6ad22;line-height:1;">${thisFund.score.toFixed(2)}</div>
         </div>
-        <div style="flex:1;border-right:2px solid rgba(201,162,39,.35);padding-right:16px;">
-          <div style="font-size:1.14rem;font-weight:900;color:${trendPanelColor};line-height:1.25;">${trend.icon ? trend.icon + ' ' : ''}${trend.text}</div>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:5px 8px;">
+          <div style="font-size:.66rem;color:#93a9c7;font-weight:800;margin-bottom:4px;">מגמה עדכנית</div>
+          <div style="font-size:1.12rem;font-weight:900;color:${trendPanelColor};line-height:1.35;">${trend.icon ? trend.icon + ' ' : ''}${trend.text}</div>
         </div>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid rgba(255,255,255,.13);margin-top:10px;padding-top:8px;">
-        <div style="font-size:.94rem;color:${color};font-weight:900;">דירוג: ${grade}</div>
-        <div style="font-size:.78rem;color:#cbd5e1;">מקום <strong style="color:#fff;">${rank}</strong> מתוך <strong style="color:#fff;">${total}</strong> מנהלים במסלול</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+        <div style="background:rgba(255,255,255,.07);border-radius:9px;padding:7px 10px;font-size:.86rem;color:${color};font-weight:900;text-align:center;">דירוג: ${grade}</div>
+        <div style="background:rgba(255,255,255,.07);border-radius:9px;padding:7px 10px;font-size:.76rem;color:#dbe7f6;text-align:center;">מקום <strong style="color:#fff;">${rank}</strong> מתוך <strong style="color:#fff;">${total}</strong> מנהלים</div>
       </div>
     </div>`;
   })() : '';
@@ -3254,16 +3256,18 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
       : support >= 55 ? 'חיוביים ביחס למתחרים'
         : support >= 40 ? 'באמצע המסלול' : 'חלשים ביחס למתחרים';
   const protectionHtml = thisFund ? `
-    <div style="padding:13px 16px;background:#fff;border-bottom:1px solid #eef2f7;">
-      <div style="font-size:.76rem;font-weight:900;color:#0f2744;margin-bottom:9px;">עבר מול הווה ${ghInfoBubble('הציון משלב מבט ארוך וקצר. בחמש השנים נבדקת יציבות הדירוג. בחודש, 3, 6 ו־12 חודשים נבדקים הביצועים מול המתחרים. תווית המגמה בפאנל הכחול מסכמת את השינוי העדכני.', 'הסבר על עבר מול הווה')}</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;">
-        <div style="background:#f8fafc;border-radius:10px;padding:9px;text-align:center;">
-          <div style="font-size:.68rem;color:#64748b;font-weight:700;">יציבות ב־5 שנים</div>
-          <div style="font-size:1rem;font-weight:900;color:#0f2744;margin-top:3px;">${consistencyLabel}</div>
+    <div style="padding:14px 16px 16px;background:#fff;border-bottom:1px solid #e8eef5;">
+      <div style="display:flex;align-items:center;margin-bottom:11px;font-size:.8rem;font-weight:900;color:#0f2744;">ביצועים לאורך זמן ${ghInfoBubble('הציון משלב שני מבטים: יציבות הדירוג בחמש השנים האחרונות, וביצועים עדכניים בחודש, 3, 6 ו־12 חודשים מול המתחרים. תווית המגמה בפאנל הכחול מסכמת את השינוי העדכני.', 'הסבר על ביצועים לאורך זמן')}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;">
+        <div style="background:linear-gradient(180deg,#f8fbff 0%,#f4f7fb 100%);border:1px solid #e5edf6;border-top:3px solid #3b82f6;border-radius:12px;padding:11px 10px;text-align:center;box-shadow:0 3px 10px rgba(15,39,68,.04);">
+          <div style="font-size:.62rem;color:#8291a6;font-weight:700;">מבט ארוך טווח</div>
+          <div style="font-size:.71rem;color:#475569;font-weight:800;margin-top:2px;">יציבות ב־5 שנים</div>
+          <div style="font-size:1.03rem;font-weight:900;color:#0f2744;margin-top:5px;">${consistencyLabel}</div>
         </div>
-        <div style="background:#f8fafc;border-radius:10px;padding:9px;text-align:center;">
-          <div style="font-size:.68rem;color:#64748b;font-weight:700;">ביצועים עד שנה</div>
-          <div style="font-size:.9rem;font-weight:900;color:#0f2744;margin-top:3px;">${supportLabel}</div>
+        <div style="background:linear-gradient(180deg,#f8fbff 0%,#f4f7fb 100%);border:1px solid #e5edf6;border-top:3px solid #14b8a6;border-radius:12px;padding:11px 10px;text-align:center;box-shadow:0 3px 10px rgba(15,39,68,.04);">
+          <div style="font-size:.62rem;color:#8291a6;font-weight:700;">מבט עדכני</div>
+          <div style="font-size:.71rem;color:#475569;font-weight:800;margin-top:2px;">ביצועים עד שנה</div>
+          <div style="font-size:.94rem;font-weight:900;color:#0f2744;margin-top:5px;">${supportLabel}</div>
         </div>
       </div>
     </div>` : '';
