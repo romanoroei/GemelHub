@@ -2311,7 +2311,7 @@ const APIModule = (() => {
   async function computeGemelHubScores(fundId, catId) {
     const cacheKey = `${catId}_${fundId}`;
     if (_cachedGHScores.has(cacheKey)) return _cachedGHScores.get(cacheKey);
-    const lsKey = `gemelhub_ghscore_v16_${cacheKey}`;
+    const lsKey = `gemelhub_ghscore_v17_${cacheKey}`;
     const lsCached = _lsLoad(lsKey);
     if (lsCached) { _cachedGHScores.set(cacheKey, lsCached); return lsCached; }
 
@@ -2444,6 +2444,17 @@ const APIModule = (() => {
       }
     });
 
+    // קבוצת השוואה קבועה: רק קופות פעילות עם נתונים מלאים בכל חמש השנים.
+    // כל רכיבי הציון וההקשר מחושבים מול אותה קבוצה, כדי שהמכנה לא ישתנה בין תקופות.
+    const eligibleFundIds = new Set([...byFund.keys()].filter(fid =>
+      targetYears.every(year => annualByYear.get(year)?.has(fid))
+    ));
+    annualByYear.forEach(yearMap => {
+      for (const fid of [...yearMap.keys()]) {
+        if (!eligibleFundIds.has(fid)) yearMap.delete(fid);
+      }
+    });
+
     // זיהוי שנה נוכחית חלקית (השנה הכי קרובה שאין לה 12 חודשים שלמים)
     const allYearsSorted = Array.from(periodsByYear.keys()).sort((a, b) => b - a);
     const mostRecentYear = allYearsSorted[0];
@@ -2459,6 +2470,7 @@ const APIModule = (() => {
     const partialYearReturn = new Map();
     if (partialMonthCount >= 3) {
       byFund.forEach(({ recs }, fid) => {
+        if (!eligibleFundIds.has(fid)) return;
         let compound = 1, valid = true;
         for (const period of partialYearPeriods) {
           const m = parseFloat(recs.get(period)?.MONTHLY_YIELD);
@@ -2482,7 +2494,7 @@ const APIModule = (() => {
     // שלוף שארפ
     const sharpeMap = await (isPension ? getAllSharpeRatiosPension() : isPolisa ? getAllSharpeRatiosPolisa() : getAllSharpeRatios());
 
-    const trackFundIds = new Set(byFund.keys());
+    const trackFundIds = eligibleFundIds;
 
     // אחוזון שארפ בתוך המסלול
     const tsArr = Array.from(sharpeMap.entries())
@@ -2529,7 +2541,9 @@ const APIModule = (() => {
     const shortHorizonPositions = new Map();
     for (const months of [1, 3, 6, 12]) {
       const returns = new Map();
-      byFund.forEach(({ recs }, id) => returns.set(id, trailingReturn(recs, months)));
+      byFund.forEach(({ recs }, id) => {
+        if (eligibleFundIds.has(id)) returns.set(id, trailingReturn(recs, months));
+      });
       shortHorizonPercentiles.set(months, percentileMap(returns));
       shortHorizonPositions.set(months, positionMap(returns));
     }
@@ -2537,6 +2551,7 @@ const APIModule = (() => {
     // חשב ציון לכל קרן שיש לה נתונים מלאים ל-5 שנים
     const allScores = [];
     byFund.forEach(({ latest }, fid) => {
+      if (!eligibleFundIds.has(fid)) return;
       const yearDetails = [];
       for (const year of targetYears) {
         const yearMap = annualByYear.get(year);
