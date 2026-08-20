@@ -2311,7 +2311,7 @@ const APIModule = (() => {
   async function computeGemelHubScores(fundId, catId) {
     const cacheKey = `${catId}_${fundId}`;
     if (_cachedGHScores.has(cacheKey)) return _cachedGHScores.get(cacheKey);
-    const lsKey = `gemelhub_ghscore_v13_${cacheKey}`;
+    const lsKey = `gemelhub_ghscore_v14_${cacheKey}`;
     const lsCached = _lsLoad(lsKey);
     if (lsCached) { _cachedGHScores.set(cacheKey, lsCached); return lsCached; }
 
@@ -2494,6 +2494,36 @@ const APIModule = (() => {
       sharpePercentile.set(id, n > 1 ? ((n - i - 1) / (n - 1)) * 100 : 50);
     });
 
+    // שכבת הקשר לציון: תמיכת טווח קצר, הסכמה וסיכון להיפוך.
+    // זו שכבת תצוגה נפרדת ואינה משנה את דירוג האיכות הבסיסי.
+    function trailingReturn(recs, months) {
+      const rows = Array.from(recs.entries())
+        .sort((a, b) => b[0] - a[0])
+        .slice(0, months);
+      if (rows.length < months) return null;
+      let wealth = 1;
+      for (const [, row] of rows) {
+        const value = parseFloat(row.MONTHLY_YIELD);
+        if (!Number.isFinite(value)) return null;
+        wealth *= 1 + value / 100;
+      }
+      return (wealth - 1) * 100;
+    }
+    function percentileMap(values) {
+      const sorted = Array.from(values.entries())
+        .filter(([, value]) => Number.isFinite(value))
+        .sort((a, b) => a[1] - b[1]);
+      const result = new Map();
+      sorted.forEach(([id], index) => result.set(id, sorted.length > 1 ? index / (sorted.length - 1) * 100 : 50));
+      return result;
+    }
+    const shortHorizonPercentiles = new Map();
+    for (const months of [1, 3, 6, 12]) {
+      const returns = new Map();
+      byFund.forEach(({ recs }, id) => returns.set(id, trailingReturn(recs, months)));
+      shortHorizonPercentiles.set(months, percentileMap(returns));
+    }
+
     // חשב ציון לכל קרן שיש לה נתונים מלאים ל-5 שנים
     const allScores = [];
     byFund.forEach(({ latest }, fid) => {
@@ -2550,8 +2580,44 @@ const APIModule = (() => {
     const _n = allScores.length;
     allScores.forEach((s, i) => {
       s.score = _n > 1
-        ? parseFloat((10 - (i / (_n - 1)) * 5).toFixed(2))
-        : 10;
+        ? parseFloat(Math.min(9.5, 10 - (i / (_n - 1)) * 5).toFixed(2))
+        : 9.5;
+
+      const horizonValues = [1, 3, 6, 12]
+        .map(months => shortHorizonPercentiles.get(months)?.get(s.fundId))
+        .filter(Number.isFinite);
+      const shortTermSupport = horizonValues.length
+        ? horizonValues.reduce((sum, value) => sum + value, 0) / horizonValues.length
+        : null;
+      const average = shortTermSupport;
+      const variance = horizonValues.length > 1
+        ? horizonValues.reduce((sum, value) => sum + (value - average) ** 2, 0) / horizonValues.length
+        : null;
+      const horizonAgreement = variance !== null ? Math.max(0, 100 - Math.sqrt(variance) * 2) : null;
+      const qualityPercentile = s.components.rawScore;
+      const qualityShortTermGap = shortTermSupport !== null
+        ? Math.max(0, Math.min(100, (qualityPercentile - shortTermSupport - 10) / 40 * 100))
+        : 0;
+      const overheat = shortTermSupport !== null ? Math.max(0, Math.min(100, (shortTermSupport - 70) / 30 * 100)) : 0;
+      const disagreement = horizonAgreement !== null ? 100 - horizonAgreement : 100;
+      const reversalRisk = Math.max(0, Math.min(100,
+        overheat * 0.30 + disagreement * 0.15 + qualityShortTermGap * 0.30
+      ));
+      const highRisk = reversalRisk >= 55 || (qualityPercentile >= 85 && qualityShortTermGap >= 80);
+      const mixedSignals = !highRisk && (reversalRisk >= 35 || (qualityPercentile >= 80 && qualityShortTermGap >= 50));
+      const dataConsistency = horizonAgreement !== null && horizonValues.length === 4
+        ? (horizonAgreement >= 70 ? 'high' : horizonAgreement >= 45 ? 'medium' : 'low')
+        : 'low';
+
+      s.userProtection = {
+        displayScoreCapped: true,
+        shortTermSupport: shortTermSupport !== null ? parseFloat(shortTermSupport.toFixed(1)) : null,
+        horizonAgreement: horizonAgreement !== null ? parseFloat(horizonAgreement.toFixed(1)) : null,
+        qualityShortTermGap: parseFloat(qualityShortTermGap.toFixed(1)),
+        reversalRisk: parseFloat(reversalRisk.toFixed(1)),
+        timingLabel: highRisk ? 'high_reversal_risk' : mixedSignals ? 'mixed_signals' : 'normal',
+        dataConsistency
+      };
     });
 
     const thisFund = allScores.find(s => s.fundId === String(fundId)) || null;
