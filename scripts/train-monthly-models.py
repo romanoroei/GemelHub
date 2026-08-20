@@ -14,7 +14,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 HORIZONS = [3, 6, 12, 24]
-TEST_YEARS = [2018, 2020, 2022, 2024]
+TEST_YEARS = list(range(2018, 2025))
 
 def serial(period):
     return (period // 100) * 12 + (period % 100) - 1
@@ -191,6 +191,29 @@ composite['truth'] = composite_truth.to_numpy()
 composite['prediction'] = composite_prediction.clip(0, 100).to_numpy()
 baseline_lookup = df.set_index(['cohort','product','track','fundId','period'])['baseline']
 composite['baseline'] = [baseline_lookup.get((r.cohort,r.product,r.track,r.fundId,r.period), np.nan) for r in composite.itertuples()]
+
+# Point-in-time score trend. Every underlying score is itself out of sample;
+# exact month lookups avoid treating gaps in a fund's history as valid lags.
+score_lookup = {(r.cohort, r.fundId, serial(r.period)): float(r.prediction) for r in composite.itertuples()}
+for months in [3, 6, 12]:
+    composite[f'scoreDelta{months}m'] = [
+        float(r.prediction) - score_lookup.get((r.cohort, r.fundId, serial(r.period) - months), np.nan)
+        for r in composite.itertuples()
+    ]
+trend_weights = {3: .5, 6: .3, 12: .2}
+trend_numerator = sum(composite[f'scoreDelta{months}m'].fillna(0) * weight for months, weight in trend_weights.items())
+trend_denominator = sum(composite[f'scoreDelta{months}m'].notna() * weight for months, weight in trend_weights.items())
+composite['scoreTrend'] = trend_numerator / trend_denominator.replace(0, np.nan)
+trend_results = []
+for strength in [.10, .25, .50]:
+    adjusted = (composite.prediction + strength * composite.scoreTrend.clip(-20, 20)).clip(0, 100)
+    valid = adjusted.notna()
+    trend_results.append({
+        'strength': strength,
+        'formula': 'broad score + strength * clipped weighted 3/6/12-month score change',
+        **metrics(composite[valid], adjusted[valid].to_numpy()),
+        'rows': int(valid.sum()),
+    })
 composite_result = {
     'weights': {str(k): v for k, v in score_weights.items()},
     'ridge': metrics(composite, composite.prediction.to_numpy()),
@@ -225,7 +248,7 @@ sample_funds = {
 }
 sample_histories = []
 for sample_fund_id, (sample_name, sample_cohort) in sample_funds.items():
-    sample = composite[(composite.fundId == sample_fund_id) & (composite.period % 100 == 12)].copy()
+    sample = composite[(composite.fundId == sample_fund_id) & (composite.period >= 201801)].copy()
     sample_histories.append({
         'fundId': sample_fund_id,
         'fundName': sample_name,
@@ -236,6 +259,11 @@ for sample_fund_id, (sample_name, sample_cohort) in sample_funds.items():
             'predictedScore': round(float(row.prediction), 1),
             'baselineScore': round(float(row.baseline), 1),
             'realizedMultiHorizonPercentile': round(float(row.truth), 1),
+            'scoreDelta3m': round(float(row.scoreDelta3m), 1) if np.isfinite(row.scoreDelta3m) else None,
+            'scoreDelta6m': round(float(row.scoreDelta6m), 1) if np.isfinite(row.scoreDelta6m) else None,
+            'scoreDelta12m': round(float(row.scoreDelta12m), 1) if np.isfinite(row.scoreDelta12m) else None,
+            'scoreTrend': round(float(row.scoreTrend), 1) if np.isfinite(row.scoreTrend) else None,
+            'trendAdjustedScore': round(float(np.clip(row.prediction + .25 * np.clip(row.scoreTrend, -20, 20), 0, 100)), 1) if np.isfinite(row.scoreTrend) else None,
         } for row in sample.itertuples()],
     })
 
@@ -255,6 +283,7 @@ result = {
     'compositeScore': composite_result,
     'shortFlowCompositeScore': short_flow_composite_result,
     'shortReturnCompositeScore': short_return_composite_result,
+    'scoreTrendExperiment': {'weights': {str(k): v for k, v in trend_weights.items()}, 'candidates': trend_results},
     'sampleHistories': sample_histories,
     'folds': folds,
 }

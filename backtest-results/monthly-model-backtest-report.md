@@ -53,6 +53,14 @@ A separate Ridge candidate used only relative returns over 1, 3, 6, and 12 month
 
 Assets and flows add substantial information compared with short-term returns alone, but the focused model does not beat the baseline or the broad Ridge. The evidence therefore supports retaining asset/flow trends as inputs inside the broad model, not replacing the broad model with a short-horizon-only formula. Raw asset growth and reported net flows are kept as separate inputs because asset growth also contains the mechanical effect of investment returns.
 
+## Point-in-time score-trend experiment
+
+The walk-forward test was expanded to every month in 2018–2024. A score-trend signal combined exact 3-, 6-, and 12-month changes in prior out-of-sample scores with weights of 50%, 30%, and 20%. Adding 25% of the clipped trend signal produced a modest aggregate improvement on the 32,479 rows with an available lag history: monthly Spearman rose to 0.227 and the bottom-third fall rate was 17.9%. This remains exploratory because the trend strength was compared on the same outer test sample and needs a final untouched holdout.
+
+For fund 1093 the trend signal did not anticipate the 2020 reversal: the broad score rose from 79.1 in January 2020 to 100.0 in December, while subsequent outcomes weakened materially from June onward. The trend signal therefore reinforced, rather than corrected, the false optimism. It became useful during 2022: the score trend reached -20.4 points by December and reduced the displayed research score from 69.4 to 64.4; by January 2023 the adjusted score had fallen to 54.4. In December 2024 it reduced 45.1 to 43.5, consistent with the weak realized percentile of 23.0.
+
+The practical conclusion is to display score direction as context, but not treat it as a sufficient crash-warning mechanism. Fund 1093 shows that a trend derived from the model can inherit the model's blind spot.
+
 ## Interpretation and limitations
 
 The result supports the predictive value of the broader monthly history: returns at several horizons, consistency, downside behavior, size, fees, flows, exposures, Alpha, and Sharpe contain more useful information together than the current fixed formula.
