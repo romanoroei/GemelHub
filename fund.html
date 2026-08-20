@@ -3096,6 +3096,13 @@ function ghTrendPresentation(label) {
   return labels[label] || labels.unclear_trend;
 }
 
+function ghInfoBubble(text, ariaLabel = 'הסבר') {
+  return `<span class="gh-info-tip">
+    <button type="button" class="gh-info-tip-btn" aria-label="${ariaLabel}"><i class="fas fa-info-circle"></i></button>
+    <span class="gh-info-tip-bubble" role="tooltip">${text}</span>
+  </span>`;
+}
+
 function ghProvName(controlling, managing) {
   return getProviderDisplayName(controlling, managing);
 }
@@ -3202,19 +3209,29 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
     if (score >  5)  return '#fb923c'; // כתום
     return '#f87171';                   // אדום בהיר
   }
+  const protection = thisFund?.userProtection || {};
+  const trend = ghTrendPresentation(protection.timingLabel);
+  const infoStylesHtml = `<style>
+    #gh-score-modal .gh-info-tip{position:relative;display:inline-flex;vertical-align:middle;margin-inline-start:3px;}
+    #gh-score-modal .gh-info-tip-btn{border:0;background:transparent;color:#2563eb;padding:0;cursor:pointer;font-size:.72rem;line-height:1;}
+    #gh-score-modal .gh-info-tip-bubble{display:none;position:absolute;z-index:40;inset-inline-end:0;top:calc(100% + 7px);width:min(280px,72vw);padding:9px 11px;border:1px solid #dbe3ee;border-radius:11px;background:#fff;color:#475569;box-shadow:0 8px 24px rgba(15,39,68,.18);font-size:.72rem;font-weight:500;line-height:1.55;text-align:right;}
+    #gh-score-modal .gh-info-tip:hover .gh-info-tip-bubble,#gh-score-modal .gh-info-tip:focus-within .gh-info-tip-bubble{display:block;}
+    #gh-score-modal .gh-info-tip-bubble::before{content:'';position:absolute;top:-6px;inset-inline-end:6px;width:10px;height:10px;background:#fff;border-top:1px solid #dbe3ee;border-right:1px solid #dbe3ee;transform:rotate(-45deg);}
+  </style>`;
   const scoreHeaderHtml = thisFund ? (() => {
     const grade = ghGrade(thisFund.score);
     const color = ghGradeColorDark(thisFund.score);
     const rank  = allScores.findIndex(s => s.fundId === String(currentFundId)) + 1;
     const total = allScores.length;
     return `
-    <div style="padding:16px;background:linear-gradient(135deg,#0f2744 0%,#1a3560 100%);display:flex;align-items:center;gap:16px;">
-      <div style="text-align:center;min-width:72px;">
+    <div style="padding:14px 16px;background:linear-gradient(135deg,#0f2744 0%,#1a3560 100%);display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:20;box-shadow:0 4px 12px rgba(15,39,68,.18);">
+      <div style="text-align:center;min-width:165px;">
         <div style="font-size:2.6rem;font-weight:900;color:#c9a227;line-height:1;">${thisFund.score.toFixed(2)}</div>
+        <div style="font-size:.68rem;color:${trend.color === '#475569' ? '#e2e8f0' : '#fff'};font-weight:800;line-height:1.35;margin-top:6px;">${trend.icon} ${trend.text}</div>
       </div>
       <div style="flex:1;border-right:2px solid rgba(201,162,39,.35);padding-right:16px;">
         <div style="font-size:1.4rem;font-weight:900;color:${color};line-height:1.1;">${grade}</div>
-        <div style="font-size:.75rem;color:#cbd5e1;margin-top:4px;">מקום <strong style="color:#fff;">${rank}</strong> מתוך <strong style="color:#fff;">${total}</strong> גופים במסלול</div>
+        <div style="font-size:.75rem;color:#cbd5e1;margin-top:4px;">מקום <strong style="color:#fff;">${rank}</strong> מתוך <strong style="color:#fff;">${total}</strong> מנהלים במסלול</div>
       </div>
     </div>`;
   })() : '';
@@ -3222,24 +3239,11 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
   // ── 2. הסבר מהו ציון גמל האב ──
   const explanationHtml = `
     <div style="padding:13px 16px;background:#f8fafc;border-bottom:1px solid #eef2f7;">
-      <details>
-        <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:7px;font-size:.78rem;font-weight:900;color:#0f2744;">
-          <i class="fas fa-info-circle" style="color:#2563eb;"></i> איך מחושב הציון?
-        </summary>
-        <div style="font-size:.78rem;color:#475569;line-height:1.65;margin-top:9px;">
-          משווים את הקופה רק לקופות דומות באותו מסלול. רוב הציון מבוסס על המיקום שלה בכל אחת מחמש השנים המלאות (${yearsLabel}).
-          בנוסף בודקים אם התשואה הושגה בסיכון סביר באמצעות מדד שארפ, ואת השנה הנוכחית אם יש לפחות 3 חודשי נתונים.
-          ציון גבוה פירושו שהקופה דורגה גבוה יחסית לאורך זמן — לא הבטחה לרווח בעתיד.
-          <div style="margin-top:8px;"><strong>שארפ, בפשטות:</strong> האם הקופה השיגה תשואה טובה בלי תנודות חריגות ביחס למתחרות.</div>
-          <div style="margin-top:8px;"><strong>פירוש הציון:</strong> מצוין 9.0–9.5 · טוב מאוד 7.5–8.99 · טוב 6.0–7.49 · חלש 5.01–5.99 · טעון שיפור 5.00.</div>
-        </div>
-      </details>
+      <div style="font-size:.78rem;font-weight:900;color:#0f2744;">איך מחושב הציון? ${ghInfoBubble(`משווים את הקופה רק לקופות דומות באותו מסלול. רוב הציון מבוסס על הדירוג שלה בחמש השנים המלאות (${yearsLabel}). מוסיפים מדד שארפ — תשואה ביחס לתנודות — ואת השנה הנוכחית כשיש לפחות 3 חודשי נתונים. ציון גבוה מתאר דירוג עבר גבוה יחסית ואינו מבטיח רווח בעתיד.`, 'הסבר על חישוב הציון')}</div>
     </div>`;
 
-  const protection = thisFund?.userProtection || {};
   const consistencyLabel = protection.dataConsistency === 'high' ? 'גבוהה'
     : protection.dataConsistency === 'medium' ? 'בינונית' : 'נמוכה';
-  const trend = ghTrendPresentation(protection.timingLabel);
   const support = protection.shortTermSupport;
   const supportLabel = !Number.isFinite(support) ? 'אין מספיק נתונים'
     : support >= 70 ? 'חזקים ביחס למתחרות'
@@ -3247,21 +3251,18 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
         : support >= 40 ? 'באמצע המסלול' : 'חלשים ביחס למתחרות';
   const protectionHtml = thisFund ? `
     <div style="padding:13px 16px;background:#fff;border-bottom:1px solid #eef2f7;">
-      <div style="font-size:.76rem;font-weight:900;color:#0f2744;margin-bottom:9px;">מה קורה עכשיו?</div>
+      <div style="font-size:.76rem;font-weight:900;color:#0f2744;margin-bottom:9px;">תמונת מצב עדכנית</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;">
         <div style="background:#f8fafc;border-radius:10px;padding:9px;text-align:center;">
-          <div style="font-size:.68rem;color:#64748b;font-weight:700;">יציבות לאורך השנים</div>
+          <div style="font-size:.68rem;color:#64748b;font-weight:700;">יציבות לאורך השנים ${ghInfoBubble('האם הקופה שמרה על מיקום דומה מול המתחרות משנה לשנה. יציבות גבוהה אינה מבטיחה תשואה גבוהה.', 'הסבר על יציבות לאורך השנים')}</div>
           <div style="font-size:1rem;font-weight:900;color:#0f2744;margin-top:3px;">${consistencyLabel}</div>
-          <details style="margin-top:5px;text-align:right;"><summary aria-label="הסבר על יציבות לאורך השנים" style="cursor:pointer;list-style:none;text-align:center;color:#2563eb;font-size:.68rem;font-weight:800;"><i class="fas fa-info-circle"></i> הסבר</summary><div style="margin-top:6px;color:#64748b;font-size:.7rem;line-height:1.5;">האם הקופה שמרה על מיקום דומה מול המתחרות משנה לשנה. יציבות גבוהה אינה מבטיחה תשואה גבוהה.</div></details>
         </div>
         <div style="background:#f8fafc;border-radius:10px;padding:9px;text-align:center;">
-          <div style="font-size:.68rem;color:#64748b;font-weight:700;">ביצועים בחודשים האחרונים</div>
+          <div style="font-size:.68rem;color:#64748b;font-weight:700;">ביצועים בחודשים האחרונים ${ghInfoBubble('השוואת תשואות החודש, 3, 6 ו־12 חודשים לקופות המתחרות. זו תמונת מגמה אחרונה, לא תחזית.', 'הסבר על הביצועים האחרונים')}</div>
           <div style="font-size:.9rem;font-weight:900;color:#0f2744;margin-top:3px;">${supportLabel}</div>
-          <details style="margin-top:5px;text-align:right;"><summary aria-label="הסבר על הביצועים האחרונים" style="cursor:pointer;list-style:none;text-align:center;color:#2563eb;font-size:.68rem;font-weight:800;"><i class="fas fa-info-circle"></i> הסבר</summary><div style="margin-top:6px;color:#64748b;font-size:.7rem;line-height:1.5;">השוואת תשואות החודש, 3, 6 ו־12 חודשים לקופות המתחרות. זה מתאר מגמה אחרונה, לא תחזית.</div></details>
         </div>
       </div>
-      <div style="margin-top:9px;border-radius:10px;padding:9px 11px;background:${trend.bg};color:${trend.color};font-size:.78rem;font-weight:900;">${trend.icon} ${trend.text}</div>
-      <details style="margin-top:7px;"><summary aria-label="הסבר על תווית המגמה" style="cursor:pointer;list-style:none;color:#2563eb;font-size:.7rem;font-weight:800;"><i class="fas fa-info-circle"></i> מה משמעות התווית?</summary><div style="font-size:.71rem;color:#64748b;line-height:1.55;margin-top:6px;">התווית מסכמת את כיוון הביצועים בחודש, 3, 6 ו־12 חודשים מול המתחרות. "מומנטום מתחזק" מציין שיפור בטווחים האחרונים; "התאוששות אפשרית" מציינת שיפור לאחר תקופה חלשה. זו תמונת מצב בלבד, לא המלצת קנייה או מכירה.</div></details>
+      <div style="margin-top:9px;font-size:.7rem;font-weight:800;color:#334155;">משמעות תווית המגמה ${ghInfoBubble('התווית מסכמת את כיוון הביצועים בחודש, 3, 6 ו־12 חודשים מול המתחרות. מומנטום מתחזק מציין שיפור בטווחים האחרונים; התאוששות אפשרית מציינת שיפור לאחר תקופה חלשה. זו תמונת מצב בלבד, לא המלצת קנייה או מכירה.', 'הסבר על תווית המגמה')}</div>
     </div>` : '';
 
   let compHtml = '';
@@ -3269,7 +3270,7 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
     const { consistencyScore, sharpeScore, currentYearScore, currentYearMonths, currentYearWeightPct, years } = thisFund.components;
     compHtml = `
       <details style="padding:13px 16px;border-bottom:1px solid #eef2f7;">
-        <summary style="cursor:pointer;list-style:none;font-size:.76rem;font-weight:900;color:#0f2744;"><i class="fas fa-info-circle" style="color:#2563eb;margin-left:6px;"></i>פירוט רכיבי הציון</summary>
+        <summary style="cursor:pointer;list-style:none;font-size:.76rem;font-weight:900;color:#0f2744;">פירוט רכיבי הציון <i class="fas fa-chevron-down" style="color:#64748b;margin-right:5px;font-size:.65rem;"></i></summary>
         <div style="margin-top:10px;">
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
           <div style="flex:1;min-width:90px;background:#eff6ff;border-radius:10px;padding:9px;text-align:center;">
@@ -3324,14 +3325,13 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
   const tableHtml = `
     <div style="padding:13px 16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;">
-        <div style="font-size:.76rem;font-weight:900;color:#0f2744;">השוואה לקופות באותו מסלול</div>
-        <details><summary aria-label="הסבר על טבלת ההשוואה" style="cursor:pointer;list-style:none;color:#2563eb;font-size:.7rem;font-weight:800;"><i class="fas fa-info-circle"></i> הסבר</summary><div style="position:absolute;z-index:2;max-width:270px;background:#fff;border:1px solid #dbe3ee;border-radius:9px;padding:8px;box-shadow:0 6px 18px rgba(15,39,68,.14);font-size:.7rem;color:#64748b;line-height:1.5;">כל הקופות שנכללו בחישוב, מהציון הגבוה לנמוך. הקופה הנוכחית מסומנת בכחול.</div></details>
+        <div style="font-size:.76rem;font-weight:900;color:#0f2744;">השוואה לקופות באותו מסלול ${ghInfoBubble('כל הקופות שנכללו בחישוב, מהציון הגבוה לנמוך. הקופה הנוכחית מסומנת בכחול.', 'הסבר על טבלת ההשוואה')}</div>
       </div>
       <table style="width:100%;border-collapse:collapse;">
         <thead>
           <tr style="border-bottom:2px solid #e2e8f0;background:#f8fafc;">
             <th style="padding:6px 10px;text-align:right;font-size:.71rem;color:#64748b;font-weight:700;">#</th>
-            <th style="padding:6px 10px;text-align:right;font-size:.71rem;color:#64748b;font-weight:700;">גוף מנהל</th>
+            <th style="padding:6px 10px;text-align:right;font-size:.71rem;color:#64748b;font-weight:700;">מנהל</th>
             <th style="padding:6px 10px;text-align:center;font-size:.71rem;color:#64748b;font-weight:700;">ציון</th>
             <th style="padding:6px 10px;text-align:center;font-size:.71rem;color:#64748b;font-weight:700;">דירוג</th>
           </tr>
@@ -3348,7 +3348,7 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
       </p>
     </div>`;
 
-  showStatModal('gh-score-modal', titleHtml, scoreHeaderHtml + explanationHtml + protectionHtml + tableHtml + compHtml + disclaimerHtml, 'max-width:640px;');
+  showStatModal('gh-score-modal', titleHtml, infoStylesHtml + scoreHeaderHtml + explanationHtml + protectionHtml + tableHtml + compHtml + disclaimerHtml, 'max-width:640px;');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
