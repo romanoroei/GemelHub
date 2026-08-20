@@ -3097,10 +3097,20 @@ function ghTrendPresentation(label) {
 }
 
 function ghInfoBubble(text, ariaLabel = 'הסבר') {
-  return `<span class="gh-info-tip">
-    <button type="button" class="gh-info-tip-btn" aria-label="${ariaLabel}"><i class="fas fa-info-circle"></i></button>
-    <span class="gh-info-tip-bubble" role="tooltip">${text}</span>
-  </span>`;
+  return `<button type="button" class="gh-info-tip-btn" data-tooltip="${encodeURIComponent(text)}" aria-label="${ariaLabel}"><i class="fas fa-info-circle"></i></button>`;
+}
+
+function ghTrendPanelColor(label) {
+  return {
+    high_reversal_risk: '#fca5a5',
+    mixed_signals: '#fcd34d',
+    possible_recovery: '#38bdf8',
+    strengthening_momentum: '#34d399',
+    positive_stable: '#86efac',
+    positive_recent: '#bbf7d0',
+    short_term_weakness: '#fdba74',
+    unclear_trend: '#e2e8f0'
+  }[label] || '#e2e8f0';
 }
 
 function ghProvName(controlling, managing) {
@@ -3211,12 +3221,10 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
   }
   const protection = thisFund?.userProtection || {};
   const trend = ghTrendPresentation(protection.timingLabel);
+  const trendPanelColor = ghTrendPanelColor(protection.timingLabel);
   const infoStylesHtml = `<style>
-    #gh-score-modal .gh-info-tip{position:relative;display:inline-flex;vertical-align:middle;margin-inline-start:3px;}
-    #gh-score-modal .gh-info-tip-btn{border:0;background:transparent;color:#2563eb;padding:0;cursor:pointer;font-size:.72rem;line-height:1;}
-    #gh-score-modal .gh-info-tip-bubble{display:none;position:absolute;z-index:40;inset-inline-end:0;top:calc(100% + 7px);width:min(280px,72vw);padding:9px 11px;border:1px solid #dbe3ee;border-radius:11px;background:#fff;color:#475569;box-shadow:0 8px 24px rgba(15,39,68,.18);font-size:.72rem;font-weight:500;line-height:1.55;text-align:right;}
-    #gh-score-modal .gh-info-tip:hover .gh-info-tip-bubble,#gh-score-modal .gh-info-tip:focus-within .gh-info-tip-bubble{display:block;}
-    #gh-score-modal .gh-info-tip-bubble::before{content:'';position:absolute;top:-6px;inset-inline-end:6px;width:10px;height:10px;background:#fff;border-top:1px solid #dbe3ee;border-right:1px solid #dbe3ee;transform:rotate(-45deg);}
+    #gh-score-modal .gh-info-tip-btn{display:inline-flex;vertical-align:middle;border:0;background:transparent;color:#2563eb;padding:0;margin-inline-start:3px;cursor:pointer;font-size:.72rem;line-height:1;}
+    #gh-score-modal .gh-info-floating-bubble{position:fixed;z-index:10020;padding:10px 12px;border:1px solid #dbe3ee;border-radius:11px;background:#fff;color:#334155;box-shadow:0 10px 30px rgba(15,39,68,.24);font-size:.74rem;font-weight:500;line-height:1.6;text-align:right;}
   </style>`;
   const scoreHeaderHtml = thisFund ? (() => {
     const grade = ghGrade(thisFund.score);
@@ -3225,12 +3233,12 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
     const total = allScores.length;
     return `
     <div style="padding:14px 16px;background:linear-gradient(135deg,#0f2744 0%,#1a3560 100%);display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:20;box-shadow:0 4px 12px rgba(15,39,68,.18);">
-      <div style="text-align:center;min-width:165px;">
+      <div style="text-align:center;min-width:150px;">
         <div style="font-size:2.6rem;font-weight:900;color:#c9a227;line-height:1;">${thisFund.score.toFixed(2)}</div>
-        <div style="font-size:.68rem;color:${trend.color === '#475569' ? '#e2e8f0' : '#fff'};font-weight:800;line-height:1.35;margin-top:6px;">${trend.icon} ${trend.text}</div>
+        <div style="font-size:.68rem;color:#e2e8f0;font-weight:800;line-height:1.35;margin-top:6px;">דירוג היסטורי: ${grade}</div>
       </div>
       <div style="flex:1;border-right:2px solid rgba(201,162,39,.35);padding-right:16px;">
-        <div style="font-size:1.4rem;font-weight:900;color:${color};line-height:1.1;">${grade}</div>
+        <div style="font-size:1.14rem;font-weight:900;color:${trendPanelColor};line-height:1.25;">${trend.icon} ${trend.text}</div>
         <div style="font-size:.75rem;color:#cbd5e1;margin-top:4px;">מקום <strong style="color:#fff;">${rank}</strong> מתוך <strong style="color:#fff;">${total}</strong> מנהלים במסלול</div>
       </div>
     </div>`;
@@ -3251,18 +3259,17 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
         : support >= 40 ? 'באמצע המסלול' : 'חלשים ביחס למתחרות';
   const protectionHtml = thisFund ? `
     <div style="padding:13px 16px;background:#fff;border-bottom:1px solid #eef2f7;">
-      <div style="font-size:.76rem;font-weight:900;color:#0f2744;margin-bottom:9px;">תמונת מצב עדכנית</div>
+      <div style="font-size:.76rem;font-weight:900;color:#0f2744;margin-bottom:9px;">עבר מול הווה ${ghInfoBubble('הציון משלב מבט ארוך וקצר. עבר: האם הקופה שמרה על דירוג דומה בחמש השנים. הווה: איך היא מדורגת מול המתחרות בחודש, 3, 6 ו־12 חודשים. תווית המגמה בפאנל הכחול מסכמת את השינוי העדכני.', 'הסבר על עבר מול הווה')}</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;">
         <div style="background:#f8fafc;border-radius:10px;padding:9px;text-align:center;">
-          <div style="font-size:.68rem;color:#64748b;font-weight:700;">יציבות לאורך השנים ${ghInfoBubble('האם הקופה שמרה על מיקום דומה מול המתחרות משנה לשנה. יציבות גבוהה אינה מבטיחה תשואה גבוהה.', 'הסבר על יציבות לאורך השנים')}</div>
+          <div style="font-size:.68rem;color:#64748b;font-weight:700;">עבר · יציבות ב־5 שנים</div>
           <div style="font-size:1rem;font-weight:900;color:#0f2744;margin-top:3px;">${consistencyLabel}</div>
         </div>
         <div style="background:#f8fafc;border-radius:10px;padding:9px;text-align:center;">
-          <div style="font-size:.68rem;color:#64748b;font-weight:700;">ביצועים בחודשים האחרונים ${ghInfoBubble('השוואת תשואות החודש, 3, 6 ו־12 חודשים לקופות המתחרות. זו תמונת מגמה אחרונה, לא תחזית.', 'הסבר על הביצועים האחרונים')}</div>
+          <div style="font-size:.68rem;color:#64748b;font-weight:700;">הווה · ביצועים עד שנה</div>
           <div style="font-size:.9rem;font-weight:900;color:#0f2744;margin-top:3px;">${supportLabel}</div>
         </div>
       </div>
-      <div style="margin-top:9px;font-size:.7rem;font-weight:800;color:#334155;">משמעות תווית המגמה ${ghInfoBubble('התווית מסכמת את כיוון הביצועים בחודש, 3, 6 ו־12 חודשים מול המתחרות. מומנטום מתחזק מציין שיפור בטווחים האחרונים; התאוששות אפשרית מציינת שיפור לאחר תקופה חלשה. זו תמונת מצב בלבד, לא המלצת קנייה או מכירה.', 'הסבר על תווית המגמה')}</div>
     </div>` : '';
 
   let compHtml = '';
@@ -3325,7 +3332,7 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
   const tableHtml = `
     <div style="padding:13px 16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;">
-        <div style="font-size:.76rem;font-weight:900;color:#0f2744;">השוואה לקופות באותו מסלול ${ghInfoBubble('כל הקופות שנכללו בחישוב, מהציון הגבוה לנמוך. הקופה הנוכחית מסומנת בכחול.', 'הסבר על טבלת ההשוואה')}</div>
+        <div style="font-size:.76rem;font-weight:900;color:#0f2744;">השוואה לקופות באותו מסלול</div>
       </div>
       <table style="width:100%;border-collapse:collapse;">
         <thead>
@@ -3349,6 +3356,43 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
     </div>`;
 
   showStatModal('gh-score-modal', titleHtml, infoStylesHtml + scoreHeaderHtml + explanationHtml + protectionHtml + tableHtml + compHtml + disclaimerHtml, 'max-width:640px;');
+
+  const scoreModal = document.getElementById('gh-score-modal');
+  let activeBubble = null;
+  const closeInfoBubble = () => {
+    activeBubble?.remove();
+    activeBubble = null;
+  };
+  scoreModal?.querySelectorAll('.gh-info-tip-btn').forEach(button => {
+    button.addEventListener('click', event => {
+      event.stopPropagation();
+      const wasOpenForThisButton = activeBubble?.dataset.owner === button.getAttribute('aria-label');
+      closeInfoBubble();
+      if (wasOpenForThisButton) return;
+
+      const bubble = document.createElement('div');
+      bubble.className = 'gh-info-floating-bubble';
+      bubble.dataset.owner = button.getAttribute('aria-label') || '';
+      bubble.setAttribute('role', 'tooltip');
+      bubble.textContent = decodeURIComponent(button.dataset.tooltip || '');
+      scoreModal.appendChild(bubble);
+
+      const buttonRect = button.getBoundingClientRect();
+      const bubbleWidth = Math.min(300, window.innerWidth - 32);
+      bubble.style.width = `${bubbleWidth}px`;
+      let left = buttonRect.left + buttonRect.width / 2 - bubbleWidth / 2;
+      left = Math.max(16, Math.min(left, window.innerWidth - bubbleWidth - 16));
+      bubble.style.left = `${left}px`;
+      const bubbleHeight = bubble.getBoundingClientRect().height;
+      let top = buttonRect.bottom + 8;
+      if (top + bubbleHeight > window.innerHeight - 16) top = buttonRect.top - bubbleHeight - 8;
+      bubble.style.top = `${Math.max(16, top)}px`;
+      activeBubble = bubble;
+    });
+  });
+  scoreModal?.addEventListener('click', event => {
+    if (!event.target.closest('.gh-info-tip-btn')) closeInfoBubble();
+  });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
