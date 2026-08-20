@@ -71,6 +71,12 @@ Directly subtracting reversal risk from the quality score did not improve aggreg
 
 For fund 1093, December 2020 would have displayed quality 95 (capped from 100), short-horizon support of only 42.5, medium confidence, and `high reversal risk`; its realized future percentile was 29.9. The strict warning remained active through 2021, when realized future percentiles became especially weak. This addresses the communication failure exposed by fund 1093 without claiming certainty that a peak has occurred.
 
+The user-facing field formerly called confidence is now named `data consistency`, because it measures agreement and history coverage rather than a probability of success.
+
+A 2,000-replication cluster bootstrap over 2,276 cohort-month decision groups estimated that high-risk observations had a bottom-third rate 19.4 percentage points above normal observations. The 95% interval was +10.4 to +28.9 points. The aggregate warning signal is therefore statistically meaningful in this research sample.
+
+The effect is not yet universal. It was particularly strong in `training_fund__general` (23 warnings, 73.9% bottom-third outcomes) and several provident-fund cohorts, but weak in `comprehensive_pension__general` (41 warnings, 22.0% bottom-third outcomes). Annual warning counts were also small and outcomes varied materially. Production use should therefore require cohort-specific calibration and minimum-sample rules; the current universal threshold remains experimental.
+
 ## Interpretation and limitations
 
 The result supports the predictive value of the broader monthly history: returns at several horizons, consistency, downside behavior, size, fees, flows, exposures, Alpha, and Sharpe contain more useful information together than the current fixed formula.

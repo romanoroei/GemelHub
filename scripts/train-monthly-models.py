@@ -237,7 +237,7 @@ for offset in [1, 2, 3]:
 prior_cols = [f'priorScore{offset}m' for offset in [1, 2, 3]]
 composite['highScorePersistenceMonths'] = composite[prior_cols].ge(80).sum(axis=1)
 composite['displayScore'] = composite.prediction.clip(5, 95)
-composite['confidence'] = np.select(
+composite['dataConsistency'] = np.select(
     [
         (composite.horizonAgreement >= 70) & (composite[prior_cols].notna().sum(axis=1) == 3),
         (composite.horizonAgreement >= 45) & (composite[prior_cols].notna().sum(axis=1) >= 2),
@@ -268,6 +268,51 @@ for label, group in composite.groupby('timingLabel'):
         'futureBottomThirdRate': round(float((group.truth <= 33.3333).mean() * 100), 1),
         'futureTopThirdRate': round(float((group.truth >= 66.6667).mean() * 100), 1),
     })
+
+timing_label_by_year = []
+for (year, label), group in composite.groupby(['testYear', 'timingLabel']):
+    timing_label_by_year.append({
+        'testYear': int(year),
+        'label': label,
+        'rows': len(group),
+        'meanFuturePercentile': round(float(group.truth.mean()), 1),
+        'futureBottomThirdRate': round(float((group.truth <= 33.3333).mean() * 100), 1),
+    })
+
+timing_high_risk_by_cohort = []
+for cohort, group in composite[composite.timingLabel == 'high reversal risk'].groupby('cohort'):
+    timing_high_risk_by_cohort.append({
+        'cohort': cohort,
+        'rows': len(group),
+        'meanFuturePercentile': round(float(group.truth.mean()), 1),
+        'futureBottomThirdRate': round(float((group.truth <= 33.3333).mean() * 100), 1),
+    })
+
+# Cluster bootstrap by cohort-month decision group. This preserves the dependence
+# among funds compared at the same historical decision point.
+bootstrap_groups = []
+for _, group in composite.groupby(['cohort', 'period']):
+    high = group.timingLabel == 'high reversal risk'
+    normal = group.timingLabel == 'normal'
+    bootstrap_groups.append((
+        int(high.sum()), int(((group.truth <= 33.3333) & high).sum()),
+        int(normal.sum()), int(((group.truth <= 33.3333) & normal).sum()),
+    ))
+bootstrap_array = np.asarray(bootstrap_groups, dtype=float)
+rng = np.random.default_rng(42)
+bootstrap_differences = []
+for _ in range(2000):
+    sampled = bootstrap_array[rng.integers(0, len(bootstrap_array), len(bootstrap_array))].sum(axis=0)
+    if sampled[0] > 0 and sampled[2] > 0:
+        bootstrap_differences.append(sampled[1] / sampled[0] * 100 - sampled[3] / sampled[2] * 100)
+bootstrap_interval = {
+    'metric': 'high-risk minus normal future bottom-third rate, percentage points',
+    'clusters': len(bootstrap_groups),
+    'replications': len(bootstrap_differences),
+    'estimate': round(float((composite.loc[composite.timingLabel == 'high reversal risk', 'truth'] <= 33.3333).mean() * 100 - (composite.loc[composite.timingLabel == 'normal', 'truth'] <= 33.3333).mean() * 100), 1),
+    'ci95Low': round(float(np.percentile(bootstrap_differences, 2.5)), 1),
+    'ci95High': round(float(np.percentile(bootstrap_differences, 97.5)), 1),
+}
 
 guardrail_results = []
 for strength in [.10, .25, .50]:
@@ -348,7 +393,7 @@ for sample_fund_id, (sample_name, sample_cohort) in sample_funds.items():
             'qualityShortTermGap': round(float(row.qualityShortTermGap), 1) if np.isfinite(row.qualityShortTermGap) else None,
             'reversalRisk': round(float(row.reversalRisk), 1) if np.isfinite(row.reversalRisk) else None,
             'timingLabel': row.timingLabel,
-            'confidence': row.confidence,
+            'dataConsistency': row.dataConsistency,
             'highScorePersistenceMonths': int(row.highScorePersistenceMonths),
         } for row in sample.itertuples()],
     })
@@ -375,6 +420,9 @@ result = {
         'reversalRiskWeights': {'overheat': .30, 'recentWeakening': .25, 'horizonDisagreement': .15, 'qualityShortTermGap': .30},
         'guardrailCandidates': guardrail_results,
         'timingLabelResults': timing_label_results,
+        'timingLabelByYear': timing_label_by_year,
+        'highRiskByCohort': timing_high_risk_by_cohort,
+        'bootstrapInterval': bootstrap_interval,
     },
     'sampleHistories': sample_histories,
     'folds': folds,

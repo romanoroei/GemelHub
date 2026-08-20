@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-20T21:44:08.608859+00:00",
+  "generatedAt": "2026-08-20T21:57:20.127932+00:00",
   "design": {
     "testYears": [
       2018,
@@ -8448,7 +8448,280 @@
         "futureBottomThirdRate": 29.3,
         "futureTopThirdRate": 28.8
       }
-    ]
+    ],
+    "timingLabelByYear": [
+      {
+        "testYear": 2018,
+        "label": "caution",
+        "rows": 149,
+        "meanFuturePercentile": 52.5,
+        "futureBottomThirdRate": 25.5
+      },
+      {
+        "testYear": 2018,
+        "label": "high reversal risk",
+        "rows": 22,
+        "meanFuturePercentile": 53.9,
+        "futureBottomThirdRate": 22.7
+      },
+      {
+        "testYear": 2018,
+        "label": "normal",
+        "rows": 4964,
+        "meanFuturePercentile": 49.9,
+        "futureBottomThirdRate": 28.0
+      },
+      {
+        "testYear": 2019,
+        "label": "caution",
+        "rows": 174,
+        "meanFuturePercentile": 64.8,
+        "futureBottomThirdRate": 17.8
+      },
+      {
+        "testYear": 2019,
+        "label": "high reversal risk",
+        "rows": 22,
+        "meanFuturePercentile": 48.8,
+        "futureBottomThirdRate": 27.3
+      },
+      {
+        "testYear": 2019,
+        "label": "normal",
+        "rows": 4830,
+        "meanFuturePercentile": 49.3,
+        "futureBottomThirdRate": 26.5
+      },
+      {
+        "testYear": 2020,
+        "label": "caution",
+        "rows": 282,
+        "meanFuturePercentile": 54.5,
+        "futureBottomThirdRate": 27.7
+      },
+      {
+        "testYear": 2020,
+        "label": "high reversal risk",
+        "rows": 25,
+        "meanFuturePercentile": 43.6,
+        "futureBottomThirdRate": 44.0
+      },
+      {
+        "testYear": 2020,
+        "label": "normal",
+        "rows": 4707,
+        "meanFuturePercentile": 49.4,
+        "futureBottomThirdRate": 31.2
+      },
+      {
+        "testYear": 2021,
+        "label": "caution",
+        "rows": 148,
+        "meanFuturePercentile": 51.0,
+        "futureBottomThirdRate": 30.4
+      },
+      {
+        "testYear": 2021,
+        "label": "high reversal risk",
+        "rows": 17,
+        "meanFuturePercentile": 14.7,
+        "futureBottomThirdRate": 100.0
+      },
+      {
+        "testYear": 2021,
+        "label": "normal",
+        "rows": 4611,
+        "meanFuturePercentile": 49.7,
+        "futureBottomThirdRate": 30.3
+      },
+      {
+        "testYear": 2022,
+        "label": "caution",
+        "rows": 213,
+        "meanFuturePercentile": 48.2,
+        "futureBottomThirdRate": 35.2
+      },
+      {
+        "testYear": 2022,
+        "label": "high reversal risk",
+        "rows": 16,
+        "meanFuturePercentile": 22.7,
+        "futureBottomThirdRate": 68.8
+      },
+      {
+        "testYear": 2022,
+        "label": "normal",
+        "rows": 4353,
+        "meanFuturePercentile": 50.2,
+        "futureBottomThirdRate": 28.0
+      },
+      {
+        "testYear": 2023,
+        "label": "caution",
+        "rows": 155,
+        "meanFuturePercentile": 61.7,
+        "futureBottomThirdRate": 20.0
+      },
+      {
+        "testYear": 2023,
+        "label": "high reversal risk",
+        "rows": 7,
+        "meanFuturePercentile": 91.8,
+        "futureBottomThirdRate": 0.0
+      },
+      {
+        "testYear": 2023,
+        "label": "normal",
+        "rows": 4648,
+        "meanFuturePercentile": 49.3,
+        "futureBottomThirdRate": 31.2
+      },
+      {
+        "testYear": 2024,
+        "label": "caution",
+        "rows": 107,
+        "meanFuturePercentile": 46.7,
+        "futureBottomThirdRate": 38.3
+      },
+      {
+        "testYear": 2024,
+        "label": "high reversal risk",
+        "rows": 6,
+        "meanFuturePercentile": 0.8,
+        "futureBottomThirdRate": 100.0
+      },
+      {
+        "testYear": 2024,
+        "label": "normal",
+        "rows": 4582,
+        "meanFuturePercentile": 49.7,
+        "futureBottomThirdRate": 29.9
+      }
+    ],
+    "highRiskByCohort": [
+      {
+        "cohort": "comprehensive_pension__age_60_plus",
+        "rows": 1,
+        "meanFuturePercentile": 0.0,
+        "futureBottomThirdRate": 100.0
+      },
+      {
+        "cohort": "comprehensive_pension__age_upto_50",
+        "rows": 1,
+        "meanFuturePercentile": 27.0,
+        "futureBottomThirdRate": 100.0
+      },
+      {
+        "cohort": "comprehensive_pension__credit_bonds",
+        "rows": 4,
+        "meanFuturePercentile": 69.2,
+        "futureBottomThirdRate": 25.0
+      },
+      {
+        "cohort": "comprehensive_pension__general",
+        "rows": 41,
+        "meanFuturePercentile": 50.8,
+        "futureBottomThirdRate": 22.0
+      },
+      {
+        "cohort": "gemel_investment__credit_bonds",
+        "rows": 3,
+        "meanFuturePercentile": 60.7,
+        "futureBottomThirdRate": 33.3
+      },
+      {
+        "cohort": "gemel_regular__age_50_60",
+        "rows": 12,
+        "meanFuturePercentile": 18.5,
+        "futureBottomThirdRate": 91.7
+      },
+      {
+        "cohort": "gemel_regular__age_60_plus",
+        "rows": 3,
+        "meanFuturePercentile": 22.2,
+        "futureBottomThirdRate": 66.7
+      },
+      {
+        "cohort": "gemel_regular__age_upto_50",
+        "rows": 1,
+        "meanFuturePercentile": 2.8,
+        "futureBottomThirdRate": 100.0
+      },
+      {
+        "cohort": "gemel_regular__credit_bonds",
+        "rows": 3,
+        "meanFuturePercentile": 42.1,
+        "futureBottomThirdRate": 66.7
+      },
+      {
+        "cohort": "gemel_regular__general",
+        "rows": 1,
+        "meanFuturePercentile": 16.7,
+        "futureBottomThirdRate": 100.0
+      },
+      {
+        "cohort": "savings_policy__credit_bonds",
+        "rows": 1,
+        "meanFuturePercentile": 35.8,
+        "futureBottomThirdRate": 0.0
+      },
+      {
+        "cohort": "savings_policy__equities",
+        "rows": 2,
+        "meanFuturePercentile": 0.0,
+        "futureBottomThirdRate": 100.0
+      },
+      {
+        "cohort": "savings_policy__general",
+        "rows": 5,
+        "meanFuturePercentile": 63.9,
+        "futureBottomThirdRate": 0.0
+      },
+      {
+        "cohort": "supplementary_pension__age_upto_50",
+        "rows": 1,
+        "meanFuturePercentile": 97.1,
+        "futureBottomThirdRate": 0.0
+      },
+      {
+        "cohort": "supplementary_pension__equities",
+        "rows": 1,
+        "meanFuturePercentile": 0.0,
+        "futureBottomThirdRate": 100.0
+      },
+      {
+        "cohort": "supplementary_pension__general",
+        "rows": 1,
+        "meanFuturePercentile": 100.0,
+        "futureBottomThirdRate": 0.0
+      },
+      {
+        "cohort": "training_fund__credit_bonds",
+        "rows": 3,
+        "meanFuturePercentile": 49.4,
+        "futureBottomThirdRate": 33.3
+      },
+      {
+        "cohort": "training_fund__equities",
+        "rows": 8,
+        "meanFuturePercentile": 31.5,
+        "futureBottomThirdRate": 62.5
+      },
+      {
+        "cohort": "training_fund__general",
+        "rows": 23,
+        "meanFuturePercentile": 28.5,
+        "futureBottomThirdRate": 73.9
+      }
+    ],
+    "bootstrapInterval": {
+      "metric": "high-risk minus normal future bottom-third rate, percentage points",
+      "clusters": 2276,
+      "replications": 2000,
+      "estimate": 19.4,
+      "ci95Low": 10.4,
+      "ci95High": 28.9
+    }
   },
   "sampleHistories": [
     {
@@ -8474,7 +8747,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 4.0,
           "timingLabel": "normal",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8495,7 +8768,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 1.2,
           "timingLabel": "normal",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8516,7 +8789,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 22.5,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8537,7 +8810,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 15.7,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8558,7 +8831,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 18.0,
           "timingLabel": "normal",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8579,7 +8852,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 10.6,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8600,7 +8873,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 5.0,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8621,7 +8894,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 2.8,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8642,7 +8915,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 4.2,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8663,7 +8936,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 2.2,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8684,7 +8957,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 4.4,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8705,7 +8978,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 0.9,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8726,7 +8999,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 7.7,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8747,7 +9020,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 17.2,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8768,7 +9041,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 9.6,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8789,7 +9062,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 4.5,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8810,7 +9083,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 14.7,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8831,7 +9104,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 7.7,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8852,7 +9125,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 1.8,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8873,7 +9146,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 9.5,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8894,7 +9167,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 7.4,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8915,7 +9188,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 2.6,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8936,7 +9209,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 1.8,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8957,7 +9230,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 1.2,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8978,7 +9251,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 2.6,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -8999,7 +9272,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 2.6,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9020,7 +9293,7 @@
           "qualityShortTermGap": 15.9,
           "reversalRisk": 6.3,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9041,7 +9314,7 @@
           "qualityShortTermGap": 44.4,
           "reversalRisk": 15.3,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9062,7 +9335,7 @@
           "qualityShortTermGap": 59.3,
           "reversalRisk": 25.9,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9083,7 +9356,7 @@
           "qualityShortTermGap": 34.9,
           "reversalRisk": 14.4,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9104,7 +9377,7 @@
           "qualityShortTermGap": 40.4,
           "reversalRisk": 18.0,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9125,7 +9398,7 @@
           "qualityShortTermGap": 40.8,
           "reversalRisk": 17.9,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9146,7 +9419,7 @@
           "qualityShortTermGap": 35.1,
           "reversalRisk": 12.7,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9167,7 +9440,7 @@
           "qualityShortTermGap": 22.0,
           "reversalRisk": 14.2,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9188,7 +9461,7 @@
           "qualityShortTermGap": 13.3,
           "reversalRisk": 6.1,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9209,7 +9482,7 @@
           "qualityShortTermGap": 24.6,
           "reversalRisk": 8.9,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9230,7 +9503,7 @@
           "qualityShortTermGap": 18.9,
           "reversalRisk": 7.7,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9251,7 +9524,7 @@
           "qualityShortTermGap": 19.1,
           "reversalRisk": 7.0,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9272,7 +9545,7 @@
           "qualityShortTermGap": 14.7,
           "reversalRisk": 5.9,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9293,7 +9566,7 @@
           "qualityShortTermGap": 9.1,
           "reversalRisk": 3.3,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9314,7 +9587,7 @@
           "qualityShortTermGap": 14.5,
           "reversalRisk": 6.6,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9335,7 +9608,7 @@
           "qualityShortTermGap": 10.1,
           "reversalRisk": 3.9,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9356,7 +9629,7 @@
           "qualityShortTermGap": 0.7,
           "reversalRisk": 6.8,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9377,7 +9650,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 4.9,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9398,7 +9671,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 4.0,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9419,7 +9692,7 @@
           "qualityShortTermGap": 0.9,
           "reversalRisk": 0.3,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9440,7 +9713,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 4.6,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9461,7 +9734,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 2.0,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9482,7 +9755,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 4.9,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9503,7 +9776,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 9.0,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9524,7 +9797,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 4.1,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9545,7 +9818,7 @@
           "qualityShortTermGap": 3.5,
           "reversalRisk": 3.3,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9566,7 +9839,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 4.1,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9587,7 +9860,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 1.5,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9608,7 +9881,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 3.7,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9629,7 +9902,7 @@
           "qualityShortTermGap": 2.9,
           "reversalRisk": 6.3,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9650,7 +9923,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 7.0,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9671,7 +9944,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 2.2,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9692,7 +9965,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 2.7,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9713,7 +9986,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 8.5,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9734,7 +10007,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 10.9,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9755,7 +10028,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 1.5,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9776,7 +10049,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 5.9,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9797,7 +10070,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 16.0,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9818,7 +10091,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 16.6,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9839,7 +10112,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 2.7,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9860,7 +10133,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 5.8,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9881,7 +10154,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 8.9,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9902,7 +10175,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 6.7,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9923,7 +10196,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 22.4,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9944,7 +10217,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 7.5,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9965,7 +10238,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 3.3,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -9986,7 +10259,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 4.1,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10007,7 +10280,7 @@
           "qualityShortTermGap": 3.7,
           "reversalRisk": 1.9,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10028,7 +10301,7 @@
           "qualityShortTermGap": 0.8,
           "reversalRisk": 1.5,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10049,7 +10322,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 2.7,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10070,7 +10343,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 4.6,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10091,7 +10364,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 2.1,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10112,7 +10385,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 1.2,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10133,7 +10406,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 0.9,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10154,7 +10427,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 0.0,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10175,7 +10448,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 2.0,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10196,7 +10469,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 1.4,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10217,7 +10490,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 3.5,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         }
       ]
@@ -10245,7 +10518,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 41.0,
           "timingLabel": "caution",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10266,7 +10539,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 31.3,
           "timingLabel": "normal",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10287,7 +10560,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 25.8,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10308,7 +10581,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 32.8,
           "timingLabel": "normal",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10329,7 +10602,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 28.6,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10350,7 +10623,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 35.1,
           "timingLabel": "caution",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10371,7 +10644,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 34.7,
           "timingLabel": "normal",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10392,7 +10665,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 14.0,
           "timingLabel": "normal",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10413,7 +10686,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 14.4,
           "timingLabel": "normal",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10434,7 +10707,7 @@
           "qualityShortTermGap": 14.9,
           "reversalRisk": 17.5,
           "timingLabel": "normal",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10455,7 +10728,7 @@
           "qualityShortTermGap": 68.1,
           "reversalRisk": 27.8,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10476,7 +10749,7 @@
           "qualityShortTermGap": 62.7,
           "reversalRisk": 27.1,
           "timingLabel": "normal",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10497,7 +10770,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 25.9,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10518,7 +10791,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 28.8,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10539,7 +10812,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 28.5,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10560,7 +10833,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 28.6,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10581,7 +10854,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 50.0,
           "timingLabel": "caution",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10602,7 +10875,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 28.3,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10623,7 +10896,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 27.9,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10644,7 +10917,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 33.8,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10665,7 +10938,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 32.8,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -10686,7 +10959,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 41.0,
           "timingLabel": "caution",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 1
         },
         {
@@ -10707,7 +10980,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 24.8,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 1
         },
         {
@@ -10728,7 +11001,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 32.1,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 2
         },
         {
@@ -10749,7 +11022,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 22.8,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 2
         },
         {
@@ -10770,7 +11043,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 27.1,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 2
         },
         {
@@ -10791,7 +11064,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 12.1,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 1
         },
         {
@@ -10812,7 +11085,7 @@
           "qualityShortTermGap": 4.8,
           "reversalRisk": 14.8,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 1
         },
         {
@@ -10833,7 +11106,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 13.3,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 2
         },
         {
@@ -10854,7 +11127,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 20.1,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 3
         },
         {
@@ -10875,7 +11148,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 22.3,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 3
         },
         {
@@ -10896,7 +11169,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 32.3,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 3
         },
         {
@@ -10917,7 +11190,7 @@
           "qualityShortTermGap": 17.8,
           "reversalRisk": 21.4,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 3
         },
         {
@@ -10938,7 +11211,7 @@
           "qualityShortTermGap": 41.0,
           "reversalRisk": 31.9,
           "timingLabel": "normal",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 3
         },
         {
@@ -10959,7 +11232,7 @@
           "qualityShortTermGap": 79.3,
           "reversalRisk": 35.3,
           "timingLabel": "caution",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 3
         },
         {
@@ -10980,7 +11253,7 @@
           "qualityShortTermGap": 100.0,
           "reversalRisk": 38.4,
           "timingLabel": "high reversal risk",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11001,7 +11274,7 @@
           "qualityShortTermGap": 100.0,
           "reversalRisk": 37.1,
           "timingLabel": "high reversal risk",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11022,7 +11295,7 @@
           "qualityShortTermGap": 90.0,
           "reversalRisk": 31.1,
           "timingLabel": "high reversal risk",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11043,7 +11316,7 @@
           "qualityShortTermGap": 85.8,
           "reversalRisk": 29.5,
           "timingLabel": "caution",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11064,7 +11337,7 @@
           "qualityShortTermGap": 67.4,
           "reversalRisk": 26.3,
           "timingLabel": "caution",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11085,7 +11358,7 @@
           "qualityShortTermGap": 77.0,
           "reversalRisk": 28.4,
           "timingLabel": "caution",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11106,7 +11379,7 @@
           "qualityShortTermGap": 100.0,
           "reversalRisk": 34.6,
           "timingLabel": "high reversal risk",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11127,7 +11400,7 @@
           "qualityShortTermGap": 100.0,
           "reversalRisk": 32.9,
           "timingLabel": "high reversal risk",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11148,7 +11421,7 @@
           "qualityShortTermGap": 100.0,
           "reversalRisk": 34.0,
           "timingLabel": "high reversal risk",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11169,7 +11442,7 @@
           "qualityShortTermGap": 100.0,
           "reversalRisk": 34.2,
           "timingLabel": "high reversal risk",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11190,7 +11463,7 @@
           "qualityShortTermGap": 100.0,
           "reversalRisk": 38.6,
           "timingLabel": "high reversal risk",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11211,7 +11484,7 @@
           "qualityShortTermGap": 100.0,
           "reversalRisk": 32.3,
           "timingLabel": "high reversal risk",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11232,7 +11505,7 @@
           "qualityShortTermGap": 100.0,
           "reversalRisk": 34.7,
           "timingLabel": "high reversal risk",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11253,7 +11526,7 @@
           "qualityShortTermGap": 100.0,
           "reversalRisk": 31.3,
           "timingLabel": "high reversal risk",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11274,7 +11547,7 @@
           "qualityShortTermGap": 100.0,
           "reversalRisk": 33.6,
           "timingLabel": "high reversal risk",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11295,7 +11568,7 @@
           "qualityShortTermGap": 100.0,
           "reversalRisk": 42.4,
           "timingLabel": "high reversal risk",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11316,7 +11589,7 @@
           "qualityShortTermGap": 100.0,
           "reversalRisk": 33.4,
           "timingLabel": "high reversal risk",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11337,7 +11610,7 @@
           "qualityShortTermGap": 100.0,
           "reversalRisk": 35.4,
           "timingLabel": "high reversal risk",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11358,7 +11631,7 @@
           "qualityShortTermGap": 100.0,
           "reversalRisk": 30.0,
           "timingLabel": "high reversal risk",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11379,7 +11652,7 @@
           "qualityShortTermGap": 100.0,
           "reversalRisk": 43.5,
           "timingLabel": "high reversal risk",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11400,7 +11673,7 @@
           "qualityShortTermGap": 100.0,
           "reversalRisk": 30.3,
           "timingLabel": "high reversal risk",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11421,7 +11694,7 @@
           "qualityShortTermGap": 100.0,
           "reversalRisk": 41.9,
           "timingLabel": "high reversal risk",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11442,7 +11715,7 @@
           "qualityShortTermGap": 100.0,
           "reversalRisk": 39.0,
           "timingLabel": "high reversal risk",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11463,7 +11736,7 @@
           "qualityShortTermGap": 98.1,
           "reversalRisk": 41.7,
           "timingLabel": "caution",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 3
         },
         {
@@ -11484,7 +11757,7 @@
           "qualityShortTermGap": 13.1,
           "reversalRisk": 23.7,
           "timingLabel": "normal",
-          "confidence": "low",
+          "dataConsistency": "low",
           "highScorePersistenceMonths": 2
         },
         {
@@ -11505,7 +11778,7 @@
           "qualityShortTermGap": 47.0,
           "reversalRisk": 22.6,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 1
         },
         {
@@ -11526,7 +11799,7 @@
           "qualityShortTermGap": 35.0,
           "reversalRisk": 18.7,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11547,7 +11820,7 @@
           "qualityShortTermGap": 1.3,
           "reversalRisk": 11.7,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11568,7 +11841,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 8.8,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11589,7 +11862,7 @@
           "qualityShortTermGap": 51.0,
           "reversalRisk": 19.4,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11610,7 +11883,7 @@
           "qualityShortTermGap": 3.4,
           "reversalRisk": 7.2,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11631,7 +11904,7 @@
           "qualityShortTermGap": 20.6,
           "reversalRisk": 9.7,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11652,7 +11925,7 @@
           "qualityShortTermGap": 13.4,
           "reversalRisk": 9.4,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11673,7 +11946,7 @@
           "qualityShortTermGap": 16.5,
           "reversalRisk": 6.6,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11694,7 +11967,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 4.6,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11715,7 +11988,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 4.9,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11736,7 +12009,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 3.2,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11757,7 +12030,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 3.9,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11778,7 +12051,7 @@
           "qualityShortTermGap": 2.7,
           "reversalRisk": 2.1,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11799,7 +12072,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 7.2,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11820,7 +12093,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 6.3,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11841,7 +12114,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 20.1,
           "timingLabel": "normal",
-          "confidence": "high",
+          "dataConsistency": "high",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11862,7 +12135,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 26.7,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11883,7 +12156,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 30.5,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11904,7 +12177,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 19.0,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11925,7 +12198,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 20.8,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11946,7 +12219,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 25.1,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11967,7 +12240,7 @@
           "qualityShortTermGap": 0.0,
           "reversalRisk": 8.4,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         },
         {
@@ -11988,7 +12261,7 @@
           "qualityShortTermGap": 8.3,
           "reversalRisk": 11.7,
           "timingLabel": "normal",
-          "confidence": "medium",
+          "dataConsistency": "medium",
           "highScorePersistenceMonths": 0
         }
       ]
