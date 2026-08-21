@@ -1948,11 +1948,7 @@ const APIModule = (() => {
     const isPension = !!(cat && cat.pensionAPI);
     const isPolisa  = !!(cat && cat.polisaAPI);
     const allRaw   = isPension ? await fetchPensionData() : isPolisa ? await fetchPolisaData() : await fetchCurrentGemelData();
-    const isMergedHarel90 = isPolisa && String(fundId) === '90';
-    let latest = getLatestRecords(isMergedHarel90
-      ? allRaw.filter(r => Number(r.REPORT_PERIOD) <= 202606)
-      : allRaw
-    );
+    let latest = getLatestRecords(allRaw);
     const fund     = latest.find(r => String(r.FUND_ID) === String(fundId));
     if (!fund) return [];
 
@@ -1986,6 +1982,11 @@ const APIModule = (() => {
       subMatch(r)
     );
 
+    // המסלול הממוזג אינו מוצג בהשוואות של מסלולים פעילים; הוא נשאר רק בדף ההיסטורי שלו.
+    if (isPolisa && String(fundId) !== '90') {
+      peers = peers.filter(r => String(r.FUND_ID) !== '90');
+    }
+
     // החל excludedFundIds של הקטגוריה
     if (cat && cat.excludedFundIds && cat.excludedFundIds.length) {
       const excl = new Set(cat.excludedFundIds.map(String));
@@ -1998,7 +1999,7 @@ const APIModule = (() => {
     const yields12M = isPension
       ? await get12MYieldsPension()
       : isPolisa
-        ? await get12MYieldsPolisa(isMergedHarel90 ? 202606 : null)
+        ? await get12MYieldsPolisa()
         : await get12MYields();
     return peers.sort((a, b) =>
       ((yields12M.get(String(b.FUND_ID)) ?? -9999) - (yields12M.get(String(a.FUND_ID)) ?? -9999))

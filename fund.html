@@ -343,7 +343,7 @@
 
   <script src="js/config.js?v=polisa-manora-funds-20260812"></script>
   <script src="js/analytics.js?v=ga-20260704"></script>
-  <script src="js/api.js?v=harel-90-merge-v2-20260822"></script>
+  <script src="js/api.js?v=harel-90-merge-v3-20260822"></script>
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
 <script>
@@ -571,7 +571,7 @@ async function loadFundPage() {
     const [latest, peers, yields12M, sharpeMap, map6M, consistencyMap] = await Promise.all([
       APIModule.getFundLatestRecord(fundId, _fundCatId),
       APIModule.getTrackPeers(fundId, _fundCatId),
-      isPension ? APIModule.get12MYieldsPension()      : isPolisa ? APIModule.get12MYieldsPolisa(isMergedHarel90 ? 202606 : null) : APIModule.get12MYields(),
+      isPension ? APIModule.get12MYieldsPension()      : isPolisa ? APIModule.get12MYieldsPolisa() : APIModule.get12MYields(),
       isPension ? APIModule.getAllSharpeRatiosPension() : isPolisa ? Promise.resolve(null) : APIModule.getAllSharpeRatios(),
       isPension ? APIModule.get6MAvgYieldsPension()    : isPolisa ? Promise.resolve(null) : APIModule.get6MAvgYields(),
       isPension ? APIModule.getConsistencyMapPension() : isPolisa ? Promise.resolve(null) : APIModule.getConsistencyMap(),
@@ -586,7 +586,14 @@ async function loadFundPage() {
     // במסלול שמוזג, השוואת העמיתים משתמשת בדיווח התקין האחרון ולא ברשומת הסגירה הריקה.
     if (isMergedHarel90) {
       const myPeerIndex = peers.findIndex(r => String(r.FUND_ID) === '90');
-      if (myPeerIndex >= 0) peers[myPeerIndex] = latest;
+      if (myPeerIndex >= 0) {
+        peers[myPeerIndex] = {
+          ...latest,
+          REPORT_PERIOD: peers[myPeerIndex].REPORT_PERIOD,
+          MONTHLY_YIELD: null,
+          _MERGED_IN_REPORT_PERIOD: true
+        };
+      }
     }
 
     const provName = getProviderDisplayName(latest.CONTROLLING_CORPORATION, latest.MANAGING_CORPORATION);
@@ -1958,6 +1965,9 @@ function renderPeersTable(myFundId, myName) {
     const yr1Cell = y12m === null
       ? '<span title="אין נתוני 12 חודשים" style="color:var(--gray-300)">—</span>'
       : y12m !== undefined ? _peerYield(y12m, 'yr1', peerSort.field==='1yr' ? yieldClass(y12m) : '', di) : '-';
+    const monthlyCell = r._MERGED_IN_REPORT_PERIOD
+      ? '<span title="המסלול מוזג להראל מסלול כללי ב־01.07.2026 ולכן אין תשואה חודשית למסלול זה ביולי" aria-label="המסלול מוזג ביולי 2026" style="display:inline-flex;align-items:center;gap:4px;color:#1d4ed8;font-weight:800;white-space:nowrap;"><i class="fas fa-code-branch" aria-hidden="true"></i> מוזג</span>'
+      : peerCell(r.MONTHLY_YIELD, 'monthly', 'monthly', di);
 
     const allocTags = fundNameTags ? `<span class="fund-name-tag-icons">${fundNameTags}</span>` : '';
     const nameRow = isMe
@@ -1979,7 +1989,7 @@ function renderPeersTable(myFundId, myName) {
         ${peerReturnMode === 'yearly' ? `
         <td class="${sc('yearly_ytd')}">${peerCell(r.YEAR_TO_DATE_YIELD, 'yearly_ytd', 'yearly_ytd', di)}</td>
         ${peerYearlyState.loading ? '<td colspan="4" style="color:var(--gray-400);font-style:italic;">טוען שנים...</td>' : yearlyCells || '<td colspan="4" style="color:var(--gray-400);">לא נמצאו שנים מלאות</td>'}` : `
-        <td class="${sc('monthly')}">${peerCell(r.MONTHLY_YIELD, 'monthly', 'monthly', di)}</td>
+        <td class="${sc('monthly')}">${monthlyCell}</td>
         <td class="${sc('ytd')}">${peerCell(r.YEAR_TO_DATE_YIELD, 'ytd', 'ytd', di)}</td>
         <td class="${sc('1yr')}">${yr1Cell}</td>
         <td class="${sc('3yr')}">${peerCell(r.YIELD_TRAILING_3_YRS, 'yr3', '3yr', di)}</td>
