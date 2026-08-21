@@ -771,7 +771,12 @@ const APIModule = (() => {
     records = records.filter(r => !(r.FUND_NAME || '').includes('בניהול אישי'));
 
     // 2c. הסר מנהלי משנה מוחרגים בפוליסות (אקסלנס ודומיהם)
-    if (isPolisa) records = records.filter(r => !_isPolisaExcluded(r.FUND_NAME));
+    if (isPolisa) {
+      records = records.filter(r =>
+        !_isPolisaExcluded(r.FUND_NAME) &&
+        String(r.FUND_ID) !== '90' // מוזג להראל מסלול כללי ב־01.07.2026; נשאר זמין בחיפוש הישיר
+      );
+    }
 
     // 3. אוכלוסיית יעד — רק לגמל (בפנסיה/פוליסה אין שדה זה)
     if (!isPension && !isPolisa) records = filterByTargetPopulation(records, targetPopulation);
@@ -1592,8 +1597,10 @@ const APIModule = (() => {
 
   // ─── תשואה מצטברת 12 חודשים — פוליסות חיסכון ──────────────────
   let _cached12MPolisa = null;
-  async function get12MYieldsPolisa() {
-    if (_cached12MPolisa) return _cached12MPolisa;
+  let _cached12MPolisa202606 = null;
+  async function get12MYieldsPolisa(endPeriod = null) {
+    if (endPeriod === 202606 && _cached12MPolisa202606) return _cached12MPolisa202606;
+    if (!endPeriod && _cached12MPolisa) return _cached12MPolisa;
     const allRaw = await fetchPolisaData();
     const byFund = new Map();
     for (const r of allRaw) {
@@ -1601,24 +1608,27 @@ const APIModule = (() => {
       if (!byFund.has(id)) byFund.set(id, []);
       byFund.get(id).push(r);
     }
-    _cached12MPolisa = new Map();
+    const resultMap = new Map();
     byFund.forEach((recs, id) => {
+      if (endPeriod) recs = recs.filter(r => Number(r.REPORT_PERIOD) <= endPeriod);
       // פוליסה 90 מוזגה ב־01.07.2026; רשומת 202607 היא רשומת סגירה ריקה.
       if (id === '90') {
         recs = recs.filter(r => Number(r.REPORT_PERIOD) <= 202606 && r.MONTHLY_YIELD !== null && r.MONTHLY_YIELD !== '');
       }
       recs.sort((a, b) => Number(b.REPORT_PERIOD) - Number(a.REPORT_PERIOD));
       const last12 = recs.slice(0, 12);
-      if (last12.length < 12) { _cached12MPolisa.set(id, null); return; }
+      if (last12.length < 12) { resultMap.set(id, null); return; }
       let compound = 1, valid = true;
       for (const r of last12) {
         const m = parseFloat(r.MONTHLY_YIELD);
         if (isNaN(m)) { valid = false; break; }
         compound *= (1 + m / 100);
       }
-      _cached12MPolisa.set(id, valid ? (compound - 1) * 100 : null);
+      resultMap.set(id, valid ? (compound - 1) * 100 : null);
     });
-    return _cached12MPolisa;
+    if (endPeriod === 202606) _cached12MPolisa202606 = resultMap;
+    else _cached12MPolisa = resultMap;
+    return resultMap;
   }
 
   // ─── ממוצע תשואה חודשית 6 חודשים אחרונים (task 12: מומנטום קצר-טווח) ──
@@ -1938,7 +1948,11 @@ const APIModule = (() => {
     const isPension = !!(cat && cat.pensionAPI);
     const isPolisa  = !!(cat && cat.polisaAPI);
     const allRaw   = isPension ? await fetchPensionData() : isPolisa ? await fetchPolisaData() : await fetchCurrentGemelData();
-    let latest     = getLatestRecords(allRaw);
+    const isMergedHarel90 = isPolisa && String(fundId) === '90';
+    let latest = getLatestRecords(isMergedHarel90
+      ? allRaw.filter(r => Number(r.REPORT_PERIOD) <= 202606)
+      : allRaw
+    );
     const fund     = latest.find(r => String(r.FUND_ID) === String(fundId));
     if (!fund) return [];
 
@@ -1984,7 +1998,7 @@ const APIModule = (() => {
     const yields12M = isPension
       ? await get12MYieldsPension()
       : isPolisa
-        ? await get12MYieldsPolisa()
+        ? await get12MYieldsPolisa(isMergedHarel90 ? 202606 : null)
         : await get12MYields();
     return peers.sort((a, b) =>
       ((yields12M.get(String(b.FUND_ID)) ?? -9999) - (yields12M.get(String(a.FUND_ID)) ?? -9999))
