@@ -11240,10 +11240,15 @@ const App = (() => {
       const sectorAudience = String(r.TARGET_POPULATION || '') !== DEFAULT_TARGET_POPULATION && _nameCount.get(baseName) > 1
         ? extractSectorAudience(fundName, baseName)
         : null;
+      const globalManager = String(trackId || '').startsWith('polisa_global_')
+        ? globalManagerForRecord(r)
+        : null;
       const _suffix = armyAudience || sectorAudience || ((_nameCount.get(baseName) > 1 && !isSectorNameWithoutSubManager)
         ? extractFundSuffix(fundName)
         : null);
-      const name = _suffix ? baseName + ' — ' + _suffix : baseName;
+      const name = globalManager
+        ? `${baseName} ${globalManager.label}`
+        : (_suffix ? baseName + ' — ' + _suffix : baseName);
       const color = providerColor(baseName);
       const fundId = r.FUND_ID || '';
       const monthly = formatPercent(r.MONTHLY_YIELD);
