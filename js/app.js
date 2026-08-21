@@ -4719,11 +4719,17 @@ const App = (() => {
   }
 
   // ─── PROVIDER FILTERS (sidebar) ──────────────────────────────
-  const POLISA_PROVIDER_SUBFILTERS = [
-    { parent: 'כלל', label: 'State Street', token: 'State Street' },
-    { parent: 'הפניקס', label: 'BlackRock', token: 'BlackRock' },
-    { parent: 'הראל', label: 'Fidelity', token: 'Fidelity' }
+  const POLISA_GLOBAL_MANAGERS = [
+    { label: 'BlackRock', token: 'BlackRock' },
+    { label: 'Fidelity', token: 'fidelity' },
+    { label: 'State Street', token: 'State Street' },
+    { label: 'Apollo', token: 'Apollo' }
   ];
+
+  function globalManagerForRecord(record) {
+    const fundName = String(record?.FUND_NAME || '').toLowerCase();
+    return POLISA_GLOBAL_MANAGERS.find(item => fundName.includes(item.token.toLowerCase())) || null;
+  }
 
   function providerFilterKey(providerName) {
     return `provider:${providerName}`;
@@ -4731,6 +4737,10 @@ const App = (() => {
 
   function providerSubFilterKey(parent, token) {
     return `sub:${parent}:${String(token).toLowerCase()}`;
+  }
+
+  function globalManagerFilterKey(token) {
+    return `manager:${String(token).toLowerCase()}`;
   }
 
   function parseProviderFilterKey(key) {
@@ -4747,16 +4757,26 @@ const App = (() => {
         token: sep >= 0 ? rest.slice(sep + 1) : ''
       };
     }
+    if (raw.startsWith('manager:')) {
+      return { type: 'manager', token: raw.slice('manager:'.length) };
+    }
     return { type: 'provider', provider: raw };
   }
 
   function recordMatchesProviderFilter(record, key) {
     const providerName = getProviderDisplayName(record.CONTROLLING_CORPORATION, record.MANAGING_CORPORATION);
     const parsed = parseProviderFilterKey(key);
-    if (parsed.type === 'provider') return providerName === parsed.provider;
+    if (parsed.type === 'provider') {
+      // בפוליסות, ניהול עולמי מסונן כמנהל עצמאי ולא כחלק מחברת הביטוח המארחת.
+      if (state.activeCategoryId === 'polisa_chisachon' && globalManagerForRecord(record)) return false;
+      return providerName === parsed.provider;
+    }
     if (parsed.type === 'sub') {
       return providerName === parsed.provider &&
         String(record.FUND_NAME || '').toLowerCase().includes(String(parsed.token || '').toLowerCase());
+    }
+    if (parsed.type === 'manager') {
+      return String(record.FUND_NAME || '').toLowerCase().includes(String(parsed.token || '').toLowerCase());
     }
     return false;
   }
@@ -4858,23 +4878,30 @@ const App = (() => {
         color
       });
 
-      POLISA_PROVIDER_SUBFILTERS
-        .filter(item => item.parent === p)
-        .forEach(item => {
-          const hasRecords = (providerRecords.get(p) || []).some(record =>
-            String(record.FUND_NAME || '').toLowerCase().includes(item.token.toLowerCase())
-          );
-          if (!hasRecords) return;
-          availableProviderKeys.push(providerSubFilterKey(item.parent, item.token));
-          appendProviderFilterRow(container, {
-            key: providerSubFilterKey(item.parent, item.token),
-            providerName: p,
-            labelText: item.label,
-            color,
-            isSub: true
-          });
-        });
     });
+
+    if (state.activeCategoryId === 'polisa_chisachon') {
+      const allRecords = Array.from(providerRecords.values()).flat();
+      const availableManagers = POLISA_GLOBAL_MANAGERS.filter(item =>
+        allRecords.some(record => String(record.FUND_NAME || '').toLowerCase().includes(item.token.toLowerCase()))
+      );
+      if (availableManagers.length) {
+        const sep = document.createElement('div');
+        sep.className = 'filter-group-sep';
+        sep.textContent = 'ניהול עולמי';
+        container.appendChild(sep);
+      }
+      availableManagers.forEach(item => {
+        const key = globalManagerFilterKey(item.token);
+        availableProviderKeys.push(key);
+        appendProviderFilterRow(container, {
+          key,
+          providerName: item.label,
+          labelText: item.label,
+          color: providerColor(item.label)
+        });
+      });
+    }
     pruneSavedProviderFilters(availableProviderKeys);
   }
 

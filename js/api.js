@@ -722,6 +722,11 @@ const APIModule = (() => {
     if (track.fundIdExcludes && track.fundIdExcludes.map(String).includes(fundId)) return false;
     if (track.fundIds && track.fundIds.map(String).includes(fundId)) return true;
 
+    // מסלולי ניהול עולמי דורשים גם התאמה למנהל ההשקעות הזר.
+    if (track.managerTokens && track.managerTokens.length) {
+      if (!track.managerTokens.some(token => matchesTrackToken(name, token))) return false;
+    }
+
     // אם למסלול יש subSpecializationKeys — בדוק אותם
     if (track.subSpecializationKeys && track.subSpecializationKeys.length) {
       if (!track.subSpecializationKeys.some(k => sub === k.trim().toLowerCase())) return false;
