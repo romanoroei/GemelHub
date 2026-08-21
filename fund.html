@@ -343,7 +343,7 @@
 
   <script src="js/config.js?v=polisa-manora-funds-20260812"></script>
   <script src="js/analytics.js?v=ga-20260704"></script>
-  <script src="js/api.js?v=fixed-score-cohort-20260821"></script>
+  <script src="js/api.js?v=harel-90-merge-20260822"></script>
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
 <script>
@@ -558,6 +558,7 @@ async function loadFundPage() {
     const _fundCat  = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === _fundCatId);
     const isPension = !!(_fundCat?.pensionAPI);
     const isPolisa  = !!(_fundCat?.polisaAPI);
+    const isMergedHarel90 = isPolisa && String(fundId) === '90';
 
     // ── מתחיל Phase 2 מיד (במקביל ל-Phase 1) כדי לחסוך זמן טעינה ──
     // אם יש cache ב-localStorage — Phase 2 יסתיים לפני Phase 1
@@ -581,6 +582,12 @@ async function loadFundPage() {
     _consistencyMap = consistencyMap;
 
     if (!latest) { showError(`לא נמצאו נתונים לקופה #${fundId}`); return; }
+
+    // במסלול שמוזג, השוואת העמיתים משתמשת בדיווח התקין האחרון ולא ברשומת הסגירה הריקה.
+    if (isMergedHarel90) {
+      const myPeerIndex = peers.findIndex(r => String(r.FUND_ID) === '90');
+      if (myPeerIndex >= 0) peers[myPeerIndex] = latest;
+    }
 
     const provName = getProviderDisplayName(latest.CONTROLLING_CORPORATION, latest.MANAGING_CORPORATION);
     const cls = (latest.FUND_CLASSIFICATION || '').trim();
@@ -620,6 +627,17 @@ async function loadFundPage() {
       `${trackDisplayLabel || ''} ${matchedTrackLabel || ''} ${latest.FUND_NAME || ''} ${latest.SUB_SPECIALIZATION || ''}`
     );
     renderStockOutlierTag(document.getElementById('fh-stock-outlier-tag'), null);
+
+    if (isMergedHarel90) {
+      const mergeNotice = document.createElement('div');
+      mergeNotice.id = 'harel-90-merge-notice';
+      mergeNotice.setAttribute('role', 'note');
+      mergeNotice.style.cssText = 'margin:14px 0 18px;padding:13px 16px;border:1px solid #cbdced;border-right:4px solid #1d4ed8;border-radius:10px;background:#f5f9ff;color:#243b5a;font-size:.83rem;line-height:1.65;box-shadow:0 3px 10px rgba(15,39,68,.05);';
+      mergeNotice.innerHTML = `<strong style="display:block;color:#0f2744;font-size:.9rem;margin-bottom:2px;">המסלול מוזג להראל מסלול כללי</strong><span>המיזוג בוצע ב־01.07.2026. הנתונים בדף זה מוצגים עד יוני 2026.</span> <a href="fund.html?id=88&cat=polisa_chisachon" style="color:#1d4ed8;font-weight:800;text-decoration:none;white-space:nowrap;">מעבר למסלול הקולט ←</a>`;
+      document.getElementById('fund-hero')?.after(mergeNotice);
+      const destinationActions = document.getElementById('fund-destination-actions');
+      if (destinationActions) destinationActions.style.display = 'none';
+    }
 
     // ── Sticky mini-bar ──
     document.getElementById('fsb-cat').textContent   = cat ? cat.label : (latest.FUND_CLASSIFICATION || '');
@@ -661,11 +679,13 @@ async function loadFundPage() {
 
     // ── GemelHub Score (async, non-blocking) ──
     const _ghWrap = document.getElementById('gh-score-badge-wrap');
-    if (_ghWrap) {
+    if (_ghWrap && !isMergedHarel90) {
       _ghWrap.innerHTML = '<div class="gh-score-loading">מחשב ציון גמלהאב…</div>';
       APIModule.computeGemelHubScores(fundId, _fundCatId).then(scoreData => {
         renderGemelHubScoreBadge(_ghWrap, scoreData, fundId, _fundCatId);
       }).catch(() => { _ghWrap.innerHTML = ''; });
+    } else if (_ghWrap) {
+      _ghWrap.innerHTML = '';
     }
 
     // ── שלב 2: טעינת גרף ברקע (היסטוריה מלאה — לא חוסם) ──

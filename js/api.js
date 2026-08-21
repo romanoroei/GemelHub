@@ -1603,6 +1603,10 @@ const APIModule = (() => {
     }
     _cached12MPolisa = new Map();
     byFund.forEach((recs, id) => {
+      // פוליסה 90 מוזגה ב־01.07.2026; רשומת 202607 היא רשומת סגירה ריקה.
+      if (id === '90') {
+        recs = recs.filter(r => Number(r.REPORT_PERIOD) <= 202606 && r.MONTHLY_YIELD !== null && r.MONTHLY_YIELD !== '');
+      }
       recs.sort((a, b) => Number(b.REPORT_PERIOD) - Number(a.REPORT_PERIOD));
       const last12 = recs.slice(0, 12);
       if (last12.length < 12) { _cached12MPolisa.set(id, null); return; }
@@ -1883,7 +1887,8 @@ const APIModule = (() => {
   // מסנן לפי FUND_ID ישירות ב-API + cache ב-localStorage (ביקור שני = מיידי)
   async function getFundHistory(fundId, catId) {
     // בדוק cache מ-localStorage תחילה
-    const lsKey = `gemelhub_hist_v1_${catId}_${fundId}`;
+    const isMergedHarel90 = String(fundId) === '90' && catId === 'polisa_chisachon';
+    const lsKey = `${isMergedHarel90 ? 'gemelhub_hist_v2' : 'gemelhub_hist_v1'}_${catId}_${fundId}`;
     const cached = _lsLoad(lsKey);
     if (cached) return cached;
 
@@ -1900,6 +1905,9 @@ const APIModule = (() => {
       result = allRaw
         .filter(r => String(r.FUND_ID) === String(fundId))
         .sort((a, b) => Number(a.REPORT_PERIOD) - Number(b.REPORT_PERIOD));
+      if (isMergedHarel90) {
+        result = result.filter(r => Number(r.REPORT_PERIOD) <= 202606);
+      }
     } else if (isPolisa) {
       // polisa: משתמש ב-fetchPolisaHistoricalRangeData שמשלב 3 resources בוודאות
       const allRaw = await fetchPolisaHistoricalRangeData();
@@ -2298,9 +2306,16 @@ const APIModule = (() => {
     const src = isPension ? await fetchPensionData()
               : isPolisa  ? await fetchPolisaData()
               : await fetchCurrentGemelData();
-    return src
-      .filter(r => String(r.FUND_ID) === String(fundId))
-      .sort((a, b) => Number(b.REPORT_PERIOD) - Number(a.REPORT_PERIOD))[0] || null;
+    let records = src.filter(r => String(r.FUND_ID) === String(fundId));
+    // פוליסה 90 של הראל מוזגה למסלול כללי ב־01.07.2026.
+    // רשומת יולי היא רשומת סגירה ללא תשואות; בדף ההיסטורי מציגים את הדיווח התקין האחרון.
+    if (isPolisa && String(fundId) === '90') {
+      records = records.filter(r =>
+        Number(r.REPORT_PERIOD) <= 202606 &&
+        r.MONTHLY_YIELD !== null && r.MONTHLY_YIELD !== ''
+      );
+    }
+    return records.sort((a, b) => Number(b.REPORT_PERIOD) - Number(a.REPORT_PERIOD))[0] || null;
   }
 
   // ─── GemelHub Score ────────────────────────────────────────────────
