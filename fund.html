@@ -3271,6 +3271,14 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
   };
   const oneMonthStrength = horizonPositionStrength(1);
   const twelveMonthStrength = horizonPositionStrength(12);
+  const shortHorizonStrengths = [1, 3, 6, 12].map(horizonPositionStrength).filter(Number.isFinite);
+  const shortStrengthRange = shortHorizonStrengths.length > 1
+    ? Math.max(...shortHorizonStrengths) - Math.min(...shortHorizonStrengths)
+    : null;
+  const shortAverageStrength = shortHorizonStrengths.length
+    ? shortHorizonStrengths.reduce((sum, value) => sum + value, 0) / shortHorizonStrengths.length
+    : null;
+  const clearlyStableShortTerm = Number.isFinite(shortStrengthRange) && shortStrengthRange <= .15;
   const recentJumpWithoutConfirmation = protection.timingLabel === 'unclear_trend'
     && Number.isFinite(oneMonthStrength) && Number.isFinite(twelveMonthStrength)
     && oneMonthStrength - twelveMonthStrength > .12;
@@ -3281,7 +3289,13 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
     ? { ...rawTrend, text: 'שיפור בחודש האחרון, אך עדיין אין מגמה ברורה', icon: '↗' }
     : recentDropWithoutConfirmation
       ? { ...rawTrend, text: 'הטווח הקצר נחלש, אך התמונה עדיין אינה אחידה', icon: '↓' }
-      : rawTrend;
+      : protection.timingLabel === 'unclear_trend' && clearlyStableShortTerm
+        ? shortAverageStrength >= .65
+          ? { ...rawTrend, text: 'מגמה טובה ויציבה בטווח הקצר', icon: '✓' }
+          : shortAverageStrength >= .35
+            ? { ...rawTrend, text: 'מיקום יציב בטווח הקצר', icon: '✓' }
+            : { ...rawTrend, text: 'יציבות במיקום נמוך בטווח הקצר', icon: '' }
+        : rawTrend;
   const trendPanelColor = ghTrendPanelColor(protection.timingLabel);
   const infoStylesHtml = `<style>
     #gh-score-modal .gh-info-tip-btn{display:inline-flex;vertical-align:middle;border:0;background:transparent;color:#2563eb;padding:0;margin-inline-start:3px;cursor:pointer;font-size:.72rem;line-height:1;}
@@ -3432,6 +3446,20 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
     const position = horizonPositions[months] || horizonPositions[String(months)];
     return position ? { rank: position.rank, total: position.total, label: horizonNames[months] } : { label: horizonNames[months] };
   });
+  const shortRankSummary = (() => {
+    const valid = horizonPoints.filter(point => Number.isFinite(point.rank) && Number.isFinite(point.total));
+    if (!valid.length) return supportLabel;
+    const ranks = valid.map(point => point.rank);
+    const total = valid[0].total;
+    const minRank = Math.min(...ranks);
+    const maxRank = Math.max(...ranks);
+    if (clearlyStableShortTerm) {
+      return minRank === maxRank
+        ? `יציבים במקום ${minRank} מתוך ${total}`
+        : `יציבים במקומות ${minRank}–${maxRank} מתוך ${total}`;
+    }
+    return supportLabel;
+  })();
   const shortTermDirection = (() => {
     const valid = horizonPoints.filter(point => Number.isFinite(point.rank) && Number.isFinite(point.total));
     if (valid.length < 2) return 'אין מספיק נתונים לזיהוי כיוון';
@@ -3442,8 +3470,12 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
     if (change > .12) return Number.isFinite(support) && support < 40
       ? 'שיפור בחודש האחרון — עדיין לא מגמה מבוססת'
       : 'מתחזק בטווח הקצר';
-    return 'שומר על כיוון יציב';
+    return 'יציב בטווח הקצר';
   })();
+  const longTermDirection = trendDirection(yearPoints);
+  const longTermSummary = longTermDirection === 'מגמת המיקום משתפרת' || longTermDirection === 'חזרה לעוצמה אחרי תקופה חלשה'
+    ? 'שיפור ברור לאורך השנים'
+    : consistencyLabel;
   const sortedFundHistory = [...fundHistory].sort((a, b) => Number(a.REPORT_PERIOD) - Number(b.REPORT_PERIOD));
   const netDepositValue = row => {
     const raw = row?.NET_MONTHLY_DEPOSITS;
@@ -3505,7 +3537,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
       <div class="gh-trend-grid">
         <section style="border:1px solid #dfe6ee;border-radius:12px;padding:13px 14px 12px;background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);box-shadow:0 4px 12px rgba(15,39,68,.05);">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
-            <div><div style="font-size:.82rem;color:#52637a;font-weight:900;">בדיקת מומנטום</div><div style="font-size:1rem;color:#172f55;font-weight:900;margin-top:3px;">${supportLabel}</div></div>
+            <div><div style="font-size:.82rem;color:#52637a;font-weight:900;">בדיקת מומנטום</div><div style="font-size:1rem;color:#172f55;font-weight:900;margin-top:3px;">${shortRankSummary}</div></div>
             <span style="font-size:.72rem;color:#0f684f;background:#e9f8f2;border:1px solid #c9ebdf;border-radius:999px;padding:5px 9px;font-weight:800;max-width:49%;line-height:1.35;text-align:center;">${shortTermDirection}</span>
           </div>
           ${rankTrendChart(horizonPoints, 'מיקום הקופה ביחס למתחרים מטווח 12 חודשים ועד החודש האחרון', horizonNetFlows)}
@@ -3513,8 +3545,8 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
         </section>
         <section style="border:1px solid #dfe6ee;border-radius:12px;padding:13px 14px 12px;background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);box-shadow:0 4px 12px rgba(15,39,68,.05);">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
-            <div><div style="font-size:.82rem;color:#52637a;font-weight:900;">עקביות לטווח ארוך</div><div style="font-size:1rem;color:#172f55;font-weight:900;margin-top:3px;">${consistencyLabel}</div></div>
-            <span style="font-size:.72rem;color:#1e3a5f;background:#eaf2fb;border:1px solid #cfdef0;border-radius:999px;padding:5px 9px;font-weight:800;max-width:49%;line-height:1.35;text-align:center;">${trendDirection(yearPoints)}</span>
+            <div><div style="font-size:.82rem;color:#52637a;font-weight:900;">עקביות לטווח ארוך</div><div style="font-size:1rem;color:#172f55;font-weight:900;margin-top:3px;">${longTermSummary}</div></div>
+            <span style="font-size:.72rem;color:#1e3a5f;background:#eaf2fb;border:1px solid #cfdef0;border-radius:999px;padding:5px 9px;font-weight:800;max-width:49%;line-height:1.35;text-align:center;">${longTermDirection}</span>
           </div>
           ${rankTrendChart(yearPoints, 'מיקום הקופה ביחס למתחרים לאורך חמש שנים', yearlyNetFlows)}
           <div style="margin-top:7px;padding:7px 9px;border-radius:8px;background:#f6f8fb;color:#334155;font-size:.76rem;font-weight:800;"><i class="fas fa-coins" style="color:#64748b;margin-left:5px;"></i>${yearlyFlowSummary}</div>
