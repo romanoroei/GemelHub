@@ -3506,7 +3506,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
         <section style="border:1px solid #dfe6ee;border-radius:12px;padding:13px 14px 12px;background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);box-shadow:0 4px 12px rgba(15,39,68,.05);">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
             <div><div style="font-size:.82rem;color:#52637a;font-weight:900;">בדיקת מומנטום</div><div style="font-size:1rem;color:#172f55;font-weight:900;margin-top:3px;">${supportLabel}</div></div>
-            <span style="font-size:.72rem;color:#0f684f;background:#e9f8f2;border:1px solid #c9ebdf;border-radius:999px;padding:5px 9px;font-weight:800;max-width:49%;line-height:1.35;text-align:center;">כיוון השינוי: ${shortTermDirection}</span>
+            <span style="font-size:.72rem;color:#0f684f;background:#e9f8f2;border:1px solid #c9ebdf;border-radius:999px;padding:5px 9px;font-weight:800;max-width:49%;line-height:1.35;text-align:center;">${shortTermDirection}</span>
           </div>
           ${rankTrendChart(horizonPoints, 'מיקום הקופה ביחס למתחרים מטווח 12 חודשים ועד החודש האחרון', horizonNetFlows)}
           <div style="margin-top:7px;padding:7px 9px;border-radius:8px;background:#f6f8fb;color:#334155;font-size:.76rem;font-weight:800;"><i class="fas fa-coins" style="color:#64748b;margin-left:5px;"></i>${shortFlowSummary}</div>
@@ -3514,7 +3514,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
         <section style="border:1px solid #dfe6ee;border-radius:12px;padding:13px 14px 12px;background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);box-shadow:0 4px 12px rgba(15,39,68,.05);">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
             <div><div style="font-size:.82rem;color:#52637a;font-weight:900;">עקביות לטווח ארוך</div><div style="font-size:1rem;color:#172f55;font-weight:900;margin-top:3px;">${consistencyLabel}</div></div>
-            <span style="font-size:.72rem;color:#1e3a5f;background:#eaf2fb;border:1px solid #cfdef0;border-radius:999px;padding:5px 9px;font-weight:800;max-width:49%;line-height:1.35;text-align:center;">כיוון לאורך שנים: ${trendDirection(yearPoints)}</span>
+            <span style="font-size:.72rem;color:#1e3a5f;background:#eaf2fb;border:1px solid #cfdef0;border-radius:999px;padding:5px 9px;font-weight:800;max-width:49%;line-height:1.35;text-align:center;">${trendDirection(yearPoints)}</span>
           </div>
           ${rankTrendChart(yearPoints, 'מיקום הקופה ביחס למתחרים לאורך חמש שנים', yearlyNetFlows)}
           <div style="margin-top:7px;padding:7px 9px;border-radius:8px;background:#f6f8fb;color:#334155;font-size:.76rem;font-weight:800;"><i class="fas fa-coins" style="color:#64748b;margin-left:5px;"></i>${yearlyFlowSummary}</div>
@@ -3525,8 +3525,11 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
 
   let compHtml = '';
   if (thisFund) {
-    const { consistencyScore, sharpeScore, currentYearScore, currentYearMonths, currentYearWeightPct, eachYearWeightPct } = thisFund.components;
-    const consistencyWeightPct = eachYearWeightPct * 5;
+    const { consistencyScore, sharpeScore, currentYearScore, currentYearMonths, currentYearWeightPct } = thisFund.components;
+    // Compute the displayed remainder from the other displayed components so
+    // the three percentages always add up to exactly 100.0 after rounding.
+    const consistencyWeightPct = 100 - 16 - currentYearWeightPct;
+    const displayedEachYearWeightPct = consistencyWeightPct / 5;
     compHtml = `
       <details style="padding:13px 16px;border-bottom:1px solid #eef2f7;">
         <summary style="cursor:pointer;list-style:none;font-size:.76rem;font-weight:900;color:#0f2744;">פירוט רכיבי הציון <i class="fas fa-chevron-down" style="color:#64748b;margin-right:5px;font-size:.65rem;"></i></summary>
@@ -3535,7 +3538,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
           <div style="flex:1;min-width:90px;background:#eff6ff;border-radius:10px;padding:9px;text-align:center;">
             <div style="font-size:.69rem;color:#3b82f6;font-weight:800;margin-bottom:3px;">עקביות 5 שנים (${consistencyWeightPct.toFixed(1)}%)</div>
             <div style="font-size:1.25rem;font-weight:900;color:#1d4ed8;">${consistencyScore.toFixed(1)}<span style="font-size:.65rem;color:#93c5fd;">/100</span></div>
-            <div style="font-size:.65rem;color:#64748b;font-weight:700;margin-top:4px;">${eachYearWeightPct.toFixed(1)}% לכל שנה</div>
+            <div style="font-size:.65rem;color:#64748b;font-weight:700;margin-top:4px;">${displayedEachYearWeightPct.toFixed(2)}% לכל שנה</div>
           </div>
           <div style="flex:1;min-width:90px;background:#f0fdf4;border-radius:10px;padding:9px;text-align:center;">
             <div style="font-size:.69rem;color:#22c55e;font-weight:700;margin-bottom:3px;">שארפ (16%)</div>
