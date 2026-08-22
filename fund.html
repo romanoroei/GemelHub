@@ -3322,12 +3322,12 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
   })() : '';
 
   const consistencyLabel = protection.dataConsistency === 'high' ? 'הדירוג משתנה מעט משנה לשנה'
-    : protection.dataConsistency === 'medium' ? 'הדירוג משתנה במידה בינונית משנה לשנה' : 'הדירוג משתנה מאוד משנה לשנה';
+    : protection.dataConsistency === 'medium' ? 'דירוג משתנה' : 'הדירוג משתנה מאוד משנה לשנה';
   const support = protection.shortTermSupport;
   const supportLabel = !Number.isFinite(support) ? 'אין מספיק נתונים'
     : support >= 70 ? 'חזקים בממוצע מול המתחרים'
-      : support >= 55 ? 'חיוביים בממוצע מול המתחרים'
-        : support >= 40 ? 'בחלק מהטווחים מעל המתחרים ובחלק מתחת' : 'עדיין חלשים בממוצע מול המתחרים';
+      : support >= 55 ? 'מעל המתחרים'
+        : support >= 40 ? 'ביצועים לא אחידים' : 'עדיין חלשים בממוצע מול המתחרים';
   const positionTone = (rank, total) => {
     const strength = total > 1 ? 1 - ((rank - 1) / (total - 1)) : .5;
     if (strength >= .75) return { color: '#087f5b', bg: '#ecfdf5', line: '#10b981' };
@@ -3509,7 +3509,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
             <span style="font-size:.72rem;color:#0f684f;background:#e9f8f2;border:1px solid #c9ebdf;border-radius:999px;padding:5px 9px;font-weight:800;max-width:49%;line-height:1.35;text-align:center;">כיוון השינוי: ${shortTermDirection}</span>
           </div>
           ${rankTrendChart(horizonPoints, 'מיקום הקופה ביחס למתחרים מטווח 12 חודשים ועד החודש האחרון', horizonNetFlows)}
-          <div style="margin-top:7px;padding:7px 9px;border-radius:8px;background:#f6f8fb;color:#334155;font-size:.76rem;font-weight:800;"><i class="fas fa-coins" style="color:#64748b;margin-left:5px;"></i>צבירה: ${shortFlowSummary}</div>
+          <div style="margin-top:7px;padding:7px 9px;border-radius:8px;background:#f6f8fb;color:#334155;font-size:.76rem;font-weight:800;"><i class="fas fa-coins" style="color:#64748b;margin-left:5px;"></i>${shortFlowSummary}</div>
         </section>
         <section style="border:1px solid #dfe6ee;border-radius:12px;padding:13px 14px 12px;background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);box-shadow:0 4px 12px rgba(15,39,68,.05);">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
@@ -3517,7 +3517,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
             <span style="font-size:.72rem;color:#1e3a5f;background:#eaf2fb;border:1px solid #cfdef0;border-radius:999px;padding:5px 9px;font-weight:800;max-width:49%;line-height:1.35;text-align:center;">כיוון לאורך שנים: ${trendDirection(yearPoints)}</span>
           </div>
           ${rankTrendChart(yearPoints, 'מיקום הקופה ביחס למתחרים לאורך חמש שנים', yearlyNetFlows)}
-          <div style="margin-top:7px;padding:7px 9px;border-radius:8px;background:#f6f8fb;color:#334155;font-size:.76rem;font-weight:800;"><i class="fas fa-coins" style="color:#64748b;margin-left:5px;"></i>צבירה: ${yearlyFlowSummary}</div>
+          <div style="margin-top:7px;padding:7px 9px;border-radius:8px;background:#f6f8fb;color:#334155;font-size:.76rem;font-weight:800;"><i class="fas fa-coins" style="color:#64748b;margin-left:5px;"></i>${yearlyFlowSummary}</div>
         </section>
       </div>
       <div style="margin-top:10px;padding:9px 11px;border-radius:9px;background:#f8fafc;color:#52637a;font-size:.75rem;line-height:1.55;"><strong style="color:#172f55;">איך לקרוא את הטווח הקצר:</strong> הכותרת מתארת את הרמה הממוצעת מול המתחרים בכל ארבעת הטווחים. תגית “כיוון השינוי” מתארת האם המיקום משתפר או נחלש. לכן קופה יכולה להיות עדיין חלשה בממוצע, אך להראות שיפור בחודש האחרון — שיפור נקודתי שעדיין אינו מגמה מבוססת. הקו מציג מיקום יחסי והעמודות מציגות צבירה נטו.</div>
