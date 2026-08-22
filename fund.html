@@ -3519,17 +3519,17 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
     if (latestSix.length !== 6 || previousSix.length !== 6) return 'אין מספיק נתונים להשוואת תנועת הכספים';
     const latest = latestSix.reduce((sum, value) => sum + value, 0) / 6;
     const previous = previousSix.reduce((sum, value) => sum + value, 0) / 6;
-    if (previous <= 0 && latest > 0) return 'מומנטום הגיוסים השתפר: מעבר מפדיונות לגיוסים';
-    if (previous >= 0 && latest < 0) return 'מומנטום הגיוסים נחלש: מעבר מגיוסים לפדיונות';
+    if (previous <= 0 && latest > 0) return 'שיפור בתנועת הכספים: מעבר מפדיונות לגיוסים';
+    if (previous >= 0 && latest < 0) return 'הרעה בתנועת הכספים: מעבר מגיוסים לפדיונות';
     if (latest < 0 && previous < 0) {
-      if (Math.abs(latest) > Math.abs(previous) * 1.15) return 'מומנטום הפדיונות נחלש: קצב יציאת הכספים גדל';
-      if (Math.abs(latest) < Math.abs(previous) * .85) return 'מומנטום הפדיונות משתפר: קצב יציאת הכספים הצטמצם';
-      return 'מומנטום הפדיונות יציב: קצב יציאת הכספים דומה';
+      if (Math.abs(latest) > Math.abs(previous) * 1.15) return 'הפדיונות מתגברים: קצב יציאת הכספים גדל';
+      if (Math.abs(latest) < Math.abs(previous) * .85) return 'הפדיונות מצטמצמים: קצב יציאת הכספים ירד';
+      return 'הפדיונות יציבים יחסית: קצב יציאת הכספים דומה';
     }
     if (latest > 0 && previous > 0) {
-      if (latest > previous * 1.15) return 'מומנטום הגיוסים מתחזק: קצב כניסת הכספים גדל';
-      if (latest < previous * .85) return 'מומנטום הגיוסים נחלש: קצב כניסת הכספים הצטמצם';
-      return 'מומנטום הגיוסים יציב: קצב כניסת הכספים דומה';
+      if (latest > previous * 1.15) return 'הגיוסים מתגברים: קצב כניסת הכספים גדל';
+      if (latest < previous * .85) return 'הגיוסים מצטמצמים: קצב כניסת הכספים ירד';
+      return 'הגיוסים יציבים יחסית: קצב כניסת הכספים דומה';
     }
     return 'אין שינוי ברור במומנטום הגיוסים והפדיונות';
   })();
