@@ -3376,7 +3376,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
     const absolute = Math.abs(value);
     return absolute >= 1000 ? `${sign}₪${(absolute / 1000).toFixed(1)}B` : `${sign}₪${Math.round(absolute)}M`;
   };
-  const rankTrendChart = (points, ariaLabel, netFlows = [], comparisonMode = false) => {
+  const rankTrendChart = (points, ariaLabel, netFlows = []) => {
     const width = 520;
     const left = 42;
     const right = 478;
@@ -3393,7 +3393,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
     const validFlows = netFlows.filter(entry => Number.isFinite(entry?.value));
     const flowLegend = validFlows.some(entry => String(entry?.fullLabel || '').startsWith('כניסה ויציאת כספים מצטברת'))
       ? 'כניסה ויציאת כספים מצטברת'
-      : 'צבירה נטו';
+      : 'גיוסים/פדיונות נטו';
     const maxFlow = Math.max(...validFlows.map(entry => Math.abs(entry.value)), 1);
     const barWidth = points.length >= 5 ? 34 : 44;
     const barsHtml = points.map((point, index) => {
@@ -3437,9 +3437,6 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
           ${linePoints ? `<polyline points="${linePoints}" fill="none" stroke="url(#${gradientId})" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></polyline>` : ''}
           ${pointHtml}
         </svg>
-        ${comparisonMode
-          ? '<div style="margin:-2px 22px 0;color:#718096;font-size:.73rem;font-weight:800;text-align:center;">כל הטווחים מסתיימים בחודש האחרון</div>'
-          : '<div style="display:flex;direction:ltr;justify-content:space-between;margin:-2px 22px 0;color:#718096;font-size:.73rem;font-weight:800;"><span dir="rtl">תחילת התקופה</span><span dir="rtl">עכשיו</span></div>'}
       </div>`;
   };
   const yearPoints = [...(thisFund?.components?.years || [])]
@@ -3517,11 +3514,11 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
   };
   const shortMonthlyFlows = latestTwelveRows.map(netDepositValue);
   const shortFlowSummary = (() => {
-    const lastThree = shortMonthlyFlows.slice(-3).filter(Number.isFinite);
-    const previousThree = shortMonthlyFlows.slice(-6, -3).filter(Number.isFinite);
-    if (lastThree.length !== 3 || previousThree.length !== 3) return 'אין מספיק נתונים להשוואת תנועת הכספים';
-    const latest = lastThree.reduce((sum, value) => sum + value, 0) / 3;
-    const previous = previousThree.reduce((sum, value) => sum + value, 0) / 3;
+    const latestSix = shortMonthlyFlows.slice(-6).filter(Number.isFinite);
+    const previousSix = shortMonthlyFlows.slice(-12, -6).filter(Number.isFinite);
+    if (latestSix.length !== 6 || previousSix.length !== 6) return 'אין מספיק נתונים להשוואת תנועת הכספים';
+    const latest = latestSix.reduce((sum, value) => sum + value, 0) / 6;
+    const previous = previousSix.reduce((sum, value) => sum + value, 0) / 6;
     if (previous <= 0 && latest > 0) return 'מומנטום הגיוסים השתפר: מעבר מפדיונות לגיוסים';
     if (previous >= 0 && latest < 0) return 'מומנטום הגיוסים נחלש: מעבר מגיוסים לפדיונות';
     if (latest < 0 && previous < 0) {
@@ -3546,7 +3543,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
             <div><div style="font-size:.82rem;color:#52637a;font-weight:900;">בדיקת מומנטום</div><div style="font-size:1rem;color:#172f55;font-weight:900;margin-top:3px;">${shortRankSummary}</div></div>
             <span style="font-size:.72rem;color:#0f684f;background:#e9f8f2;border:1px solid #c9ebdf;border-radius:999px;padding:5px 9px;font-weight:800;max-width:49%;line-height:1.35;text-align:center;">${shortTermDirection}</span>
           </div>
-          ${rankTrendChart(horizonPoints, 'דירוג הקופה לפי תשואה מצטברת בכל טווח, נכון לחודש האחרון', [], true)}
+          ${rankTrendChart(horizonPoints, 'דירוג הקופה לפי תשואה מצטברת בכל טווח, נכון לחודש האחרון')}
           <div style="margin-top:7px;padding:7px 9px;border-radius:8px;background:#f6f8fb;color:#334155;font-size:.76rem;font-weight:800;"><i class="fas fa-coins" style="color:#64748b;margin-left:5px;"></i>${shortFlowSummary}</div>
         </section>
         <section style="border:1px solid #dfe6ee;border-radius:12px;padding:13px 14px 12px;background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);box-shadow:0 4px 12px rgba(15,39,68,.05);">
@@ -3558,7 +3555,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
           <div style="margin-top:7px;padding:7px 9px;border-radius:8px;background:#f6f8fb;color:#334155;font-size:.76rem;font-weight:800;"><i class="fas fa-coins" style="color:#64748b;margin-left:5px;"></i>${yearlyFlowSummary}</div>
         </section>
       </div>
-      <div style="margin-top:10px;padding:9px 11px;border-radius:9px;background:#f8fafc;color:#52637a;font-size:.75rem;line-height:1.55;"><strong style="color:#172f55;">איך לקרוא את הטווח הקצר:</strong> הקו משווה את דירוג התשואה המצטברת בכל טווח, כאשר כל הטווחים מסתיימים בחודש האחרון. מסקנת הגיוסים או הפדיונות מחושבת בנפרד באמצעות השוואת הקצב החודשי הממוצע ב־3 החודשים האחרונים ל־3 שקדמו להם.</div>
+      <div style="margin-top:10px;padding:9px 11px;border-radius:9px;background:#f8fafc;color:#52637a;font-size:.75rem;line-height:1.55;"><strong style="color:#172f55;">איך לקרוא את הטווח הקצר:</strong> הקו משווה את דירוג התשואה המצטברת בכל טווח. מסקנת הגיוסים או הפדיונות מחושבת בנפרד באמצעות השוואת הקצב החודשי הממוצע ב־6 החודשים האחרונים ל־6 החודשים שקדמו להם.</div>
     </div>` : '';
 
   let compHtml = '';
@@ -3589,7 +3586,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
           </div>` : ''}
         </div>
         <div style="padding:9px 10px;border-radius:9px;background:#f8fafc;color:#52637a;font-size:.72rem;line-height:1.55;">
-          הצבירה נטו מוצגת כמידע משלים ואינה נכנסת לציון. הציון מודד ביצועים יחסיים, עקביות ושארפ; כניסת או יציאת כספים יכולה לנבוע גם משיווק, הסכמי מעסיקים והעברות לקוחות — ולא רק מאיכות ניהול ההשקעות.
+          הגיוסים/פדיונות נטו מוצגים כמידע משלים ואינם נכנסים לציון. הציון מודד ביצועים יחסיים, עקביות ושארפ; כניסת או יציאת כספים יכולה לנבוע גם משיווק, הסכמי מעסיקים והעברות לקוחות — ולא רק מאיכות ניהול ההשקעות.
         </div>
         </div>
       </details>`;
