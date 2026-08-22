@@ -5483,12 +5483,9 @@ const App = (() => {
   }
 
   function getFilteredActuarialRows() {
-    const q = (document.getElementById('global-search')?.value || '').toLowerCase().trim();
     return state.actuarial.rows.filter(row => {
       if (!companyPassesProviderFilters(row.companyName)) return false;
-      if (!q) return true;
-      const legalId = row.legalId ? String(row.legalId) : '';
-      return row.companyName.toLowerCase().includes(q) || legalId.includes(q);
+      return true;
     });
   }
 

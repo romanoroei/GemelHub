@@ -24330,6 +24330,18 @@ html body #scroll-top-btn {
   z-index: 2147483000 !important;
 }
 
+/* Final actuarial header contract. Keep range selection inside the filter panel. */
+html body.actuarial-mode #sidebar-toggle-btn { order: 1 !important; }
+html body.actuarial-mode #page-main-title { order: 2 !important; }
+html body.actuarial-mode #actuarial-pension-toggle { order: 3 !important; }
+html body.actuarial-mode .tsb-inner #custom-range-entry:not([hidden]),
+html body.actuarial-mode .tsb-inner .hero-search,
+html body.actuarial-mode .tsb-inner #advanced-search-open-btn:not([hidden]),
+html body.actuarial-mode .tsb-inner #compact-view-toggle,
+html body.actuarial-mode .tsb-inner #display-options-toggle {
+  display: none !important;
+}
+
 /* Navigation personalization and actuarial pension switch */
 .category-primary-nav > [data-category-order-id] {
   cursor: grab;
