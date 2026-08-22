@@ -3391,8 +3391,8 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
     });
     const linePoints = plotted.filter(Boolean).map(point => `${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(' ');
     const validFlows = netFlows.filter(entry => Number.isFinite(entry?.value));
-    const flowLegend = validFlows.some(entry => String(entry?.fullLabel || '').startsWith('ממוצע חודשי'))
-      ? 'ממוצע חודשי של כניסה ויציאת כספים'
+    const flowLegend = validFlows.some(entry => String(entry?.fullLabel || '').startsWith('כניסה ויציאת כספים מצטברת'))
+      ? 'כניסה ויציאת כספים מצטברת'
       : 'צבירה נטו';
     const maxFlow = Math.max(...validFlows.map(entry => Math.abs(entry.value)), 1);
     const barWidth = points.length >= 5 ? 34 : 44;
@@ -3496,8 +3496,8 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
     const values = latestTwelveRows.slice(-months).map(netDepositValue).filter(Number.isFinite);
     return {
       label: horizonNames[months],
-      fullLabel: `ממוצע חודשי של כניסת ויציאת כספים ב־${horizonNames[months]}`,
-      value: values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : NaN
+      fullLabel: `כניסה ויציאת כספים מצטברת ב־${horizonNames[months]}`,
+      value: values.length ? values.reduce((sum, value) => sum + value, 0) : NaN
     };
   });
   const flowSummary = (values, periodLabel) => {
@@ -3528,16 +3528,21 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
     const lastThree = shortMonthlyFlows.slice(-3).filter(Number.isFinite);
     const previousThree = shortMonthlyFlows.slice(-6, -3).filter(Number.isFinite);
     if (lastThree.length !== 3 || previousThree.length !== 3) return 'אין מספיק נתונים להשוואת תנועת הכספים';
-    const latest = lastThree.reduce((sum, value) => sum + value, 0);
-    const previous = previousThree.reduce((sum, value) => sum + value, 0);
-    const currentText = latest < 0 ? `יציאת כספים של ${formatMoneyPlain(Math.abs(latest))}` : `כניסת כספים של ${formatMoneyPlain(latest)}`;
-    const previousText = previous < 0 ? `יציאה של ${formatMoneyPlain(Math.abs(previous))}` : `כניסה של ${formatMoneyPlain(previous)}`;
-    const lastMonth = lastThree[lastThree.length - 1];
-    const priorMonth = lastThree[lastThree.length - 2];
-    const monthlyRelief = lastMonth < 0 && priorMonth < 0 && Math.abs(lastMonth) < Math.abs(priorMonth) * .9
-      ? ` בחודש האחרון היציאה הצטמצמה ל־${formatMoneyPlain(Math.abs(lastMonth))}.`
-      : '';
-    return `ב־3 החודשים האחרונים: ${currentText}, לעומת ${previousText} ב־3 החודשים שקדמו להם.${monthlyRelief}`;
+    const latest = lastThree.reduce((sum, value) => sum + value, 0) / 3;
+    const previous = previousThree.reduce((sum, value) => sum + value, 0) / 3;
+    if (previous <= 0 && latest > 0) return 'מומנטום הגיוסים השתפר: מעבר מפדיונות לגיוסים';
+    if (previous >= 0 && latest < 0) return 'מומנטום הגיוסים נחלש: מעבר מגיוסים לפדיונות';
+    if (latest < 0 && previous < 0) {
+      if (Math.abs(latest) > Math.abs(previous) * 1.15) return 'מומנטום הפדיונות נחלש: קצב יציאת הכספים גדל';
+      if (Math.abs(latest) < Math.abs(previous) * .85) return 'מומנטום הפדיונות משתפר: קצב יציאת הכספים הצטמצם';
+      return 'מומנטום הפדיונות יציב: קצב יציאת הכספים דומה';
+    }
+    if (latest > 0 && previous > 0) {
+      if (latest > previous * 1.15) return 'מומנטום הגיוסים מתחזק: קצב כניסת הכספים גדל';
+      if (latest < previous * .85) return 'מומנטום הגיוסים נחלש: קצב כניסת הכספים הצטמצם';
+      return 'מומנטום הגיוסים יציב: קצב כניסת הכספים דומה';
+    }
+    return 'אין שינוי ברור במומנטום הגיוסים והפדיונות';
   })();
   const yearlyFlowSummary = flowSummary(yearlyNetFlows.map(entry => entry.value), 'בשנה האחרונה');
   const protectionHtml = thisFund ? `
@@ -3561,7 +3566,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
           <div style="margin-top:7px;padding:7px 9px;border-radius:8px;background:#f6f8fb;color:#334155;font-size:.76rem;font-weight:800;"><i class="fas fa-coins" style="color:#64748b;margin-left:5px;"></i>${yearlyFlowSummary}</div>
         </section>
       </div>
-      <div style="margin-top:10px;padding:9px 11px;border-radius:9px;background:#f8fafc;color:#52637a;font-size:.75rem;line-height:1.55;"><strong style="color:#172f55;">איך לקרוא את הטווח הקצר:</strong> הכותרת מתארת את הרמה הממוצעת מול המתחרים בכל ארבעת הטווחים. תגית “כיוון השינוי” מתארת האם המיקום משתפר או נחלש. לכן קופה יכולה להיות עדיין חלשה בממוצע, אך להראות שיפור בחודש האחרון — שיפור נקודתי שעדיין אינו מגמה מבוססת. הקו מציג מיקום יחסי; העמודות מציגות ממוצע חודשי של כניסה או יציאת כספים, כדי להשוות באופן הוגן בין התקופות.</div>
+      <div style="margin-top:10px;padding:9px 11px;border-radius:9px;background:#f8fafc;color:#52637a;font-size:.75rem;line-height:1.55;"><strong style="color:#172f55;">איך לקרוא את הטווח הקצר:</strong> הכותרת מתארת את הרמה הממוצעת מול המתחרים בכל ארבעת הטווחים. הקו משווה את דירוג התשואה המצטברת בכל טווח; העמודות מציגות את כניסת או יציאת הכספים המצטברת באותו טווח. שורת המומנטום משווה את הקצב החודשי הממוצע ב־3 החודשים האחרונים ל־3 שקדמו להם.</div>
     </div>` : '';
 
   let compHtml = '';
