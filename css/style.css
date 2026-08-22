@@ -24330,6 +24330,60 @@ html body #scroll-top-btn {
   z-index: 2147483000 !important;
 }
 
+/* Navigation personalization and actuarial pension switch */
+.category-primary-nav > [data-category-order-id] {
+  cursor: grab;
+  touch-action: pan-x;
+}
+.category-primary-nav > [data-category-order-id]:active { cursor: grabbing; }
+.category-primary-nav > .is-category-dragging {
+  opacity: .42;
+  outline: 2px dashed #c6a643;
+  outline-offset: -3px;
+}
+.actuarial-pension-toggle {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid #d8c77f;
+  border-radius: 999px;
+  background: #fffdf4;
+  box-shadow: 0 2px 8px rgba(15, 35, 61, .08);
+  flex: 0 0 auto;
+}
+.actuarial-pension-toggle[hidden] { display: none !important; }
+.actuarial-pension-toggle button {
+  min-width: 68px;
+  padding: 7px 13px;
+  border: 0;
+  border-radius: 999px;
+  color: #536174;
+  background: transparent;
+  font: 700 .84rem/1 system-ui, sans-serif;
+  cursor: pointer;
+}
+.actuarial-pension-toggle button.is-active {
+  color: #fff;
+  background: #10253d;
+  box-shadow: 0 2px 7px rgba(16, 37, 61, .2);
+}
+
+@media (max-width: 1024px) {
+  html body.mobile-filter-open .whatsapp-float,
+  html body.mobile-filter-open .scroll-top-btn,
+  html body.mobile-filter-open #scroll-top-btn {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+  .actuarial-pension-toggle button {
+    min-width: 58px;
+    padding: 7px 10px;
+    font-size: .78rem;
+  }
+}
+
 @media (max-width: 1024px) {
   html body.mobile-filter-open #sidebar .provider-filter-name,
   html body.mobile-filter-open #sidebar #filter-tracks .filter-checkbox {

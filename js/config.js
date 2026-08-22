@@ -205,11 +205,12 @@ const CONFIG = {
       polisaAPI: true,
       trackList: [
         'polisa_kaklali','polisa_maniот','polisa_ashrai_maniот',
-        'polisa_global_maniот','polisa_global_kaklali','polisa_global_ashrai_agach',
         'polisa_sp500','polisa_okev_maniот','polisa_okev_gmish',
         'polisa_okev_agach','polisa_okev_agach_maniот',
         'polisa_maniот_sahar','polisa_meshulab_sahar','polisa_agach_sahar',
-        'polisa_agach_mimshalot','polisa_ashrai_agach','polisa_kayamut','polisa_halacha','polisa_ksafi'
+        'polisa_agach_mimshalot','polisa_ashrai_agach','polisa_kayamut','polisa_halacha','polisa_ksafi',
+        // ניהול עולמי הוא סקטור עצמאי וקבוע בסוף הרשימה.
+        'polisa_global_maniот','polisa_global_kaklali','polisa_global_ashrai_agach'
       ]
     },
     {

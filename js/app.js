@@ -1021,7 +1021,7 @@ const App = (() => {
 
   function getCategoryLabel(categoryId = state.activeCategoryId) {
     if (getCurrentCompareMode() === 'actuarial') {
-      return ACTUARIAL_CATEGORIES.find(item => item.catId === categoryId)?.label || '';
+      return 'איזון אקטוארי';
     }
     const cat = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === categoryId);
     return cat?.label || '';
@@ -1509,8 +1509,7 @@ const App = (() => {
 
   const PENSION_ACTUARIAL_CATS = new Set(['pension_mekafit', 'pension_mashlima']);
   const ACTUARIAL_CATEGORIES = Object.freeze([
-    { id: 'actuarial:pension_mekafit', catId: 'pension_mekafit', label: 'איזון אקטוארי מקיפה', actuarial: true },
-    { id: 'actuarial:pension_mashlima', catId: 'pension_mashlima', label: 'איזון אקטוארי משלימה', actuarial: true }
+    { id: 'actuarial:pension_mekafit', catId: 'pension_mekafit', label: 'איזון אקטוארי', actuarial: true }
   ]);
   const MOBILE_CATEGORY_LABELS = Object.freeze({
     pension_mashlima: 'פנסיה משלימה'
@@ -1554,7 +1553,7 @@ const App = (() => {
 
   function getCurrentMobileNavigationId() {
     return getCurrentCompareMode() === 'actuarial'
-      ? `actuarial:${state.activeCategoryId}`
+      ? 'actuarial:pension_mekafit'
       : state.activeCategoryId;
   }
 
@@ -3109,11 +3108,6 @@ const App = (() => {
       return btn;
     };
 
-    ['gemel_tagmulim', 'gemel_hashkaa', 'hashtalamot', 'polisa_chisachon', 'pension_mekafit', 'pension_mashlima'].forEach(id => {
-      const cat = byId.get(id);
-      if (cat) primaryNav.appendChild(makeCategoryButton(cat));
-    });
-
     const categoryTabsBar = bar.closest('.category-tabs-bar');
     const closeCategoryMenus = () => {
       document.querySelectorAll('.category-menu-panel').forEach(panel => { panel.hidden = true; });
@@ -3186,18 +3180,18 @@ const App = (() => {
       primaryNav.appendChild(wrap);
     };
 
-    makeMenu({
-      id: 'actuarial', label: 'איזון אקטוארי', icon: '',
-      primaryId: 'actuarial:pension_mekafit',
-      menuAriaLabel: 'בחירת סוג איזון אקטוארי',
-      itemIds: ['actuarial:pension_mekafit', 'actuarial:pension_mashlima'],
-      descriptions: {
-        'actuarial:pension_mekafit': 'איזון אקטוארי בקרנות פנסיה מקיפות',
-        'actuarial:pension_mashlima': 'איזון אקטוארי בקרנות פנסיה משלימות'
-      }
+    // Product categories share one persistent personal order. The lab and
+    // head-to-head actions are appended separately and cannot be dragged.
+    getOrderedProductCategories().forEach(cat => {
+      const button = makeCategoryButton(cat, {
+        label: cat.actuarial ? 'איזון אקטוארי' : cat.label,
+        icon: cat.actuarial ? '' : (cat.icon || '')
+      });
+      button.dataset.categoryOrderId = cat.id;
+      button.draggable = true;
+      primaryNav.appendChild(button);
     });
-    const childSavingsCategory = byId.get('hisachon_yeled');
-    if (childSavingsCategory) primaryNav.appendChild(makeCategoryButton(childSavingsCategory));
+    setupDesktopCategoryDrag(primaryNav);
     const sandboxBtn = document.createElement('button');
     sandboxBtn.className = 'cat-tab sandbox-tab';
     sandboxBtn.dataset.cat = 'sandbox';
@@ -3226,6 +3220,43 @@ const App = (() => {
           switchCategory(cid);
         }
       });
+    });
+  }
+
+  function setupDesktopCategoryDrag(container) {
+    let dragged = null;
+    let suppressClick = false;
+    container.querySelectorAll(':scope > [data-category-order-id]').forEach(item => {
+      item.title = 'ניתן לגרור לשינוי סדר הקטגוריות';
+      item.addEventListener('dragstart', event => {
+        dragged = item;
+        suppressClick = true;
+        item.classList.add('is-category-dragging');
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', item.dataset.categoryOrderId);
+      });
+      item.addEventListener('dragover', event => {
+        if (!dragged || dragged === item) return;
+        event.preventDefault();
+        const rect = item.getBoundingClientRect();
+        const insertBefore = event.clientX > rect.left + rect.width / 2;
+        container.insertBefore(dragged, insertBefore ? item : item.nextElementSibling);
+      });
+      item.addEventListener('drop', event => event.preventDefault());
+      item.addEventListener('dragend', () => {
+        const order = [...container.querySelectorAll(':scope > [data-category-order-id]')]
+          .map(node => node.dataset.categoryOrderId);
+        writeMobileCategoryOrder(order);
+        dragged?.classList.remove('is-category-dragging');
+        dragged = null;
+        renderMobileCategoryRail();
+        setTimeout(() => { suppressClick = false; }, 0);
+      });
+      item.addEventListener('click', event => {
+        if (!suppressClick) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }, true);
     });
   }
 
@@ -3336,7 +3367,7 @@ const App = (() => {
 
   function setActiveTab(catId) {
     const activeNavigationId = getCurrentCompareMode() === 'actuarial'
-      ? `actuarial:${catId}`
+      ? 'actuarial:pension_mekafit'
       : catId;
     document.querySelectorAll('.cat-tab[data-cat]').forEach(t =>
       t.classList.toggle('active', t.dataset.cat === activeNavigationId));
@@ -3571,10 +3602,11 @@ const App = (() => {
     const mode = getCurrentCompareMode();
     const actuarialAvailable = isActuarialModeAvailable();
     document.body.classList.toggle('actuarial-mode', mode === 'actuarial');
+    syncActuarialPensionToggle(mode);
 
     if (toggle) {
-      // Actuarial balance is exposed as two standalone categories. Keep the old
-      // in-category mode switch hidden so pension categories contain tracks only.
+      // Actuarial balance is exposed as one standalone category. Its pension
+      // type is selected by the compact toggle in the search bar.
       toggle.hidden = true;
       toggle.style.display = 'none';
       toggle.querySelectorAll('[data-compare-mode]').forEach(btn => {
@@ -3605,6 +3637,26 @@ const App = (() => {
     }
     syncCompactViewToggle();
     syncTracksDensityClasses();
+  }
+
+  function syncActuarialPensionToggle(mode = getCurrentCompareMode()) {
+    const toggle = document.getElementById('actuarial-pension-toggle');
+    if (!toggle) return;
+    const visible = mode === 'actuarial' && PENSION_ACTUARIAL_CATS.has(state.activeCategoryId);
+    toggle.hidden = !visible;
+    toggle.querySelectorAll('[data-actuarial-pension]').forEach(button => {
+      const active = button.dataset.actuarialPension === state.activeCategoryId;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+      if (button.dataset.actuarialBound === '1') return;
+      button.dataset.actuarialBound = '1';
+      button.addEventListener('click', () => {
+        const catId = button.dataset.actuarialPension;
+        if (!PENSION_ACTUARIAL_CATS.has(catId) || catId === state.activeCategoryId) return;
+        state.pendingCompareMode = 'actuarial';
+        switchCategory(catId);
+      });
+    });
   }
 
   function updateComparisonUrl() {
@@ -4561,11 +4613,13 @@ const App = (() => {
   function applySavedTrackOrder(organized, catId) {
     const availableIds = organized.map(item => String(item.track.id));
     const savedOrder = readTrackOrder(catId, availableIds);
-    if (!savedOrder.length) return organized;
     const rank = new Map(savedOrder.map((id, index) => [id, index]));
     return organized
       .map((item, index) => ({ item, index }))
       .sort((a, b) => {
+        const aGlobal = a.item.track.group === 'global_management' ? 1 : 0;
+        const bGlobal = b.item.track.group === 'global_management' ? 1 : 0;
+        if (aGlobal !== bGlobal) return aGlobal - bGlobal;
         const aRank = rank.has(String(a.item.track.id)) ? rank.get(String(a.item.track.id)) : Number.MAX_SAFE_INTEGER;
         const bRank = rank.has(String(b.item.track.id)) ? rank.get(String(b.item.track.id)) : Number.MAX_SAFE_INTEGER;
         return aRank - bRank || a.index - b.index;
@@ -4577,7 +4631,11 @@ const App = (() => {
     const orderedIds = [...container.querySelectorAll('.filter-track-row[data-track-id]')]
       .map(row => row.dataset.trackId);
     const byId = new Map(state.organizedData.map(item => [String(item.track.id), item]));
-    const reordered = orderedIds.map(id => byId.get(String(id))).filter(Boolean);
+    const domOrdered = orderedIds.map(id => byId.get(String(id))).filter(Boolean);
+    const reordered = [
+      ...domOrdered.filter(item => item.track.group !== 'global_management'),
+      ...domOrdered.filter(item => item.track.group === 'global_management')
+    ];
     state.organizedData.forEach(item => {
       if (!orderedIds.includes(String(item.track.id))) reordered.push(item);
     });
@@ -4598,7 +4656,9 @@ const App = (() => {
         event.preventDefault();
         event.stopPropagation();
         const row = handle.closest('.filter-track-row');
-        const rows = [...container.querySelectorAll('.filter-track-row')];
+        const group = row.dataset.trackGroup;
+        const rows = [...container.querySelectorAll('.filter-track-row')]
+          .filter(candidate => candidate.dataset.trackGroup === group);
         const index = rows.indexOf(row);
         const target = rows[index + (event.key === 'ArrowUp' ? -1 : 1)];
         if (!target) return;
@@ -4634,7 +4694,7 @@ const App = (() => {
           moveEvent.preventDefault();
           ghost.style.top = `${moveEvent.clientY - rect.height / 2}px`;
           const target = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY)?.closest('.filter-track-row');
-          if (!target || target === row || !container.contains(target)) return;
+          if (!target || target === row || !container.contains(target) || target.dataset.trackGroup !== row.dataset.trackGroup) return;
           const targetRect = target.getBoundingClientRect();
           container.insertBefore(row, moveEvent.clientY < targetRect.top + targetRect.height / 2 ? target : target.nextElementSibling);
         };
@@ -4695,6 +4755,7 @@ const App = (() => {
       const label = document.createElement('label');
       label.className = 'filter-checkbox filter-track-row' + (track.group ? ' filter-checkbox-sub' : '');
       label.dataset.trackId = track.id;
+      label.dataset.trackGroup = track.group || 'main';
       label.innerHTML = `
         <button type="button" class="track-drag-handle" aria-label="גרור לשינוי סדר המסלול ${track.label}" title="גרור לשינוי סדר">
           <i class="fas fa-grip-vertical" aria-hidden="true"></i>

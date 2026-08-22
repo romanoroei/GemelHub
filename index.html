@@ -58,7 +58,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css?v=mobile-search-brand-refresh-20260815" />
+  <link rel="stylesheet" href="css/style.css?v=navigation-groups-20260822" />
   <style>
     @media (max-width: 760px) {
       .advanced-search-overlay { z-index: 9500 !important; }
@@ -263,6 +263,10 @@
                aria-haspopup="listbox"
                aria-autocomplete="list" />
         <div id="search-dropdown" class="search-dropdown" style="display:none;"></div>
+      </div>
+      <div class="actuarial-pension-toggle" id="actuarial-pension-toggle" hidden role="group" aria-label="סוג קרן פנסיה לאיזון אקטוארי">
+        <button type="button" class="is-active" data-actuarial-pension="pension_mekafit" aria-pressed="true">מקיפה</button>
+        <button type="button" data-actuarial-pension="pension_mashlima" aria-pressed="false">משלימה</button>
       </div>
       <button type="button" class="advanced-search-open-btn" id="advanced-search-open-btn"
               title="חיפוש מתקדם" aria-label="חיפוש מתקדם" hidden>
@@ -810,7 +814,7 @@
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="js/config.js?v=polisa-global-management-20260822"></script>
+<script src="js/config.js?v=navigation-groups-20260822"></script>
 <script src="js/analytics.js?v=ga-20260704"></script>
 <script src="js/api.js?v=hide-empty-return-funds-20260822"></script>
 <!-- Mobile fund search overlay -->
@@ -831,6 +835,6 @@
 
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
-  <script src="js/app.js?v=polisa-global-manager-names-20260822"></script>
+  <script src="js/app.js?v=navigation-groups-20260822"></script>
 </body>
 </html>
