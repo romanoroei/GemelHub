@@ -679,6 +679,19 @@ const APIModule = (() => {
     return records.filter(r => Number(r.REPORT_PERIOD) === maxPeriod);
   }
 
+  // בטבלאות אין ערך לשורה שכל נתוני התשואה שלה ריקים.
+  // אפס הוא נתון תקין; רק null/undefined/מחרוזת ריקה/ערך לא מספרי נחשבים חסרים.
+  function hasAnyReturnData(record, yields12M = null) {
+    const values = [
+      record.MONTHLY_YIELD,
+      record.YEAR_TO_DATE_YIELD,
+      record.YIELD_TRAILING_3_YRS,
+      record.YIELD_TRAILING_5_YRS,
+      yields12M ? yields12M.get(String(record.FUND_ID)) : null
+    ];
+    return values.some(value => value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value)));
+  }
+
   // ─── סנן לפי יצרנים מורשים ───────────────────────────────────
   function filterByAllowedProviders(records) {
     return records.filter(r =>
@@ -832,6 +845,7 @@ const APIModule = (() => {
       : isPolisa
         ? await get12MYieldsPolisa()
         : await get12MYields();
+    records = records.filter(record => hasAnyReturnData(record, yields12M));
 
     const organized = [];
 
@@ -892,6 +906,7 @@ const APIModule = (() => {
       : catMeta?.polisaAPI
         ? await get12MYieldsPolisa()
         : await get12MYields();
+    records = records.filter(record => hasAnyReturnData(record, yields12M));
     records.sort((a, b) =>
       ((yields12M.get(String(b.FUND_ID)) ?? -9999) - (yields12M.get(String(a.FUND_ID)) ?? -9999))
     );
@@ -2006,6 +2021,7 @@ const APIModule = (() => {
       : isPolisa
         ? await get12MYieldsPolisa()
         : await get12MYields();
+    peers = peers.filter(record => hasAnyReturnData(record, yields12M));
     return peers.sort((a, b) =>
       ((yields12M.get(String(b.FUND_ID)) ?? -9999) - (yields12M.get(String(a.FUND_ID)) ?? -9999))
     );
