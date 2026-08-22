@@ -2362,7 +2362,7 @@ const APIModule = (() => {
   async function computeGemelHubScores(fundId, catId) {
     const cacheKey = `${catId}_${fundId}`;
     if (_cachedGHScores.has(cacheKey)) return _cachedGHScores.get(cacheKey);
-    const lsKey = `gemelhub_ghscore_v17_${cacheKey}`;
+    const lsKey = `gemelhub_ghscore_v18_${cacheKey}`;
     const lsCached = _lsLoad(lsKey);
     if (lsCached) { _cachedGHScores.set(cacheKey, lsCached); return lsCached; }
 
@@ -2423,8 +2423,11 @@ const APIModule = (() => {
 
     // סנן לרשומות הסיווג הנכון בלבד — subMatchFn לא מופעל כאן כי שמות/SUB_SPECIALIZATION
     // משתנים בנתונים ישנים; סינון המסלול מתבצע דרך activeFundIds (נתונים נוכחיים בלבד)
+    // Preserve a fund's history by FUND_ID even when its manager changed.
+    // Provider eligibility is enforced below through the current active peers;
+    // filtering every historical row by its former manager incorrectly erased
+    // valid years (for example fund 7975 before it moved to Phoenix).
     const trackRecords = allRaw.filter(r =>
-      isProviderAllowed(r.CONTROLLING_CORPORATION, r.MANAGING_CORPORATION) &&
       !(r.FUND_NAME || '').includes('בניהול אישי') &&
       !(isPolisa && _isPolisaExcluded(r.FUND_NAME)) &&
       (r.FUND_CLASSIFICATION || '').trim() === cls &&

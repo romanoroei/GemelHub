@@ -3286,7 +3286,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
     && Number.isFinite(oneMonthStrength) && Number.isFinite(twelveMonthStrength)
     && oneMonthStrength - twelveMonthStrength < -.12;
   const trend = recentJumpWithoutConfirmation
-    ? { ...rawTrend, text: 'שיפור בחודש האחרון, אך עדיין אין מגמה ברורה', icon: '↗' }
+    ? { ...rawTrend, text: 'הביצועים האחרונים טובים מהביצועים השנתיים, אך התמונה עדיין אינה אחידה', icon: '↗' }
     : recentDropWithoutConfirmation
       ? { ...rawTrend, text: 'הטווח הקצר נחלש, אך התמונה עדיין אינה אחידה', icon: '↓' }
       : protection.timingLabel === 'unclear_trend' && clearlyStableShortTerm
@@ -3376,7 +3376,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
     const absolute = Math.abs(value);
     return absolute >= 1000 ? `${sign}₪${(absolute / 1000).toFixed(1)}B` : `${sign}₪${Math.round(absolute)}M`;
   };
-  const rankTrendChart = (points, ariaLabel, netFlows = []) => {
+  const rankTrendChart = (points, ariaLabel, netFlows = [], comparisonMode = false) => {
     const width = 520;
     const left = 42;
     const right = 478;
@@ -3391,6 +3391,9 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
     });
     const linePoints = plotted.filter(Boolean).map(point => `${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(' ');
     const validFlows = netFlows.filter(entry => Number.isFinite(entry?.value));
+    const flowLegend = validFlows.some(entry => String(entry?.fullLabel || '').startsWith('ממוצע חודשי'))
+      ? 'ממוצע חודשי של כניסה ויציאת כספים'
+      : 'צבירה נטו';
     const maxFlow = Math.max(...validFlows.map(entry => Math.abs(entry.value)), 1);
     const barWidth = points.length >= 5 ? 34 : 44;
     const barsHtml = points.map((point, index) => {
@@ -3422,7 +3425,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
       <div style="position:relative;margin-top:7px;max-width:100%;overflow:hidden;">
         <div style="display:flex;justify-content:flex-end;gap:12px;color:#52637a;font-size:.76rem;font-weight:800;margin:0 5px 2px;">
           <span><i style="display:inline-block;width:13px;height:2px;background:#4569b3;vertical-align:middle;margin-left:3px;"></i>מיקום יחסי</span>
-          ${hasNetFlows ? '<span><i style="display:inline-block;width:8px;height:8px;background:#4fbe95;vertical-align:middle;margin-left:3px;border-radius:2px;"></i>צבירה נטו</span>' : ''}
+          ${hasNetFlows ? `<span><i style="display:inline-block;width:8px;height:8px;background:#4fbe95;vertical-align:middle;margin-left:3px;border-radius:2px;"></i>${flowLegend}</span>` : ''}
         </div>
         <svg viewBox="0 0 ${width} 170" role="img" aria-label="${ariaLabel}" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;max-width:100%;height:auto;overflow:hidden;">
           <defs><linearGradient id="${gradientId}" x1="0" x2="1"><stop offset="0" stop-color="#64748b"></stop><stop offset="1" stop-color="#2563eb"></stop></linearGradient></defs>
@@ -3434,13 +3437,15 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
           ${linePoints ? `<polyline points="${linePoints}" fill="none" stroke="url(#${gradientId})" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></polyline>` : ''}
           ${pointHtml}
         </svg>
-        <div style="display:flex;direction:ltr;justify-content:space-between;margin:-2px 22px 0;color:#718096;font-size:.73rem;font-weight:800;"><span dir="rtl">תחילת התקופה</span><span dir="rtl">עכשיו</span></div>
+        ${comparisonMode
+          ? '<div style="margin:-2px 22px 0;color:#718096;font-size:.73rem;font-weight:800;text-align:center;">כל הטווחים מסתיימים בחודש האחרון</div>'
+          : '<div style="display:flex;direction:ltr;justify-content:space-between;margin:-2px 22px 0;color:#718096;font-size:.73rem;font-weight:800;"><span dir="rtl">תחילת התקופה</span><span dir="rtl">עכשיו</span></div>'}
       </div>`;
   };
   const yearPoints = [...(thisFund?.components?.years || [])]
     .sort((a, b) => Number(a.year) - Number(b.year))
     .map(year => ({ rank: year.rank, total: year.total, label: String(year.year) }));
-  const horizonNames = { 1: 'חודש', 3: '3 ח׳', 6: '6 ח׳', 12: '12 ח׳' };
+  const horizonNames = { 1: 'חודש אחרון', 3: '3 ח׳ מצטבר', 6: '6 ח׳ מצטבר', 12: '12 ח׳ מצטבר' };
   const horizonPositions = protection.horizonPositions || {};
   const horizonPoints = [12, 6, 3, 1].map(months => {
     const position = horizonPositions[months] || horizonPositions[String(months)];
@@ -3464,13 +3469,11 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
     const valid = horizonPoints.filter(point => Number.isFinite(point.rank) && Number.isFinite(point.total));
     if (valid.length < 2) return 'אין מספיק נתונים לזיהוי כיוון';
     const change = rankStrength(valid[valid.length - 1]) - rankStrength(valid[0]);
-    if (change < -.12) return Number.isFinite(support) && support >= 55
-      ? 'עדיין חיובי, אך נחלש לאחרונה'
-      : 'נחלש בטווח הקצר';
+    if (change < -.12) return 'הטווחים האחרונים חלשים מהביצועים השנתיים';
     if (change > .12) return Number.isFinite(support) && support < 40
-      ? 'שיפור בחודש האחרון — עדיין לא מגמה מבוססת'
-      : 'מתחזק בטווח הקצר';
-    return 'יציב בטווח הקצר';
+      ? 'הביצועים האחרונים טובים מהביצועים השנתיים — עדיין חלשים בממוצע'
+      : 'הביצועים האחרונים טובים מהביצועים השנתיים';
+    return 'דירוג דומה בכל טווחי הבדיקה';
   })();
   const longTermDirection = trendDirection(yearPoints);
   const longTermSummary = longTermDirection === 'מגמת המיקום משתפרת' || longTermDirection === 'חזרה לעוצמה אחרי תקופה חלשה'
@@ -3493,8 +3496,8 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
     const values = latestTwelveRows.slice(-months).map(netDepositValue).filter(Number.isFinite);
     return {
       label: horizonNames[months],
-      fullLabel: `צבירה נטו ב־${horizonNames[months]}`,
-      value: values.length ? values.reduce((sum, value) => sum + value, 0) : NaN
+      fullLabel: `ממוצע חודשי של כניסת ויציאת כספים ב־${horizonNames[months]}`,
+      value: values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : NaN
     };
   });
   const flowSummary = (values, periodLabel) => {
@@ -3524,11 +3527,17 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
   const shortFlowSummary = (() => {
     const lastThree = shortMonthlyFlows.slice(-3).filter(Number.isFinite);
     const previousThree = shortMonthlyFlows.slice(-6, -3).filter(Number.isFinite);
-    const values = [
-      previousThree.length ? previousThree.reduce((sum, value) => sum + value, 0) : NaN,
-      lastThree.length ? lastThree.reduce((sum, value) => sum + value, 0) : NaN
-    ];
-    return flowSummary(values, 'בשלושת החודשים האחרונים');
+    if (lastThree.length !== 3 || previousThree.length !== 3) return 'אין מספיק נתונים להשוואת תנועת הכספים';
+    const latest = lastThree.reduce((sum, value) => sum + value, 0);
+    const previous = previousThree.reduce((sum, value) => sum + value, 0);
+    const currentText = latest < 0 ? `יציאת כספים של ${formatMoneyPlain(Math.abs(latest))}` : `כניסת כספים של ${formatMoneyPlain(latest)}`;
+    const previousText = previous < 0 ? `יציאה של ${formatMoneyPlain(Math.abs(previous))}` : `כניסה של ${formatMoneyPlain(previous)}`;
+    const lastMonth = lastThree[lastThree.length - 1];
+    const priorMonth = lastThree[lastThree.length - 2];
+    const monthlyRelief = lastMonth < 0 && priorMonth < 0 && Math.abs(lastMonth) < Math.abs(priorMonth) * .9
+      ? ` בחודש האחרון היציאה הצטמצמה ל־${formatMoneyPlain(Math.abs(lastMonth))}.`
+      : '';
+    return `ב־3 החודשים האחרונים: ${currentText}, לעומת ${previousText} ב־3 החודשים שקדמו להם.${monthlyRelief}`;
   })();
   const yearlyFlowSummary = flowSummary(yearlyNetFlows.map(entry => entry.value), 'בשנה האחרונה');
   const protectionHtml = thisFund ? `
@@ -3540,7 +3549,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
             <div><div style="font-size:.82rem;color:#52637a;font-weight:900;">בדיקת מומנטום</div><div style="font-size:1rem;color:#172f55;font-weight:900;margin-top:3px;">${shortRankSummary}</div></div>
             <span style="font-size:.72rem;color:#0f684f;background:#e9f8f2;border:1px solid #c9ebdf;border-radius:999px;padding:5px 9px;font-weight:800;max-width:49%;line-height:1.35;text-align:center;">${shortTermDirection}</span>
           </div>
-          ${rankTrendChart(horizonPoints, 'מיקום הקופה ביחס למתחרים מטווח 12 חודשים ועד החודש האחרון', horizonNetFlows)}
+          ${rankTrendChart(horizonPoints, 'דירוג הקופה לפי תשואה מצטברת בכל טווח, נכון לחודש האחרון', horizonNetFlows, true)}
           <div style="margin-top:7px;padding:7px 9px;border-radius:8px;background:#f6f8fb;color:#334155;font-size:.76rem;font-weight:800;"><i class="fas fa-coins" style="color:#64748b;margin-left:5px;"></i>${shortFlowSummary}</div>
         </section>
         <section style="border:1px solid #dfe6ee;border-radius:12px;padding:13px 14px 12px;background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);box-shadow:0 4px 12px rgba(15,39,68,.05);">
@@ -3552,7 +3561,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
           <div style="margin-top:7px;padding:7px 9px;border-radius:8px;background:#f6f8fb;color:#334155;font-size:.76rem;font-weight:800;"><i class="fas fa-coins" style="color:#64748b;margin-left:5px;"></i>${yearlyFlowSummary}</div>
         </section>
       </div>
-      <div style="margin-top:10px;padding:9px 11px;border-radius:9px;background:#f8fafc;color:#52637a;font-size:.75rem;line-height:1.55;"><strong style="color:#172f55;">איך לקרוא את הטווח הקצר:</strong> הכותרת מתארת את הרמה הממוצעת מול המתחרים בכל ארבעת הטווחים. תגית “כיוון השינוי” מתארת האם המיקום משתפר או נחלש. לכן קופה יכולה להיות עדיין חלשה בממוצע, אך להראות שיפור בחודש האחרון — שיפור נקודתי שעדיין אינו מגמה מבוססת. הקו מציג מיקום יחסי והעמודות מציגות צבירה נטו.</div>
+      <div style="margin-top:10px;padding:9px 11px;border-radius:9px;background:#f8fafc;color:#52637a;font-size:.75rem;line-height:1.55;"><strong style="color:#172f55;">איך לקרוא את הטווח הקצר:</strong> הכותרת מתארת את הרמה הממוצעת מול המתחרים בכל ארבעת הטווחים. תגית “כיוון השינוי” מתארת האם המיקום משתפר או נחלש. לכן קופה יכולה להיות עדיין חלשה בממוצע, אך להראות שיפור בחודש האחרון — שיפור נקודתי שעדיין אינו מגמה מבוססת. הקו מציג מיקום יחסי; העמודות מציגות ממוצע חודשי של כניסה או יציאת כספים, כדי להשוות באופן הוגן בין התקופות.</div>
     </div>` : '';
 
   let compHtml = '';
