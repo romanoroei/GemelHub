@@ -343,7 +343,7 @@
 
   <script src="js/config.js?v=polisa-global-management-20260822"></script>
   <script src="js/analytics.js?v=ga-20260704"></script>
-  <script src="js/api.js?v=peer-average-return-20260822"></script>
+  <script src="js/api.js?v=hide-empty-return-funds-20260822"></script>
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
 <script>
@@ -2546,12 +2546,6 @@ function buildPeersCumGapsTable(peersCumGaps, myFundId) {
 
   const myRank = peersCumGaps.findIndex(p => p.isMe) + 1;
   const total  = peersCumGaps.length;
-  const myPeerBenchmark = peersCumGaps.find(p => p.isMe && Number.isFinite(p.peerCumReturn))
-    || peersCumGaps.find(p => Number.isFinite(p.peerCumReturn));
-  const peerAverageReturn = myPeerBenchmark?.peerCumReturn;
-  const peerAverageDisplay = Number.isFinite(peerAverageReturn)
-    ? `${peerAverageReturn >= 0 ? '+' : ''}${peerAverageReturn.toFixed(1)}%`
-    : '—';
 
   // זהה מנהלים שמופיעים יותר מפעם אחת (שני מסלולים שונים)
   const provCount = new Map();
@@ -2620,18 +2614,7 @@ function buildPeersCumGapsTable(peersCumGaps, myFundId) {
           <th style="padding:8px 10px;font-size:.71rem;color:#0c2134;font-weight:900;text-align:center;">% מעל ממוצע</th>
         </tr>
       </thead>
-      <tbody>
-        <tr style="background:#eef5ff;border-top:1px solid #cbdced;border-bottom:1px solid #cbdced;">
-          <td style="padding:9px 10px;text-align:center;color:#64748b;font-weight:900;">—</td>
-          <td style="padding:9px 8px;font-size:.84rem;font-weight:900;color:#0f2744;">
-            ממוצע המתחרים
-            <div style="font-size:.68rem;color:#64748b;font-weight:700;margin-top:2px;">תשואה מצטברת ממוצעת ב־36 החודשים שנבדקו</div>
-          </td>
-          <td style="padding:9px 10px;font-size:.86rem;font-weight:900;color:#1d4ed8;">${peerAverageDisplay}</td>
-          <td style="padding:9px 10px;font-size:.74rem;color:#64748b;text-align:center;">—</td>
-        </tr>
-        ${rows}
-      </tbody>
+      <tbody>${rows}</tbody>
     </table>`;
 }
 
@@ -3338,13 +3321,13 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
     </div>`;
   })() : '';
 
-  const consistencyLabel = protection.dataConsistency === 'high' ? 'גבוהה'
-    : protection.dataConsistency === 'medium' ? 'בינונית' : 'נמוכה';
+  const consistencyLabel = protection.dataConsistency === 'high' ? 'הדירוג משתנה מעט משנה לשנה'
+    : protection.dataConsistency === 'medium' ? 'הדירוג משתנה במידה בינונית משנה לשנה' : 'הדירוג משתנה מאוד משנה לשנה';
   const support = protection.shortTermSupport;
   const supportLabel = !Number.isFinite(support) ? 'אין מספיק נתונים'
     : support >= 70 ? 'חזקים בממוצע מול המתחרים'
       : support >= 55 ? 'חיוביים בממוצע מול המתחרים'
-        : support >= 40 ? 'סביב אמצע דירוג המתחרים' : 'עדיין חלשים בממוצע מול המתחרים';
+        : support >= 40 ? 'בחלק מהטווחים מעל המתחרים ובחלק מתחת' : 'עדיין חלשים בממוצע מול המתחרים';
   const positionTone = (rank, total) => {
     const strength = total > 1 ? 1 - ((rank - 1) / (total - 1)) : .5;
     if (strength >= .75) return { color: '#087f5b', bg: '#ecfdf5', line: '#10b981' };
@@ -3482,6 +3465,40 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
       value: values.length ? values.reduce((sum, value) => sum + value, 0) : NaN
     };
   });
+  const flowSummary = (values, periodLabel) => {
+    const valid = values.filter(Number.isFinite);
+    if (!valid.length) return 'אין נתוני צבירה זמינים';
+    const latest = valid[valid.length - 1];
+    const previous = valid.length > 1 ? valid[valid.length - 2] : null;
+    if (latest < 0) {
+      if (Number.isFinite(previous) && previous < 0) {
+        if (Math.abs(latest) > Math.abs(previous) * 1.2) return `הפדיונות גדלו ${periodLabel}`;
+        if (Math.abs(latest) < Math.abs(previous) * .8) return `הפדיונות הצטמצמו ${periodLabel}`;
+        return `הפדיונות נותרו בהיקף דומה ${periodLabel}`;
+      }
+      return `נרשמו פדיונות נטו ${periodLabel}`;
+    }
+    if (latest > 0) {
+      if (Number.isFinite(previous) && previous > 0) {
+        if (latest > previous * 1.2) return `הגיוסים גדלו ${periodLabel}`;
+        if (latest < previous * .8) return `הגיוסים נחלשו ${periodLabel}`;
+        return `הגיוסים נותרו בהיקף דומה ${periodLabel}`;
+      }
+      return `נרשמו גיוסים נטו ${periodLabel}`;
+    }
+    return `ללא שינוי מהותי בצבירה ${periodLabel}`;
+  };
+  const shortMonthlyFlows = latestTwelveRows.map(netDepositValue);
+  const shortFlowSummary = (() => {
+    const lastThree = shortMonthlyFlows.slice(-3).filter(Number.isFinite);
+    const previousThree = shortMonthlyFlows.slice(-6, -3).filter(Number.isFinite);
+    const values = [
+      previousThree.length ? previousThree.reduce((sum, value) => sum + value, 0) : NaN,
+      lastThree.length ? lastThree.reduce((sum, value) => sum + value, 0) : NaN
+    ];
+    return flowSummary(values, 'בשלושת החודשים האחרונים');
+  })();
+  const yearlyFlowSummary = flowSummary(yearlyNetFlows.map(entry => entry.value), 'בשנה האחרונה');
   const protectionHtml = thisFund ? `
     <div style="padding:15px 18px 17px;background:#fff;border-bottom:1px solid #e8eef5;">
       <div style="margin-bottom:10px;font-size:.8rem;font-weight:900;color:#172f55;">ביצועים לאורך זמן</div>
@@ -3492,6 +3509,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
             <span style="font-size:.72rem;color:#0f684f;background:#e9f8f2;border:1px solid #c9ebdf;border-radius:999px;padding:5px 9px;font-weight:800;max-width:49%;line-height:1.35;text-align:center;">כיוון השינוי: ${shortTermDirection}</span>
           </div>
           ${rankTrendChart(horizonPoints, 'מיקום הקופה ביחס למתחרים מטווח 12 חודשים ועד החודש האחרון', horizonNetFlows)}
+          <div style="margin-top:7px;padding:7px 9px;border-radius:8px;background:#f6f8fb;color:#334155;font-size:.76rem;font-weight:800;"><i class="fas fa-coins" style="color:#64748b;margin-left:5px;"></i>צבירה: ${shortFlowSummary}</div>
         </section>
         <section style="border:1px solid #dfe6ee;border-radius:12px;padding:13px 14px 12px;background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);box-shadow:0 4px 12px rgba(15,39,68,.05);">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
@@ -3499,6 +3517,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
             <span style="font-size:.72rem;color:#1e3a5f;background:#eaf2fb;border:1px solid #cfdef0;border-radius:999px;padding:5px 9px;font-weight:800;max-width:49%;line-height:1.35;text-align:center;">כיוון לאורך שנים: ${trendDirection(yearPoints)}</span>
           </div>
           ${rankTrendChart(yearPoints, 'מיקום הקופה ביחס למתחרים לאורך חמש שנים', yearlyNetFlows)}
+          <div style="margin-top:7px;padding:7px 9px;border-radius:8px;background:#f6f8fb;color:#334155;font-size:.76rem;font-weight:800;"><i class="fas fa-coins" style="color:#64748b;margin-left:5px;"></i>צבירה: ${yearlyFlowSummary}</div>
         </section>
       </div>
       <div style="margin-top:10px;padding:9px 11px;border-radius:9px;background:#f8fafc;color:#52637a;font-size:.75rem;line-height:1.55;"><strong style="color:#172f55;">איך לקרוא את הטווח הקצר:</strong> הכותרת מתארת את הרמה הממוצעת מול המתחרים בכל ארבעת הטווחים. תגית “כיוון השינוי” מתארת האם המיקום משתפר או נחלש. לכן קופה יכולה להיות עדיין חלשה בממוצע, אך להראות שיפור בחודש האחרון — שיפור נקודתי שעדיין אינו מגמה מבוססת. הקו מציג מיקום יחסי והעמודות מציגות צבירה נטו.</div>
@@ -3506,15 +3525,17 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
 
   let compHtml = '';
   if (thisFund) {
-    const { consistencyScore, sharpeScore, currentYearScore, currentYearMonths, currentYearWeightPct } = thisFund.components;
+    const { consistencyScore, sharpeScore, currentYearScore, currentYearMonths, currentYearWeightPct, eachYearWeightPct } = thisFund.components;
+    const consistencyWeightPct = eachYearWeightPct * 5;
     compHtml = `
       <details style="padding:13px 16px;border-bottom:1px solid #eef2f7;">
         <summary style="cursor:pointer;list-style:none;font-size:.76rem;font-weight:900;color:#0f2744;">פירוט רכיבי הציון <i class="fas fa-chevron-down" style="color:#64748b;margin-right:5px;font-size:.65rem;"></i></summary>
         <div style="margin-top:10px;">
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
           <div style="flex:1;min-width:90px;background:#eff6ff;border-radius:10px;padding:9px;text-align:center;">
-            <div style="font-size:.69rem;color:#3b82f6;font-weight:700;margin-bottom:3px;">עקביות 5 שנים</div>
+            <div style="font-size:.69rem;color:#3b82f6;font-weight:800;margin-bottom:3px;">עקביות 5 שנים (${consistencyWeightPct.toFixed(1)}%)</div>
             <div style="font-size:1.25rem;font-weight:900;color:#1d4ed8;">${consistencyScore.toFixed(1)}<span style="font-size:.65rem;color:#93c5fd;">/100</span></div>
+            <div style="font-size:.65rem;color:#64748b;font-weight:700;margin-top:4px;">${eachYearWeightPct.toFixed(1)}% לכל שנה</div>
           </div>
           <div style="flex:1;min-width:90px;background:#f0fdf4;border-radius:10px;padding:9px;text-align:center;">
             <div style="font-size:.69rem;color:#22c55e;font-weight:700;margin-bottom:3px;">שארפ (16%)</div>
@@ -3525,6 +3546,9 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
             <div style="font-size:.69rem;color:#f59e0b;font-weight:700;margin-bottom:3px;">שנה נוכחית (${currentYearWeightPct}%)</div>
             <div style="font-size:1.25rem;font-weight:900;color:#92400e;">${currentYearScore !== null ? currentYearScore.toFixed(1) : '—'}<span style="font-size:.65rem;color:#fcd34d;">/100</span></div>
           </div>` : ''}
+        </div>
+        <div style="padding:9px 10px;border-radius:9px;background:#f8fafc;color:#52637a;font-size:.72rem;line-height:1.55;">
+          הצבירה נטו מוצגת כמידע משלים ואינה נכנסת לציון. הציון מודד ביצועים יחסיים, עקביות ושארפ; כניסת או יציאת כספים יכולה לנבוע גם משיווק, הסכמי מעסיקים והעברות לקוחות — ולא רק מאיכות ניהול ההשקעות.
         </div>
         </div>
       </details>`;

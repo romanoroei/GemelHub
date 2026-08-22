@@ -2148,7 +2148,7 @@ const APIModule = (() => {
   // ממוין מהגבוה לנמוך לפי cumGap
   // משתמש בנתונים שכבר cached מ-getTrackPeersMonthlyAvg — מהיר
   async function getTrackPeersCumGaps(fundId, catId) {
-    const lsKey = `gemelhub_pcg_v4_${catId}_${fundId}`;
+    const lsKey = `gemelhub_pcg_v3_${catId}_${fundId}`;
     const cached = _lsLoad(lsKey);
     if (cached && Array.isArray(cached) && cached.length > 0) return cached;
 
@@ -2242,8 +2242,6 @@ const APIModule = (() => {
         ctrl:        latestR.CONTROLLING_CORPORATION || '',
         mgmt:        latestR.MANAGING_CORPORATION    || '',
         name:        latestR.FUND_NAME               || '',
-        fundCumReturn: (myC - 1) * 100,
-        peerCumReturn: (peerC - 1) * 100,
         cumGap:      (myC - peerC) * 100,
         abovePct:    Math.round(aboveCnt / validCnt * 100),
         monthsValid: validCnt,
