@@ -3269,7 +3269,7 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
           <div style="font-size:2.5rem;font-weight:900;color:#d6ad22;line-height:1;letter-spacing:-1px;">${thisFund.score.toFixed(2)}</div>
         </div>
         <div style="flex:1;min-width:0;">
-          <div style="font-size:.64rem;color:#93a9c7;font-weight:700;margin-bottom:5px;">מגמה עדכנית</div>
+          <div style="font-size:.64rem;color:#b9c7da;font-weight:700;margin-bottom:4px;">מגמה עדכנית</div>
           <div style="font-size:1.08rem;font-weight:800;color:${trendPanelColor};line-height:1.35;">${trend.icon ? trend.icon + ' ' : ''}${trend.text}</div>
         </div>
       </div>
@@ -3295,51 +3295,85 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
     if (strength >= .25) return { color: '#a16207', bg: '#fffbeb', line: '#eab308' };
     return { color: '#b42318', bg: '#fff1f2', line: '#f43f5e' };
   };
-  const yearBreakdown = (thisFund?.components?.years || []).map(year => {
-    const tone = positionTone(year.rank, year.total);
+  const rankStrength = point => point && point.total > 1
+    ? 1 - ((point.rank - 1) / (point.total - 1))
+    : .5;
+  const trendDirection = points => {
+    const valid = points.filter(point => point && Number.isFinite(point.rank) && Number.isFinite(point.total));
+    if (valid.length < 2) return 'אין מספיק נתונים לזיהוי כיוון';
+    const change = rankStrength(valid[valid.length - 1]) - rankStrength(valid[0]);
+    if (change > .12) return 'מגמת המיקום משתפרת';
+    if (change < -.12) return 'מגמת המיקום נחלשת';
+    return 'מגמת המיקום יציבה יחסית';
+  };
+  const rankTrendChart = (points, ariaLabel) => {
+    const width = 520;
+    const left = 42;
+    const right = 478;
+    const top = 32;
+    const bottom = 105;
+    const step = points.length > 1 ? (right - left) / (points.length - 1) : 0;
+    const plotted = points.map((point, index) => {
+      if (!point || !Number.isFinite(point.rank) || !Number.isFinite(point.total)) return null;
+      const strength = rankStrength(point);
+      return { ...point, x: left + (index * step), y: bottom - (strength * (bottom - top)), tone: positionTone(point.rank, point.total) };
+    });
+    const linePoints = plotted.filter(Boolean).map(point => `${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(' ');
+    const pointHtml = points.map((point, index) => {
+      const plottedPoint = plotted[index];
+      const x = left + (index * step);
+      if (!plottedPoint) return `<text x="${x}" y="71" text-anchor="middle" fill="#94a3b8" font-size="13">—</text><text x="${x}" y="137" text-anchor="middle" fill="#64748b" font-size="11" font-weight="700">${point.label}</text>`;
+      const valueY = Math.max(17, plottedPoint.y - 13);
+      return `
+        <circle cx="${plottedPoint.x}" cy="${plottedPoint.y}" r="9" fill="#fff" stroke="${plottedPoint.tone.line}" stroke-width="3"></circle>
+        <circle cx="${plottedPoint.x}" cy="${plottedPoint.y}" r="3.5" fill="${plottedPoint.tone.line}"></circle>
+        <text x="${plottedPoint.x}" y="${valueY}" text-anchor="middle" fill="${plottedPoint.tone.color}" font-size="11" font-weight="800">${plottedPoint.rank}/${plottedPoint.total}</text>
+        <text x="${plottedPoint.x}" y="137" text-anchor="middle" fill="#52637a" font-size="11" font-weight="700">${plottedPoint.label}</text>`;
+    }).join('');
+    const gradientId = ariaLabel.includes('שנים') ? 'gh-rank-years' : 'gh-rank-months';
     return `
-    <div style="position:relative;background:${tone.bg};border:1px solid #dfe6ee;border-radius:9px;padding:9px 7px 8px;text-align:center;min-width:68px;flex:1;overflow:hidden;box-shadow:0 2px 5px rgba(15,39,68,.05);">
-      <div style="position:absolute;inset:0 0 auto;height:3px;background:${tone.line};"></div>
-      <div style="font-size:.64rem;color:#64748b;font-weight:800;">${year.year}</div>
-      <div style="font-size:.68rem;color:#52637a;margin-top:5px;">מקום <strong style="font-size:1.05rem;color:${tone.color};">${year.rank}</strong></div>
-      <div style="font-size:.6rem;color:#8493a7;margin-top:1px;">מתוך ${year.total}</div>
-    </div>`;
-  }).join('');
-  const horizonNames = { 1: 'חודש', 3: '3 חודשים', 6: '6 חודשים', 12: '12 חודשים' };
-  const horizonBreakdown = Object.entries(protection.horizonPositions || {}).map(([months, position]) => {
-    const tone = position ? positionTone(position.rank, position.total) : { color: '#64748b', bg: '#f8fafc', line: '#94a3b8' };
-    return `
-    <div style="position:relative;background:${tone.bg};border:1px solid #dfe6ee;border-radius:9px;padding:9px 7px 8px;text-align:center;min-width:68px;flex:1;overflow:hidden;box-shadow:0 2px 5px rgba(15,39,68,.05);">
-      <div style="position:absolute;inset:0 0 auto;height:3px;background:${tone.line};"></div>
-      <div style="font-size:.64rem;color:#64748b;font-weight:800;">${horizonNames[months]}</div>
-      ${position ? `<div style="font-size:.68rem;color:#52637a;margin-top:5px;">מקום <strong style="font-size:1.05rem;color:${tone.color};">${position.rank}</strong></div><div style="font-size:.6rem;color:#8493a7;margin-top:1px;">מתוך ${position.total}</div>` : '<div style="font-size:.72rem;color:#64748b;margin-top:8px;">אין נתון</div>'}
-    </div>`;
-  }).join('');
+      <div style="position:relative;margin-top:8px;">
+        <svg viewBox="0 0 ${width} 150" role="img" aria-label="${ariaLabel}" style="display:block;width:100%;height:auto;overflow:visible;">
+          <defs><linearGradient id="${gradientId}" x1="0" x2="1"><stop offset="0" stop-color="#64748b"></stop><stop offset="1" stop-color="#2563eb"></stop></linearGradient></defs>
+          <rect x="25" y="20" width="470" height="98" rx="12" fill="#f8fafc"></rect>
+          <line x1="31" y1="${top}" x2="489" y2="${top}" stroke="#d9f3e7" stroke-width="1"></line>
+          <line x1="31" y1="${(top + bottom) / 2}" x2="489" y2="${(top + bottom) / 2}" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4 5"></line>
+          <line x1="31" y1="${bottom}" x2="489" y2="${bottom}" stroke="#fee2e2" stroke-width="1"></line>
+          ${linePoints ? `<polyline points="${linePoints}" fill="none" stroke="url(#${gradientId})" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></polyline>` : ''}
+          ${pointHtml}
+        </svg>
+        <div style="display:flex;justify-content:space-between;margin:-3px 25px 0;color:#94a3b8;font-size:.6rem;font-weight:700;"><span>תחילת התקופה</span><span>עכשיו</span></div>
+      </div>`;
+  };
+  const yearPoints = [...(thisFund?.components?.years || [])]
+    .sort((a, b) => Number(a.year) - Number(b.year))
+    .map(year => ({ rank: year.rank, total: year.total, label: String(year.year) }));
+  const horizonNames = { 1: 'חודש', 3: '3 ח׳', 6: '6 ח׳', 12: '12 ח׳' };
+  const horizonPositions = protection.horizonPositions || {};
+  const horizonPoints = [12, 6, 3, 1].map(months => {
+    const position = horizonPositions[months] || horizonPositions[String(months)];
+    return position ? { rank: position.rank, total: position.total, label: horizonNames[months] } : { label: horizonNames[months] };
+  });
   const protectionHtml = thisFund ? `
     <div style="padding:15px 18px 17px;background:#fff;border-bottom:1px solid #e8eef5;">
       <div style="margin-bottom:10px;font-size:.8rem;font-weight:900;color:#172f55;">ביצועים לאורך זמן</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));border:1px solid #dfe6ee;border-radius:8px;overflow:hidden;background:#fff;">
-        <details class="gh-period-detail" style="border-left:1px solid #dfe6ee;">
-          <summary style="list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-            <div><div style="font-size:.72rem;color:#52637a;font-weight:700;">יציבות ב־5 שנים</div><div style="font-size:1rem;color:#172f55;font-weight:900;margin-top:3px;">${consistencyLabel}</div></div>
-            <i class="fas fa-chevron-down gh-period-chevron" style="font-size:.65rem;color:#8493a7;transition:transform .2s;"></i>
-          </summary>
-          <div style="padding:0 14px 12px;color:#52637a;font-size:.7rem;line-height:1.55;">
-            <div style="padding:8px 0;color:#64748b;">מידת היציבות של מיקום הקופה מול מתחרים בכל אחת מחמש השנים.</div>
-            <div style="display:flex;gap:5px;flex-wrap:wrap;">${yearBreakdown}</div>
+      <div style="display:grid;grid-template-columns:1fr;gap:10px;">
+        <section style="border:1px solid #dfe6ee;border-radius:12px;padding:13px 14px 12px;background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);box-shadow:0 4px 12px rgba(15,39,68,.05);">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+            <div><div style="font-size:.72rem;color:#52637a;font-weight:800;">מיקום לאורך 5 שנים</div><div style="font-size:1rem;color:#172f55;font-weight:900;margin-top:3px;">${consistencyLabel}</div></div>
+            <span style="font-size:.65rem;color:#64748b;background:#f1f5f9;border-radius:999px;padding:4px 8px;white-space:nowrap;">${trendDirection(yearPoints)}</span>
           </div>
-        </details>
-        <details class="gh-period-detail">
-          <summary style="list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-            <div><div style="font-size:.72rem;color:#52637a;font-weight:700;">ביצועים עד שנה</div><div style="font-size:.92rem;color:#172f55;font-weight:900;margin-top:3px;">${supportLabel}</div></div>
-            <i class="fas fa-chevron-down gh-period-chevron" style="font-size:.65rem;color:#8493a7;transition:transform .2s;"></i>
-          </summary>
-          <div style="padding:0 14px 12px;color:#52637a;font-size:.7rem;line-height:1.55;">
-            <div style="padding:8px 0;color:#64748b;">מיקום הקופה מול המתחרים בכל אחד מטווחי הזמן.</div>
-            <div style="display:flex;gap:5px;flex-wrap:wrap;">${horizonBreakdown}</div>
+          ${rankTrendChart(yearPoints, 'מיקום הקופה ביחס למתחרים לאורך חמש שנים')}
+        </section>
+        <section style="border:1px solid #dfe6ee;border-radius:12px;padding:13px 14px 12px;background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);box-shadow:0 4px 12px rgba(15,39,68,.05);">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+            <div><div style="font-size:.72rem;color:#52637a;font-weight:800;">המגמה עד עכשיו</div><div style="font-size:.92rem;color:#172f55;font-weight:900;margin-top:3px;">${supportLabel}</div></div>
+            <span style="font-size:.65rem;color:#64748b;background:#f1f5f9;border-radius:999px;padding:4px 8px;white-space:nowrap;">${trendDirection(horizonPoints)}</span>
           </div>
-        </details>
+          ${rankTrendChart(horizonPoints, 'מיקום הקופה ביחס למתחרים מטווח 12 חודשים ועד החודש האחרון')}
+        </section>
       </div>
+      <div style="margin-top:9px;color:#64748b;font-size:.66rem;line-height:1.5;">נקודה גבוהה יותר מציינת מיקום טוב יותר ביחס למתחרים. המספר ליד כל נקודה הוא מקום הקופה מתוך מספר הקופות שנבדקו.</div>
     </div>` : '';
 
   let compHtml = '';
