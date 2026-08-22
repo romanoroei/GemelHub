@@ -937,7 +937,12 @@ const APIModule = (() => {
 
   async function getRangeSourceRecords(categoryId, startPeriod = null, endPeriod = null) {
     const cat = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === categoryId);
-    if (!cat || !startPeriod || !endPeriod) return getSourceRecordsByCategory(categoryId);
+    if (!cat) return [];
+    if (!startPeriod || !endPeriod) {
+      if (cat.pensionAPI) return fetchPensionHistoricalRangeData();
+      if (cat.polisaAPI) return fetchPolisaHistoricalRangeData();
+      return fetchAllData();
+    }
 
     const start = Number(startPeriod);
     const end = Number(endPeriod);
