@@ -935,17 +935,49 @@ const APIModule = (() => {
     return fetchAllData();
   }
 
-  async function getRangeEligibleRecords(categoryId, targetPopulation = 'כלל האוכלוסיה') {
+  async function getRangeSourceRecords(categoryId, startPeriod = null, endPeriod = null) {
+    const cat = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === categoryId);
+    if (!cat || !startPeriod || !endPeriod) return getSourceRecordsByCategory(categoryId);
+
+    const start = Number(startPeriod);
+    const end = Number(endPeriod);
+    if (cat.pensionAPI) {
+      if (start <= 202312) return fetchPensionHistoricalRangeData();
+      return fetchPensionData();
+    }
+    if (cat.polisaAPI) {
+      if (start <= 202312) return fetchPolisaHistoricalRangeData();
+      return fetchPolisaData();
+    }
+
+    // Gemel archives are large. Loading the complete 1999–2022 archive made a
+    // recent custom range wait for tens of megabytes it could never use.
+    const parts = [];
+    if (end >= 202401) parts.push(fetchCurrentGemelData());
+    if (start <= 202312 && end >= 202301) {
+      parts.push(fetchDatastoreRecords(CONFIG.API.GEMEL_2023_RESOURCE_ID));
+    }
+    if (start <= 202212) {
+      const classifications = (cat.apiClassifications || [])
+        .map(value => String(value || '').trim())
+        .filter(Boolean);
+      parts.push(Promise.all(classifications.map(classification =>
+        safeFetchFilteredRecords(CONFIG.API.GEMEL_1999_2022_RESOURCE_ID, {
+          FUND_CLASSIFICATION: classification
+        })
+      )).then(groups => groups.flat()));
+    }
+
+    return dedupeRecordsByFundAndPeriod((await Promise.all(parts)).flat());
+  }
+
+  async function getRangeEligibleRecords(categoryId, targetPopulation = 'כלל האוכלוסיה', startPeriod = null, endPeriod = null) {
     const cat = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === categoryId);
     if (!cat) return [];
 
     const isPension = !!cat.pensionAPI;
     const isPolisa = !!cat.polisaAPI;
-    let records = isPension
-      ? await fetchPensionHistoricalRangeData()
-      : isPolisa
-        ? await fetchPolisaHistoricalRangeData()
-        : await getSourceRecordsByCategory(categoryId);
+    let records = await getRangeSourceRecords(categoryId, startPeriod, endPeriod);
 
     if (isPension || isPolisa || targetPopulation) {
       records = filterByAllowedProviders(records);
@@ -1013,7 +1045,7 @@ const APIModule = (() => {
     if (!expectedPeriods.length) return result;
 
     const expectedSet = new Set(expectedPeriods);
-    const records = await getRangeEligibleRecords(categoryId, targetPopulation);
+    const records = await getRangeEligibleRecords(categoryId, targetPopulation, startPeriod, endPeriod);
     const byFund = new Map();
 
     for (const record of records) {

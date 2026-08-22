@@ -2907,11 +2907,14 @@ const App = (() => {
     const requestId = ++state.customRange.availabilityRequestId;
     const requestedCategoryId = state.activeCategoryId;
     const requestedTargetPopulation = state.targetPopulation;
-    if (!state.customRange.availablePeriods.length && getCurrentCompareMode() !== 'actuarial') {
+    if (getCurrentCompareMode() !== 'actuarial') {
       const immediatePeriods = buildImmediateCustomRangePeriods();
       if (immediatePeriods.length > 1) {
         state.customRange.availablePeriods = immediatePeriods;
+        state.customRange.availabilityResolved = true;
         hydrateCustomRangePeriodOptions();
+        syncCustomRangeControls();
+        return;
       }
     }
     state.customRange.availabilityLoading = true;
@@ -4536,6 +4539,7 @@ const App = (() => {
         const immediatePeriods = buildImmediateCustomRangePeriods();
         if (immediatePeriods.length > 1) {
           state.customRange.availablePeriods = immediatePeriods;
+          state.customRange.availabilityResolved = true;
           hydrateCustomRangePeriodOptions();
         }
       }
