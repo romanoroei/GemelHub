@@ -5277,7 +5277,29 @@ table.track-table tr.average-row td.exp-col:nth-last-child(3) {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+.actuarial-pension-kind-title { display: none; }
 @media (max-width: 1024px) {
+  .actuarial-pension-filter-section .actuarial-pension-toggle {
+    display: flex !important;
+    width: 100%;
+    margin-top: 8px;
+  }
+  .actuarial-pension-filter-section .actuarial-pension-toggle button { flex: 1; }
+  .actuarial-pension-kind-title {
+    display: block;
+    width: 100%;
+    color: #0c2134;
+    font-size: 1rem;
+    font-weight: 900;
+    text-align: right;
+  }
+  .actuarial-heatmap-head { align-items: flex-start; }
+  .actuarial-heatmap-head h4 {
+    width: 100%;
+    margin-top: 2px;
+    font-size: .78rem;
+    line-height: 1.45;
+  }
   .actuarial-heatmap-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;

@@ -2295,7 +2295,7 @@ const App = (() => {
     const blockedTarget = target => {
       if (target.closest(
         'input, select, textarea, label, .mobile-product-rail-scroll, .sidebar-right, ' +
-        '.advanced-search-overlay, .mobile-category-editor, .custom-range-panel'
+        '.advanced-search-overlay, .mobile-category-editor, .custom-range-panel, .actuarial-heatmap-scroll, .mobile-table-scrollbar'
       )) return true;
       const tableWrapper = target.closest('.track-table-wrapper');
       return !!tableWrapper && tableWrapper.scrollWidth - tableWrapper.clientWidth > 2;
@@ -3647,6 +3647,30 @@ const App = (() => {
     if (!toggle) return;
     const visible = mode === 'actuarial' && PENSION_ACTUARIAL_CATS.has(state.activeCategoryId);
     toggle.hidden = !visible;
+    if (toggle.dataset.placementBound !== '1') {
+      toggle.dataset.placementBound = '1';
+      window.addEventListener('resize', () => syncActuarialPensionToggle(), { passive: true });
+    }
+    const isMobile = window.matchMedia?.('(max-width: 1024px)').matches;
+    let mobileSection = document.getElementById('actuarial-pension-filter-section');
+    if (isMobile) {
+      const providerSection = document.getElementById('provider-filter-section');
+      if (!mobileSection && providerSection?.parentElement) {
+        mobileSection = document.createElement('div');
+        mobileSection.id = 'actuarial-pension-filter-section';
+        mobileSection.className = 'sidebar-section actuarial-pension-filter-section';
+        mobileSection.innerHTML = '<div class="sidebar-section-title"><i class="fas fa-umbrella" aria-hidden="true"></i> סוג קרן הפנסיה</div>';
+        providerSection.parentElement.insertBefore(mobileSection, providerSection);
+      }
+      if (mobileSection) {
+        mobileSection.hidden = !visible;
+        if (toggle.parentElement !== mobileSection) mobileSection.appendChild(toggle);
+      }
+    } else {
+      const toolbar = document.querySelector('.title-search-bar .tsb-inner');
+      if (toolbar && toggle.parentElement !== toolbar) toolbar.appendChild(toggle);
+      if (mobileSection) mobileSection.hidden = true;
+    }
     toggle.querySelectorAll('[data-actuarial-pension]').forEach(button => {
       const active = button.dataset.actuarialPension === state.activeCategoryId;
       button.classList.toggle('is-active', active);
@@ -5601,6 +5625,7 @@ const App = (() => {
     wrap.innerHTML = `
       <div class="actuarial-heatmap-card">
         <div class="actuarial-heatmap-head">
+          <h3 class="actuarial-pension-kind-title">קרן פנסיה ${state.activeCategoryId === 'pension_mashlima' ? 'משלימה' : 'מקיפה'}</h3>
           <h4>מפת חום שנתית, איזון אקטוארי : האם הקרן חילקה עודף או גרעון בין העמיתים</h4>
           <div class="actuarial-heatmap-tools">
             <div class="actuarial-heatmap-legend">
@@ -5629,6 +5654,8 @@ const App = (() => {
         ${hasCoverageAlert ? '<span class="actuarial-header-alert" title="יש חברות שאין להן נתונים מלאים לכל טווח הסינון שביקשת">⚠</span>' : ''}
         ${hasCoverageAlert ? 'סימון האזהרה מופיע רק בחברות שאין להן כיסוי מלא לטווח הסינון שנבחר.' : 'מפת החום מציגה השוואה שנתית ישירה בין החברות.'}
       </div>`;
+
+    setupMobileTableScrollbar(wrap.querySelector('.actuarial-heatmap-scroll'));
 
     const toggleYearsBtn = document.getElementById('actuarial-toggle-years-btn');
     if (toggleYearsBtn) {
