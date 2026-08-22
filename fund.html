@@ -3255,6 +3255,8 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
     #gh-score-modal .gh-info-floating-bubble{position:fixed;z-index:10020;padding:10px 12px;border:1px solid #dbe3ee;border-radius:11px;background:#fff;color:#334155;box-shadow:0 10px 30px rgba(15,39,68,.24);font-size:.74rem;font-weight:500;line-height:1.6;text-align:right;}
     #gh-score-modal .gh-period-detail summary::-webkit-details-marker{display:none;}
     #gh-score-modal .gh-period-detail[open] .gh-period-chevron{transform:rotate(180deg);}
+    #gh-score-modal .gh-trend-grid{display:grid;grid-template-columns:1fr;gap:10px;}
+    @media (min-width:760px){#gh-score-modal .gh-trend-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
   </style>`;
   const scoreHeaderHtml = thisFund ? (() => {
     const grade = ghGrade(thisFund.score);
@@ -3263,19 +3265,18 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
     const total = allScores.length;
     return `
     <div style="padding:15px 18px 13px;background:#172f55;position:sticky;top:0;z-index:20;box-shadow:0 4px 12px rgba(15,39,68,.2);">
-      <div style="display:flex;align-items:center;gap:18px;">
-        <div style="text-align:center;min-width:112px;padding-left:18px;border-left:1px solid rgba(255,255,255,.22);">
-          <div style="font-size:.64rem;color:#b9c7da;font-weight:700;margin-bottom:4px;">ציון גמל האב</div>
+      <div style="display:grid;grid-template-columns:130px minmax(0,1fr);align-items:start;column-gap:18px;">
+        <div style="text-align:center;min-width:0;padding-left:18px;border-left:1px solid rgba(255,255,255,.22);">
+          <div style="font-size:.74rem;line-height:1.25;color:#c3cede;font-weight:700;margin-bottom:5px;">ציון גמל האב</div>
           <div style="font-size:2.5rem;font-weight:900;color:#d6ad22;line-height:1;letter-spacing:-1px;">${thisFund.score.toFixed(2)}</div>
         </div>
         <div style="flex:1;min-width:0;">
-          <div style="font-size:.64rem;color:#b9c7da;font-weight:700;margin-bottom:4px;">מגמה עדכנית</div>
+          <div style="font-size:.74rem;line-height:1.25;color:#c3cede;font-weight:700;margin-bottom:5px;">מגמה עדכנית</div>
           <div style="font-size:1.08rem;font-weight:800;color:${trendPanelColor};line-height:1.35;">${trend.icon ? trend.icon + ' ' : ''}${trend.text}</div>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:10px;border-top:1px solid rgba(255,255,255,.14);margin-top:12px;padding-top:9px;font-size:.78rem;">
-        <div style="color:${color};font-weight:900;">דירוג: ${grade}</div>
-        <span style="color:#6f86a6;">|</span>
+      <div style="display:grid;grid-template-columns:130px minmax(0,1fr);align-items:center;column-gap:18px;border-top:1px solid rgba(255,255,255,.14);margin-top:12px;padding-top:9px;font-size:.78rem;">
+        <div style="color:${color};font-size:.88rem;font-weight:900;text-align:center;padding-left:18px;border-left:1px solid rgba(255,255,255,.22);">דירוג: ${grade}</div>
         <div style="color:#cbd5e1;">מקום <strong style="color:#fff;">${rank}</strong> מתוך <strong style="color:#fff;">${total}</strong> מנהלים</div>
       </div>
     </div>`;
@@ -3342,7 +3343,7 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
           ${linePoints ? `<polyline points="${linePoints}" fill="none" stroke="url(#${gradientId})" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></polyline>` : ''}
           ${pointHtml}
         </svg>
-        <div style="display:flex;justify-content:space-between;margin:-3px 25px 0;color:#94a3b8;font-size:.6rem;font-weight:700;"><span>תחילת התקופה</span><span>עכשיו</span></div>
+        <div style="display:flex;direction:ltr;justify-content:space-between;margin:-3px 25px 0;color:#94a3b8;font-size:.6rem;font-weight:700;"><span dir="rtl">תחילת התקופה</span><span dir="rtl">עכשיו</span></div>
       </div>`;
   };
   const yearPoints = [...(thisFund?.components?.years || [])]
@@ -3354,10 +3355,20 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
     const position = horizonPositions[months] || horizonPositions[String(months)];
     return position ? { rank: position.rank, total: position.total, label: horizonNames[months] } : { label: horizonNames[months] };
   });
+  const shortTermDirection = (() => {
+    const valid = horizonPoints.filter(point => Number.isFinite(point.rank) && Number.isFinite(point.total));
+    if (valid.length < 2) return 'אין מספיק נתונים לזיהוי כיוון';
+    const change = rankStrength(valid[valid.length - 1]) - rankStrength(valid[0]);
+    if (change < -.12) return Number.isFinite(support) && support >= 55
+      ? 'עדיין חיובי, אך נחלש לאחרונה'
+      : 'נחלש בטווח הקצר';
+    if (change > .12) return 'מתחזק בטווח הקצר';
+    return 'שומר על כיוון יציב';
+  })();
   const protectionHtml = thisFund ? `
     <div style="padding:15px 18px 17px;background:#fff;border-bottom:1px solid #e8eef5;">
       <div style="margin-bottom:10px;font-size:.8rem;font-weight:900;color:#172f55;">ביצועים לאורך זמן</div>
-      <div style="display:grid;grid-template-columns:1fr;gap:10px;">
+      <div class="gh-trend-grid">
         <section style="border:1px solid #dfe6ee;border-radius:12px;padding:13px 14px 12px;background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);box-shadow:0 4px 12px rgba(15,39,68,.05);">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
             <div><div style="font-size:.72rem;color:#52637a;font-weight:800;">מיקום לאורך 5 שנים</div><div style="font-size:1rem;color:#172f55;font-weight:900;margin-top:3px;">${consistencyLabel}</div></div>
@@ -3368,12 +3379,12 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
         <section style="border:1px solid #dfe6ee;border-radius:12px;padding:13px 14px 12px;background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);box-shadow:0 4px 12px rgba(15,39,68,.05);">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
             <div><div style="font-size:.72rem;color:#52637a;font-weight:800;">המגמה עד עכשיו</div><div style="font-size:.92rem;color:#172f55;font-weight:900;margin-top:3px;">${supportLabel}</div></div>
-            <span style="font-size:.65rem;color:#64748b;background:#f1f5f9;border-radius:999px;padding:4px 8px;white-space:nowrap;">${trendDirection(horizonPoints)}</span>
+            <span style="font-size:.65rem;color:#64748b;background:#f1f5f9;border-radius:999px;padding:4px 8px;white-space:nowrap;">${shortTermDirection}</span>
           </div>
           ${rankTrendChart(horizonPoints, 'מיקום הקופה ביחס למתחרים מטווח 12 חודשים ועד החודש האחרון')}
         </section>
       </div>
-      <div style="margin-top:9px;color:#64748b;font-size:.66rem;line-height:1.5;">נקודה גבוהה יותר מציינת מיקום טוב יותר ביחס למתחרים. המספר ליד כל נקודה הוא מקום הקופה מתוך מספר הקופות שנבדקו.</div>
+      <div style="margin-top:9px;color:#64748b;font-size:.66rem;line-height:1.5;">נקודה גבוהה יותר מציינת מיקום טוב יותר ביחס למתחרים. המספר ליד כל נקודה הוא מקום הקופה מתוך מספר הקופות שנבדקו. הכותרת מתארת את רמת הביצועים הנוכחית, והתגית מתארת אם המיקום מתחזק או נחלש.</div>
     </div>` : '';
 
   let compHtml = '';
@@ -3451,7 +3462,7 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
       </p>
     </div>`;
 
-  showStatModal('gh-score-modal', titleHtml, infoStylesHtml + scoreHeaderHtml + protectionHtml + tableHtml + compHtml + disclaimerHtml, 'max-width:640px;');
+  showStatModal('gh-score-modal', titleHtml, infoStylesHtml + scoreHeaderHtml + protectionHtml + tableHtml + compHtml + disclaimerHtml, 'max-width:900px;');
 
   const scoreModal = document.getElementById('gh-score-modal');
   let activeBubble = null;
