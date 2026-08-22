@@ -376,6 +376,7 @@ function extractFundSuffix(fundName) {
 
 let historyChart       = null;   // canvas ראשי (תשואה חודשית — גלילה)
 let historyChartStatic = null;   // canvas משני (נכסים / מניות — סטטי)
+let _scoreFundHistory  = [];     // היסטוריה זמינה לגרפי מגמה וצבירה בחלון הציון
 let currentField       = 'MONTHLY_YIELD';
 let _yields12M         = null;
 let _sharpeMap         = null;
@@ -705,6 +706,7 @@ async function loadFundPage() {
 
     _phase2Promise.then(([history, peersMonthlyAvg]) => {
       chartLoadingEl.remove();
+      _scoreFundHistory = history || [];
       _peersMonthlyAvg = peersMonthlyAvg;
       buildHistoryChart(history, currentField);
       setupChartTabs(history);
@@ -3222,10 +3224,22 @@ function renderGemelHubScoreBadge(container, data, fundId, catId) {
     </button>`;
 
   document.getElementById('gh-score-badge-btn')
-    ?.addEventListener('click', () => showGemelHubScoreModal(data, fundId, catId));
+    ?.addEventListener('click', async event => {
+      const button = event.currentTarget;
+      button?.setAttribute('aria-busy', 'true');
+      try {
+        const history = _scoreFundHistory.length
+          ? _scoreFundHistory
+          : await APIModule.getFundHistory(fundId, catId).catch(() => []);
+        if (history.length) _scoreFundHistory = history;
+        showGemelHubScoreModal(data, fundId, catId, history);
+      } finally {
+        button?.removeAttribute('aria-busy');
+      }
+    });
 }
 
-function showGemelHubScoreModal(data, currentFundId, catId) {
+function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
   const { thisFund, allScores, targetYears } = data;
   const yearsLabel = [...targetYears].sort((a, b) => a - b).join(', ');
 
@@ -3302,10 +3316,46 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
   const trendDirection = points => {
     const valid = points.filter(point => point && Number.isFinite(point.rank) && Number.isFinite(point.total));
     if (valid.length < 2) return 'אין מספיק נתונים לזיהוי כיוון';
-    const change = rankStrength(valid[valid.length - 1]) - rankStrength(valid[0]);
+    const strengths = valid.map(rankStrength);
+    const weakest = Math.min(...strengths);
+    const weakestIndex = strengths.indexOf(weakest);
+    const latest = strengths[strengths.length - 1];
+    if (weakestIndex > 0 && weakestIndex < strengths.length - 1 && latest - weakest > .12) {
+      return 'חזרה לעוצמה אחרי תקופה חלשה';
+    }
+    const change = latest - strengths[0];
     if (change > .12) return 'מגמת המיקום משתפרת';
     if (change < -.12) return 'מגמת המיקום נחלשת';
     return 'מגמת המיקום יציבה יחסית';
+  };
+  const netFlowBars = (entries, title, compact = false) => {
+    const valid = entries.filter(entry => Number.isFinite(entry.value));
+    if (!valid.length) return '';
+    const maxAbs = Math.max(...valid.map(entry => Math.abs(entry.value)), 1);
+    const total = valid.reduce((sum, entry) => sum + entry.value, 0);
+    const totalColor = total > 0 ? '#087f5b' : total < 0 ? '#b42318' : '#64748b';
+    const bars = entries.map(entry => {
+      const value = Number(entry.value);
+      const available = Number.isFinite(value);
+      const height = available ? Math.max(3, Math.round((Math.abs(value) / maxAbs) * 25)) : 0;
+      const color = value >= 0 ? '#34b985' : '#ef6a78';
+      const position = value >= 0 ? `bottom:50%;height:${height}px;` : `top:50%;height:${height}px;`;
+      const display = available ? formatMoneyMillions(value) : 'אין נתון';
+      return `<div style="flex:1;min-width:0;text-align:center;" title="${entry.fullLabel || entry.label}: ${display}">
+        <div style="height:54px;position:relative;border-radius:4px;background:#f8fafc;overflow:hidden;">
+          <span style="position:absolute;left:0;right:0;top:50%;height:1px;background:#dbe3ee;"></span>
+          ${available ? `<span style="position:absolute;left:20%;right:20%;${position}background:${color};border-radius:${value >= 0 ? '3px 3px 0 0' : '0 0 3px 3px'};"></span>` : ''}
+        </div>
+        <div style="margin-top:3px;color:#8493a7;font-size:${compact ? '.52rem' : '.57rem'};font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${entry.label}</div>
+      </div>`;
+    }).join('');
+    return `<div style="margin-top:9px;padding-top:9px;border-top:1px solid #edf1f6;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">
+        <span style="font-size:.65rem;color:#52637a;font-weight:800;">${title}</span>
+        <span style="font-size:.64rem;color:${totalColor};font-weight:900;direction:ltr;">${formatMoneyMillions(total)}</span>
+      </div>
+      <div style="display:flex;direction:ltr;align-items:stretch;gap:${compact ? '2px' : '5px'};">${bars}</div>
+    </div>`;
   };
   const rankTrendChart = (points, ariaLabel) => {
     const width = 520;
@@ -3365,23 +3415,44 @@ function showGemelHubScoreModal(data, currentFundId, catId) {
     if (change > .12) return 'מתחזק בטווח הקצר';
     return 'שומר על כיוון יציב';
   })();
+  const sortedFundHistory = [...fundHistory].sort((a, b) => Number(a.REPORT_PERIOD) - Number(b.REPORT_PERIOD));
+  const netDepositValue = row => {
+    const raw = row?.NET_MONTHLY_DEPOSITS;
+    if (raw === null || raw === undefined || raw === '') return NaN;
+    const value = Number(raw);
+    return Number.isFinite(value) ? value : NaN;
+  };
+  const yearlyNetFlows = yearPoints.map(point => {
+    const rows = sortedFundHistory.filter(row => Math.floor(Number(row.REPORT_PERIOD) / 100) === Number(point.label));
+    const values = rows.map(netDepositValue).filter(Number.isFinite);
+    return { label: point.label, fullLabel: `שנת ${point.label}`, value: values.length ? values.reduce((sum, value) => sum + value, 0) : NaN };
+  });
+  const monthlyNetFlows = sortedFundHistory.slice(-12).map(row => {
+    const period = Number(row.REPORT_PERIOD);
+    const month = period % 100;
+    return { label: String(month), fullLabel: formatReportPeriod(period), value: netDepositValue(row) };
+  });
+  const yearlyNetFlowHtml = netFlowBars(yearlyNetFlows, 'צבירה נטו שנתית');
+  const monthlyNetFlowHtml = netFlowBars(monthlyNetFlows, 'צבירה נטו חודשית · 12 חודשים', true);
   const protectionHtml = thisFund ? `
     <div style="padding:15px 18px 17px;background:#fff;border-bottom:1px solid #e8eef5;">
       <div style="margin-bottom:10px;font-size:.8rem;font-weight:900;color:#172f55;">ביצועים לאורך זמן</div>
       <div class="gh-trend-grid">
         <section style="border:1px solid #dfe6ee;border-radius:12px;padding:13px 14px 12px;background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);box-shadow:0 4px 12px rgba(15,39,68,.05);">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
-            <div><div style="font-size:.72rem;color:#52637a;font-weight:800;">מיקום לאורך 5 שנים</div><div style="font-size:1rem;color:#172f55;font-weight:900;margin-top:3px;">${consistencyLabel}</div></div>
-            <span style="font-size:.65rem;color:#64748b;background:#f1f5f9;border-radius:999px;padding:4px 8px;white-space:nowrap;">${trendDirection(yearPoints)}</span>
+            <div><div style="font-size:.72rem;color:#52637a;font-weight:800;">עקביות לטווח ארוך</div><div style="font-size:1rem;color:#172f55;font-weight:900;margin-top:3px;">מיקום יחסי לאורך 5 שנים · ${consistencyLabel}</div></div>
+            <span style="font-size:.66rem;color:#1e3a5f;background:#eaf2fb;border:1px solid #cfdef0;border-radius:999px;padding:5px 9px;font-weight:800;max-width:49%;line-height:1.35;text-align:center;">מגמה ארוכה: ${trendDirection(yearPoints)}</span>
           </div>
           ${rankTrendChart(yearPoints, 'מיקום הקופה ביחס למתחרים לאורך חמש שנים')}
+          ${yearlyNetFlowHtml}
         </section>
         <section style="border:1px solid #dfe6ee;border-radius:12px;padding:13px 14px 12px;background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);box-shadow:0 4px 12px rgba(15,39,68,.05);">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
-            <div><div style="font-size:.72rem;color:#52637a;font-weight:800;">המגמה עד עכשיו</div><div style="font-size:.92rem;color:#172f55;font-weight:900;margin-top:3px;">${supportLabel}</div></div>
-            <span style="font-size:.65rem;color:#64748b;background:#f1f5f9;border-radius:999px;padding:4px 8px;white-space:nowrap;">${shortTermDirection}</span>
+            <div><div style="font-size:.72rem;color:#52637a;font-weight:800;">שינוי מומנטום בטווח הקצר</div><div style="font-size:.92rem;color:#172f55;font-weight:900;margin-top:3px;">12 חודשים עד החודש האחרון · ${supportLabel}</div></div>
+            <span style="font-size:.66rem;color:#0f684f;background:#e9f8f2;border:1px solid #c9ebdf;border-radius:999px;padding:5px 9px;font-weight:800;max-width:49%;line-height:1.35;text-align:center;">מומנטום קצר: ${shortTermDirection}</span>
           </div>
           ${rankTrendChart(horizonPoints, 'מיקום הקופה ביחס למתחרים מטווח 12 חודשים ועד החודש האחרון')}
+          ${monthlyNetFlowHtml}
         </section>
       </div>
       <div style="margin-top:9px;color:#64748b;font-size:.66rem;line-height:1.5;">נקודה גבוהה יותר מציינת מיקום טוב יותר ביחס למתחרים. המספר ליד כל נקודה הוא מקום הקופה מתוך מספר הקופות שנבדקו. הכותרת מתארת את רמת הביצועים הנוכחית, והתגית מתארת אם המיקום מתחזק או נחלש.</div>
