@@ -3317,6 +3317,11 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
   const shortAverageStrength = shortHorizonStrengths.length
     ? shortHorizonStrengths.reduce((sum, value) => sum + value, 0) / shortHorizonStrengths.length
     : null;
+  const volatileShortTerm = Number.isFinite(shortStrengthRange) && shortStrengthRange >= .35;
+  const strongRecentRecovery = volatileShortTerm
+    && Number.isFinite(oneMonthStrength)
+    && oneMonthStrength >= .65
+    && oneMonthStrength - Math.min(...shortHorizonStrengths) >= .3;
   const strongShortTermDespiteRecentDip = shortHorizonStrengths.length >= 3
     && Number.isFinite(oneMonthStrength)
     && oneMonthStrength >= .6
@@ -3514,6 +3519,8 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
     const valid = horizonPoints.filter(point => Number.isFinite(point.rank) && Number.isFinite(point.total));
     if (valid.length < 2) return 'אין מספיק נתונים לזיהוי כיוון';
     const change = rankStrength(valid[valid.length - 1]) - rankStrength(valid[0]);
+    if (strongRecentRecovery) return 'תנודתיות בין טווחי הבדיקה, לצד התאוששות חזקה בחודש האחרון';
+    if (volatileShortTerm) return 'תנודתיות בין טווחי הבדיקה';
     if (change < -.12 && strongShortTermDespiteRecentDip) return 'ביצועים חזקים ברוב הטווחים, עם ירידה קלה בחודש האחרון';
     if (change < -.12 && moderateRecentDrop) return 'הטווח הקצר מעט נחלש ביחס לביצועים השנתיים';
     if (change < -.12) return 'הטווחים האחרונים חלשים מהביצועים השנתיים';
