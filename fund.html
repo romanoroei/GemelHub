@@ -343,7 +343,7 @@
 
   <script src="js/config.js?v=polisa-global-management-20260822"></script>
   <script src="js/analytics.js?v=ga-20260704"></script>
-  <script src="js/api.js?v=hide-empty-return-funds-20260822"></script>
+  <script src="js/api.js?v=score-trend-direction-20260823"></script>
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
 <script>
@@ -3308,13 +3308,12 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
   const recentJumpWithoutConfirmation = protection.timingLabel === 'unclear_trend'
     && Number.isFinite(oneMonthStrength) && Number.isFinite(twelveMonthStrength)
     && oneMonthStrength - twelveMonthStrength > .12;
-  const recentDropWithoutConfirmation = protection.timingLabel === 'unclear_trend'
-    && Number.isFinite(oneMonthStrength) && Number.isFinite(twelveMonthStrength)
+  const recentDropWithoutConfirmation = Number.isFinite(oneMonthStrength) && Number.isFinite(twelveMonthStrength)
     && oneMonthStrength - twelveMonthStrength < -.12;
   const trend = recentJumpWithoutConfirmation
     ? { ...rawTrend, text: 'הביצועים האחרונים טובים מהביצועים השנתיים, אך התמונה עדיין אינה אחידה', icon: '↗' }
     : recentDropWithoutConfirmation
-      ? { ...rawTrend, text: 'הטווח הקצר נחלש, אך התמונה עדיין אינה אחידה', icon: '↓' }
+      ? { ...ghTrendPresentation('short_term_weakness'), text: 'הטווח הקצר נחלש משמעותית ביחס לביצועים השנתיים', icon: '↓' }
       : protection.timingLabel === 'unclear_trend' && clearlyStableShortTerm
         ? shortAverageStrength >= .65
           ? { ...rawTrend, text: 'מגמה טובה ויציבה בטווח הקצר', icon: '✓' }
@@ -3322,7 +3321,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
             ? { ...rawTrend, text: 'מיקום יציב בטווח הקצר', icon: '✓' }
             : { ...rawTrend, text: 'יציבות במיקום נמוך בטווח הקצר', icon: '' }
         : rawTrend;
-  const trendPanelColor = ghTrendPanelColor(protection.timingLabel);
+  const trendPanelColor = ghTrendPanelColor(recentDropWithoutConfirmation ? 'short_term_weakness' : protection.timingLabel);
   const infoStylesHtml = `<style>
     #gh-score-modal .gh-info-tip-btn{display:inline-flex;vertical-align:middle;border:0;background:transparent;color:#2563eb;padding:0;margin-inline-start:3px;cursor:pointer;font-size:.72rem;line-height:1;}
     #gh-score-modal .gh-info-floating-bubble{position:fixed;z-index:10020;padding:10px 12px;border:1px solid #dbe3ee;border-radius:11px;background:#fff;color:#334155;box-shadow:0 10px 30px rgba(15,39,68,.24);font-size:.74rem;font-weight:500;line-height:1.6;text-align:right;}
