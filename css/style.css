@@ -1462,22 +1462,25 @@ body.sticky-gap-mask-active:not(.fund-page)::before {
   transition: background .14s;
 }
 .adv-hist-item:hover { background: #f0f4ff; }
-.adv-hist-item[data-history-category="gemel_tagmulim"] { border-inline-start: 5px solid #334155; background: #f8fafc; }
-.adv-hist-item[data-history-category="gemel_hashkaa"] { border-inline-start: 5px solid #10b981; background: #ecfdf5; }
-.adv-hist-item[data-history-category="hashtalamot"] { border-inline-start: 5px solid #a855f7; background: #faf5ff; }
-.adv-hist-item[data-history-category="hisachon_yeled"] { border-inline-start: 5px solid #f59e0b; background: #fffbeb; }
-.adv-hist-item[data-history-category="polisa_chisachon"] { border-inline-start: 5px solid #7c3aed; background: #f5f3ff; }
-.adv-hist-item[data-history-category="pension_mekafit"] { border-inline-start: 5px solid #ef4444; background: #fef2f2; }
-.adv-hist-item[data-history-category="pension_mashlima"] { border-inline-start: 5px solid #0891b2; background: #ecfeff; }
-.adv-hist-item[data-history-category="actuarial"] { border-inline-start: 5px solid #d4a017; background: #fffdf5; }
 .adv-hist-cat {
+  display: inline-flex;
+  align-items: center;
   font-size: .68rem;
   font-weight: 800;
   color: #0c2134;
   white-space: nowrap;
-  border-left: 1px solid rgba(12,33,52,.2);
-  padding-left: 8px;
+  border: 1px solid rgba(12,33,52,.2);
+  border-radius: 999px;
+  padding: 3px 8px !important;
 }
+.adv-hist-item[data-history-category="gemel_tagmulim"] .adv-hist-cat { color:#334155 !important; border-color:#94a3b8 !important; background:#f1f5f9 !important; }
+.adv-hist-item[data-history-category="gemel_hashkaa"] .adv-hist-cat { color:#047857 !important; border-color:#6ee7b7 !important; background:#ecfdf5 !important; }
+.adv-hist-item[data-history-category="hashtalamot"] .adv-hist-cat { color:#7e22ce !important; border-color:#d8b4fe !important; background:#faf5ff !important; }
+.adv-hist-item[data-history-category="hisachon_yeled"] .adv-hist-cat { color:#92400e !important; border-color:#fcd34d !important; background:#fffbeb !important; }
+.adv-hist-item[data-history-category="polisa_chisachon"] .adv-hist-cat { color:#6d28d9 !important; border-color:#c4b5fd !important; background:#f5f3ff !important; }
+.adv-hist-item[data-history-category="pension_mekafit"] .adv-hist-cat { color:#b91c1c !important; border-color:#fca5a5 !important; background:#fef2f2 !important; }
+.adv-hist-item[data-history-category="pension_mashlima"] .adv-hist-cat { color:#0e7490 !important; border-color:#67e8f9 !important; background:#ecfeff !important; }
+.adv-hist-item[data-history-category="actuarial"] .adv-hist-cat { color:#8a6f18 !important; border-color:#d8c36d !important; background:#fffdf5 !important; }
 .adv-hist-params {
   font-size: .7rem;
   color: #475569;

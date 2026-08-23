@@ -14228,9 +14228,6 @@ const App = (() => {
         if (!field) return;
         field.focus();
         if (typeof field.select === 'function' && (field.tagName === 'INPUT' || field.tagName === 'TEXTAREA')) field.select();
-        if (focusTarget === 'metric' && typeof field.showPicker === 'function') {
-          try { field.showPicker(); } catch (err) {}
-        }
         state.advancedSearch.focusParamId = null;
         state.advancedSearch.focusTarget = null;
       });
@@ -14532,9 +14529,6 @@ const App = (() => {
         field.focus();
         if (typeof field.select === 'function' && (field.tagName === 'INPUT' || field.tagName === 'TEXTAREA')) {
           field.select();
-        }
-        if (focusTarget === 'metric' && typeof field.showPicker === 'function') {
-          try { field.showPicker(); } catch (err) {}
         }
         state.advancedSearch.focusParamId = null;
         state.advancedSearch.focusTarget = null;
@@ -18327,9 +18321,6 @@ const App = (() => {
         if (!field) return;
         field.focus();
         if (typeof field.select === 'function' && (field.tagName === 'INPUT' || field.tagName === 'TEXTAREA')) field.select();
-        if (focusTarget === 'metric' && typeof field.showPicker === 'function') {
-          try { field.showPicker(); } catch (err) {}
-        }
         state.advancedSearch.focusParamId = null;
         state.advancedSearch.focusTarget = null;
       });
@@ -18656,9 +18647,6 @@ const App = (() => {
         if (!field) return;
         field.focus();
         if (typeof field.select === 'function' && (field.tagName === 'INPUT' || field.tagName === 'TEXTAREA')) field.select();
-        if (focusTarget === 'metric' && typeof field.showPicker === 'function') {
-          try { field.showPicker(); } catch (err) {}
-        }
         state.advancedSearch.focusParamId = null;
         state.advancedSearch.focusTarget = null;
       });
@@ -18924,9 +18912,6 @@ const App = (() => {
         if (!field) return;
         field.focus();
         if (typeof field.select === 'function' && (field.tagName === 'INPUT' || field.tagName === 'TEXTAREA')) field.select();
-        if (focusTarget === 'metric' && typeof field.showPicker === 'function') {
-          try { field.showPicker(); } catch (err) {}
-        }
         state.advancedSearch.focusParamId = null;
         state.advancedSearch.focusTarget = null;
       });
