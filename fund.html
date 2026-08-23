@@ -3315,10 +3315,15 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
   const recentDropWithoutConfirmation = Number.isFinite(oneMonthStrength) && Number.isFinite(twelveMonthStrength)
     && oneMonthStrength - twelveMonthStrength < -.12
     && !strongShortTermDespiteRecentDip;
+  const moderateRecentDrop = recentDropWithoutConfirmation
+    && oneMonthStrength >= .35
+    && shortAverageStrength >= .4;
   const trend = recentJumpWithoutConfirmation
     ? { ...rawTrend, text: 'הביצועים האחרונים טובים מהביצועים השנתיים, אך התמונה עדיין אינה אחידה', icon: '↗' }
     : recentDropWithoutConfirmation
-      ? { ...ghTrendPresentation('short_term_weakness'), text: 'הטווח הקצר נחלש משמעותית ביחס לביצועים השנתיים', icon: '↓' }
+      ? { ...ghTrendPresentation('short_term_weakness'), text: moderateRecentDrop
+          ? 'הטווח הקצר מעט נחלש ביחס לביצועים השנתיים'
+          : 'הטווח הקצר נחלש משמעותית ביחס לביצועים השנתיים', icon: '↓' }
       : protection.timingLabel === 'unclear_trend' && clearlyStableShortTerm
         ? shortAverageStrength >= .65
           ? { ...rawTrend, text: 'מגמה טובה ויציבה בטווח הקצר', icon: '✓' }
@@ -3497,6 +3502,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
     if (valid.length < 2) return 'אין מספיק נתונים לזיהוי כיוון';
     const change = rankStrength(valid[valid.length - 1]) - rankStrength(valid[0]);
     if (change < -.12 && strongShortTermDespiteRecentDip) return 'ביצועים חזקים ברוב הטווחים, עם ירידה קלה בחודש האחרון';
+    if (change < -.12 && moderateRecentDrop) return 'הטווח הקצר מעט נחלש ביחס לביצועים השנתיים';
     if (change < -.12) return 'הטווחים האחרונים חלשים מהביצועים השנתיים';
     if (change > .12) return Number.isFinite(support) && support < 40
       ? 'הביצועים האחרונים טובים מהביצועים השנתיים — עדיין חלשים בממוצע'
