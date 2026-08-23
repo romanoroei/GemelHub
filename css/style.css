@@ -1462,6 +1462,14 @@ body.sticky-gap-mask-active:not(.fund-page)::before {
   transition: background .14s;
 }
 .adv-hist-item:hover { background: #f0f4ff; }
+.adv-hist-item[data-history-category="gemel_tagmulim"] { border-inline-start: 5px solid #334155; background: #f8fafc; }
+.adv-hist-item[data-history-category="gemel_hashkaa"] { border-inline-start: 5px solid #10b981; background: #ecfdf5; }
+.adv-hist-item[data-history-category="hashtalamot"] { border-inline-start: 5px solid #a855f7; background: #faf5ff; }
+.adv-hist-item[data-history-category="hisachon_yeled"] { border-inline-start: 5px solid #f59e0b; background: #fffbeb; }
+.adv-hist-item[data-history-category="polisa_chisachon"] { border-inline-start: 5px solid #7c3aed; background: #f5f3ff; }
+.adv-hist-item[data-history-category="pension_mekafit"] { border-inline-start: 5px solid #ef4444; background: #fef2f2; }
+.adv-hist-item[data-history-category="pension_mashlima"] { border-inline-start: 5px solid #0891b2; background: #ecfeff; }
+.adv-hist-item[data-history-category="actuarial"] { border-inline-start: 5px solid #d4a017; background: #fffdf5; }
 .adv-hist-cat {
   font-size: .68rem;
   font-weight: 800;
@@ -17218,8 +17226,8 @@ tr.sb-row-hidden .sandbox-invest-input {
     margin-bottom: 0 !important;
     flex-direction: column !important;
     gap: 2px !important;
-    flex: 1 1 calc(50% - 3px);
-    max-width: calc(50% - 3px);
+    flex: 1 1 100%;
+    max-width: 100%;
     text-align: right !important;
     align-items: flex-start !important;
     direction: rtl !important;
@@ -17240,6 +17248,13 @@ tr.sb-row-hidden .sandbox-invest-input {
     white-space: normal !important;
     line-height: 1.3 !important;
     text-align: right !important;
+  }
+
+  .adv-hist-date {
+    width: 100%;
+    margin-inline-start: 0;
+    font-size: .64rem;
+    text-align: right;
   }
 
   /* ── Compare results table: compact + actions layout ── */

@@ -12453,8 +12453,6 @@ const App = (() => {
       return;
     }
 
-    saveAdvancedSearchToHistory(selectedParams);
-
     const candidates = getAdvancedSearchCandidates();
     if (!candidates.length) {
       state.advancedSearch.results = [];
@@ -12614,15 +12612,23 @@ const App = (() => {
         ? ''
         : new Intl.DateTimeFormat('he-IL', { dateStyle: 'short', timeStyle: 'short' }).format(date);
     };
+    const formatHistoryDirection = param => {
+      if (param.direction === 'between') {
+        const min = param.minValue !== '' && param.minValue != null ? param.minValue : '—';
+        const max = param.maxValue !== '' && param.maxValue != null ? param.maxValue : '—';
+        return `בין ${min} ל־${max}`;
+      }
+      return ADVANCED_SEARCH_DIRECTION_LABELS[param.direction] || ADVANCED_SEARCH_DIRECTION_LABELS.high;
+    };
     container.innerHTML = `
       <div class="adv-hist-head">
         <div class="adv-hist-title">&#x200F;4 חיפושים אחרונים</div>
         <button type="button" class="adv-hist-clear" id="adv-hist-clear">ניקוי חיפושים</button>
       </div>
       ${hist.map((h, i) => `
-        <button type="button" class="adv-hist-item" data-hist-idx="${i}">
+        <button type="button" class="adv-hist-item" data-hist-idx="${i}" data-history-category="${h.catId || ''}">
           <span class="adv-hist-cat">${h.catLabel || h.catId}</span>
-          <span class="adv-hist-params">${h.params.map(p => p.metricLabel).join(' · ')}</span>
+          <span class="adv-hist-params">${h.params.map(p => `${p.metricLabel} (${formatHistoryDirection(p)})`).join(' · ')}</span>
           <span class="adv-hist-date">${i === 0 ? 'החיפוש האחרון: ' : ''}${formatSearchDate(h.ts)}</span>
         </button>
       `).join('')}
@@ -13126,8 +13132,6 @@ const App = (() => {
       setAdvancedSearchStatus('כל פרמטר יכול להיבחר פעם אחת בלבד.');
       return;
     }
-
-    saveAdvancedSearchToHistory(selectedParams);
 
     const candidates = getAdvancedSearchCandidates();
     if (!candidates.length) {
@@ -18711,6 +18715,7 @@ const App = (() => {
       state.advancedSearch.hasRun = true;
     }
     await baseRunAdvancedSearchFinal();
+    if (selectedParams.length) saveAdvancedSearchToHistory(selectedParams);
     if (selectedParams.length) state.advancedSearch.hasRun = true;
     state.advancedSearch.needsRefresh = !!state.advancedSearch.hasRun
       && getSearchParamsSignature() !== runSignature;
@@ -18864,9 +18869,7 @@ const App = (() => {
         const param = syncInputValue();
         if (!param) return;
         state.advancedSearch.focusParamId = param.id;
-        state.advancedSearch.focusTarget = input.dataset.advInput === 'direction' && param.direction === 'between'
-          ? 'minValue'
-          : null;
+        state.advancedSearch.focusTarget = input.dataset.advInput;
         renderAdvancedSearchRows();
       });
     });
