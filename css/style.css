@@ -17238,10 +17238,14 @@ tr.sb-row-hidden .sandbox-invest-input {
 
   .adv-hist-cat {
     font-size: .62rem !important;
-    border-left: none !important;
-    padding-left: 0 !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+    padding: 3px 8px !important;
     color: #94a3b8 !important;
     font-weight: 600 !important;
+    line-height: 1.25 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .adv-hist-params {

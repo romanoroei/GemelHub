@@ -387,6 +387,18 @@ let _fundCatId         = null;
 let _myFundId          = null;
 let _fundTrackFullLabel = '';
 let _fundTrackId       = '';
+const GH_SCORE_PRIMARY_TRACKS = {
+  gemel_tagmulim: new Set(['ad_gil_50', 'gil_50_60', 'gil_60_plus', 'maniот', 'sp500']),
+  gemel_hashkaa: new Set(['kaklali', 'maniот', 'sp500']),
+  hashtalamot: new Set(['kaklali', 'maniот', 'sp500']),
+  hisachon_yeled: new Set(['yeled_stocks', 'yeled_general', 'yeled_low']),
+  polisa_chisachon: new Set(['polisa_kaklali', 'polisa_maniот', 'polisa_sp500']),
+  pension_mekafit: new Set(['pension_gil_50', 'pension_gil_50_60', 'pension_gil_60_plus', 'pension_maniот', 'pension_sp500']),
+  pension_mashlima: new Set(['pension_gil_50', 'pension_gil_50_60', 'pension_gil_60_plus', 'pension_maniот', 'pension_sp500'])
+};
+function isPrimaryGemelHubScoreTrack(catId, trackId) {
+  return !!trackId && !!GH_SCORE_PRIMARY_TRACKS[catId]?.has(trackId);
+}
 const FUND_SANDBOX_STORAGE_KEY = 'gemelhub_sandbox_portfolio_v1';
 const FUND_SANDBOX_SELECTIONS_KEY = 'gemelhub_sandbox_selections_v1';
 const FUND_H2H_STORAGE_KEY = 'gemelhubH2HComparison';
@@ -687,7 +699,8 @@ async function loadFundPage() {
 
     // ── GemelHub Score (async, non-blocking) ──
     const _ghWrap = document.getElementById('gh-score-badge-wrap');
-    if (_ghWrap && !isMergedHarel90) {
+    const _ghScoreEligible = isPrimaryGemelHubScoreTrack(_fundCatId, _fundTrackId);
+    if (_ghWrap && !isMergedHarel90 && _ghScoreEligible) {
       _ghWrap.innerHTML = '<div class="gh-score-loading">מחשב ציון גמלהאב…</div>';
       APIModule.computeGemelHubScores(fundId, _fundCatId).then(scoreData => {
         renderGemelHubScoreBadge(_ghWrap, scoreData, fundId, _fundCatId);
