@@ -2943,7 +2943,7 @@ function buildFundPageHeader() {
   orderedIds.forEach(navId => {
     const item = itemById.get(navId);
     if (!item) return;
-    const link = makeLink(item, { href: item.href || `index.html?cat=${item.id}`, icon: item.icon || '' });
+    const link = makeLink(item, { href: item.href || `index.html?cat=${item.id}`, icon: '' });
     link.dataset.categoryOrderId = navId;
     link.draggable = true;
     if (navId.startsWith('actuarial:')) link.classList.remove('active');
