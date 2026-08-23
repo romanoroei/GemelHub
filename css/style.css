@@ -748,7 +748,7 @@ body.sticky-gap-mask-active:not(.fund-page)::before {
   border-radius: 50px;
   box-shadow: var(--shadow-lg);
 }
-.hero-search i {
+.hero-search > i {
   position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
   color: var(--gray-400); font-size: .95rem; pointer-events: none;
 }
@@ -14317,7 +14317,7 @@ tr.sb-row-hidden .sandbox-invest-input {
     padding: 0 !important;
   }
 
-  .title-search-bar .hero-search i {
+  .title-search-bar .hero-search > i {
     right: 50% !important;
     top: 50% !important;
     transform: translate(50%, -50%) !important;

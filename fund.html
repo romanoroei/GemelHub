@@ -3083,7 +3083,7 @@ async function setupFundSearch() {
         <button type="button" class="sd-result-fund-action sd-fund-page-link" data-search-fund-link><span class="sd-name">${escapeHtml(res.name)}</span><span class="sd-open-fund-cue"><i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i> פתיחת דף הקופה</span></button>
         ${detailsHtml}
         ${isSectorial ? `<div class="search-sectorial-badge"><i class="fas fa-users" aria-hidden="true"></i> קופה סקטוריאלית · ${escapeHtml(population)}</div>` : ''}
-        ${res.catId ? `<button type="button" class="sd-category-link" data-search-category="${escapeHtml(res.catId)}" data-search-population="${escapeHtml(res.targetPopulation)}"><i class="fas fa-table" aria-hidden="true"></i> מעבר לטבלת המסלול · ${escapeHtml(catLabel)}</button>` : ''}
+        ${res.catId ? `<button type="button" class="sd-category-link" data-search-category="${escapeHtml(res.catId)}" data-search-population="${escapeHtml(res.targetPopulation)}">מעבר לטבלת המסלול · ${escapeHtml(catLabel)}</button>` : ''}
       </div>`;
     }).join('');
     dropdown.style.display = 'block';
@@ -3853,7 +3853,7 @@ document.addEventListener('DOMContentLoaded', () => {
           '<button type="button" class="mob-search-fund-link" data-mobile-fund-link><span class="sd-name">' + escapeHtml(res.name) + '</span><span class="mob-search-open-cue"><i class="fas fa-arrow-up-right-from-square"></i> דף הקופה</span></button>' +
           '<div class="sd-sub" style="font-size:.75rem;color:#64748b;">' + (res.fname || res.sub) + ' · <span style="color:#94a3b8;">#' + res.id + '</span></div>' +
           (isSectorial ? '<div class="search-sectorial-badge"><i class="fas fa-users"></i> קופה סקטוריאלית · ' + escapeHtml(population) + '</div>' : '') +
-          '<button type="button" class="mob-search-table-link" data-mobile-table-link><i class="fas fa-table"></i> מעבר לטבלת המסלול · ' + escapeHtml(cat ? cat.label : '') + '</button>' +
+          '<button type="button" class="mob-search-table-link" data-mobile-table-link>מעבר לטבלת המסלול · ' + escapeHtml(cat ? cat.label : '') + '</button>' +
         '</div>';
       }).join('');
       results.querySelectorAll('[data-mobile-fund-link]').forEach(function(button) {
