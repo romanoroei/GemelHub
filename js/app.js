@@ -11942,7 +11942,7 @@ const App = (() => {
 
       return `
         <div class="advanced-search-row" data-adv-row="${param.id}">
-          <button type="button" class="advanced-search-drag" data-adv-drag="${param.id}" draggable="true" aria-label="גרור לשינוי סדר הפרמטר">
+          <button type="button" class="advanced-search-drag" data-adv-drag="${param.id}" draggable="true" tabindex="-1" aria-label="גרור לשינוי סדר הפרמטר">
             <i class="fas fa-grip-vertical" aria-hidden="true"></i>
           </button>
           <div class="advanced-search-field">
@@ -12608,6 +12608,12 @@ const App = (() => {
       `;
       return;
     }
+    const formatSearchDate = ts => {
+      const date = new Date(Number(ts));
+      return Number.isNaN(date.getTime())
+        ? ''
+        : new Intl.DateTimeFormat('he-IL', { dateStyle: 'short', timeStyle: 'short' }).format(date);
+    };
     container.innerHTML = `
       <div class="adv-hist-head">
         <div class="adv-hist-title">&#x200F;4 חיפושים אחרונים</div>
@@ -12617,6 +12623,7 @@ const App = (() => {
         <button type="button" class="adv-hist-item" data-hist-idx="${i}">
           <span class="adv-hist-cat">${h.catLabel || h.catId}</span>
           <span class="adv-hist-params">${h.params.map(p => p.metricLabel).join(' · ')}</span>
+          <span class="adv-hist-date">${i === 0 ? 'החיפוש האחרון: ' : ''}${formatSearchDate(h.ts)}</span>
         </button>
       `).join('')}
     `;
@@ -12629,16 +12636,21 @@ const App = (() => {
       btn.addEventListener('click', () => {
         const h = hist[+btn.dataset.histIdx];
         if (!h) return;
-        state.advancedSearch.params = h.params.map(p => ({
-          id: Date.now() + Math.random(),
+        state.advancedSearch.params = h.params.map(p => createAdvancedSearchParam({
           metricId: p.metricId,
           direction: p.direction || 'high',
           weight: p.weight || 'medium',
           minValue: p.minValue || '',
           maxValue: p.maxValue || ''
         }));
+        state.advancedSearch.results = [];
+        state.advancedSearch.hasRun = false;
+        state.advancedSearch.needsRefresh = false;
+        state.advancedSearch.emptyMessage = '';
+        setAdvancedSearchStatus('החיפוש האחרון נטען. אפשר לעדכן את הפרמטרים ולבצע חיפוש.');
         renderAdvancedSearchRows();
-        runAdvancedSearch();
+        renderAdvancedSearchResults();
+        updateAdvancedSearchRunButton(false);
       });
     });
   }
@@ -14088,7 +14100,7 @@ const App = (() => {
 
       return `
         <div class="advanced-search-row" data-adv-row="${param.id}">
-          <button type="button" class="advanced-search-drag" data-adv-drag="${param.id}" draggable="true" aria-label="גרור לשינוי סדר הפרמטר">
+          <button type="button" class="advanced-search-drag" data-adv-drag="${param.id}" draggable="true" tabindex="-1" aria-label="גרור לשינוי סדר הפרמטר">
             <i class="fas fa-grip-vertical" aria-hidden="true"></i>
           </button>
           <div class="advanced-search-field">
@@ -18187,7 +18199,7 @@ const App = (() => {
 
       return `
         <div class="advanced-search-row" data-adv-row="${param.id}">
-          <button type="button" class="advanced-search-drag" data-adv-drag="${param.id}" draggable="true" aria-label="גרור לשינוי סדר הפרמטר">
+          <button type="button" class="advanced-search-drag" data-adv-drag="${param.id}" draggable="true" tabindex="-1" aria-label="גרור לשינוי סדר הפרמטר">
             <i class="fas fa-grip-vertical" aria-hidden="true"></i>
           </button>
           <div class="advanced-search-field">
@@ -18500,7 +18512,7 @@ const App = (() => {
             </select>
           </div>
           ${rangeFields}
-          <button type="button" class="advanced-search-drag" data-adv-drag="${param.id}" draggable="true" aria-label="גרור לשינוי סדר הפרמטר">
+          <button type="button" class="advanced-search-drag" data-adv-drag="${param.id}" draggable="true" tabindex="-1" aria-label="גרור לשינוי סדר הפרמטר">
             <i class="fas fa-grip-vertical" aria-hidden="true"></i>
           </button>
           <button type="button" class="advanced-search-remove" data-adv-remove="${param.id}" aria-label="הסר פרמטר">
@@ -18688,11 +18700,21 @@ const App = (() => {
   const baseRunAdvancedSearchFinal = runAdvancedSearch;
   runAdvancedSearch = async function() {
     const selectedParams = state.advancedSearch.params.filter(param => param.metricId);
+    const getSearchParamsSignature = () => JSON.stringify(state.advancedSearch.params.map(param => ({
+      metricId: param.metricId || '',
+      direction: param.direction || 'high',
+      minValue: param.minValue ?? '',
+      maxValue: param.maxValue ?? ''
+    })));
+    const runSignature = getSearchParamsSignature();
     if (selectedParams.length) {
       state.advancedSearch.hasRun = true;
     }
     await baseRunAdvancedSearchFinal();
-    updateAdvancedSearchRunButton(false);
+    if (selectedParams.length) state.advancedSearch.hasRun = true;
+    state.advancedSearch.needsRefresh = !!state.advancedSearch.hasRun
+      && getSearchParamsSignature() !== runSignature;
+    updateAdvancedSearchRunButton(state.advancedSearch.needsRefresh);
   };
 
   renderAdvancedSearchRows = function() {
@@ -18726,7 +18748,7 @@ const App = (() => {
 
       return `
         <div class="advanced-search-row" data-adv-row="${param.id}">
-          <button type="button" class="advanced-search-drag" data-adv-drag="${param.id}" draggable="true" aria-label="גרור לשינוי סדר הפרמטר">
+          <button type="button" class="advanced-search-drag" data-adv-drag="${param.id}" draggable="true" tabindex="-1" aria-label="גרור לשינוי סדר הפרמטר">
             <i class="fas fa-grip-vertical" aria-hidden="true"></i>
           </button>
           <div class="advanced-search-field">
@@ -18816,20 +18838,35 @@ const App = (() => {
     });
 
     container.querySelectorAll('[data-adv-input]').forEach(input => {
-      input.addEventListener('change', () => {
+      const syncInputValue = () => {
         const row = input.closest('[data-adv-row]');
         const param = state.advancedSearch.params.find(item => item.id === row?.dataset.advRow);
-        if (!param) return;
+        if (!param) return null;
         param.metricId = row.querySelector('[data-adv-input="metric"]')?.value || '';
         param.direction = row.querySelector('[data-adv-input="direction"]')?.value || 'high';
         param.minValue = row.querySelector('[data-adv-input="minValue"]')?.value || '';
         param.maxValue = row.querySelector('[data-adv-input="maxValue"]')?.value || '';
         state.advancedSearch.emptyMessage = '';
+        const hasSearchResults = !!state.advancedSearch.hasRun || state.advancedSearch.results.length > 0;
+        state.advancedSearch.hasRun = hasSearchResults;
+        state.advancedSearch.needsRefresh = hasSearchResults;
+        updateAdvancedSearchRunButton(hasSearchResults);
+        return param;
+      };
+
+      if (input.matches('input[type="number"]')) {
+        input.addEventListener('input', syncInputValue);
+        input.addEventListener('change', syncInputValue);
+        return;
+      }
+
+      input.addEventListener('change', () => {
+        const param = syncInputValue();
+        if (!param) return;
         state.advancedSearch.focusParamId = param.id;
         state.advancedSearch.focusTarget = input.dataset.advInput === 'direction' && param.direction === 'between'
           ? 'minValue'
           : null;
-        updateAdvancedSearchRunButton(false);
         renderAdvancedSearchRows();
       });
     });

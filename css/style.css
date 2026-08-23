@@ -1477,6 +1477,13 @@ body.sticky-gap-mask-active:not(.fund-page)::before {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.adv-hist-date {
+  margin-inline-start: auto;
+  color: #64748b;
+  font-size: .66rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
 
 .advanced-search-empty {
   border: 1px dashed var(--gray-300);
