@@ -2736,9 +2736,11 @@ const APIModule = (() => {
         && p1 >= 55 && p3 >= 55 && ((p1 + p3) / 2) >= ((p6 + p12) / 2) + 12;
       const positiveStable = shortTermSupport !== null && shortTermSupport >= 65 && horizonAgreement >= 65;
       const shortTermWeakness = shortTermSupport !== null && shortTermSupport < 35;
-      // A strong 6/12-month result must not hide a sharp deterioration in the
-      // latest month. Direction takes precedence over the four-horizon average.
-      const sharpRecentDrop = Number.isFinite(p1) && Number.isFinite(p12) && p1 <= p12 - 12;
+      // A strong 6/12-month result must not hide a genuine short-term reversal,
+      // but a dip that remains in the top half is not short-term weakness.
+      const sharpRecentDrop = Number.isFinite(p1) && Number.isFinite(p12)
+        && p1 < 55
+        && p1 <= p12 - 20;
       const yearlyPercentiles = s.components.years.map(year => year.percentile).filter(Number.isFinite);
       const yearlyAverage = yearlyPercentiles.reduce((sum, value) => sum + value, 0) / yearlyPercentiles.length;
       const yearlyStdDev = yearlyPercentiles.length > 1
