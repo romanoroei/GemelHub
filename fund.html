@@ -3304,12 +3304,17 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
   const shortAverageStrength = shortHorizonStrengths.length
     ? shortHorizonStrengths.reduce((sum, value) => sum + value, 0) / shortHorizonStrengths.length
     : null;
+  const strongShortTermDespiteRecentDip = shortHorizonStrengths.length >= 3
+    && Number.isFinite(oneMonthStrength)
+    && oneMonthStrength >= .6
+    && shortAverageStrength >= .75;
   const clearlyStableShortTerm = Number.isFinite(shortStrengthRange) && shortStrengthRange <= .15;
   const recentJumpWithoutConfirmation = protection.timingLabel === 'unclear_trend'
     && Number.isFinite(oneMonthStrength) && Number.isFinite(twelveMonthStrength)
     && oneMonthStrength - twelveMonthStrength > .12;
   const recentDropWithoutConfirmation = Number.isFinite(oneMonthStrength) && Number.isFinite(twelveMonthStrength)
-    && oneMonthStrength - twelveMonthStrength < -.12;
+    && oneMonthStrength - twelveMonthStrength < -.12
+    && !strongShortTermDespiteRecentDip;
   const trend = recentJumpWithoutConfirmation
     ? { ...rawTrend, text: 'הביצועים האחרונים טובים מהביצועים השנתיים, אך התמונה עדיין אינה אחידה', icon: '↗' }
     : recentDropWithoutConfirmation
@@ -3491,6 +3496,7 @@ function showGemelHubScoreModal(data, currentFundId, catId, fundHistory = []) {
     const valid = horizonPoints.filter(point => Number.isFinite(point.rank) && Number.isFinite(point.total));
     if (valid.length < 2) return 'אין מספיק נתונים לזיהוי כיוון';
     const change = rankStrength(valid[valid.length - 1]) - rankStrength(valid[0]);
+    if (change < -.12 && strongShortTermDespiteRecentDip) return 'ביצועים חזקים ברוב הטווחים, עם ירידה קלה בחודש האחרון';
     if (change < -.12) return 'הטווחים האחרונים חלשים מהביצועים השנתיים';
     if (change > .12) return Number.isFinite(support) && support < 40
       ? 'הביצועים האחרונים טובים מהביצועים השנתיים — עדיין חלשים בממוצע'
