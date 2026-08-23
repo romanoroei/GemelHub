@@ -12567,12 +12567,18 @@ const App = (() => {
       const parsed = raw ? JSON.parse(raw) : [];
       const hist = Array.isArray(parsed) ? parsed : [];
       const snapshotKey = getHistoryKey(snapshot);
-      nextHistory = [snapshot, ...hist.filter(h => getHistoryKey(h) !== snapshotKey)].slice(0, 4);
+      const previousItems = state.advancedSearch.forceNewHistoryEntry
+        ? hist
+        : hist.filter(h => getHistoryKey(h) !== snapshotKey);
+      nextHistory = [snapshot, ...previousItems].slice(0, 4);
       localStorage.setItem(ADVANCED_SEARCH_HISTORY_KEY, JSON.stringify(nextHistory));
     } catch(e) {
       const hist = Array.isArray(state.advancedSearch.history) ? state.advancedSearch.history : [];
       const snapshotKey = getHistoryKey(snapshot);
-      nextHistory = [snapshot, ...hist.filter(h => getHistoryKey(h) !== snapshotKey)].slice(0, 4);
+      const previousItems = state.advancedSearch.forceNewHistoryEntry
+        ? hist
+        : hist.filter(h => getHistoryKey(h) !== snapshotKey);
+      nextHistory = [snapshot, ...previousItems].slice(0, 4);
     }
     state.advancedSearch.history = nextHistory;
     renderAdvancedSearchHistory();
@@ -18692,6 +18698,7 @@ const App = (() => {
   const baseRunAdvancedSearchFinal = runAdvancedSearch;
   runAdvancedSearch = async function() {
     const selectedParams = state.advancedSearch.params.filter(param => param.metricId);
+    const isUpdatedSearch = !!state.advancedSearch.hasRun && !!state.advancedSearch.needsRefresh;
     const getSearchParamsSignature = () => JSON.stringify(state.advancedSearch.params.map(param => ({
       metricId: param.metricId || '',
       direction: param.direction || 'high',
@@ -18702,8 +18709,9 @@ const App = (() => {
     if (selectedParams.length) {
       state.advancedSearch.hasRun = true;
     }
+    state.advancedSearch.forceNewHistoryEntry = isUpdatedSearch;
     await baseRunAdvancedSearchFinal();
-    if (selectedParams.length) saveAdvancedSearchToHistory(selectedParams);
+    state.advancedSearch.forceNewHistoryEntry = false;
     if (selectedParams.length) state.advancedSearch.hasRun = true;
     state.advancedSearch.needsRefresh = !!state.advancedSearch.hasRun
       && getSearchParamsSignature() !== runSignature;
