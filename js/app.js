@@ -7724,9 +7724,9 @@ const App = (() => {
     updateSandboxBar();
   }
 
-  function saveSandboxPortfolio() {
-    // Always snapshot current DOM values first so in-progress edits are captured
-    _sbSyncVisibleInputsToState();
+  function saveSandboxPortfolio({ syncVisibleInputs = true } = {}) {
+    // Capture in-progress edits unless state was replaced while the old portfolio is still rendered.
+    if (syncVisibleInputs) _sbSyncVisibleInputsToState();
     const pJson = JSON.stringify(state.sandbox.portfolio);
     const sJson = JSON.stringify(state.sandbox.selections);
     const _trySave = () => {
@@ -9168,7 +9168,8 @@ const App = (() => {
     state.sandbox.portfolioName = item.name;
     _sbSetDirty(false);
     _sbSetAutoSaveId(item.id);
-    saveSandboxPortfolio();
+    // The outgoing portfolio was synced above; the DOM still belongs to it until the render below.
+    saveSandboxPortfolio({ syncVisibleInputs: false });
     document.querySelectorAll('.sandbox-check').forEach(cb => {
       cb.checked = false; cb.classList.remove('is-in-portfolio');
     });
