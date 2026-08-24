@@ -8844,6 +8844,11 @@ const App = (() => {
   let _sbSaveMode = 'new'; // 'new' | 'update'
   let _sbUpdateSelectedId = null;
 
+  function _sbCurrentSavedPortfolioId(list) {
+    return _sbFindMirrorEntry(list)?.id
+      || (state.sandbox.portfolioName ? list.find(p => p.name === state.sandbox.portfolioName)?.id : null);
+  }
+
   function _sbOpenSaveDialog() {
     const dialog = document.getElementById('sb-save-dialog');
     if (!dialog) return;
@@ -8854,13 +8859,19 @@ const App = (() => {
     document.getElementById('sb-save-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('sb-save-notes').value = '';
     // Show/hide mode tabs based on whether saved portfolios exist
-    const hasSaved = _sbGetSavedPortfolios().length > 0;
+    const list = _sbGetSavedPortfolios();
+    const hasSaved = list.length > 0;
+    const mode = _sbCurrentSavedPortfolioId(list) ? 'update' : 'new';
     const tabs = document.getElementById('sb-save-mode-tabs');
     if (tabs) tabs.hidden = !hasSaved;
-    _sbSetSaveMode('new');
+    _sbSetSaveMode(mode);
     dialog.hidden = false;
     history.pushState({ sbDialog: 'save' }, '');
-    setTimeout(() => document.getElementById('sb-save-name')?.focus(), 60);
+    setTimeout(() => {
+      if (dialog.hidden) return;
+      if (_sbSaveMode === 'update') document.querySelector('#sb-save-update-list .sb-update-item.is-selected')?.focus();
+      else document.getElementById('sb-save-name')?.focus();
+    }, 60);
   }
 
   function _sbSetSaveMode(mode) {
@@ -8894,8 +8905,19 @@ const App = (() => {
       container.innerHTML = '<p class="sb-load-empty">אין תיקים שמורים עדיין.</p>';
       return;
     }
-    const currentId = _sbFindMirrorEntry(list)?.id
-      || (state.sandbox.portfolioName ? list.find(p => p.name === state.sandbox.portfolioName)?.id : null);
+    const currentId = _sbCurrentSavedPortfolioId(list);
+    const savedTime = item => {
+      const savedAt = Date.parse(item.savedAt || '');
+      if (Number.isFinite(savedAt)) return savedAt;
+      const date = Date.parse(item.date || '');
+      return Number.isFinite(date) ? date : (Number(item.id) || 0);
+    };
+    list.sort((a, b) => {
+      if (a.id === currentId) return -1;
+      if (b.id === currentId) return 1;
+      return savedTime(b) - savedTime(a);
+    });
+    _sbUpdateSelectedId = null;
     container.innerHTML = list.map(item => {
       const tot = _sbVisibleAmountTotal(item.portfolio);
       const totStr = tot > 0 ? `<span dir="ltr">₪ ${Math.round(tot).toLocaleString('he-IL')}</span>` : '';
