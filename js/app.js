@@ -8918,7 +8918,7 @@ const App = (() => {
     _sbSaveMode = 'new';
     _sbUpdateSelectedId = null;
     // Reset new-portfolio form
-    document.getElementById('sb-save-name').value = '';
+    document.getElementById('sb-save-name').value = _sbDefaultPortfolioName();
     document.getElementById('sb-save-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('sb-save-notes').value = '';
     // Show/hide mode tabs based on whether saved portfolios exist
