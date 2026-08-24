@@ -2693,22 +2693,8 @@ const App = (() => {
     if (!period) return '';
     const s = String(period);
     const year = s.substring(2, 4);
-    const month = parseInt(s.substring(4, 6), 10);
-    const shortMonths = {
-      1: 'ינו׳',
-      2: 'פבר׳',
-      3: 'מרץ',
-      4: 'אפר׳',
-      5: 'מאי',
-      6: 'יונ׳',
-      7: 'יול׳',
-      8: 'אוג׳',
-      9: 'ספט׳',
-      10: 'אוק׳',
-      11: 'נוב׳',
-      12: 'דצמ׳'
-    };
-    return `${shortMonths[month] || month} ${year}`;
+    const month = s.substring(4, 6).padStart(2, '0');
+    return `${month}/${year}`;
   }
 
   function setCustomRangeStatus(message = '') {
@@ -16378,9 +16364,8 @@ const App = (() => {
     const value = Number(period);
     const year = Math.floor(value / 100);
     const month = value % 100;
-    const months = ['', 'ינו׳', 'פבר׳', 'מרץ', 'אפר׳', 'מאי', 'יונ׳', 'יול׳', 'אוג׳', 'ספט׳', 'אוק׳', 'נוב׳', 'דצמ׳'];
     if (!year || month < 1 || month > 12) return '';
-    return `${months[month]}${String(year).slice(-2)}`;
+    return `${String(month).padStart(2, '0')}/${String(year).slice(-2)}`;
   }
 
   function getH2HMetricShortLabel(metric) {
