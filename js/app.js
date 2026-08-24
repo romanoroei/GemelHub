@@ -8857,15 +8857,14 @@ const App = (() => {
     showToast(`התיק "${name}" נשמר אוטומטית`);
   }
 
-  async function _sbConfirmClearPortfolio({ replacing = false } = {}) {
+  async function _sbConfirmClearPortfolio({ replacing = false, deleteId = null } = {}) {
     _sbSyncVisibleInputsToState();
     const list = _sbGetSavedPortfolios();
-    const entry = list.find(p => p.id === _sbCurrentSavedPortfolioId(list));
+    const entry = list.find(p => p.id === (deleteId || _sbCurrentSavedPortfolioId(list)));
+    if (deleteId && !entry) return false;
     const isSaved = entry && !entry.autoNamed;
     const hasChanges = isSaved && JSON.stringify(entry.portfolio) !== JSON.stringify(state.sandbox.portfolio);
-    if (isSaved && !hasChanges) {
-      return confirm('לנקות את התיק מהמסך?\n\nהתיק השמור לא יימחק וניתן יהיה לטעון אותו שוב דרך "פתח/השווה".');
-    }
+    const offerSave = !deleteId && (!isSaved || hasChanges);
     const dialog = document.getElementById('sb-clear-dialog');
     if (!dialog) return false;
     document.getElementById('sb-clear-message').textContent = isSaved
@@ -8873,9 +8872,19 @@ const App = (() => {
       : 'התיק הזה לא נשמר. אם תמחק אותו עכשיו, הוא יימחק ולא ניתן יהיה לטעון אותו שוב. מומלץ לשמור אותו לפני המחיקה.';
     document.getElementById('sb-clear-title').textContent = replacing ? 'שמירה לפני החלפת התיק' : 'שמירה לפני מחיקת התיק';
     if (replacing) document.getElementById('sb-clear-message').textContent = 'התיק הנוכחי לא נשמר. אם תטען תיק אחר ללא שמירה, התיק הנוכחי יימחק ולא ניתן יהיה לטעון אותו שוב. ניתן לשמור אותו קודם או לבטל את המעבר.';
+    if (deleteId) {
+      document.getElementById('sb-clear-title').textContent = 'מחיקת תיק שמור';
+      document.getElementById('sb-clear-message').textContent = `למחוק את התיק "${entry.name}"? התיק יוסר מרשימת התיקים השמורים ולא ניתן יהיה לטעון אותו שוב מהרשימה.`;
+    } else if (!offerSave) {
+      document.getElementById('sb-clear-title').textContent = 'ניקוי התיק מהמסך';
+      document.getElementById('sb-clear-message').textContent = 'לנקות את התיק מהמסך? התיק השמור לא יימחק וניתן יהיה לטעון אותו שוב דרך "פתח/השווה".';
+    }
     const previousFocus = document.activeElement;
-    const buttons = [...dialog.querySelectorAll('button')];
-    buttons.find(button => button.dataset.clearChoice === 'discard').textContent = replacing ? 'טען ללא שמירת התיק הנוכחי' : 'מחק ללא שמירה';
+    const allButtons = [...dialog.querySelectorAll('button')];
+    allButtons.find(button => button.dataset.clearChoice === 'save').hidden = !offerSave;
+    const buttons = allButtons.filter(button => !button.hidden);
+    const discardButton = buttons.find(button => button.dataset.clearChoice === 'discard');
+    discardButton.textContent = deleteId ? 'מחק את התיק' : !offerSave ? 'נקה מהמסך' : replacing ? 'טען ללא שמירת התיק הנוכחי' : 'מחק ללא שמירה';
     const choice = await new Promise(resolve => {
       const finish = value => {
         dialog.hidden = true;
@@ -8894,7 +8903,7 @@ const App = (() => {
         }
       };
       dialog.hidden = false;
-      buttons.find(button => button.dataset.clearChoice === 'save')?.focus();
+      buttons.find(button => button.dataset.clearChoice === (offerSave ? 'save' : 'cancel'))?.focus();
     });
     if (choice === 'save') {
       _sbCloseLoadDialog();
@@ -9262,11 +9271,9 @@ const App = (() => {
     showToast(`התיק "${item.name}" נטען בהצלחה`);
   }
 
-  function _sbDoDeletePortfolio(id) {
-    const list = _sbGetSavedPortfolios();
-    const item = list.find(p => p.id === id);
-    if (!item || !confirm(`למחוק את התיק "${item.name}"?`)) return;
-    _sbPutSavedPortfolios(list.filter(p => p.id !== id));
+  async function _sbDoDeletePortfolio(id) {
+    if (!await _sbConfirmClearPortfolio({ deleteId: id })) return;
+    _sbPutSavedPortfolios(_sbGetSavedPortfolios().filter(p => p.id !== id));
     _sbRenderLoadList();
   }
 

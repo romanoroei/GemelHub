@@ -7,6 +7,7 @@ const source = readFileSync(new URL('../js/app.js', import.meta.url), 'utf8');
 const names = ['_sbItemKey', '_sbFindPortfolioItemFromElement', '_sbSyncVisibleInputsToState', 'saveSandboxPortfolio', '_sbGetSavedPortfolios', '_sbPutSavedPortfolios', '_sbSetDirty', '_sbSetAutoSaveId', '_sbFindMirrorEntry', '_sbEnsureCurrentPortfolioPersisted', '_sbOpenLoadDialog', '_sbCloseLoadDialog', '_sbDoLoadPortfolio'];
 names.push('_sbCurrentSavedPortfolioId', '_sbSaveRenamedPortfolio', '_sbConfirmClearPortfolio');
 names.push('_sbDefaultPortfolioName', '_sbDiscardAutoSavedDraft');
+names.push('_sbDoDeletePortfolio');
 const code = names.map(name => {
   const start = source.search(new RegExp(`  (?:async )?function ${name}\\(`));
   assert.ok(start >= 0, name);
@@ -18,7 +19,8 @@ const row = (fundId, amount, mode = 'amount') => ({ categoryId: 'gemel', trackId
 function setup(a, b) {
   const storage = new Map();
   let inputs = [];
-  const dialog = { hidden: true };
+  const buttons = ['cancel', 'save', 'discard'].map(value => ({ dataset: { clearChoice: value }, focus() {} }));
+  const dialog = { hidden: true, querySelectorAll: () => buttons };
   const c = {
     state: { activeCategoryId: 'sandbox', sandbox: { portfolio: copy(a), selections: [], categoryNotes: {}, portfolioName: 'A', autoSaveId: 'a' } },
     localStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, String(value)), removeItem: key => storage.delete(key) },
@@ -41,7 +43,7 @@ function setup(a, b) {
   vm.runInContext(code, c);
   c._sbPutSavedPortfolios([{ id: 'a', name: 'A', portfolio: copy(a) }, { id: 'b', name: 'B', portfolio: copy(b) }]);
   c.renderSandboxPage();
-  return { c, inputs: () => inputs, saved: () => copy(c._sbGetSavedPortfolios()).map(p => p.portfolio), draft: () => JSON.parse(storage.get('SANDBOX_STORAGE_KEY')) };
+  return { c, dialog, buttons, inputs: () => inputs, saved: () => copy(c._sbGetSavedPortfolios()).map(p => p.portfolio), draft: () => JSON.parse(storage.get('SANDBOX_STORAGE_KEY')) };
 }
 
 for (const [label, a, b] of [
@@ -146,11 +148,28 @@ for (const choice of ['cancel', 'save', 'discard']) {
 
 test('unchanged saved portfolio can be cleared with the saved-copy confirmation', async () => {
   const h = setup([row('1', '100000')], []);
-  let message;
-  h.c.confirm = text => { message = text; return true; };
-  assert.equal(await h.c._sbConfirmClearPortfolio(), true);
-  assert.match(message, /התיק השמור לא יימחק/);
+  h.c.confirm = () => { assert.fail('Native confirmation must not be used for deletion'); };
+  const result = h.c._sbConfirmClearPortfolio();
+  assert.equal(h.dialog.hidden, false);
+  assert.match(h.dialog.textContent, /התיק השמור לא יימחק/);
+  assert.equal(h.buttons.find(b => b.dataset.clearChoice === 'save').hidden, true);
+  h.buttons.find(b => b.dataset.clearChoice === 'discard').onclick();
+  assert.equal(await result, true);
 });
+
+for (const choice of ['cancel', 'discard']) {
+  test(`saved portfolio deletion uses styled dialog: ${choice}`, async () => {
+    const a = [row('1', '100000')], b = [row('2', '800000')];
+    const h = setup(a, b);
+    h.c.confirm = () => { assert.fail('Native confirmation must not be used for deletion'); };
+    const result = h.c._sbDoDeletePortfolio('b');
+    assert.equal(h.dialog.hidden, false);
+    assert.match(h.dialog.textContent, /לא ניתן יהיה לטעון אותו שוב/);
+    h.buttons.find(button => button.dataset.clearChoice === choice).onclick();
+    await result;
+    assert.deepEqual(h.saved(), choice === 'discard' ? [a] : [a, b]);
+  });
+}
 
 test('a clean portfolio gets an unused default name and browsing never saves it', () => {
   const h = setup([row('1', '100000')], []);

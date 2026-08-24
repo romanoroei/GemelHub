@@ -11670,6 +11670,7 @@ body.h2h-active,
   direction: rtl;
 }
 .sb-dialog-overlay[hidden] { display: none !important; }
+.sb-dialog-footer button[hidden] { display: none !important; }
 .sb-dialog-box {
   background: #fff;
   border-radius: 16px;
