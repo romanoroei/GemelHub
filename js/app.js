@@ -7694,6 +7694,11 @@ const App = (() => {
     state.sandbox.portfolioName = localStorage.getItem(SANDBOX_NAME_KEY) || '';
     state.sandbox.isDirty       = localStorage.getItem(SANDBOX_DIRTY_KEY) === '1';
     state.sandbox.autoSaveId    = localStorage.getItem(SANDBOX_AUTOSAVE_ID_KEY) || null;
+    if (!state.sandbox.portfolio.length) {
+      state.sandbox.portfolioName = '';
+      localStorage.removeItem(SANDBOX_NAME_KEY);
+      _sbSetAutoSaveId(null);
+    }
     state.sandbox.lastModified  = localStorage.getItem(SANDBOX_LAST_MOD_KEY) || '';
     try {
       const savedNotes = localStorage.getItem(SANDBOX_CATEGORY_NOTES_KEY);
@@ -7763,7 +7768,8 @@ const App = (() => {
   function _sbShowAutosaveIndicator() {
     const el = document.getElementById('sb-autosave-status');
     if (!el) return;
-    el.textContent = '✓ נשמר';
+    const entry = _sbFindMirrorEntry(_sbGetSavedPortfolios());
+    el.textContent = entry && !entry.autoNamed ? '✓ נשמר' : 'טיוטה — לא נשמרה ברשימת התיקים';
     el.classList.add('is-visible');
     clearTimeout(_sbAutosaveTimer);
     _sbAutosaveTimer = setTimeout(() => el.classList.remove('is-visible'), 2500);
@@ -8729,7 +8735,8 @@ const App = (() => {
   function _sbDefaultPortfolioName() {
     let max = 0;
     const scan = (name) => {
-      const m = /^תיק השקעות (\d+)$/.exec(String(name || '').trim());
+      const normalized = String(name || '').normalize('NFKC').replace(/[\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, '').trim().replace(/\s+/g, ' ');
+      const m = /^תיק השקעות (\d+)$/.exec(normalized);
       if (m) max = Math.max(max, parseInt(m[1], 10));
     };
     _sbGetSavedPortfolios().forEach(p => scan(p.name));
@@ -8792,34 +8799,17 @@ const App = (() => {
     return null;
   }
 
-  // Makes sure the current working portfolio has a real, up-to-date entry in the
-  // saved-portfolios list — auto-creating one under the default name if it doesn't
-  // have a name yet — so nothing is lost when browsing/loading a different portfolio.
+  // Only refresh an explicitly saved/renamed portfolio. Browsing must never turn
+  // a new default-named working draft into a saved portfolio.
   function _sbEnsureCurrentPortfolioPersisted() {
     if (!state.sandbox.portfolio.length) return;
     _sbSyncVisibleInputsToState();
     const list = _sbGetSavedPortfolios();
-    const portfolioCopy = JSON.parse(JSON.stringify(state.sandbox.portfolio));
     const mirror = _sbFindMirrorEntry(list);
-    if (mirror) {
-      mirror.portfolio = portfolioCopy;
-      mirror.savedAt = new Date().toISOString();
-      _sbPutSavedPortfolios(list);
-      if (!state.sandbox.portfolioName) {
-        state.sandbox.portfolioName = mirror.name;
-        localStorage.setItem(SANDBOX_NAME_KEY, mirror.name);
-      }
-    } else {
-      const name = state.sandbox.portfolioName || _sbDefaultPortfolioName();
-      const id = Date.now().toString();
-      list.push({ id, name, date: new Date().toISOString().split('T')[0], notes: '', portfolio: portfolioCopy, savedAt: new Date().toISOString(), autoNamed: !state.sandbox.portfolioName });
-      _sbPutSavedPortfolios(list);
-      _sbSetAutoSaveId(id);
-      if (!state.sandbox.portfolioName) {
-        state.sandbox.portfolioName = name;
-        localStorage.setItem(SANDBOX_NAME_KEY, name);
-      }
-    }
+    if (!mirror || mirror.autoNamed) return;
+    mirror.portfolio = JSON.parse(JSON.stringify(state.sandbox.portfolio));
+    mirror.savedAt = new Date().toISOString();
+    _sbPutSavedPortfolios(list);
     _sbSetDirty(false);
   }
 
@@ -8867,7 +8857,7 @@ const App = (() => {
     showToast(`התיק "${name}" נשמר אוטומטית`);
   }
 
-  async function _sbConfirmClearPortfolio() {
+  async function _sbConfirmClearPortfolio({ replacing = false } = {}) {
     _sbSyncVisibleInputsToState();
     const list = _sbGetSavedPortfolios();
     const entry = list.find(p => p.id === _sbCurrentSavedPortfolioId(list));
@@ -8881,8 +8871,11 @@ const App = (() => {
     document.getElementById('sb-clear-message').textContent = isSaved
       ? 'השינויים האחרונים בתיק לא נשמרו. מחיקה ללא שמירה תאבד אותם ולא ניתן יהיה לטעון אותם שוב. רק הגרסה השמורה תישאר זמינה. מומלץ לשמור לפני המחיקה.'
       : 'התיק הזה לא נשמר. אם תמחק אותו עכשיו, הוא יימחק ולא ניתן יהיה לטעון אותו שוב. מומלץ לשמור אותו לפני המחיקה.';
+    document.getElementById('sb-clear-title').textContent = replacing ? 'שמירה לפני החלפת התיק' : 'שמירה לפני מחיקת התיק';
+    if (replacing) document.getElementById('sb-clear-message').textContent = 'התיק הנוכחי לא נשמר. אם תטען תיק אחר ללא שמירה, התיק הנוכחי יימחק ולא ניתן יהיה לטעון אותו שוב. ניתן לשמור אותו קודם או לבטל את המעבר.';
     const previousFocus = document.activeElement;
     const buttons = [...dialog.querySelectorAll('button')];
+    buttons.find(button => button.dataset.clearChoice === 'discard').textContent = replacing ? 'טען ללא שמירת התיק הנוכחי' : 'מחק ללא שמירה';
     const choice = await new Promise(resolve => {
       const finish = value => {
         dialog.hidden = true;
@@ -9240,11 +9233,15 @@ const App = (() => {
     });
   }
 
-  function _sbDoLoadPortfolio(id) {
+  async function _sbDoLoadPortfolio(id) {
     const list = _sbGetSavedPortfolios();
     const item = list.find(p => p.id === id);
     if (!item) return;
-    if (!confirm(`לטעון את התיק "${item.name}"?\nהתיק הנוכחי יישמר ברשימה ויוחלף במסך.`)) return;
+    const current = _sbFindMirrorEntry(list);
+    if (state.sandbox.portfolio.length && (!current || current.autoNamed)) {
+      if (!await _sbConfirmClearPortfolio({ replacing: true })) return;
+      _sbDiscardAutoSavedDraft();
+    } else if (!confirm(`לטעון את התיק "${item.name}"?${state.sandbox.portfolio.length ? '\nהתיק הנוכחי יישמר ברשימה ויוחלף במסך.' : ''}`)) return;
     _sbEnsureCurrentPortfolioPersisted();
     _sbCloseLoadDialog();
     state.sandbox.portfolio = JSON.parse(JSON.stringify(item.portfolio));

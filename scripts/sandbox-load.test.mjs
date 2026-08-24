@@ -6,6 +6,7 @@ import test from 'node:test';
 const source = readFileSync(new URL('../js/app.js', import.meta.url), 'utf8');
 const names = ['_sbItemKey', '_sbFindPortfolioItemFromElement', '_sbSyncVisibleInputsToState', 'saveSandboxPortfolio', '_sbGetSavedPortfolios', '_sbPutSavedPortfolios', '_sbSetDirty', '_sbSetAutoSaveId', '_sbFindMirrorEntry', '_sbEnsureCurrentPortfolioPersisted', '_sbOpenLoadDialog', '_sbCloseLoadDialog', '_sbDoLoadPortfolio'];
 names.push('_sbCurrentSavedPortfolioId', '_sbSaveRenamedPortfolio', '_sbConfirmClearPortfolio');
+names.push('_sbDefaultPortfolioName', '_sbDiscardAutoSavedDraft');
 const code = names.map(name => {
   const start = source.search(new RegExp(`  (?:async )?function ${name}\\(`));
   assert.ok(start >= 0, name);
@@ -150,3 +151,54 @@ test('unchanged saved portfolio can be cleared with the saved-copy confirmation'
   assert.equal(await h.c._sbConfirmClearPortfolio(), true);
   assert.match(message, /התיק השמור לא יימחק/);
 });
+
+test('a clean portfolio gets an unused default name and browsing never saves it', () => {
+  const h = setup([row('1', '100000')], []);
+  h.c.state.sandbox.portfolioName = '';
+  h.c.state.sandbox.autoSaveId = null;
+  const list = h.c._sbGetSavedPortfolios();
+  list[0].name = 'תיק השקעות 1';
+  list[1].name = '\u200fתיק  השקעות 2';
+  h.c._sbPutSavedPortfolios(list);
+  const before = copy(h.c._sbGetSavedPortfolios());
+  assert.equal(h.c._sbDefaultPortfolioName(), 'תיק השקעות 3');
+  h.c._sbOpenLoadDialog();
+  h.c._sbOpenLoadDialog();
+  assert.deepEqual(copy(h.c._sbGetSavedPortfolios()), before);
+  assert.equal(h.c.state.sandbox.autoSaveId, null);
+  assert.equal(h.c.state.sandbox.portfolioName, '');
+  assert.equal(h.c._sbDefaultPortfolioName(), 'תיק השקעות 3');
+});
+
+test('legacy automatic drafts are not silently updated or promoted', () => {
+  const h = setup([row('1', '100000')], []);
+  const list = h.c._sbGetSavedPortfolios();
+  list[0].autoNamed = true;
+  h.c._sbPutSavedPortfolios(list);
+  h.inputs()[0].value = '999,999';
+  h.c._sbOpenLoadDialog();
+  assert.equal(h.c._sbGetSavedPortfolios()[0].portfolio[0].investAmount, '100000');
+  assert.equal(h.c._sbGetSavedPortfolios()[0].autoNamed, true);
+});
+
+for (const choice of ['cancel', 'save', 'discard']) {
+  test(`switching away from an unsaved draft: ${choice}`, async () => {
+    const a = [row('1', '100000')], b = [row('2', '800000')];
+    const h = setup(a, b);
+    h.c.state.sandbox.portfolioName = '';
+    h.c.state.sandbox.autoSaveId = null;
+    const buttons = ['cancel', 'save', 'discard'].map(value => ({ dataset: { clearChoice: value }, focus() {} }));
+    const dialog = { hidden: true, querySelectorAll: () => buttons };
+    const getElement = h.c.document.getElementById;
+    h.c.document.getElementById = id => id === 'sb-clear-dialog' ? dialog : getElement(id);
+    let saveOpened = false;
+    h.c._sbOpenSaveDialog = () => { saveOpened = true; };
+    const result = h.c._sbDoLoadPortfolio('b');
+    assert.equal(dialog.hidden, false);
+    buttons.find(button => button.dataset.clearChoice === choice).onclick();
+    await result;
+    assert.deepEqual(copy(h.c.state.sandbox.portfolio), choice === 'discard' ? b : a);
+    assert.deepEqual(h.saved(), [a, b]);
+    assert.equal(saveOpened, choice === 'save');
+  });
+}
