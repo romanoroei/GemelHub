@@ -5,8 +5,9 @@ import test from 'node:test';
 
 const source = readFileSync(new URL('../js/app.js', import.meta.url), 'utf8');
 const names = ['_sbItemKey', '_sbFindPortfolioItemFromElement', '_sbSyncVisibleInputsToState', 'saveSandboxPortfolio', '_sbGetSavedPortfolios', '_sbPutSavedPortfolios', '_sbSetDirty', '_sbSetAutoSaveId', '_sbFindMirrorEntry', '_sbEnsureCurrentPortfolioPersisted', '_sbOpenLoadDialog', '_sbCloseLoadDialog', '_sbDoLoadPortfolio'];
+names.push('_sbCurrentSavedPortfolioId', '_sbSaveRenamedPortfolio', '_sbConfirmClearPortfolio');
 const code = names.map(name => {
-  const start = source.indexOf(`  function ${name}(`);
+  const start = source.search(new RegExp(`  (?:async )?function ${name}\\(`));
   assert.ok(start >= 0, name);
   return source.slice(start, source.indexOf('\n  }', start) + 4);
 }).join('\n');
@@ -24,7 +25,8 @@ function setup(a, b) {
       getElementById: id => id === 'sandbox-section' ? { style: {}, querySelectorAll: selector => inputs.filter(input => input.selector === selector) } : dialog,
       querySelectorAll: () => [], querySelector: () => null,
     },
-    confirm: () => true, history: { pushState() {} },
+    confirm: () => true, history: { pushState() {} }, crypto: { randomUUID: () => 'new-id' },
+    _sbResetSaveButtonUI() {},
     _sbUpdateTabBadge() {}, syncFundMembershipIndicators() {}, _sbShowAutosaveIndicator() {}, _sbRenderLoadList() {}, showToast() {},
     renderSandboxPage() {
       inputs = c.state.sandbox.portfolio.flatMap((item, index) => [
@@ -80,4 +82,71 @@ test('cancelling load leaves both portfolios intact', () => {
   h.c._sbDoLoadPortfolio('b');
   assert.deepEqual(copy(h.c.state.sandbox.portfolio), a);
   assert.deepEqual(h.saved(), [a, b]);
+});
+
+test('renaming an unsaved portfolio creates a loadable snapshot with pending edits', () => {
+  const h = setup([row('1', '100000')], []);
+  h.c.state.sandbox.portfolioName = '';
+  h.c.state.sandbox.autoSaveId = null;
+  h.inputs()[0].value = '123,456';
+  h.c._sbSaveRenamedPortfolio('My portfolio');
+  const entry = h.c._sbGetSavedPortfolios().find(p => p.id === 'new-id');
+  assert.equal(entry.name, 'My portfolio');
+  assert.equal(entry.portfolio[0].investAmount, '123456');
+  assert.equal(h.c.state.sandbox.autoSaveId, entry.id);
+  assert.equal(h.c.state.sandbox.isDirty, false);
+  assert.deepEqual(h.draft(), copy(entry.portfolio));
+});
+
+test('renaming a draft updates the same entry and makes it permanent', () => {
+  const h = setup([row('1', '100000')], []);
+  const list = h.c._sbGetSavedPortfolios();
+  list[0].autoNamed = true;
+  h.c._sbPutSavedPortfolios(list);
+  h.inputs()[0].value = '250,000';
+  h.c._sbSaveRenamedPortfolio('Named draft');
+  const saved = h.c._sbGetSavedPortfolios();
+  assert.equal(saved.length, 2);
+  assert.equal(saved[0].name, 'Named draft');
+  assert.equal(saved[0].autoNamed, undefined);
+  assert.equal(saved[0].portfolio[0].investAmount, '250000');
+});
+
+test('failed rename save keeps the existing identity and saved snapshot', () => {
+  const h = setup([row('1', '100000')], []);
+  h.c._sbPutSavedPortfolios = () => { throw new Error('quota'); };
+  h.c._sbSaveRenamedPortfolio('New name');
+  assert.equal(h.c.state.sandbox.portfolioName, 'A');
+  assert.equal(h.c._sbGetSavedPortfolios()[0].name, 'A');
+});
+
+for (const choice of ['cancel', 'save', 'discard']) {
+  test(`unsaved deletion offers ${choice} without altering the portfolio`, async () => {
+    const h = setup([row('1', '100000')], []);
+    h.c.state.sandbox.portfolioName = '';
+    h.c.state.sandbox.autoSaveId = null;
+    const buttons = ['cancel', 'save', 'discard'].map(value => ({ dataset: { clearChoice: value }, focus() {} }));
+    const dialog = { hidden: true, querySelectorAll: () => buttons };
+    const message = {};
+    const getElement = h.c.document.getElementById;
+    h.c.document.getElementById = id => id === 'sb-clear-dialog' ? dialog : id === 'sb-clear-message' ? message : getElement(id);
+    let saveOpened = false;
+    h.c._sbOpenSaveDialog = () => { saveOpened = true; };
+    const result = h.c._sbConfirmClearPortfolio();
+    assert.equal(dialog.hidden, false);
+    assert.match(message.textContent, /לא ניתן יהיה לטעון אותו שוב/);
+    buttons.find(button => button.dataset.clearChoice === choice).onclick();
+    assert.equal(await result, choice === 'discard');
+    assert.equal(saveOpened, choice === 'save');
+    assert.equal(h.c.state.sandbox.portfolio.length, 1);
+    assert.equal(dialog.hidden, true);
+  });
+}
+
+test('unchanged saved portfolio can be cleared with the saved-copy confirmation', async () => {
+  const h = setup([row('1', '100000')], []);
+  let message;
+  h.c.confirm = text => { message = text; return true; };
+  assert.equal(await h.c._sbConfirmClearPortfolio(), true);
+  assert.match(message, /התיק השמור לא יימחק/);
 });

@@ -7875,18 +7875,7 @@ const App = (() => {
       const commit = () => {
         const newName = input.value.trim();
         if (newName && newName !== currentName) {
-          // Rename the mirrored saved entry (by id) before touching state, then fall
-          // back to a name match for portfolios saved before the mirror-id existed.
-          const loaded = _sbGetSavedPortfolios();
-          const entry = _sbFindMirrorEntry(loaded) || loaded.find(p => p.name === currentName);
-          if (entry) {
-            entry.name = newName;
-            delete entry.autoNamed; // user gave it a real name — no longer a discardable draft
-            _sbPutSavedPortfolios(loaded);
-            _sbSetAutoSaveId(entry.id);
-          }
-          state.sandbox.portfolioName = newName;
-          localStorage.setItem(SANDBOX_NAME_KEY, newName);
+          _sbSaveRenamedPortfolio(newName);
         }
         _sbUpdateValueBar(state.sandbox.portfolio);
       };
@@ -8849,6 +8838,78 @@ const App = (() => {
       || (state.sandbox.portfolioName ? list.find(p => p.name === state.sandbox.portfolioName)?.id : null);
   }
 
+  function _sbSaveRenamedPortfolio(name) {
+    _sbSyncVisibleInputsToState();
+    const list = _sbGetSavedPortfolios();
+    const currentId = _sbCurrentSavedPortfolioId(list);
+    let entry = list.find(p => p.id === currentId);
+    const now = new Date().toISOString();
+    if (!entry) {
+      entry = { id: crypto.randomUUID(), date: now.split('T')[0], notes: '' };
+      list.push(entry);
+    }
+    entry.name = name;
+    entry.portfolio = JSON.parse(JSON.stringify(state.sandbox.portfolio));
+    entry.savedAt = now;
+    delete entry.autoNamed;
+    delete entry.sharedSourceId;
+    try {
+      _sbPutSavedPortfolios(list);
+    } catch (error) {
+      showToast('לא ניתן לשמור את התיק. השם לא שונה. נסה שוב.', 'warn');
+      return;
+    }
+    state.sandbox.portfolioName = name;
+    _sbSetAutoSaveId(entry.id);
+    _sbSetDirty(false);
+    _sbResetSaveButtonUI();
+    saveSandboxPortfolio();
+    showToast(`התיק "${name}" נשמר אוטומטית`);
+  }
+
+  async function _sbConfirmClearPortfolio() {
+    _sbSyncVisibleInputsToState();
+    const list = _sbGetSavedPortfolios();
+    const entry = list.find(p => p.id === _sbCurrentSavedPortfolioId(list));
+    const isSaved = entry && !entry.autoNamed;
+    const hasChanges = isSaved && JSON.stringify(entry.portfolio) !== JSON.stringify(state.sandbox.portfolio);
+    if (isSaved && !hasChanges) {
+      return confirm('לנקות את התיק מהמסך?\n\nהתיק השמור לא יימחק וניתן יהיה לטעון אותו שוב דרך "פתח/השווה".');
+    }
+    const dialog = document.getElementById('sb-clear-dialog');
+    if (!dialog) return false;
+    document.getElementById('sb-clear-message').textContent = isSaved
+      ? 'השינויים האחרונים בתיק לא נשמרו. מחיקה ללא שמירה תאבד אותם ולא ניתן יהיה לטעון אותם שוב. רק הגרסה השמורה תישאר זמינה. מומלץ לשמור לפני המחיקה.'
+      : 'התיק הזה לא נשמר. אם תמחק אותו עכשיו, הוא יימחק ולא ניתן יהיה לטעון אותו שוב. מומלץ לשמור אותו לפני המחיקה.';
+    const previousFocus = document.activeElement;
+    const buttons = [...dialog.querySelectorAll('button')];
+    const choice = await new Promise(resolve => {
+      const finish = value => {
+        dialog.hidden = true;
+        buttons.forEach(button => { button.onclick = null; });
+        dialog.onkeydown = null;
+        previousFocus?.focus();
+        resolve(value);
+      };
+      buttons.forEach(button => { button.onclick = () => finish(button.dataset.clearChoice); });
+      dialog.onkeydown = event => {
+        if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); finish('cancel'); }
+        if (event.key === 'Tab') {
+          const index = buttons.indexOf(document.activeElement);
+          event.preventDefault();
+          buttons[(index + (event.shiftKey ? -1 : 1) + buttons.length) % buttons.length].focus();
+        }
+      };
+      dialog.hidden = false;
+      buttons.find(button => button.dataset.clearChoice === 'save')?.focus();
+    });
+    if (choice === 'save') {
+      _sbCloseLoadDialog();
+      _sbOpenSaveDialog();
+    }
+    return choice === 'discard';
+  }
+
   function _sbOpenSaveDialog() {
     const dialog = document.getElementById('sb-save-dialog');
     if (!dialog) return;
@@ -9160,8 +9221,8 @@ const App = (() => {
     });
     container.querySelectorAll('.sb-delete-item-btn').forEach(btn =>
       btn.addEventListener('click', () => _sbDoDeletePortfolio(btn.dataset.deleteId)));
-    document.getElementById('sb-delete-current-btn')?.addEventListener('click', () => {
-      if (!confirm('לנקות את התיק הנוכחי מהמסך?')) return;
+    document.getElementById('sb-delete-current-btn')?.addEventListener('click', async () => {
+      if (!await _sbConfirmClearPortfolio()) return;
       _sbDiscardAutoSavedDraft();
       state.sandbox.portfolio = [];
       state.sandbox.portfolioName = '';
@@ -10643,8 +10704,8 @@ const App = (() => {
     section.querySelector('#sandbox-share-btn')?.addEventListener('click', _sbSharePortfolio);
 
     // Clear portfolio button
-    section.querySelector('#sandbox-clear-portfolio-btn')?.addEventListener('click', () => {
-      if (!confirm('לנקות את התיק מהמסך?\n\nהתיק השמור לא יימחק — ניתן לטעון אותו שוב דרך כפתור "טען תיק".')) return;
+    section.querySelector('#sandbox-clear-portfolio-btn')?.addEventListener('click', async () => {
+      if (!await _sbConfirmClearPortfolio()) return;
       _sbDiscardAutoSavedDraft();
       state.sandbox.portfolio = [];
       state.sandbox.portfolioName = '';
@@ -10663,7 +10724,9 @@ const App = (() => {
 
     // Remove individual item
     section.querySelectorAll('.sandbox-remove-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
+        if (state.sandbox.portfolio.length === 1 && !await _sbConfirmClearPortfolio()) return;
+        if (state.sandbox.portfolio.length === 1) _sbDiscardAutoSavedDraft();
         const idx = parseInt(btn.dataset.portfolioIdx, 10);
         const itemFromKey = _sbFindPortfolioItemFromElement(btn);
         const resolvedIdx = itemFromKey ? state.sandbox.portfolio.indexOf(itemFromKey) : idx;

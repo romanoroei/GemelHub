@@ -618,6 +618,17 @@
 </div>
 
 <!-- Sandbox: Save Portfolio Dialog -->
+<div id="sb-clear-dialog" class="sb-dialog-overlay" hidden aria-modal="true" role="alertdialog" aria-labelledby="sb-clear-title" aria-describedby="sb-clear-message" style="z-index:10001">
+  <div class="sb-dialog-box">
+    <div class="sb-dialog-head"><h3 id="sb-clear-title">שמירה לפני מחיקת התיק</h3></div>
+    <div class="sb-dialog-body"><p id="sb-clear-message"></p></div>
+    <div class="sb-dialog-footer" style="flex-wrap:wrap">
+      <button type="button" class="sb-dialog-cancel" data-clear-choice="cancel">ביטול</button>
+      <button type="button" class="sb-dialog-cancel" data-clear-choice="discard">מחק ללא שמירה</button>
+      <button type="button" class="sb-dialog-submit" data-clear-choice="save">שמור את התיק</button>
+    </div>
+  </div>
+</div>
 <div id="sb-save-dialog" class="sb-dialog-overlay" hidden aria-modal="true" role="dialog" aria-label="שמירת תיק">
   <div class="sb-dialog-box">
     <div class="sb-dialog-head">
@@ -835,6 +846,6 @@
 
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
-  <script src="js/app.js?v=sandbox-save-20260907"></script>
+  <script src="js/app.js?v=sandbox-save-delete-20260907"></script>
 </body>
 </html>
