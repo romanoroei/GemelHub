@@ -9904,7 +9904,7 @@ const App = (() => {
       ? 'השוואה: ' + items[0].name + ' vs ' + items[1].name
       : 'השוואת ' + n + ' תיקים';
     document.getElementById('sb-compare-title').textContent = title;
-    document.getElementById('sb-compare-content').innerHTML = valueSummaryHtml + tracksHtml + returnsHtml + exposuresHtml;
+    document.getElementById('sb-compare-content').innerHTML = valueSummaryHtml + tracksHtml + exposuresHtml + returnsHtml;
     state.sandbox.compareItems = items; // stored for share
   }
 
