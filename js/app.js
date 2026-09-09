@@ -8202,7 +8202,16 @@ const App = (() => {
     if (!missing.length) return '';
     const periods = missing.map(field => field.label).join(', ');
     const prefix = name ? escapeHtml(name) + ': ' : '';
-    return `<div class="sb-returns-history-note">${prefix}חסרים נתוני תשואה למסלולים בתקופות: ${escapeHtml(periods)}. התשואה המשוקללת בתקופות אלה מבוססת רק על המסלולים עם נתונים ואינה מייצגת את מלוא ההרכב; בהיעדר נתונים מוצג —. יש להביא זאת בחשבון בהשוואת תיקים.</div>`;
+    return `<div class="sb-returns-history-note">* ${prefix}חסרים נתוני תשואה למסלולים בתקופות: ${escapeHtml(periods)}. התשואה המשוקללת בתקופות אלה מבוססת רק על המסלולים עם נתונים ואינה מייצגת את מלוא ההרכב; בהיעדר נתונים מוצג —. יש להביא זאת בחשבון בהשוואת תיקים.</div>`;
+  }
+
+  function _sbReturnHistoryMarker(noteId) {
+    return `<sup class="sb-return-history-marker" aria-describedby="${_sbEscapeAttr(noteId)}" title="חסרים נתוני תשואה — ראו הערה בתחתית הטבלה">*</sup>`;
+  }
+
+  function _sbCategoryHistoryNote(items, fields) {
+    const visible = items.filter(item => !item.hidden);
+    return _sbReturnsHistoryNote(visible, _sbWeights(visible), fields);
   }
 
   function _sbWeightedRowCellsHtml(items, catId, returnFields) {
@@ -8220,7 +8229,7 @@ const App = (() => {
     const returnCells = returnFields.map(field => {
       const val = _sbWeightedVal(visibleItems, weights, it => _sbReturnFieldValue(it, field));
       const missing = _sbMissingReturnFields(visibleItems, weights, [field]).length > 0;
-      const note = missing ? '<small class="sb-returns-history-note">' + (val == null ? 'אין נתוני תשואה' : 'נתונים חלקיים — רק מסלולים עם נתונים') + '</small>' : '';
+      const note = missing ? _sbReturnHistoryMarker('sb-history-' + catId) : '';
       return `<td class="sb-td-return sb-td-${field.id} sb-yield-col" style="color:${_sbYieldColor(val)};font-weight:800;font-size:.9rem">${_sbFmtPct(val)}${note}</td>`;
     }).join('');
     const wStock = _sbWeightedExposureVal(visibleItems, weights, it => it.stock);
@@ -8448,6 +8457,7 @@ const App = (() => {
               <tfoot><tr class="sandbox-weighted-row">${_sbWeightedRowCellsHtml(items, catId, returnFields)}</tr></tfoot>
             </table>
           </div>
+          <div class="sb-category-history-note" id="${_sbEscapeAttr('sb-history-' + catId)}">${_sbCategoryHistoryNote(items, returnFields)}</div>
         </div>`;
       }
 
@@ -9875,12 +9885,18 @@ const App = (() => {
         t += '<tr><td class="sbcmp-row-label">' + escapeHtml(row.label) + '</td>';
         const vals = sums.map(s => s[row.key]);
         const best = row.isReturn ? Math.max(...vals.filter(v => v != null)) : null;
-        vals.forEach(v => {
-          if (v == null) { t += '<td>—</td>'; return; }
+        vals.forEach((v, ci) => {
+          const fieldKey = { avgY1: 'y1', avgY3m: 'y3', avgY12: 'y12m', avgY3y: 'y5', avgY5yr: 'y5yr' }[row.key];
+          const portfolio = items[ci].portfolio;
+          const amounts = portfolio.map(it => parseFloat(String(it.investAmount || '').replace(/,/g, '')) || 0);
+          const total = amounts.reduce((sum, amount) => sum + amount, 0);
+          const missing = fieldKey && _sbMissingReturnFields(portfolio, amounts.map(amount => total > 0 ? amount / total : 1 / amounts.length), [{ itemKey: fieldKey }]).length;
+          const marker = missing ? _sbReturnHistoryMarker('sb-compare-history-' + ci) : '';
+          if (v == null) { t += '<td>—' + marker + '</td>'; return; }
           const signCls = row.isReturn ? (v > 0.005 ? 'pos' : v < -0.005 ? 'neg' : '') : '';
           const isBest = row.isReturn && v === best;
           const crown = isBest ? '<i class="fas fa-crown sbcmp-best-icon" aria-hidden="true"></i>' : '';
-          t += '<td class="' + signCls + '"><span class="sbcmp-val-wrap">' + crown + v.toFixed(row.dec || 2) + '%</span></td>';
+          t += '<td class="' + signCls + '"><span class="sbcmp-val-wrap">' + crown + v.toFixed(row.dec || 2) + '%' + marker + '</span></td>';
         });
         if (n === 2 && vals[0] != null && vals[1] != null) {
           const d = vals[0] - vals[1];
@@ -9906,12 +9922,12 @@ const App = (() => {
         { label: '3 שנים',     key: 'avgY3y',  dec: 2, isReturn: true },
         { label: '5 שנים',     key: 'avgY5yr', dec: 2, isReturn: true },
         ...feeRows,
-      ]) + items.map(it => {
+      ]) + items.map((it, ci) => {
         // Match the amount-based weights used by _sbBuildExtendedSummary.
         const amounts = it.portfolio.map(t => parseFloat(String(t.investAmount || '').replace(/,/g, '')) || 0);
         const total = amounts.reduce((sum, amount) => sum + amount, 0);
         const weights = amounts.map(amount => total > 0 ? amount / total : 1 / amounts.length);
-        return _sbReturnsHistoryNote(it.portfolio, weights, SB_RETURN_FIELDS, it.name);
+        return '<div id="sb-compare-history-' + ci + '">' + _sbReturnsHistoryNote(it.portfolio, weights, SB_RETURN_FIELDS, it.name) + '</div>';
       }).join('') + '</div>';
 
     // ── Section 3: Exposures
@@ -11080,6 +11096,8 @@ const App = (() => {
       // <td> elements by position -- that used to drift out of sync whenever the column set changed
       // (e.g. a dynamic return field added/removed), since it assumed a fixed column count.
       row.innerHTML = _sbWeightedRowCellsHtml(items, catId, returnFields);
+      const historyNote = catBlock.querySelector('.sb-category-history-note');
+      if (historyNote) historyNote.innerHTML = _sbCategoryHistoryNote(items, returnFields);
     });
     // Update dashboard section
     const dashEl = section.querySelector('.sb-dashboard');
