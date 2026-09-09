@@ -8883,14 +8883,14 @@ const App = (() => {
     showToast(`התיק "${name}" נשמר אוטומטית`);
   }
 
-  async function _sbConfirmClearPortfolio({ replacing = false, deleteId = null } = {}) {
+  async function _sbConfirmClearPortfolio({ replacing = false, deleteId = null, loadName = null } = {}) {
     _sbSyncVisibleInputsToState();
     const list = _sbGetSavedPortfolios();
     const entry = list.find(p => p.id === (deleteId || _sbCurrentSavedPortfolioId(list)));
     if (deleteId && !entry) return false;
     const isSaved = entry && !entry.autoNamed;
     const hasChanges = isSaved && JSON.stringify(entry.portfolio) !== JSON.stringify(state.sandbox.portfolio);
-    const offerSave = !deleteId && (!isSaved || hasChanges);
+    const offerSave = loadName === null && !deleteId && (!isSaved || hasChanges);
     const dialog = document.getElementById('sb-clear-dialog');
     if (!dialog) return false;
     document.getElementById('sb-clear-message').textContent = isSaved
@@ -8905,12 +8905,19 @@ const App = (() => {
       document.getElementById('sb-clear-title').textContent = 'ניקוי התיק מהמסך';
       document.getElementById('sb-clear-message').textContent = 'לנקות את התיק מהמסך? התיק השמור לא יימחק וניתן יהיה לטעון אותו שוב דרך "פתח/השווה".';
     }
+    if (loadName !== null) {
+      document.getElementById('sb-clear-title').textContent = 'טעינת תיק שמור';
+      document.getElementById('sb-clear-message').textContent = `לטעון את התיק "${loadName}"?${state.sandbox.portfolio.length ? ' התיק הנוכחי יישמר ברשימה ויוחלף במסך.' : ''}`;
+    }
     const previousFocus = document.activeElement;
     const allButtons = [...dialog.querySelectorAll('button')];
     allButtons.find(button => button.dataset.clearChoice === 'save').hidden = !offerSave;
     const buttons = allButtons.filter(button => !button.hidden);
     const discardButton = buttons.find(button => button.dataset.clearChoice === 'discard');
     discardButton.textContent = deleteId ? 'מחק את התיק' : !offerSave ? 'נקה מהמסך' : replacing ? 'טען ללא שמירת התיק הנוכחי' : 'מחק ללא שמירה';
+    discardButton.classList.toggle('sb-dialog-submit', loadName !== null);
+    discardButton.classList.toggle('sb-dialog-cancel', loadName === null);
+    if (loadName !== null) discardButton.textContent = 'טען את התיק';
     const choice = await new Promise(resolve => {
       const finish = value => {
         dialog.hidden = true;
@@ -9276,7 +9283,7 @@ const App = (() => {
     if (state.sandbox.portfolio.length && (!current || current.autoNamed)) {
       if (!await _sbConfirmClearPortfolio({ replacing: true })) return;
       _sbDiscardAutoSavedDraft();
-    } else if (!confirm(`לטעון את התיק "${item.name}"?${state.sandbox.portfolio.length ? '\nהתיק הנוכחי יישמר ברשימה ויוחלף במסך.' : ''}`)) return;
+    } else if (!await _sbConfirmClearPortfolio({ loadName: item.name })) return;
     _sbEnsureCurrentPortfolioPersisted();
     _sbCloseLoadDialog();
     state.sandbox.portfolio = JSON.parse(JSON.stringify(item.portfolio));
