@@ -8191,6 +8191,20 @@ const App = (() => {
   // drift out of sync with each other or with however many return columns are currently shown.
   // Hidden routes (the "what if" eye toggle) are excluded from every weighted figure here, matching
   // how the dashboard already treats them — a hidden route shouldn't count toward the totals.
+  function _sbMissingReturnFields(items, weights, fields = SB_RETURN_FIELDS) {
+    return fields.filter(field => items.some((item, index) =>
+      !item.hidden && weights[index] > 0 && !Number.isFinite(parseFloat(item[field.itemKey]))
+    ));
+  }
+
+  function _sbReturnsHistoryNote(items, weights, fields = SB_RETURN_FIELDS, name = '') {
+    const missing = _sbMissingReturnFields(items, weights, fields);
+    if (!missing.length) return '';
+    const periods = missing.map(field => field.label).join(', ');
+    const prefix = name ? escapeHtml(name) + ': ' : '';
+    return `<div class="sb-returns-history-note">${prefix}חסרים נתוני תשואה למסלולים בתקופות: ${escapeHtml(periods)}. התשואה המשוקללת בתקופות אלה מבוססת רק על המסלולים עם נתונים ואינה מייצגת את מלוא ההרכב; בהיעדר נתונים מוצג —. יש להביא זאת בחשבון בהשוואת תיקים.</div>`;
+  }
+
   function _sbWeightedRowCellsHtml(items, catId, returnFields) {
     const visibleItems = items.filter(it => !it.hidden);
     const isPension = catId.startsWith('pension_');
@@ -8205,7 +8219,9 @@ const App = (() => {
     const visibleSharePct = catAmtTotal > 0 ? 100 : null;
     const returnCells = returnFields.map(field => {
       const val = _sbWeightedVal(visibleItems, weights, it => _sbReturnFieldValue(it, field));
-      return `<td class="sb-td-return sb-td-${field.id} sb-yield-col" style="color:${_sbYieldColor(val)};font-weight:800;font-size:.9rem">${_sbFmtPct(val)}</td>`;
+      const missing = _sbMissingReturnFields(visibleItems, weights, [field]).length > 0;
+      const note = missing ? '<small class="sb-returns-history-note">' + (val == null ? 'אין נתוני תשואה' : 'נתונים חלקיים — רק מסלולים עם נתונים') + '</small>' : '';
+      return `<td class="sb-td-return sb-td-${field.id} sb-yield-col" style="color:${_sbYieldColor(val)};font-weight:800;font-size:.9rem">${_sbFmtPct(val)}${note}</td>`;
     }).join('');
     const wStock = _sbWeightedExposureVal(visibleItems, weights, it => it.stock);
     const wAbroad = _sbWeightedExposureVal(visibleItems, weights, it => it.abroad);
@@ -9885,12 +9901,18 @@ const App = (() => {
     const returnsHtml = '<div class="sbcmp-section"><div class="sbcmp-section-head">תשואות ודמי ניהול (ממוצע משוקלל)</div>'
       + mkTable('תקופה', [
         { label: 'חודש אחרון', key: 'avgY1',   dec: 2, isReturn: true },
-        { label: '3 חודשים',   key: 'avgY3m',  dec: 2, isReturn: true },
+        { label: 'מתחילת שנה', key: 'avgY3m',  dec: 2, isReturn: true },
         { label: '12 חודשים',  key: 'avgY12',  dec: 2, isReturn: true },
         { label: '3 שנים',     key: 'avgY3y',  dec: 2, isReturn: true },
         { label: '5 שנים',     key: 'avgY5yr', dec: 2, isReturn: true },
         ...feeRows,
-      ]) + '</div>';
+      ]) + items.map(it => {
+        // Match the amount-based weights used by _sbBuildExtendedSummary.
+        const amounts = it.portfolio.map(t => parseFloat(String(t.investAmount || '').replace(/,/g, '')) || 0);
+        const total = amounts.reduce((sum, amount) => sum + amount, 0);
+        const weights = amounts.map(amount => total > 0 ? amount / total : 1 / amounts.length);
+        return _sbReturnsHistoryNote(it.portfolio, weights, SB_RETURN_FIELDS, it.name);
+      }).join('') + '</div>';
 
     // ── Section 3: Exposures
     const exposuresHtml = '<div class="sbcmp-section"><div class="sbcmp-section-head">חשיפות (ממוצע משוקלל)</div>'
@@ -10267,6 +10289,7 @@ const App = (() => {
       <div class="sb-returns-mini-row" data-returns-mini-row>
         ${miniHtml}
       </div>
+      ${_sbReturnsHistoryNote(items, weights, SB_RETURN_FIELDS.filter(field => field.id !== 'monthly'))}
     </div>`;
   }
 
