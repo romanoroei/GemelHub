@@ -8202,7 +8202,7 @@ const App = (() => {
     if (!missing.length) return '';
     const periods = missing.map(field => field.label).join(', ');
     const prefix = name ? escapeHtml(name) + ': ' : '';
-    return `<div class="sb-returns-history-note">* ${prefix}חסרים נתוני תשואה למסלולים בתקופות: ${escapeHtml(periods)}. התשואה המשוקללת בתקופות אלה מבוססת רק על המסלולים עם נתונים ואינה מייצגת את מלוא ההרכב; בהיעדר נתונים מוצג —. יש להביא זאת בחשבון בהשוואת תיקים.</div>`;
+    return `<div class="sb-returns-history-note">* ${prefix}חסרים נתוני תשואה למסלולים בתקופות: ${escapeHtml(periods)}. התשואה המשוקללת בתקופות אלה מבוססת רק על המסלולים עם נתונים ואינה מייצגת את מלוא ההרכב; יש להביא זאת בחשבון בעת השוואה.</div>`;
   }
 
   function _sbReturnHistoryMarker(noteId) {
