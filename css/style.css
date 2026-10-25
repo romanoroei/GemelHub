@@ -24909,3 +24909,11 @@ body.sb-printing .sandbox-total-control { display: none !important; }
     padding-right: 0 !important;
   }
 }
+
+/* Move only printed row amounts; preserve column widths, header and summary positions. */
+@media print {
+  html body.sb-printing .sandbox-cat-table tbody .sandbox-invest-print-only {
+    position: relative;
+    left: -6px;
+  }
+}
