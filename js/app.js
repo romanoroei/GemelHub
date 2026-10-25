@@ -7669,8 +7669,7 @@ const App = (() => {
       const item = _sbFindPortfolioItemFromElement(input);
       if (!item) return;
       const clean = input.value.replace(/,/g, '').replace(/[^\d.]/g, '');
-      if (item.investMode === 'percent') item.investPct = clean;
-      else item.investAmount = clean;
+      if (item.investMode !== 'percent') item.investAmount = clean;
     });
     sbSection.querySelectorAll('.sandbox-fee-input').forEach(input => {
       const item = _sbFindPortfolioItemFromElement(input);
@@ -8048,8 +8047,83 @@ const App = (() => {
   // column and the basis that percent edits redistribute against. Excludes hidden routes (matching
   // the weighted-row totals): hiding a route removes its money from the 100% basis entirely, so
   // whatever remains visible becomes the new 100%, rather than just capping out below it.
+  function _sbAllocationValue(it) {
+    return Math.max(0, parseFloat(String(it.investMode === 'percent' ? it.investPct : it.investAmount).replace(/,/g, '')) || 0);
+  }
+
+  function _sbCategoryPercent(item, items) {
+    if (item.hidden) return 0;
+    const total = _sbCategoryInvestTotal(items);
+    return total > 0 ? _sbAllocationValue(item) / total * 100 : (parseFloat(item.investPct) || 0);
+  }
+
+  function _sbDistribute(items, total, weights, mode) {
+    if (!items.length) return;
+    const units = Math.round(Math.max(0, total) * 100);
+    const sum = weights.reduce((a, b) => a + b, 0);
+    const exact = weights.map(w => units * (sum > 0 ? w / sum : 1 / items.length));
+    const parts = exact.map(Math.floor);
+    const order = exact.map((v, i) => i).sort((a, b) => (exact[b] - parts[b]) - (exact[a] - parts[a]));
+    for (let i = 0, left = units - parts.reduce((a, b) => a + b, 0); i < left; i++) parts[order[i % order.length]]++;
+    items.forEach((it, i) => {
+      it.investMode = mode;
+      it.investAmount = mode === 'amount' ? String(parts[i] / 100) : '';
+      it.investPct = mode === 'percent' ? String(parts[i] / 100) : '';
+    });
+  }
+
+  function _sbSetCategoryTotal(items, total) {
+    const visible = items.filter(it => !it.hidden);
+    _sbDistribute(visible, total > 0 ? total : 100, visible.map(_sbAllocationValue), total > 0 ? 'amount' : 'percent');
+  }
+
+  function _sbSetPercent(item, items, value) {
+    const visible = items.filter(it => !it.hidden);
+    const total = _sbCategoryInvestTotal(visible);
+    const mode = total > 0 ? 'amount' : 'percent';
+    const basis = total > 0 ? total : 100;
+    const others = visible.filter(it => it !== item);
+    const locked = others.filter(it => it.pctLocked);
+    const unlocked = others.filter(it => !it.pctLocked);
+    const available = Math.max(0, basis - locked.reduce((sum, it) => sum + _sbAllocationValue(it), 0));
+    const pct = Math.min(100, Math.max(0, Number(value) || 0));
+    const own = unlocked.length ? Math.min(available, Math.round(pct / 100 * basis * 100) / 100) : available;
+    _sbDistribute(unlocked, available - own, unlocked.map(_sbAllocationValue), mode);
+    item.investMode = mode;
+    item.investAmount = mode === 'amount' ? String(own) : '';
+    item.investPct = mode === 'percent' ? String(own) : '';
+    locked.forEach(it => { if (it.investMode !== mode) _sbDistribute([it], _sbAllocationValue(it), [1], mode); });
+  }
+
+  function _sbSetAmount(item, items, value) {
+    const amount = Math.max(0, Number(value) || 0);
+    if (item.investMode === 'percent' && amount > 0) {
+      const pct = _sbAllocationValue(item);
+      if (pct <= 0) return false;
+      _sbSetCategoryTotal(items, amount / (pct / 100));
+    }
+    if (item.investMode === 'percent' && !amount) return true;
+    item.investMode = 'amount';
+    item.investAmount = value === '' ? '' : String(amount);
+    item.investPct = '';
+    return true;
+  }
+
+  function _sbSyncAllocationDom(section, catId) {
+    const items = state.sandbox.portfolio.filter(it => it.categoryId === catId);
+    section.querySelectorAll('.sandbox-invest-input').forEach(input => {
+      const item = _sbFindPortfolioItemFromElement(input);
+      if (!item || item.categoryId !== catId) return;
+      input.value = item.investMode === 'percent' || item.investAmount === '' ? '' : Number(item.investAmount).toLocaleString('he-IL');
+      const print = input.closest('.sandbox-invest-control')?.querySelector('.sandbox-invest-print-only');
+      if (print) print.textContent = input.value;
+    });
+    const totalInput = section.querySelector('.sandbox-total-input[data-category-id="' + CSS.escape(catId) + '"]');
+    if (totalInput) totalInput.value = _sbCategoryInvestTotal(items) || '';
+  }
+
   function _sbCategoryInvestTotal(items) {
-    return items.filter(it => !it.hidden && it.investAmount !== '')
+    return items.filter(it => !it.hidden && it.investMode !== 'percent' && it.investAmount !== '')
       .reduce((s, it) => s + (parseFloat(String(it.investAmount).replace(/,/g, '')) || 0), 0);
   }
 
@@ -8222,10 +8296,10 @@ const App = (() => {
     const wDnDep = _sbWeightedVal(visibleItems, weights, it => it.dnDeposit);
     const catAmtTotal = visibleItems.filter(it => it.investAmount !== '')
       .reduce((s, it) => s + (parseFloat(String(it.investAmount).replace(/,/g, '')) || 0), 0);
-    const catInvestDisplay = Math.round(catAmtTotal).toLocaleString('he-IL');
+    const catInvestDisplay = catAmtTotal > 0 ? catAmtTotal.toLocaleString('he-IL') : '—';
     // The visible rows' own percentages always sum to 100% of catAmtTotal by construction (hidden
     // routes are excluded from that basis entirely) — so this is just confirming the total adds up.
-    const visibleSharePct = catAmtTotal > 0 ? 100 : null;
+    const visibleSharePct = catAmtTotal > 0 ? 100 : (visibleItems.some(it => it.investMode === 'percent') ? visibleItems.reduce((sum, it) => sum + (parseFloat(it.investPct) || 0), 0) : null);
     const returnCells = returnFields.map(field => {
       const val = _sbWeightedVal(visibleItems, weights, it => _sbReturnFieldValue(it, field));
       const missing = _sbMissingReturnFields(visibleItems, weights, [field]).length > 0;
@@ -8344,7 +8418,7 @@ const App = (() => {
           const providerName = String(item.provider || '').trim();
           if (!catProviderColors.has(providerName)) catProviderColors.set(providerName, providerColor(providerName));
           const itemProviderColor = catProviderColors.get(providerName) || item.color;
-          const rawInvestVal = item.investMode === 'percent' ? item.investPct : item.investAmount;
+          const rawInvestVal = item.investMode === 'percent' ? '' : item.investAmount;
           const displayInvest = rawInvestVal !== '' ? Number(String(rawInvestVal).replace(/,/g, '')).toLocaleString('he-IL') : '';
           const allocationProfile = ghAllocationProfileFor({ stock: item.stock, abroad: item.abroad, fx: item.fx });
           const allocationIcon = item.fundIdTagIcons || ghAllocationProfileIcons(allocationProfile, item.trackLabel || '');
@@ -8353,7 +8427,7 @@ const App = (() => {
           const returnCells = returnFields.map(field => _sbReturnCell(item, field)).join('');
           const isHidden = !!item.hidden;
           const investAmountNum = parseFloat(String(item.investAmount || '').replace(/,/g, '')) || 0;
-          const pctOfTotal = (!isHidden && catAmtTotalForPct > 0) ? (investAmountNum / catAmtTotalForPct * 100) : 0;
+          const pctOfTotal = _sbCategoryPercent(item, grouped[catId]);
           const pctDisplay = pctOfTotal ? pctOfTotal.toFixed(1).replace(/\.0$/, '') : '';
           return `<tr data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}"${isHidden ? ' class="sb-row-hidden"' : ''}>
             <td><button type="button" class="sandbox-remove-btn" data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" aria-label="הסר מסלול">
@@ -8398,8 +8472,8 @@ const App = (() => {
                 <input type="text" inputmode="numeric" class="sandbox-invest-input"
                   data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" data-field="invest"
                   value="${displayInvest}"
-                  placeholder="${item.investMode==='percent'?'הכנס אחוז':'הכנס סכום'}" />
-                <span class="sandbox-invest-print-only" data-sandbox-key="${itemKey}">${displayInvest}${item.investMode==='percent' && displayInvest ? '%' : ''}</span>
+                  placeholder="הכנס סכום" />
+                <span class="sandbox-invest-print-only" data-sandbox-key="${itemKey}">${displayInvest}</span>
               </div>
             </td>
             ${returnCells}
@@ -8425,6 +8499,11 @@ const App = (() => {
             <textarea class="sandbox-cat-note-input" data-sandbox-note-cat="${catId}" rows="2" maxlength="300" placeholder="הערה חופשית לקטגוריה...">${escapeHtml(catNoteText)}</textarea>
           </div>` : ''}
           ${catNoteText ? `<div class="sandbox-cat-note-print-only">${escapeHtml(catNoteText).replace(/\n/g, '<br>')}</div>` : ''}
+          <label style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;font-size:.85rem">
+            <span>סכום השקעה כולל בקטגוריה (₪)</span>
+            <input type="number" min="0" step="0.01" class="sandbox-total-input" data-category-id="${catId}" value="${catAmtTotalForPct || ''}" placeholder="אפשר לעבוד באחוזים בלבד" style="width:210px;max-width:100%;padding:7px;border:1px solid #cbd5e1;border-radius:8px" />
+            <span>שינוי הסכום הכולל שומר על החלוקה באחוזים</span>
+          </label>
           <div class="sandbox-cat-table-wrap">
             <table class="sandbox-cat-table${isPension ? ' is-pension-table' : ''}">
               <colgroup>
@@ -10847,65 +10926,31 @@ const App = (() => {
     });
 
     // invest inputs — comma formatting on input, save clean value on blur
-    section.querySelectorAll('.sandbox-invest-input').forEach(input => {
-      input.addEventListener('input', () => {
-        const oldValue = input.value;
-        const oldSelStart = input.selectionStart;
-        // Count real digits (ignoring thousands separators) before the caret, so the caret can be
-        // restored to the same digit after reformatting — not the same character index, which shifts
-        // whenever a comma is inserted/removed and previously caused digits typed afterwards to land
-        // in the wrong slot (e.g. typing 150342 landing as 150423).
-        const digitsBeforeCaret = oldValue.slice(0, oldSelStart).replace(/[^\d.]/g, '').length;
-        let raw = oldValue.replace(/,/g, '').replace(/[^\d.]/g, '');
-        const item = _sbFindPortfolioItemFromElement(input);
-        // Invest AMOUNTS (not percent-mode) are capped at 8 digits (99,999,999) — beyond that the
-        // number no longer fits its table column without clipping, on screen or in print. Simply
-        // refuse the extra digit (truncate) rather than snapping the whole value to 99,999,999,
-        // which would silently rewrite whatever the customer typed into a different number.
-        if (raw.length > 8 && (!item || item.investMode !== 'percent')) {
-          raw = raw.slice(0, 8);
-        }
-        const printSpan = input.closest('.sandbox-invest-control')?.querySelector('.sandbox-invest-print-only');
-        if (raw === '' || isNaN(Number(raw))) {
-          // still save empty
-          if (printSpan) printSpan.textContent = '';
-          if (item) {
-            if (item.investMode === 'percent') item.investPct = '';
-            else item.investAmount = '';
-            _sbMarkPortfolioModified();
-            saveSandboxPortfolio();
-            _sbRefreshWeightedRows(section);
-          }
-          return;
-        }
-        const formatted = Number(raw).toLocaleString('he-IL');
-        input.value = formatted;
-        if (printSpan) printSpan.textContent = formatted + ((item && item.investMode === 'percent') ? '%' : '');
-        let seen = 0, newPos = formatted.length;
-        for (let i = 0; i < formatted.length; i++) {
-          if (formatted[i] !== ',') seen++;
-          if (seen === digitsBeforeCaret) { newPos = i + 1; break; }
-        }
-        try { input.setSelectionRange(newPos, newPos); } catch(e) {}
-        // live save
-        if (item) {
-          if (item.investMode === 'percent') item.investPct = raw;
-          else item.investAmount = raw;
-          _sbMarkPortfolioModified();
-          saveSandboxPortfolio();
-          _sbRefreshWeightedRows(section);
-          _sbRefreshCategoryPercents(section, item.categoryId);
-        }
+    section.querySelectorAll('.sandbox-total-input').forEach(input => {
+      input.addEventListener('change', () => {
+        const catId = input.dataset.categoryId;
+        const items = state.sandbox.portfolio.filter(it => it.categoryId === catId);
+        _sbSetCategoryTotal(items, Math.max(0, Number(input.value) || 0));
+        _sbSyncAllocationDom(section, catId);
+        _sbMarkPortfolioModified();
+        saveSandboxPortfolio({ syncVisibleInputs: false });
+        _sbRefreshCategoryPercents(section, catId);
+        _sbRefreshWeightedRows(section);
       });
+    });
+    section.querySelectorAll('.sandbox-invest-input').forEach(input => {
       input.addEventListener('change', () => {
         const item = _sbFindPortfolioItemFromElement(input);
         if (!item) return;
-        const clean = input.value.replace(/,/g, '');
-        if (item.investMode === 'percent') item.investPct = clean;
-        else item.investAmount = clean;
-        saveSandboxPortfolio();
-        _sbRefreshWeightedRows(section);
+        const items = state.sandbox.portfolio.filter(it => it.categoryId === item.categoryId);
+        const raw = input.value.replace(/,/g, '').trim();
+        if (raw !== '' && (!Number.isFinite(Number(raw)) || Number(raw) < 0)) showToast('יש להזין סכום תקין');
+        else if (!_sbSetAmount(item, items, raw)) showToast('כדי לחשב סכומים מהחלוקה, הזן סכום כולל בקטגוריה');
+        _sbSyncAllocationDom(section, item.categoryId);
+        _sbMarkPortfolioModified();
+        saveSandboxPortfolio({ syncVisibleInputs: false });
         _sbRefreshCategoryPercents(section, item.categoryId);
+        _sbRefreshWeightedRows(section);
       });
     });
 
@@ -10918,61 +10963,8 @@ const App = (() => {
         if (!item || item.hidden || item.pctLocked) return;
         const catId = input.dataset.categoryId;
         const catItems = state.sandbox.portfolio.filter(it => it.categoryId === catId);
-        // The category's total (of visible routes only) is held fixed — a percent edit only moves
-        // money between routes within the category, it never changes how much is invested overall.
-        const total = _sbCategoryInvestTotal(catItems);
-        if (total <= 0) return;
-
-        // Locked routes keep their exact current amount — the edit can only move money between
-        // this row and the OTHER unlocked routes, never touch a locked one.
-        const others = catItems.filter(it => it !== item && !it.hidden);
-        const lockedOthers = others.filter(it => it.pctLocked);
-        const unlockedOthers = others.filter(it => !it.pctLocked);
-        const lockedSum = lockedOthers.reduce((s, it) => s + (parseFloat(String(it.investAmount || '').replace(/,/g, '')) || 0), 0);
-        const availablePool = Math.max(0, total - lockedSum);
-
-        let pct = parseFloat(input.value);
-        if (!Number.isFinite(pct) || pct < 0) pct = 0;
-        pct = Math.min(pct, 100);
-        let newOwnAmount = Math.round(pct / 100 * total);
-        newOwnAmount = Math.min(newOwnAmount, availablePool); // can't eat into locked routes' amounts
-        if (!unlockedOthers.length) newOwnAmount = availablePool; // nowhere else for the leftover to go
-        const remainder = availablePool - newOwnAmount;
-
-        // The rest of the available pool is spread across the other UNLOCKED routes, proportionally
-        // to their current amounts, so their relative weights among themselves don't change — only
-        // their share is scaled up/down to make room for this row's new amount.
-        const othersOldSum = unlockedOthers.reduce((s, it) => s + (parseFloat(String(it.investAmount || '').replace(/,/g, '')) || 0), 0);
-        let assigned = 0;
-        unlockedOthers.forEach((it, idx) => {
-          const isLast = idx === unlockedOthers.length - 1;
-          let newAmt;
-          if (isLast) {
-            newAmt = remainder - assigned; // absorb rounding drift on the last route so the total stays exact
-          } else if (othersOldSum > 0) {
-            const oldAmt = parseFloat(String(it.investAmount || '').replace(/,/g, '')) || 0;
-            newAmt = Math.round(oldAmt * remainder / othersOldSum);
-          } else {
-            newAmt = Math.round(remainder / unlockedOthers.length); // all others were at 0 — split evenly
-          }
-          newAmt = Math.max(0, newAmt);
-          assigned += newAmt;
-          it.investAmount = String(newAmt);
-          it.investMode = 'amount';
-        });
-        item.investAmount = String(newOwnAmount);
-        item.investMode = 'amount';
-
-        // Update every affected row's invest-input DOM value BEFORE saving — saveSandboxPortfolio()
-        // re-syncs every visible invest-input's current DOM value back into state (to catch
-        // in-progress edits elsewhere), so any row whose DOM wasn't updated first would have its
-        // freshly-computed amount clobbered back to its pre-edit value. Locked routes are untouched
-        // so their DOM already matches — no need to refresh those.
-        [item, ...unlockedOthers].forEach(it => {
-          const row = section.querySelector(`tr[data-sandbox-key="${CSS.escape(_sbItemKey(it))}"]`);
-          const investInput = row?.querySelector('.sandbox-invest-input');
-          if (investInput) investInput.value = Number(it.investAmount).toLocaleString('he-IL');
-        });
+        _sbSetPercent(item, catItems, input.value);
+        _sbSyncAllocationDom(section, catId);
         _sbMarkPortfolioModified();
         saveSandboxPortfolio();
         _sbRefreshCategoryPercents(section, catId);
@@ -11041,26 +11033,7 @@ const App = (() => {
       });
     });
 
-    // Tab key navigation between invest inputs
-    const investInputs = [...section.querySelectorAll('.sandbox-invest-input')];
-    investInputs.forEach((input, i) => {
-      input.addEventListener('keydown', e => {
-        if (e.key !== 'Tab') return;
-        e.preventDefault();
-        // save current value
-        const item = _sbFindPortfolioItemFromElement(input);
-        if (item) {
-          const clean = input.value.replace(/,/g, '');
-          if (item.investMode === 'percent') item.investPct = clean;
-          else item.investAmount = clean;
-          saveSandboxPortfolio();
-          _sbRefreshWeightedRows(section);
-        }
-        // move to next (or first if at end)
-        const next = investInputs[(i + 1) % investInputs.length];
-        if (next) { next.focus(); next.select(); }
-      });
-    });
+
   }
 
   // Every row's investAmount contributes to every other row's "% מהסכום" in the same category, so
@@ -11071,11 +11044,11 @@ const App = (() => {
     const total = _sbCategoryInvestTotal(catItems);
     const matches = section.querySelectorAll(`.sandbox-pct-input[data-category-id="${CSS.escape(String(catId))}"]`);
     matches.forEach(pctInput => {
-      if (pctInput === document.activeElement) return;
+      // Refresh the edited input too, to reflect clamps and locks.
       const item = _sbFindPortfolioItemFromElement(pctInput);
       if (!item) return;
       const amt = parseFloat(String(item.investAmount || '').replace(/,/g, '')) || 0;
-      const pct = (!item.hidden && total > 0) ? (amt / total * 100) : 0;
+      const pct = _sbCategoryPercent(item, catItems);
       const pctDisplay = pct ? pct.toFixed(1).replace(/\.0$/, '') : '';
       pctInput.value = pctDisplay;
       const printSpan = pctInput.closest('.sandbox-pct-cell')?.querySelector('.sandbox-pct-print-only');
@@ -19593,3 +19566,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+                                                                              
