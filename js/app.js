@@ -8109,6 +8109,16 @@ const App = (() => {
     return true;
   }
 
+  function _sbFormatTotalInvestment(value) {
+    const clean = String(value).replace(/,/g, '').replace(/[^\d.]/g, '');
+    if (!clean) return '';
+    const [whole, ...fractions] = clean.split('.');
+    const fraction = fractions.join('').slice(0, 2);
+    const amount = Number((whole || '0') + (fractions.length ? '.' + fraction : ''));
+    if (amount >= 99999999) return '99,999,999';
+    return Number(whole || 0).toLocaleString('he-IL') + (fractions.length ? '.' + fraction : '');
+  }
+
   function _sbSyncAllocationDom(section, catId) {
     const items = state.sandbox.portfolio.filter(it => it.categoryId === catId);
     section.querySelectorAll('.sandbox-invest-input').forEach(input => {
@@ -8119,7 +8129,7 @@ const App = (() => {
       if (print) print.textContent = input.value;
     });
     const totalInput = section.querySelector('.sandbox-total-input[data-category-id="' + CSS.escape(catId) + '"]');
-    if (totalInput) totalInput.value = _sbCategoryInvestTotal(items) || '';
+    if (totalInput) totalInput.value = _sbCategoryInvestTotal(items) > 0 ? _sbCategoryInvestTotal(items).toLocaleString('he-IL', { maximumFractionDigits: 2 }) : '';
   }
 
   function _sbCategoryInvestTotal(items) {
@@ -8501,8 +8511,8 @@ const App = (() => {
           </div>` : ''}
           ${catNoteText ? `<div class="sandbox-cat-note-print-only">${escapeHtml(catNoteText).replace(/\n/g, '<br>')}</div>` : ''}
           <label class="sandbox-total-control" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;font-size:.85rem">
-            <span>סכום השקעה כולל בקטגוריה (₪)</span>
-            <input type="number" min="0" step="0.01" class="sandbox-total-input" data-category-id="${catId}" value="${catAmtTotalForPct || ''}" placeholder="אפשר לעבוד באחוזים בלבד" style="width:210px;max-width:100%;padding:7px;border:1px solid #cbd5e1;border-radius:8px" />
+            <span>הזן סכום השקעה כולל בקטגוריה</span>
+            <input type="text" inputmode="decimal" dir="ltr" class="sandbox-total-input" data-category-id="${catId}" value="${catAmtTotalForPct > 0 ? catAmtTotalForPct.toLocaleString('he-IL', { maximumFractionDigits: 2 }) : ''}" placeholder="עד 99,999,999" aria-label="הזן סכום השקעה כולל בקטגוריה" style="width:14ch;max-width:100%;padding:7px;border:1px solid #cbd5e1;border-radius:8px" />
             <span>שינוי הסכום הכולל שומר על החלוקה באחוזים</span>
           </label>
           <div class="sandbox-cat-table-wrap">
@@ -10928,10 +10938,21 @@ const App = (() => {
 
     // invest inputs — comma formatting on input, save clean value on blur
     section.querySelectorAll('.sandbox-total-input').forEach(input => {
+      input.addEventListener('input', () => {
+        const caret = input.selectionStart ?? input.value.length;
+        const digitsBefore = input.value.slice(0, caret).replace(/,/g, '').length;
+        input.value = _sbFormatTotalInvestment(input.value);
+        let seen = 0, position = input.value.length;
+        for (let i = 0; i < input.value.length; i++) {
+          if (input.value[i] !== ',') seen++;
+          if (seen === digitsBefore) { position = i + 1; break; }
+        }
+        input.setSelectionRange(position, position);
+      });
       input.addEventListener('change', () => {
         const catId = input.dataset.categoryId;
         const items = state.sandbox.portfolio.filter(it => it.categoryId === catId);
-        _sbSetCategoryTotal(items, Math.max(0, Number(input.value) || 0));
+        _sbSetCategoryTotal(items, Math.min(99999999, Math.max(0, Number(input.value.replace(/,/g, '')) || 0)));
         _sbSyncAllocationDom(section, catId);
         _sbMarkPortfolioModified();
         saveSandboxPortfolio({ syncVisibleInputs: false });
