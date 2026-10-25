@@ -8217,7 +8217,8 @@ const App = (() => {
   function _sbSortFieldValue(item, field) {
     if (field === 'provider') return item.provider || '';
     if (field === 'track') return item.trackLabel || '';
-    if (field === 'invest' || field === 'pctOfTotal') return parseFloat(String(item.investAmount || '').replace(/,/g, ''));
+    if (field === 'pctOfTotal') return _sbAllocationValue(item);
+    if (field === 'invest') return item.investMode === 'percent' ? null : parseFloat(String(item.investAmount || '').replace(/,/g, ''));
     if (field === 'dnCumulative' || field === 'dnDeposit' || field === 'stock' || field === 'abroad' || field === 'fx') {
       return parseFloat(item[field]);
     }
@@ -19566,4 +19567,3 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
-                                                                              
