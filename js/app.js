@@ -8500,7 +8500,7 @@ const App = (() => {
             <textarea class="sandbox-cat-note-input" data-sandbox-note-cat="${catId}" rows="2" maxlength="300" placeholder="הערה חופשית לקטגוריה...">${escapeHtml(catNoteText)}</textarea>
           </div>` : ''}
           ${catNoteText ? `<div class="sandbox-cat-note-print-only">${escapeHtml(catNoteText).replace(/\n/g, '<br>')}</div>` : ''}
-          <label style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;font-size:.85rem">
+          <label class="sandbox-total-control" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;font-size:.85rem">
             <span>סכום השקעה כולל בקטגוריה (₪)</span>
             <input type="number" min="0" step="0.01" class="sandbox-total-input" data-category-id="${catId}" value="${catAmtTotalForPct || ''}" placeholder="אפשר לעבוד באחוזים בלבד" style="width:210px;max-width:100%;padding:7px;border:1px solid #cbd5e1;border-radius:8px" />
             <span>שינוי הסכום הכולל שומר על החלוקה באחוזים</span>

@@ -24866,3 +24866,9 @@ html body.actuarial-mode .tsb-inner #display-options-toggle {
     color: #526174 !important;
   }
 }
+
+/* Hide allocation editing controls in browser and sandbox print layouts. */
+body.sb-printing .sandbox-total-control { display: none !important; }
+@media print {
+  .sandbox-total-control { display: none !important; }
+}
