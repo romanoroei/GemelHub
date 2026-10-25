@@ -8512,8 +8512,8 @@ const App = (() => {
           ${catNoteText ? `<div class="sandbox-cat-note-print-only">${escapeHtml(catNoteText).replace(/\n/g, '<br>')}</div>` : ''}
           <label class="sandbox-total-control" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;font-size:.85rem">
             <span>הזן סכום השקעה כולל בקטגוריה</span>
-            <input type="text" inputmode="decimal" dir="ltr" class="sandbox-total-input" data-category-id="${catId}" value="${catAmtTotalForPct > 0 ? catAmtTotalForPct.toLocaleString('he-IL', { maximumFractionDigits: 2 }) : ''}" placeholder="עד 99,999,999" aria-label="הזן סכום השקעה כולל בקטגוריה" style="width:14ch;max-width:100%;padding:7px;border:1px solid #cbd5e1;border-radius:8px" />
-            <span>שינוי הסכום הכולל שומר על החלוקה באחוזים</span>
+            <input type="text" inputmode="decimal" dir="ltr" class="sandbox-total-input" data-category-id="${catId}" value="${catAmtTotalForPct > 0 ? catAmtTotalForPct.toLocaleString('he-IL', { maximumFractionDigits: 2 }) : ''}" placeholder="עד 99,999,999" aria-label="הזן סכום השקעה כולל בקטגוריה" style="text-align:right;width:14ch;max-width:100%;padding:7px;border:1px solid #cbd5e1;border-radius:8px" />
+            <span style="font-size:.78rem">(הסכום הכולל שומר על החלוקה באחוזים)</span>
           </label>
           <div class="sandbox-cat-table-wrap">
             <table class="sandbox-cat-table${isPension ? ' is-pension-table' : ''}">
