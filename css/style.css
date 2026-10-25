@@ -24872,3 +24872,39 @@ body.sb-printing .sandbox-total-control { display: none !important; }
 @media print {
   .sandbox-total-control { display: none !important; }
 }
+
+/* Center summary values under the corresponding investment-entry fields. */
+@media screen {
+  html body:not(.sb-printing) .sandbox-weighted-row td.sb-weighted-fee {
+    text-align: right !important;
+    padding-left: 18px !important;
+    padding-right: 0 !important;
+  }
+  body:not(.sb-printing) .sb-weighted-fee-value {
+    display: inline-block;
+    width: 42px;
+    text-align: center;
+  }
+  html body:not(.sb-printing) .sandbox-weighted-row td.sb-weighted-pct {
+    padding-left: 24px !important;
+    padding-right: 3px !important;
+  }
+}
+@media screen and (max-width: 1024px) {
+  html body:not(.sb-printing) .sandbox-weighted-row td.sb-weighted-pct {
+    padding-left: 22px !important;
+    padding-right: 0 !important;
+  }
+}
+@media screen and (max-width: 640px) {
+  body:not(.sb-printing) .sb-weighted-fee-value { width: 38px; }
+  html body:not(.sb-printing) .sandbox-weighted-row td.sb-weighted-fee {
+    text-align: center !important;
+    padding-left: 14px !important;
+    padding-right: 2px !important;
+  }
+  html body:not(.sb-printing) .sandbox-weighted-row td.sb-weighted-pct {
+    padding-left: 23px !important;
+    padding-right: 0 !important;
+  }
+}

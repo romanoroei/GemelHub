@@ -8324,8 +8324,8 @@ const App = (() => {
       <td></td>
       <td></td>
       <td></td>
-      <td class="sb-weighted-fee">${wDn !== null ? _sbFmtPct(wDn) : '—'}</td>
-      ${isPension ? `<td class="sb-weighted-fee">${wDnDep !== null ? _sbFmtPct(wDnDep) : '—'}</td>` : ''}
+      <td class="sb-weighted-fee"><span class="sb-weighted-fee-value">${wDn !== null ? _sbFmtPct(wDn) : '—'}</span></td>
+      ${isPension ? `<td class="sb-weighted-fee"><span class="sb-weighted-fee-value">${wDnDep !== null ? _sbFmtPct(wDnDep) : '—'}</span></td>` : ''}
       <td class="sb-weighted-pct">${visibleSharePct !== null ? _sbFmtPct(visibleSharePct, 0) : '—'}</td>
       <td class="sb-invest-col sb-weighted-invest">${catInvestDisplay}</td>
       ${returnCells}
@@ -11015,6 +11015,31 @@ const App = (() => {
           if (Math.abs(delta) > 1) window.scrollBy({ top: delta, left: 0, behavior: 'auto' });
           freshButton.focus({ preventScroll: true });
         });
+      });
+    });
+
+    // Keep investment entry in visual row order, without stopping on unrelated controls.
+    section.querySelectorAll('.sandbox-total-input, .sandbox-pct-input, .sandbox-invest-input').forEach(input => {
+      input.addEventListener('keydown', event => {
+        if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey) return;
+        const fields = [];
+        section.querySelectorAll('.sandbox-cat-block').forEach(block => {
+          const total = block.querySelector('.sandbox-total-input');
+          if (total) fields.push(total);
+          block.querySelectorAll('tbody tr[data-sandbox-key]').forEach(row => {
+            if (row.classList.contains('sb-row-hidden')) return;
+            const percent = row.querySelector('.sandbox-pct-input');
+            const amount = row.querySelector('.sandbox-invest-input');
+            if (percent && !percent.readOnly && !percent.disabled) fields.push(percent);
+            if (amount && !amount.disabled) fields.push(amount);
+          });
+        });
+        const index = fields.indexOf(input);
+        const next = index >= 0 ? fields[index + (event.shiftKey ? -1 : 1)] : null;
+        if (!next) return;
+        event.preventDefault();
+        next.focus();
+        next.select();
       });
     });
 
