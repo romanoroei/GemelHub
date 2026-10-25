@@ -12397,7 +12397,8 @@ html body .sandbox-cat-table th.sb-pct-head {
 .sandbox-weighted-row .sb-weighted-pct {
   padding-left: 1px;
   padding-right: 6px;
-  font-size: .74rem;
+  font-size: .83rem;
+  font-weight: 800;
   text-align: center;
 }
 /* The row's own 12px horizontal padding (roomy on purpose for the fee/invest/label cells) left too
@@ -20504,7 +20505,7 @@ html body #tracks-container:not(.tracks-two-col-blocked) .track-name {
      nudge, "100%" read visibly off-center in its (now narrower) column instead of sitting in the
      middle of it. */
   html body .sandbox-weighted-row .sb-weighted-pct {
-    font-size: .74rem !important;
+    font-size: .78rem !important;
     padding-left: 27px !important;
     padding-right: 0 !important;
   }
