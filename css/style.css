@@ -24917,3 +24917,29 @@ body.sb-printing .sandbox-total-control { display: none !important; }
     left: -6px;
   }
 }
+
+/* Separate money locks from percentage locks. Keep amount fields usable on small screens. */
+.sandbox-amount-lock-btn {
+  display: inline-flex;
+  flex: 0 0 18px;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 1px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--gray-400);
+  font-size: .72rem;
+  cursor: pointer;
+}
+.sandbox-amount-lock-btn:hover { color: var(--blue); background: #eef2ff; }
+.sandbox-amount-lock-btn.is-locked { color: var(--blue); background: #eef2ff; }
+.sandbox-invest-input.is-locked { background: #fafaf5; color: var(--gray-500); }
+body:not(.sb-printing) .sandbox-invest-control { gap: 2px; }
+body:not(.sb-printing) .sandbox-invest-control .sandbox-invest-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+body.sb-printing .sandbox-amount-lock-btn { display: none !important; }
+tr.sb-row-hidden .sandbox-amount-lock-btn { opacity: .35; }
+@media print { .sandbox-amount-lock-btn { display: none !important; } }

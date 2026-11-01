@@ -8,6 +8,7 @@ const names = ['_sbItemKey', '_sbFindPortfolioItemFromElement', '_sbSyncVisibleI
 names.push('_sbCurrentSavedPortfolioId', '_sbSaveRenamedPortfolio', '_sbConfirmClearPortfolio');
 names.push('_sbDefaultPortfolioName', '_sbDiscardAutoSavedDraft');
 names.push('_sbDoDeletePortfolio');
+names.push('_sbAllocationValue', '_sbCategoryPercent', '_sbCategoryInvestTotal', '_sbDistribute', '_sbLockedPercent', '_sbAllocateLocked', '_sbSetCategoryTotal', '_sbSetPercent', '_sbSetAmount');
 const code = names.map(name => {
   const start = source.search(new RegExp(`  (?:async )?function ${name}\\(`));
   assert.ok(start >= 0, name);
@@ -19,7 +20,7 @@ const row = (fundId, amount, mode = 'amount') => ({ categoryId: 'gemel', trackId
 function setup(a, b) {
   const storage = new Map();
   let inputs = [];
-  const buttons = ['cancel', 'save', 'discard'].map(value => ({ dataset: { clearChoice: value }, focus() {} }));
+  const buttons = ['cancel', 'save', 'discard'].map(value => ({ dataset: { clearChoice: value }, classList: { toggle() {} }, focus() {} }));
   const dialog = { hidden: true, querySelectorAll: () => buttons };
   const c = {
     state: { activeCategoryId: 'sandbox', sandbox: { portfolio: copy(a), selections: [], categoryNotes: {}, portfolioName: 'A', autoSaveId: 'a' } },
@@ -46,43 +47,49 @@ function setup(a, b) {
   return { c, dialog, buttons, inputs: () => inputs, saved: () => copy(c._sbGetSavedPortfolios()).map(p => p.portfolio), draft: () => JSON.parse(storage.get('SANDBOX_STORAGE_KEY')) };
 }
 
+async function load(h, id, choice = 'discard') {
+  const result = h.c._sbDoLoadPortfolio(id);
+  h.buttons.find(button => button.dataset.clearChoice === choice).onclick();
+  await result;
+}
+
 for (const [label, a, b] of [
   ['shared funds reordered', [row('1', '100000'), row('2', '200000')], [row('2', '700000'), row('1', '900000')]],
   ['different funds at the same indexes', [row('1', '100000')], [row('3', '800000')]],
   ['different investment modes', [row('1', '100000')], [row('1', '25', 'percent')]],
+  ['different lock types and anchors', [{ ...row('1', '60000'), pctLocked: true, lockedPct: 60 }, row('2', '40000')], [{ ...row('1', '20000'), amountLocked: true }, row('2', '80000')]],
 ]) {
-  test(`round trip preserves both portfolios: ${label}`, () => {
+  test(`round trip preserves both portfolios: ${label}`, async () => {
     const h = setup(a, b);
     h.c._sbOpenLoadDialog();
     assert.deepEqual(h.saved(), [a, b]);
-    h.c._sbDoLoadPortfolio('b');
+    await load(h, 'b');
     assert.deepEqual(copy(h.c.state.sandbox.portfolio), b);
     assert.deepEqual(h.draft(), b);
     h.c._sbOpenLoadDialog();
-    h.c._sbDoLoadPortfolio('a');
+    await load(h, 'a');
     assert.deepEqual(copy(h.c.state.sandbox.portfolio), a);
     assert.deepEqual(h.saved(), [a, b]);
     assert.deepEqual(h.draft(), a);
   });
 }
-test('pending edits belong only to the outgoing portfolio; normal saves still sync', () => {
+test('pending edits belong only to the outgoing portfolio; normal saves still sync', async () => {
   const a = [row('1', '100000')], b = [row('1', '800000')];
   const h = setup(a, b);
   h.inputs()[0].value = '123,456';
   h.inputs()[1].value = '0.7';
   h.c._sbOpenLoadDialog();
-  h.c._sbDoLoadPortfolio('b');
+  await load(h, 'b');
   assert.deepEqual(h.saved()[0], [{ ...a[0], investAmount: '123456', dnCumulative: '0.7' }]);
   assert.deepEqual(h.draft(), b);
   h.inputs()[0].value = '654,321';
   h.c.saveSandboxPortfolio();
   assert.equal(h.draft()[0].investAmount, '654321');
 });
-test('cancelling load leaves both portfolios intact', () => {
+test('cancelling load leaves both portfolios intact', async () => {
   const a = [row('1', '100000')], b = [row('1', '800000')];
   const h = setup(a, b);
-  h.c.confirm = () => false;
-  h.c._sbDoLoadPortfolio('b');
+  await load(h, 'b', 'cancel');
   assert.deepEqual(copy(h.c.state.sandbox.portfolio), a);
   assert.deepEqual(h.saved(), [a, b]);
 });
@@ -128,7 +135,7 @@ for (const choice of ['cancel', 'save', 'discard']) {
     const h = setup([row('1', '100000')], []);
     h.c.state.sandbox.portfolioName = '';
     h.c.state.sandbox.autoSaveId = null;
-    const buttons = ['cancel', 'save', 'discard'].map(value => ({ dataset: { clearChoice: value }, focus() {} }));
+    const buttons = ['cancel', 'save', 'discard'].map(value => ({ dataset: { clearChoice: value }, classList: { toggle() {} }, focus() {} }));
     const dialog = { hidden: true, querySelectorAll: () => buttons };
     const message = {};
     const getElement = h.c.document.getElementById;
@@ -206,7 +213,7 @@ for (const choice of ['cancel', 'save', 'discard']) {
     const h = setup(a, b);
     h.c.state.sandbox.portfolioName = '';
     h.c.state.sandbox.autoSaveId = null;
-    const buttons = ['cancel', 'save', 'discard'].map(value => ({ dataset: { clearChoice: value }, focus() {} }));
+    const buttons = ['cancel', 'save', 'discard'].map(value => ({ dataset: { clearChoice: value }, classList: { toggle() {} }, focus() {} }));
     const dialog = { hidden: true, querySelectorAll: () => buttons };
     const getElement = h.c.document.getElementById;
     h.c.document.getElementById = id => id === 'sb-clear-dialog' ? dialog : getElement(id);

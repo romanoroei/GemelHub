@@ -7669,7 +7669,13 @@ const App = (() => {
       const item = _sbFindPortfolioItemFromElement(input);
       if (!item) return;
       const clean = input.value.replace(/,/g, '').replace(/[^\d.]/g, '');
-      if (item.investMode !== 'percent') item.investAmount = clean;
+      if (item.investMode !== 'percent' && !item.amountLocked) {
+        const items = state.sandbox.portfolio.filter(it => it.categoryId === item.categoryId);
+        if (clean !== item.investAmount && items.some(it => !it.hidden && it.pctLocked)) {
+          _sbSetAmount(item, items, clean);
+          _sbSyncAllocationDom(sbSection, item.categoryId);
+        } else item.investAmount = clean;
+      }
     });
     sbSection.querySelectorAll('.sandbox-fee-input').forEach(input => {
       const item = _sbFindPortfolioItemFromElement(input);
@@ -8072,41 +8078,134 @@ const App = (() => {
     });
   }
 
-  function _sbSetCategoryTotal(items, total) {
+  function _sbLockedPercent(item, items) {
+    const saved = item.lockedPct;
+    return saved !== undefined && saved !== null && Number.isFinite(Number(saved))
+      ? Math.min(100, Math.max(0, Number(saved))) : _sbCategoryPercent(item, items);
+  }
+
+  // Plan every value before committing: an impossible edit must leave the whole category intact.
+  function _sbAllocateLocked(items, total, mode, editedItem = null, editedValue = null) {
     const visible = items.filter(it => !it.hidden);
-    _sbDistribute(visible, total > 0 ? total : 100, visible.map(_sbAllocationValue), total > 0 ? 'amount' : 'percent');
+    if (!Number.isFinite(total) || total < 0 || (mode === 'amount' && total > 99999999)) return false;
+    if (!visible.length) return true;
+    const units = Math.round(total * 100);
+    const planned = visible.map(it => ({ ...it }));
+    const fixed = visible.map(() => null);
+    const percentParts = [];
+    const anchors = visible.map(it => it.pctLocked ? _sbLockedPercent(it, items) : null);
+    for (let i = 0; i < visible.length; i++) {
+      const it = visible[i];
+      if (it.amountLocked) {
+        if (mode !== 'amount') return false;
+        fixed[i] = Math.round((parseFloat(String(it.investAmount).replace(/,/g, '')) || 0) * 100);
+      }
+      if (it === editedItem) {
+        const editedUnits = Math.round(editedValue * 100);
+        if (fixed[i] !== null && fixed[i] !== editedUnits) return false;
+        fixed[i] = editedUnits;
+      }
+      if (anchors[i] !== null) {
+        const exact = units * anchors[i] / 100;
+        if (mode === 'amount' && units === 0 && anchors[i] > 0) return false;
+        if (fixed[i] !== null) {
+          if (Math.abs(fixed[i] - exact) > 0.500001) return false;
+        } else {
+          percentParts.push({ index: i, exact, units: Math.floor(exact) });
+        }
+      }
+    }
+    // Round the locked percentage group together so 100% of locked routes still sums exactly.
+    const percentUnits = Math.round(percentParts.reduce((sum, part) => sum + part.exact, 0));
+    const order = [...percentParts].sort((a, b) => (b.exact - b.units) - (a.exact - a.units));
+    let extra = percentUnits - percentParts.reduce((sum, part) => sum + part.units, 0);
+    for (let i = 0; i < extra; i++) order[i].units++;
+    percentParts.forEach(part => { fixed[part.index] = part.units; });
+    let remaining = units - fixed.reduce((sum, value) => sum + (value ?? 0), 0);
+    const freeIndexes = fixed.map((value, index) => value === null ? index : -1).filter(index => index >= 0);
+    if (!freeIndexes.length && remaining !== 0) {
+      // A cent of rounding can be absorbed by a percentage lock, never by a money lock or user edit.
+      if (Math.abs(remaining) > percentParts.length) return false;
+      for (const part of order) {
+        if (!remaining) break;
+        const step = remaining > 0 ? 1 : -1;
+        const adjusted = fixed[part.index] + step;
+        if (adjusted >= 0 && Math.abs(adjusted - part.exact) <= 1.000001) {
+          fixed[part.index] = adjusted;
+          remaining -= step;
+        }
+      }
+    }
+    if (remaining < 0 || (!freeIndexes.length && remaining !== 0)) return false;
+    const freePlans = freeIndexes.map(index => planned[index]);
+    _sbDistribute(freePlans, remaining / 100, freeIndexes.map(index => _sbAllocationValue(visible[index])), mode);
+    fixed.forEach((value, index) => {
+      if (value === null) return;
+      planned[index].investMode = mode;
+      planned[index].investAmount = mode === 'amount' ? String(value / 100) : '';
+      planned[index].investPct = mode === 'percent' ? String(value / 100) : '';
+    });
+    for (let i = 0; i < planned.length; i++) {
+      if (anchors[i] === null) continue;
+      const actualPct = units > 0 ? _sbAllocationValue(planned[i]) / total * 100 : 0;
+      // Don't silently change even the displayed tenth of a percent when cents cannot represent it.
+      if (Math.round(actualPct * 10) !== Math.round(anchors[i] * 10)) return false;
+      planned[i].lockedPct = anchors[i];
+    }
+    visible.forEach((it, index) => Object.assign(it, planned[index]));
+    return true;
+  }
+
+  function _sbSetCategoryTotal(items, total) {
+    if (!Number.isFinite(total) || total < 0) return false;
+    return _sbAllocateLocked(items, total > 0 ? total : 100, total > 0 ? 'amount' : 'percent');
   }
 
   function _sbSetPercent(item, items, value) {
+    if (item.hidden || item.pctLocked || item.amountLocked) return false;
     const visible = items.filter(it => !it.hidden);
     const total = _sbCategoryInvestTotal(visible);
     const mode = total > 0 ? 'amount' : 'percent';
     const basis = total > 0 ? total : 100;
     const others = visible.filter(it => it !== item);
-    const locked = others.filter(it => it.pctLocked);
-    const unlocked = others.filter(it => !it.pctLocked);
-    const available = Math.max(0, basis - locked.reduce((sum, it) => sum + _sbAllocationValue(it), 0));
+    const reserved = others.reduce((sum, it) => sum + (it.amountLocked ? _sbAllocationValue(it)
+      : it.pctLocked ? basis * _sbLockedPercent(it, items) / 100 : 0), 0);
+    const available = Math.max(0, basis - reserved);
+    const freeOthers = others.filter(it => !it.pctLocked && !it.amountLocked);
     const pct = Math.min(100, Math.max(0, Number(value) || 0));
-    const own = unlocked.length ? Math.min(available, Math.round(pct / 100 * basis * 100) / 100) : available;
-    _sbDistribute(unlocked, available - own, unlocked.map(_sbAllocationValue), mode);
-    item.investMode = mode;
-    item.investAmount = mode === 'amount' ? String(own) : '';
-    item.investPct = mode === 'percent' ? String(own) : '';
-    locked.forEach(it => { if (it.investMode !== mode) _sbDistribute([it], _sbAllocationValue(it), [1], mode); });
+    const own = freeOthers.length ? Math.min(available, Math.round(pct / 100 * basis * 100) / 100) : available;
+    return _sbAllocateLocked(items, basis, mode, item, own);
   }
 
   function _sbSetAmount(item, items, value) {
-    const amount = Math.max(0, Number(value) || 0);
-    if (item.investMode === 'percent' && amount > 0) {
-      const pct = _sbAllocationValue(item);
+    if (item.hidden || item.amountLocked) return false;
+    const parsed = value === '' ? 0 : Number(value);
+    if (!Number.isFinite(parsed) || parsed < 0 || parsed > 99999999) return false;
+    const amount = Math.round(parsed * 100) / 100;
+    const visible = items.filter(it => !it.hidden);
+    const oldTotal = _sbCategoryInvestTotal(visible);
+    let total;
+    if (oldTotal <= 0 && visible.some(it => it.investMode === 'percent')) {
+      if (amount === 0) return true;
+      const pct = item.pctLocked ? _sbLockedPercent(item, items) : _sbCategoryPercent(item, items);
       if (pct <= 0) return false;
-      _sbSetCategoryTotal(items, amount / (pct / 100));
+      total = amount / (pct / 100);
+    } else if (item.pctLocked) {
+      const pct = _sbLockedPercent(item, items);
+      if (pct <= 0 && amount > 0) return false;
+      total = pct > 0 ? amount / (pct / 100) : oldTotal;
+    } else {
+      const others = visible.filter(it => it !== item);
+      const lockedShare = others.reduce((sum, it) => sum + (it.pctLocked ? _sbLockedPercent(it, items) / 100 : 0), 0);
+      const otherAmounts = others.reduce((sum, it) => sum + (!it.pctLocked ? _sbAllocationValue(it) : 0), 0);
+      if (lockedShare >= 1 - 1e-10) {
+        if (amount + otherAmounts > 0) return false;
+        total = oldTotal;
+      } else total = (amount + otherAmounts) / (1 - lockedShare);
     }
-    if (item.investMode === 'percent' && !amount) return true;
-    item.investMode = 'amount';
-    item.investAmount = value === '' ? '' : String(amount);
-    item.investPct = '';
-    return true;
+    const ok = _sbAllocateLocked(items, Math.round(total * 100) / 100, 'amount', item, amount);
+    if (ok && value === '' && !item.pctLocked) item.investAmount = '';
+    return ok;
   }
 
   function _sbFormatTotalInvestment(value) {
@@ -8465,14 +8564,15 @@ const App = (() => {
               value="${item.dnDeposit}" placeholder="0.25" title="% דמי ניהול מהפקדה" /></td>` : ''}
             <td class="sb-td-pct">
               <div class="sandbox-pct-cell">
-                <input type="number" step="0.1" min="0" max="100" class="sandbox-pct-input${item.pctLocked ? ' is-locked' : ''}"
+                <input type="number" step="0.1" min="0" max="100" class="sandbox-pct-input${item.pctLocked || item.amountLocked ? ' is-locked' : ''}"
                   data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" data-category-id="${catId}"
-                  value="${pctDisplay}" placeholder="0" title="אחוז מסך ההשקעה בקטגוריה"
-                  ${item.pctLocked ? 'readonly' : ''} />
+                  value="${pctDisplay}" placeholder="0" title="${item.amountLocked && !item.pctLocked ? 'האחוז נגזר מהסכום הנעול — שחרר את נעילת הסכום כדי לערוך אותו' : 'אחוז מסך ההשקעה בקטגוריה'}"
+                  ${item.pctLocked || item.amountLocked ? 'readonly' : ''} />
                 <span class="sandbox-pct-print-only" data-sandbox-key="${itemKey}">${pctDisplay ? pctDisplay + '%' : ''}</span>
                 <button type="button" class="sandbox-pct-lock-btn${item.pctLocked ? ' is-locked' : ''}"
                   data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}"
-                  title="${item.pctLocked ? 'בטל נעילת האחוז' : 'נעל את האחוז — לא ישתנה כשעורכים מסלולים אחרים'}"
+                  title="${item.pctLocked ? 'בטל נעילת האחוז' : 'נעל את האחוז — יישמר גם כשמשנים סכומים'}"
+                  aria-pressed="${!!item.pctLocked}"
                   aria-label="${item.pctLocked ? 'בטל נעילת אחוז' : 'נעל אחוז'}">
                   <i class="fas ${item.pctLocked ? 'fa-lock' : 'fa-lock-open'}" aria-hidden="true"></i>
                 </button>
@@ -8480,11 +8580,17 @@ const App = (() => {
             </td>
             <td class="sb-invest-col">
               <div class="sandbox-invest-control">
-                <input type="text" inputmode="numeric" class="sandbox-invest-input"
+                <input type="text" inputmode="numeric" class="sandbox-invest-input${item.amountLocked ? ' is-locked' : ''}"
                   data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" data-field="invest"
                   value="${displayInvest}"
-                  placeholder="הכנס סכום" />
+                  placeholder="הכנס סכום" ${item.amountLocked ? 'readonly' : ''} />
                 <span class="sandbox-invest-print-only" data-sandbox-key="${itemKey}">${displayInvest}</span>
+                <button type="button" class="sandbox-amount-lock-btn${item.amountLocked ? ' is-locked' : ''}"
+                  data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}"
+                  title="${item.amountLocked ? 'בטל נעילת סכום' : 'נעל סכום — יישמר גם כשמשנים את הסכום הכולל'}"
+                  aria-label="${item.amountLocked ? 'בטל נעילת סכום' : 'נעל סכום'}" aria-pressed="${!!item.amountLocked}">
+                  <i class="fas ${item.amountLocked ? 'fa-lock' : 'fa-lock-open'}" aria-hidden="true"></i>
+                </button>
               </div>
             </td>
             ${returnCells}
@@ -10208,7 +10314,8 @@ const App = (() => {
       Math.round((+it.dnCumulative||0)*10000)/10000,
       Math.round((+it.dnDeposit||0)*10000)/10000,
       it.investAmount||0, it.investMode||'amount', it.investPct||'',
-      it.hidden ? 1 : 0, it.color || ''
+      it.hidden ? 1 : 0, it.color || '',
+      it.pctLocked ? 1 : 0, it.amountLocked ? 1 : 0, it.lockedPct ?? null
     ];
   }
   // Expand v2 mini-array back to full portfolio item
@@ -10222,7 +10329,9 @@ const App = (() => {
       stock: String(a[12]), abroad: String(a[13]), fx: String(a[14]),
       dnCumulative: String(a[15]), dnDeposit: String(a[16]),
       investAmount: String(a[17]||0), investMode: a[18]||'amount', investPct: String(a[19]||''),
-      hidden: !!a[20], color: a[21] || ''
+      hidden: !!a[20], color: a[21] || '',
+      pctLocked: !!a[22], amountLocked: !!a[23],
+      ...(a[24] !== undefined && a[24] !== null ? { lockedPct: Number(a[24]) } : {})
     };
   }
 
@@ -10952,7 +11061,9 @@ const App = (() => {
       input.addEventListener('change', () => {
         const catId = input.dataset.categoryId;
         const items = state.sandbox.portfolio.filter(it => it.categoryId === catId);
-        _sbSetCategoryTotal(items, Math.min(99999999, Math.max(0, Number(input.value.replace(/,/g, '')) || 0)));
+        if (!_sbSetCategoryTotal(items, Math.min(99999999, Math.max(0, Number(input.value.replace(/,/g, '')) || 0)))) {
+          showToast('לא ניתן לשנות את הסכום הכולל בלי לשנות ערך נעול. שחרר נעילה או בחר סכום מתאים.');
+        }
         _sbSyncAllocationDom(section, catId);
         _sbMarkPortfolioModified();
         saveSandboxPortfolio({ syncVisibleInputs: false });
@@ -10967,7 +11078,7 @@ const App = (() => {
         const items = state.sandbox.portfolio.filter(it => it.categoryId === item.categoryId);
         const raw = input.value.replace(/,/g, '').trim();
         if (raw !== '' && (!Number.isFinite(Number(raw)) || Number(raw) < 0)) showToast('יש להזין סכום תקין');
-        else if (!_sbSetAmount(item, items, raw)) showToast('כדי לחשב סכומים מהחלוקה, הזן סכום כולל בקטגוריה');
+        else if (!_sbSetAmount(item, items, raw)) showToast('השינוי אינו אפשרי עם החלוקה, הנעילות ומגבלת הסכום הנוכחיות. שחרר נעילה או הזן סכום כולל מתאים.');
         _sbSyncAllocationDom(section, item.categoryId);
         _sbMarkPortfolioModified();
         saveSandboxPortfolio({ syncVisibleInputs: false });
@@ -10982,10 +11093,12 @@ const App = (() => {
     section.querySelectorAll('.sandbox-pct-input').forEach(input => {
       input.addEventListener('change', () => {
         const item = _sbFindPortfolioItemFromElement(input);
-        if (!item || item.hidden || item.pctLocked) return;
+        if (!item || item.hidden || item.pctLocked || item.amountLocked) return;
         const catId = input.dataset.categoryId;
         const catItems = state.sandbox.portfolio.filter(it => it.categoryId === catId);
-        _sbSetPercent(item, catItems, input.value);
+        if (!_sbSetPercent(item, catItems, input.value)) {
+          showToast('לא ניתן לשנות את החלוקה בלי לשנות ערך נעול. שחרר נעילה ונסה שוב.');
+        }
         _sbSyncAllocationDom(section, catId);
         _sbMarkPortfolioModified();
         saveSandboxPortfolio();
@@ -10994,13 +11107,26 @@ const App = (() => {
       });
     });
 
-    section.querySelectorAll('.sandbox-pct-lock-btn').forEach(btn => {
+    section.querySelectorAll('.sandbox-pct-lock-btn, .sandbox-amount-lock-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const item = _sbFindPortfolioItemFromElement(btn);
         if (!item) return;
         const anchorTop = btn.getBoundingClientRect().top;
         const itemKey = btn.dataset.sandboxKey || '';
-        item.pctLocked = !item.pctLocked;
+        const isAmount = btn.classList.contains('sandbox-amount-lock-btn');
+        if (isAmount) {
+          if (!item.amountLocked && (item.investMode === 'percent' || item.investAmount === '')) {
+            showToast('יש להזין סכום השקעה לפני נעילת הסכום');
+            return;
+          }
+          item.amountLocked = !item.amountLocked;
+        } else {
+          if (!item.pctLocked) {
+            const items = state.sandbox.portfolio.filter(it => it.categoryId === item.categoryId);
+            item.lockedPct = _sbCategoryPercent(item, items);
+          } else delete item.lockedPct;
+          item.pctLocked = !item.pctLocked;
+        }
         _sbMarkPortfolioModified();
         saveSandboxPortfolio();
         const scrollMap = _sbCaptureTableScroll(section);
@@ -11008,7 +11134,7 @@ const App = (() => {
         _sbRestoreTableScroll(section, scrollMap);
         requestAnimationFrame(() => {
           const freshButton = itemKey
-            ? section.querySelector(`.sandbox-pct-lock-btn[data-sandbox-key="${CSS.escape(itemKey)}"]`)
+            ? section.querySelector(`.${isAmount ? 'sandbox-amount-lock-btn' : 'sandbox-pct-lock-btn'}[data-sandbox-key="${CSS.escape(itemKey)}"]`)
             : null;
           if (!freshButton) return;
           const delta = freshButton.getBoundingClientRect().top - anchorTop;
@@ -11031,7 +11157,7 @@ const App = (() => {
             const percent = row.querySelector('.sandbox-pct-input');
             const amount = row.querySelector('.sandbox-invest-input');
             if (percent && !percent.readOnly && !percent.disabled) fields.push(percent);
-            if (amount && !amount.disabled) fields.push(amount);
+            if (amount && !amount.readOnly && !amount.disabled) fields.push(amount);
           });
         });
         const index = fields.indexOf(input);
