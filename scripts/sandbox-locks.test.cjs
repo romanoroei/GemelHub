@@ -94,10 +94,9 @@ test('percentage and amount locks on different rows can coexist', () => {
   assert.deepEqual(amounts(rows), [42857.14, 20000, 80000]);
   assert.equal(c._sbCategoryPercent(rows[0], rows).toFixed(1), '30.0');
 });
-test('direct writes to either field of an amount-locked row are rejected atomically', () => {
+test('direct amount writes to an amount-locked row are rejected atomically', () => {
   const rows = [row(20000, { amountLocked: true }), row(80000)];
   atomicFailure(rows, () => c._sbSetAmount(rows[0], rows, '25000'));
-  atomicFailure(rows, () => c._sbSetPercent(rows[0], rows, '25'));
 });
 test('a direct percentage edit to a percentage lock is rejected atomically', () => {
   const rows = [row(20000, { pctLocked: true }), row(80000)];
@@ -176,4 +175,50 @@ test('mixed lock allocations retain all invariants across 200 deterministic scen
       assert(rows.every(it => Number(it.investAmount) >= 0));
     } else assert.equal(JSON.stringify(rows), before);
   }
+});
+
+
+test('editing the percentage of locked money derives a new category total', () => {
+  const rows = [row(20000, { amountLocked: true }), row(80000)];
+  assert.equal(c._sbSetPercent(rows[0], rows, '10'), true);
+  assert.deepEqual(amounts(rows), [20000, 180000]);
+  near(c._sbCategoryInvestTotal(rows), 200000);
+  near(c._sbCategoryPercent(rows[0], rows), 10);
+  assert.equal(rows[0].pctLocked, undefined);
+});
+test('editing the percentage of locked money preserves other percentage and money locks', () => {
+  const rows = [row(20000, { amountLocked: true }), row(30000, { pctLocked: true }), row(10000, { amountLocked: true }), row(40000)];
+  assert.equal(c._sbSetPercent(rows[0], rows, '5'), true);
+  assert.deepEqual(amounts(rows), [20000, 120000, 10000, 250000]);
+  near(c._sbCategoryPercent(rows[1], rows), 30);
+});
+test('impossible percentages of positive locked money are rejected atomically', () => {
+  const rows = [row(20000, { amountLocked: true }), row(80000)];
+  atomicFailure(rows, () => c._sbSetPercent(rows[0], rows, '0'));
+  atomicFailure(rows, () => c._sbSetPercent(rows[0], rows, '.01'));
+});
+test('percentage changes of locked money reject conflicts with other money locks', () => {
+  const rows = [row(20000, { amountLocked: true }), row(80000, { amountLocked: true })];
+  atomicFailure(rows, () => c._sbSetPercent(rows[0], rows, '10'));
+});
+test('percentage changes of locked money reject conflicts with another double lock', () => {
+  const rows = [row(20000, { amountLocked: true }), row(30000, { pctLocked: true, amountLocked: true }), row(50000)];
+  atomicFailure(rows, () => c._sbSetPercent(rows[0], rows, '10'));
+});
+test('zero money can remain zero percent but cannot represent a positive percentage', () => {
+  const rows = [row(0, { amountLocked: true }), row(100000)];
+  assert.equal(c._sbSetPercent(rows[0], rows, '0'), true);
+  atomicFailure(rows, () => c._sbSetPercent(rows[0], rows, '10'));
+});
+test('explicitly locking both fields still prevents direct percentage edits', () => {
+  const rows = [row(20000, { amountLocked: true, pctLocked: true }), row(80000)];
+  atomicFailure(rows, () => c._sbSetPercent(rows[0], rows, '10'));
+});
+test('fractional percentage edits preserve cents and survive reloads', () => {
+  let rows = [row(12345.67, { amountLocked: true }), row(87654.33)];
+  assert.equal(c._sbSetPercent(rows[0], rows, '12.3'), true);
+  near(c._sbCategoryInvestTotal(rows), 100371.3);
+  rows = clone(rows);
+  assert.equal(rows[0].investAmount, '12345.67');
+  assert.equal(c._sbCategoryPercent(rows[0], rows).toFixed(1), '12.3');
 });

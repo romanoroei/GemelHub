@@ -8162,9 +8162,20 @@ const App = (() => {
   }
 
   function _sbSetPercent(item, items, value) {
-    if (item.hidden || item.pctLocked || item.amountLocked) return false;
+    if (item.hidden || item.pctLocked) return false;
     const visible = items.filter(it => !it.hidden);
     const total = _sbCategoryInvestTotal(visible);
+    if (item.amountLocked) {
+      const amount = _sbAllocationValue(item);
+      const pct = Math.min(100, Math.max(0, Number(value) || 0));
+      // Editing the share of fixed money determines the category total, not the locked amount.
+      if (amount === 0) return pct === 0;
+      if (pct <= 0) return false;
+      const nextTotal = Math.round(amount / (pct / 100) * 100) / 100;
+      if (!Number.isFinite(nextTotal) || nextTotal <= 0 || nextTotal > 99999999) return false;
+      if (Math.round(amount / nextTotal * 1000) !== Math.round(pct * 10)) return false;
+      return _sbAllocateLocked(items, nextTotal, 'amount', item, amount);
+    }
     const mode = total > 0 ? 'amount' : 'percent';
     const basis = total > 0 ? total : 100;
     const others = visible.filter(it => it !== item);
@@ -8564,10 +8575,10 @@ const App = (() => {
               value="${item.dnDeposit}" placeholder="0.25" title="% דמי ניהול מהפקדה" /></td>` : ''}
             <td class="sb-td-pct">
               <div class="sandbox-pct-cell">
-                <input type="number" step="0.1" min="0" max="100" class="sandbox-pct-input${item.pctLocked || item.amountLocked ? ' is-locked' : ''}"
+                <input type="number" step="0.1" min="0" max="100" class="sandbox-pct-input${item.pctLocked ? ' is-locked' : ''}"
                   data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}" data-category-id="${catId}"
-                  value="${pctDisplay}" placeholder="0" title="${item.amountLocked && !item.pctLocked ? 'האחוז נגזר מהסכום הנעול — שחרר את נעילת הסכום כדי לערוך אותו' : 'אחוז מסך ההשקעה בקטגוריה'}"
-                  ${item.pctLocked || item.amountLocked ? 'readonly' : ''} />
+                  value="${pctDisplay}" placeholder="0" title="${item.amountLocked && !item.pctLocked ? 'שינוי האחוז יעדכן את הסכום הכולל וישמור על הסכום הנעול' : 'אחוז מסך ההשקעה בקטגוריה'}"
+                  ${item.pctLocked ? 'readonly' : ''} />
                 <span class="sandbox-pct-print-only" data-sandbox-key="${itemKey}">${pctDisplay ? pctDisplay + '%' : ''}</span>
                 <button type="button" class="sandbox-pct-lock-btn${item.pctLocked ? ' is-locked' : ''}"
                   data-portfolio-idx="${gi}" data-sandbox-key="${itemKey}"
@@ -11093,7 +11104,7 @@ const App = (() => {
     section.querySelectorAll('.sandbox-pct-input').forEach(input => {
       input.addEventListener('change', () => {
         const item = _sbFindPortfolioItemFromElement(input);
-        if (!item || item.hidden || item.pctLocked || item.amountLocked) return;
+        if (!item || item.hidden || item.pctLocked) return;
         const catId = input.dataset.categoryId;
         const catItems = state.sandbox.portfolio.filter(it => it.categoryId === catId);
         if (!_sbSetPercent(item, catItems, input.value)) {
