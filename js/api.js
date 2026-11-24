@@ -977,12 +977,17 @@ const APIModule = (() => {
   }
 
   async function getRangeEligibleRecords(categoryId, targetPopulation = 'כלל האוכלוסיה', startPeriod = null, endPeriod = null) {
+    const records = await getRangeSourceRecords(categoryId, startPeriod, endPeriod);
+    return filterRangeEligibleRecords(records, categoryId, targetPopulation);
+  }
+
+  // Shared with the offline period-index builder: identical eligibility rules.
+  function filterRangeEligibleRecords(records, categoryId, targetPopulation = 'כלל האוכלוסיה') {
     const cat = CONFIG.PRODUCT_CATEGORIES.find(c => c.id === categoryId);
     if (!cat) return [];
 
     const isPension = !!cat.pensionAPI;
     const isPolisa = !!cat.polisaAPI;
-    let records = await getRangeSourceRecords(categoryId, startPeriod, endPeriod);
 
     if (isPension || isPolisa || targetPopulation) {
       records = filterByAllowedProviders(records);
@@ -1037,6 +1042,16 @@ const APIModule = (() => {
     year = Math.floor(absolute / 12);
     month = (absolute % 12) + 1;
     return (year * 100) + month;
+  }
+
+  // Selector metadata only. Never fall back to downloading historical records here.
+  async function getComparisonReportPeriods(categoryId, targetPopulation = 'כלל האוכלוסיה') {
+    const index = await _loadStaticJson('data/ckan/report-periods.json');
+    const periods = index?.schemaVersion === 1
+      ? index.categories?.[categoryId]?.[targetPopulation || '']
+      : null;
+    if (!Array.isArray(periods) || !periods.length) throw new Error('Report period index unavailable');
+    return [...periods];
   }
 
   async function getAvailableReportPeriods(categoryId, targetPopulation = 'כלל האוכלוסיה') {
@@ -2807,6 +2822,8 @@ const APIModule = (() => {
     getAllSearchablePolisa,
     fetchPolisaData,
     getAvailableReportPeriods,
+    getComparisonReportPeriods,
+    filterRangeEligibleRecords,
     getCustomRangeYields,
     peekTrailing7Yields,
     warmTrailing7Yields,

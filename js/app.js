@@ -2896,18 +2896,27 @@ const App = (() => {
     if (getCurrentCompareMode() !== 'actuarial') {
       const immediatePeriods = buildImmediateCustomRangePeriods();
       if (immediatePeriods.length > 1) {
-        state.customRange.availablePeriods = immediatePeriods;
-        state.customRange.availabilityResolved = true;
-        hydrateCustomRangePeriodOptions();
-        syncCustomRangeControls();
-        return;
+        // Immediate options remain usable while the small metadata file loads.
+        if (!state.customRange.availablePeriods.length) {
+          state.customRange.availablePeriods = immediatePeriods;
+          hydrateCustomRangePeriodOptions();
+        }
       }
     }
     state.customRange.availabilityLoading = true;
     syncCustomRangeControls();
 
     try {
-      const periods = await APIModule.getAvailableReportPeriods(requestedCategoryId, requestedTargetPopulation);
+      const isActuarial = getCurrentCompareMode() === 'actuarial';
+      let periods = isActuarial
+        ? await APIModule.getAvailableReportPeriods(requestedCategoryId, requestedTargetPopulation)
+        : await APIModule.getComparisonReportPeriods(requestedCategoryId, requestedTargetPopulation);
+      if (!isActuarial && periods.length) {
+        // An older metadata cache must not hide newly published reporting months.
+        const latestIndexed = Math.max(...periods);
+        periods = [...new Set([...periods, ...buildImmediateCustomRangePeriods()
+          .filter(period => period > latestIndexed)])].sort((a, b) => b - a);
+      }
       if (
         requestId !== state.customRange.availabilityRequestId ||
         state.activeCategoryId !== requestedCategoryId ||
@@ -2921,9 +2930,11 @@ const App = (() => {
       state.customRange.startPeriod = periods.some(period => String(period) === String(priorStart)) ? priorStart : '';
       state.customRange.endPeriod = periods.some(period => String(period) === String(priorEnd)) ? priorEnd : '';
       state.customRange.selectedYear = periods.some(period => String(Math.floor(Number(period) / 100)) === String(priorYear)) ? priorYear : '';
-      state.customRange.yieldMap = null;
-      state.customRange.active = false;
-      resetCustomRangeSorts();
+      if (isActuarial) {
+        state.customRange.yieldMap = null;
+        state.customRange.active = false;
+        resetCustomRangeSorts();
+      }
       hydrateCustomRangePeriodOptions();
       setCustomRangeStatus('');
     } finally {
@@ -4549,7 +4560,8 @@ const App = (() => {
         const immediatePeriods = buildImmediateCustomRangePeriods();
         if (immediatePeriods.length > 1) {
           state.customRange.availablePeriods = immediatePeriods;
-          state.customRange.availabilityResolved = true;
+          // Full availability is resolved lazily when the selector opens.
+          state.customRange.availabilityResolved = false;
           hydrateCustomRangePeriodOptions();
         }
       }

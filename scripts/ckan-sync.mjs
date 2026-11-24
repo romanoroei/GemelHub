@@ -27,6 +27,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildTrailing7YFile } from './build-trailing-7y.mjs';
+import { buildReportPeriodsFile } from './build-report-periods.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.join(__dirname, '..');
@@ -270,6 +271,18 @@ async function main() {
       console.log('trailing-7y: rebuilt compact precomputed results.');
     } catch (err) {
       console.error('trailing-7y: rebuild FAILED:', err.message);
+      checkFailed = true;
+    }
+  }
+
+  // Small selector metadata; no visitor needs to parse archives just to list months.
+  if (anyChange || !(await fileExists(path.join(DATA_DIR, 'report-periods.json')))) {
+    try {
+      await buildReportPeriodsFile();
+      anyChange = true;
+      console.log('report-periods: rebuilt compact selector metadata.');
+    } catch (err) {
+      console.error('report-periods: rebuild FAILED:', err.message);
       checkFailed = true;
     }
   }

@@ -29,7 +29,7 @@ function periodsInRange(startPeriod, endPeriod) {
   return periods;
 }
 
-async function loadFamilyRecords(family) {
+export async function loadFamilyRecords(family) {
   const current = (await readJson(path.join(dataDir, `${family}-current.json`))).records || [];
   const year2023 = (await readJson(path.join(dataDir, `${family}-2023.json`))).records || [];
   let archive = [];
