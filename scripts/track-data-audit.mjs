@@ -58,6 +58,6 @@ if(old){
  ['gemel_hashkaa:15980','agach_memshalti_sahir']
  ]);
  assert.equal(result.changes.length,approved.size,'expected exactly five approved membership changes');
- for(const r of result.changes){assert.equal(r.previous.length,0);assert.deepEqual(r.tracks,[approved.get(r.category+':'+r.id)]);}
+ for(const r of result.changes){assert.equal(r.previous.length,0);assert.deepEqual(Array.from(r.tracks),[approved.get(r.category+':'+r.id)]);}
  assert.equal(result.duplicates.length,0,'duplicate memberships');
 }
