@@ -148,7 +148,7 @@ const CONFIG = {
       trackList: ['ad_gil_50','gil_50_60','gil_60_plus','maniот','sp500','halachti',
                   'ashrai_agach','ashrai_agach_maniот','okev_mimdim','ksafi_shekel','okev_maniот',
                   'meshulab_sahar','maniот_sahar','agach_mimshalot','agach_sahar',
-                  'okev_agach','kayamut','kaklali']
+                  'okev_agach','okev_agach_maniot25','kayamut','kaklali']
     },
     {
       id: 'gemel_hashkaa',
@@ -163,7 +163,7 @@ const CONFIG = {
       // הגבל רק למסלולים הרלוונטיים (ללא מסלולי ילד/הלכה/סיכון)
       trackList: ['kaklali','maniот','sp500','halachti','ashrai_agach','ashrai_agach_maniот','okev_mimdim',
                   'ksafi_shekel','okev_maniот','meshulab_sahar','maniот_sahar',
-                  'agach_mimshalot','agach_sahar','okev_agach','kayamut']
+                  'agach_mimshalot','agach_sahar','okev_agach','okev_agach_maniot25','kayamut']
     },
     {
       id: 'hashtalamot',
@@ -178,7 +178,7 @@ const CONFIG = {
       excludedFundIds: ['1290'],
       trackList: ['kaklali','maniот','sp500','halachti','ashrai_agach','ashrai_agach_maniот','okev_mimdim',
                   'ksafi_shekel','okev_maniот','meshulab_sahar','maniот_sahar',
-                  'agach_mimshalot','agach_sahar','okev_agach','kayamut']
+                  'agach_mimshalot','agach_sahar','okev_agach','okev_agach_maniot25','kayamut']
     },
     {
       id: 'hisachon_yeled',
@@ -357,7 +357,16 @@ const CONFIG = {
     {
       id: 'okev_agach',
       label: 'עוקב מדדי אג"ח',
-      subSpecializationKeys: ['עוקב מדדי אג"ח']
+      subSpecializationKeys: ['עוקב מדדי אג"ח', 'עוקב מדדי אגח', 'עוקב מדדי אג״ח'],
+      fundIdExcludes: ['15258', '15351', '8684', '15290', '15299'],
+      fundNameExcludes: ['25%', 'מניות']
+    },
+    {
+      id: 'okev_agach_maniot25',
+      label: 'עוקב מדדים עד 25% מניות',
+      subSpecializationKeys: ['עוקב מדדי אג"ח', 'עוקב מדדי אגח', 'עוקב מדדי אג״ח'],
+      fundIds: ['15258', '15351', '8684', '15290', '15299'],
+      fundNameIncludes: ['25%', 'מניות']
     },
     // ── מסלול כללי ── מוסתר ברירת מחדל בתגמולים
     {
