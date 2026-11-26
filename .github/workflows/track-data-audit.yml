@@ -2,7 +2,7 @@ name: Track classification data audit
 on:
   push:
     branches: [safe-track-classification-audit]
-    paths: ['scripts/track-data-audit.mjs','.github/workflows/track-data-audit.yml']
+    paths: ['js/config.js','js/api.js','scripts/track-data-audit.mjs','.github/workflows/track-data-audit.yml']
   workflow_dispatch:
 permissions:
   contents: read

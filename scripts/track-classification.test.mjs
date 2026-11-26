@@ -23,3 +23,16 @@ for (const [id,name,sub,expected] of [
 }
 for(const c of ctx.cfg.PRODUCT_CATEGORIES) for(const id of c.trackList||[]) assert.ok(ctx.cfg.INVESTMENT_TRACKS.some(t=>t.id===id),id);
 console.log('Shared classification regression checks passed.');
+
+for (const [catId,id,name,sub,expected] of [
+ ['polisa_chisachon','15320','הראל מסלול סחיר- אג"ח עם מניות (עד 25% מניות)','','polisa_agach_sahar_maniot25'],
+ ['pension_mashlima','14795','כלל פנסיה משלימה עוקב מדד  s1;p500','','pension_sp500'],
+ ['pension_mekafit','15342','מנורה מבטחים פנסיה מסלול אג"ח ממשלות','','pension_agach_mimshalot'],
+ ['gemel_tagmulim','15966','איילון גמל לחיסכון אג"ח ממשלתי סחיר','אג"ח ממשלתי סחיר','agach_memshalti_sahir'],
+ ['gemel_hashkaa','15980','איילון קופת גמל להשקעה אג"ח ממשלתי סחיר','אג"ח ממשלתי סחיר','agach_memshalti_sahir']
+]) {
+ const c=ctx.cfg.PRODUCT_CATEGORIES.find(x=>x.id===catId);
+ const r={FUND_ID:id,FUND_NAME:name,SUB_SPECIALIZATION:sub};
+ assert.deepEqual(Array.from(ctx.cfg.INVESTMENT_TRACKS.filter(t=>c.trackList.includes(t.id)&&ctx.match(r,t)).map(t=>t.id)),[expected]);
+ assert.equal(ctx.findFundTrack(r,c).id,expected);
+}

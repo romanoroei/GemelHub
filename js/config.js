@@ -147,7 +147,7 @@ const CONFIG = {
       // רק מסלולים רלוונטיים (מסלולי גיל + השקעה, ללא ילד)
       trackList: ['ad_gil_50','gil_50_60','gil_60_plus','maniот','sp500','halachti',
                   'ashrai_agach','ashrai_agach_maniот','okev_mimdim','ksafi_shekel','okev_maniот',
-                  'meshulab_sahar','maniот_sahar','agach_mimshalot','agach_sahar',
+                  'meshulab_sahar','maniот_sahar','agach_mimshalot','agach_memshalti_sahir','agach_sahar',
                   'okev_agach','okev_agach_maniot25','kayamut','kaklali']
     },
     {
@@ -163,7 +163,7 @@ const CONFIG = {
       // הגבל רק למסלולים הרלוונטיים (ללא מסלולי ילד/הלכה/סיכון)
       trackList: ['kaklali','maniот','sp500','halachti','ashrai_agach','ashrai_agach_maniот','okev_mimdim',
                   'ksafi_shekel','okev_maniот','meshulab_sahar','maniот_sahar',
-                  'agach_mimshalot','agach_sahar','okev_agach','okev_agach_maniot25','kayamut']
+                  'agach_mimshalot','agach_memshalti_sahir','agach_sahar','okev_agach','okev_agach_maniot25','kayamut']
     },
     {
       id: 'hashtalamot',
@@ -178,7 +178,7 @@ const CONFIG = {
       excludedFundIds: ['1290'],
       trackList: ['kaklali','maniот','sp500','halachti','ashrai_agach','ashrai_agach_maniот','okev_mimdim',
                   'ksafi_shekel','okev_maniот','meshulab_sahar','maniот_sahar',
-                  'agach_mimshalot','agach_sahar','okev_agach','okev_agach_maniot25','kayamut']
+                  'agach_mimshalot','agach_memshalti_sahir','agach_sahar','okev_agach','okev_agach_maniot25','kayamut']
     },
     {
       id: 'hisachon_yeled',
@@ -226,7 +226,7 @@ const CONFIG = {
       trackList: [
         'pension_gil_50','pension_gil_50_60','pension_gil_60_plus',
         'pension_maniот','pension_sp500','pension_maniот_sahar',
-        'pension_meshulab_sahar','pension_agach_sahar',
+        'pension_meshulab_sahar','pension_agach_mimshalot','pension_agach_sahar',
         'pension_okev_maniот','pension_okev_mimdim','pension_okev_agach',
         'pension_halachti','pension_ashrai','pension_kayemet',
         'pension_kaklali','pension_ksafi',
@@ -246,7 +246,7 @@ const CONFIG = {
       trackList: [
         'pension_gil_50','pension_gil_50_60','pension_gil_60_plus',
         'pension_maniот','pension_sp500','pension_maniот_sahar',
-        'pension_meshulab_sahar','pension_agach_sahar',
+        'pension_meshulab_sahar','pension_agach_mimshalot','pension_agach_sahar',
         'pension_okev_maniот','pension_okev_mimdim','pension_okev_agach',
         'pension_halachti','pension_ashrai','pension_kayemet',
         'pension_kaklali','pension_ksafi',
@@ -343,6 +343,12 @@ const CONFIG = {
       id: 'maniот_sahar',
       label: 'מניות סחיר',
       subSpecializationKeys: ['מניות סחיר']
+    },
+    {
+      id: 'agach_memshalti_sahir',
+      label: 'אג"ח ממשלתי סחיר',
+      subSpecializationKeys: ['אג"ח ממשלתי סחיר', 'אגח ממשלתי סחיר', 'אג״ח ממשלתי סחיר'],
+      fundIds: ['15966', '15980']
     },
     {
       id: 'agach_mimshalot',
@@ -476,6 +482,13 @@ const CONFIG = {
       fundNameExcludes: ['מקבלי', 'קצבה', 'קיצבה']
     },
     {
+      id: 'pension_agach_mimshalot',
+      label: 'אג"ח ממשלות',
+      fundNameIncludes: ['אג"ח ממשלות', 'אגח ממשלות', 'אג״ח ממשלות'],
+      fundNameExcludes: ['מקבלי', 'קצבה', 'קיצבה'],
+      fundIds: ['15342']
+    },
+    {
       id: 'pension_agach_sahar',
       label: 'אג"ח סחיר',
       fundNameIncludes: ['אג"ח סחיר', 'אגח סחיר'],
@@ -483,6 +496,7 @@ const CONFIG = {
     },
     {
       id: 'pension_sp500',
+      fundIds: ['14795'],
       label: 'עוקב S&P 500',
       fundNameIncludes: ['s&p', 'sp500', 'sp 500', 'מדד s', 'standard & poor', 'standard&poor'],
       fundNameExcludes: ['מקבלי', 'קצבה', 'קיצבה']
@@ -819,6 +833,7 @@ function calcExposurePercentValue(exposureVal, totalAssets) {
 
     ensureTrack({
       id: 'polisa_agach_sahar_maniot25',
+      fundIds: ['15320'],
       label: 'אג"ח סחיר עד 25% במניות',
       fundNameIncludes: ['אג"ח סחיר עד 25%', 'אגח סחיר עד 25%', 'אג"ח סחיר עד 25% במניות', 'אגח סחיר עד 25% במניות'],
       fundNameExcludes: ['ממשלתי']

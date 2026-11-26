@@ -49,4 +49,15 @@ for(const cat of current.cfg.PRODUCT_CATEGORIES.filter(c=>c.trackList)){
 console.log(JSON.stringify(result,null,2));
 fs.writeFileSync('track-audit-report.json',JSON.stringify(result,null,2));
 if(process.env.GITHUB_STEP_SUMMARY)fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,'## Track classification audit (read-only)\n\n'+result.categories.map(c=>'- '+c.category+': '+c.active+' active, '+c.missing+' missing, '+c.duplicates+' multiple').join('\n')+'\n\nBaseline membership changes: '+result.changes.length+'\n');
-if(old)assert.equal(result.changes.length,0,'unexpected comparison group membership changes');
+if(old){
+ const approved=new Map([
+ ['polisa_chisachon:15320','polisa_agach_sahar_maniot25'],
+ ['pension_mashlima:14795','pension_sp500'],
+ ['pension_mekafit:15342','pension_agach_mimshalot'],
+ ['gemel_tagmulim:15966','agach_memshalti_sahir'],
+ ['gemel_hashkaa:15980','agach_memshalti_sahir']
+ ]);
+ assert.equal(result.changes.length,approved.size,'expected exactly five approved membership changes');
+ for(const r of result.changes){assert.equal(r.previous.length,0);assert.deepEqual(r.tracks,[approved.get(r.category+':'+r.id)]);}
+ assert.equal(result.duplicates.length,0,'duplicate memberships');
+}
