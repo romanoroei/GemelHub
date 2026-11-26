@@ -247,82 +247,7 @@ const APIModule = (() => {
     return fetch(url);
   }
 
-  (function extendAgachSahirTracks() {
-    const insertAfter = (list, afterId, newId) => {
-      if (!Array.isArray(list) || list.includes(newId)) return;
-      const anchorIndex = list.indexOf(afterId);
-      if (anchorIndex === -1) {
-        list.push(newId);
-        return;
-      }
-      list.splice(anchorIndex + 1, 0, newId);
-    };
-
-    const ensureTrack = (track) => {
-      if (!CONFIG.INVESTMENT_TRACKS.some(item => item.id === track.id)) {
-        CONFIG.INVESTMENT_TRACKS.push(track);
-      }
-    };
-
-    const byId = (id) => CONFIG.INVESTMENT_TRACKS.find(track => track.id === id);
-    const okevAgachManiot25FundIds = ['15258', '15351', '8684', '15290'];
-
-    const agachSahar = byId('agach_sahar');
-    if (agachSahar) agachSahar.fundNameExcludes = Array.from(new Set([...(agachSahar.fundNameExcludes || []), '25%']));
-
-    const pensionAgachSahar = byId('pension_agach_sahar');
-    if (pensionAgachSahar) pensionAgachSahar.fundNameExcludes = Array.from(new Set([...(pensionAgachSahar.fundNameExcludes || []), '25%']));
-
-    const polisaAgachSahar = byId('polisa_agach_sahar');
-    if (polisaAgachSahar) polisaAgachSahar.fundNameExcludes = Array.from(new Set([...(polisaAgachSahar.fundNameExcludes || []), '25%']));
-
-    const okevAgach = byId('okev_agach');
-    if (okevAgach) okevAgach.fundIdExcludes = Array.from(new Set([...(okevAgach.fundIdExcludes || []), ...okevAgachManiot25FundIds]));
-
-    ensureTrack({
-      id: 'agach_sahar_maniot25',
-      label: 'אג"ח סחיר עד 25% במניות',
-      subSpecializationKeys: ['אג"ח סחיר'],
-      fundNameIncludes: ['25%']
-    });
-
-    ensureTrack({
-      id: 'okev_agach_maniot25',
-      label: 'עוקב מדדי אג"ח עד 25% במניות',
-      subSpecializationKeys: ['עוקב מדדי אג"ח'],
-      fundIds: okevAgachManiot25FundIds,
-      fundNameIncludes: ['25%']
-    });
-
-    ensureTrack({
-      id: 'pension_agach_sahar_maniot25',
-      label: 'אג"ח סחיר עד 25% במניות',
-      fundNameIncludes: ['אג"ח סחיר עד 25%', 'אגח סחיר עד 25%', 'אג"ח סחיר עד 25% במניות', 'אגח סחיר עד 25% במניות'],
-      fundNameExcludes: ['מקבלי', 'קצבה', 'קיצבה']
-    });
-
-    ensureTrack({
-      id: 'polisa_agach_sahar_maniot25',
-      label: 'אג"ח סחיר עד 25% במניות',
-      fundNameIncludes: ['אג"ח סחיר עד 25%', 'אגח סחיר עד 25%', 'אג"ח סחיר עד 25% במניות', 'אגח סחיר עד 25% במניות'],
-      fundNameExcludes: ['ממשלתי']
-    });
-
-    ['gemel_tagmulim', 'gemel_hashkaa', 'hashtalamot'].forEach(categoryId => {
-      const category = CONFIG.PRODUCT_CATEGORIES.find(item => item.id === categoryId);
-      if (category?.trackList) insertAfter(category.trackList, 'agach_sahar', 'agach_sahar_maniot25');
-      if (category?.trackList) insertAfter(category.trackList, 'okev_agach', 'okev_agach_maniot25');
-    });
-
-    ['pension_mekafit', 'pension_mashlima'].forEach(categoryId => {
-      const category = CONFIG.PRODUCT_CATEGORIES.find(item => item.id === categoryId);
-      if (category?.trackList) insertAfter(category.trackList, 'pension_agach_sahar', 'pension_agach_sahar_maniot25');
-    });
-
-    const polisaCategory = CONFIG.PRODUCT_CATEGORIES.find(item => item.id === 'polisa_chisachon');
-    if (polisaCategory?.trackList) insertAfter(polisaCategory.trackList, 'polisa_agach_sahar', 'polisa_agach_sahar_maniot25');
-  })();
-
+  // Track extensions are initialized in config.js.
   // ─── localStorage persistence ─────────────────────────────────
   // Superseded by the IndexedDB cache above (_ckanCacheGet/_ckanCacheSet): storing the full
   // gemel/pension/polisa "current" datasets (tens of MB combined) as a single JSON string here hit
@@ -716,49 +641,8 @@ const APIModule = (() => {
     });
   }
 
-  function matchesTrackToken(name, token) {
-    const haystack = String(name || '').toLowerCase();
-    const needle = String(token || '').trim().toLowerCase();
-    if (!needle) return false;
-    if (needle === '25%') {
-      return /(?:עד\s*25|25\s*%|25\s*אחוז)/i.test(haystack);
-    }
-    return haystack.includes(needle);
-  }
-
-  // ─── התאם מסלול לפי SUB_SPECIALIZATION + FUND_NAME (אופציונלי) ─────────────
   function matchTrackBySubSpec(record, track) {
-    const sub  = (record.SUB_SPECIALIZATION || '').trim().toLowerCase();
-    const name = (record.FUND_NAME || '').toLowerCase();
-    const fundId = String(record.FUND_ID || '').trim();
-
-    if (track.fundIdExcludes && track.fundIdExcludes.map(String).includes(fundId)) return false;
-    if (track.fundIds && track.fundIds.map(String).includes(fundId)) return true;
-
-    // מסלולי ניהול עולמי דורשים גם התאמה למנהל ההשקעות הזר.
-    if (track.managerTokens && track.managerTokens.length) {
-      if (!track.managerTokens.some(token => matchesTrackToken(name, token))) return false;
-    }
-
-    // אם למסלול יש subSpecializationKeys — בדוק אותם
-    if (track.subSpecializationKeys && track.subSpecializationKeys.length) {
-      if (!track.subSpecializationKeys.some(k => sub === k.trim().toLowerCase())) return false;
-    } else if (!track.fundNameIncludes || !track.fundNameIncludes.length) {
-      // אין קריטריון התאמה — לא מתאים
-      return false;
-    }
-
-    // fundNameIncludes: לפחות אחד מהמפתחות חייב להופיע בשם הקופה
-    if (track.fundNameIncludes && track.fundNameIncludes.length) {
-      if (!track.fundNameIncludes.some(k => matchesTrackToken(name, k))) return false;
-    }
-
-    // fundNameExcludes: אף אחד מהמפתחות לא יכול להופיע בשם הקופה
-    if (track.fundNameExcludes && track.fundNameExcludes.length) {
-      if (track.fundNameExcludes.some(k => matchesTrackToken(name, k))) return false;
-    }
-
-    return true;
+    return matchInvestmentTrack(record, track);
   }
 
   // ─── ארגן נתונים לפי קטגוריה → מסלולים ─────────────────────

@@ -341,9 +341,9 @@
   </div>
 </div>
 
-  <script src="js/config.js?v=track-classification-20261126"></script>
+  <script src="js/config.js?v=shared-track-rules-20261126"></script>
   <script src="js/analytics.js?v=ga-20260704"></script>
-  <script src="js/api.js?v=score-trend-direction-20260823"></script>
+  <script src="js/api.js?v=shared-track-rules-20261126"></script>
 <script src="js/legal.js"></script>
 <script src="js/leads.js"></script>
 <script>
@@ -742,35 +742,12 @@ function showError(msg) {
   document.getElementById('fund-error-msg').textContent = msg;
 }
 
-function matchesTrackToken(name, token) {
-  const haystack = String(name || '').toLowerCase();
-  const needle = String(token || '').trim().toLowerCase();
-  if (!needle) return false;
-  if (needle === '25%') return /(?:עד\s*25|25\s*%|25\s*אחוז)/i.test(haystack);
-  return haystack.includes(needle);
-}
-
 function findFundTrack(record, category) {
+  if (!record) return null;
   const catTrackIds = category?.trackList ? new Set(category.trackList) : null;
-  const tracksToSearch = catTrackIds
-    ? CONFIG.INVESTMENT_TRACKS.filter(track => catTrackIds.has(track.id))
-    : CONFIG.INVESTMENT_TRACKS;
-  const fundName = (record?.FUND_NAME || '').toLowerCase();
-  const sub = (record?.SUB_SPECIALIZATION || '').toLowerCase();
-  const fundId = String(record?.FUND_ID || '').trim();
-  for (const track of tracksToSearch) {
-    if (track.fundIdExcludes?.map(String).includes(fundId)) continue;
-    if (track.fundIds?.map(String).includes(fundId)) return track;
-    if (track.subSpecializationKeys?.length) {
-      if (!track.subSpecializationKeys.some(key => sub === key.trim().toLowerCase())) continue;
-    } else if (!track.fundNameIncludes?.length) {
-      continue;
-    }
-    if (track.fundNameIncludes?.length && !track.fundNameIncludes.some(key => matchesTrackToken(fundName, key))) continue;
-    if (track.fundNameExcludes?.length && track.fundNameExcludes.some(key => matchesTrackToken(fundName, key))) continue;
-    return track;
-  }
-  return null;
+  return CONFIG.INVESTMENT_TRACKS.find(track =>
+    (!catTrackIds || catTrackIds.has(track.id)) && matchInvestmentTrack(record, track)
+  ) || null;
 }
 
 function buildTrackCompareUrl(catId, trackId) {

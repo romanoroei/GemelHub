@@ -35,6 +35,22 @@ jobs:
         id: sync
         run: node scripts/ckan-sync.mjs
 
+      - name: Audit track classification (non-blocking)
+        if: steps.sync.outcome == 'success'
+        continue-on-error: true
+        run: |
+          node scripts/track-data-audit.mjs
+          node -e 'const r=require("./track-audit-report.json"); if(r.unclassified.length || r.duplicates.length) console.log("::warning::Track audit: "+r.unclassified.length+" unclassified, "+r.duplicates.length+" duplicate memberships. See audit artifact.")'
+
+      - name: Save classification audit
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: track-classification-audit
+          path: track-audit-report.json
+          if-no-files-found: ignore
+
       - name: Commit updated data
         if: always()
         run: |
